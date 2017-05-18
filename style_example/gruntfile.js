@@ -9,18 +9,35 @@ module.exports = function(grunt) {
   };
 
   grunt.initConfig({
+    env: {
+      server: {
+        BABEL_ENV: 'server'
+      },
+      babili: {
+        BABEL_ENV: 'babili'
+      }
+    },
     babel: {
       options: {
-        presets: [
-          ['env', {
-            'targets': {
-              'node': nodeTarget
-            },
-            'debug': false
-          }]
-        ]
+        env: {
+          server: {
+            presets: [
+              ['env', {
+                'targets': {
+                  'node': nodeTarget
+                },
+                'debug': false
+              }]
+            ]
+          },
+          babili: {
+            presets: [
+              ['babili']
+            ]
+          }
+        }
       },
-      dist: {
+      server: {
         files: [{
           expand: true,
           cwd: 'src/server/',
@@ -34,6 +51,11 @@ module.exports = function(grunt) {
           dest: 'dist/common',
           ext: '.js'
         }]
+      },
+      babili: {
+        files: {
+          'html/js/bundle.js': 'html/js/bundle.js'
+        }
       }
     },
     copy: {
@@ -76,11 +98,6 @@ module.exports = function(grunt) {
                 }]
               ]
             }]
-          ],
-          plugin: [
-            ['minifyify', {
-              map: false
-            }]
           ]
         }
       }
@@ -88,11 +105,11 @@ module.exports = function(grunt) {
   });
 
   // Build all
-  grunt.registerTask('default', ['babel', 'copy', 'browserify:production']);
+  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'browserify:production', 'env:babili', 'babel:babili']);
   // Build the client
-  grunt.registerTask('client', ['copy', 'browserify:production']);
+  grunt.registerTask('client', ['copy', 'browserify:production', 'env:babili', 'babel:babili']);
   // Build the server
-  grunt.registerTask('server', ['babel']);
+  grunt.registerTask('server', ['env:server', 'babel:server']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['copy', 'browserify:development']);
 };

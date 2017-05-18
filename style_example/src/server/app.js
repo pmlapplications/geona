@@ -2,7 +2,7 @@ import express from 'express'; // Default import since express() is a function
 import * as http from 'http';
 import * as path from 'path';
 import * as sharedExample from '../common/shared_example';
-import {aTest, otherTest} from './test';
+import { printVariable, incVariable } from './example';
 
 let app = express();
 
@@ -15,9 +15,9 @@ server.listen(1337, function() {
 });
 
 let string = 'Testing the common module on the back end!';
-
 sharedExample.consoleLog(string);
 sharedExample.reverseLog(string);
 
-aTest();
-otherTest();
+printVariable();
+incVariable();
+printVariable();
