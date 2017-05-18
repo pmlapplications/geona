@@ -1,0 +1,17 @@
+{
+  "env": {
+    "babel-node": {
+      "presets": [
+        [
+          "env",
+          {
+            "targets": {
+              "node": 4
+            },
+            "debug": false
+          }
+        ]
+      ]
+    }
+  }
+}
