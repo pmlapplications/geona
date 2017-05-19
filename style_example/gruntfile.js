@@ -5,11 +5,11 @@ module.exports = function(grunt) {
   const nodeTarget = 4;
   const browserTargets = {
     'ie': 11,
-    'browsers': ['last 2 versions', 'last 6 chrome versions']
+    'browsers': ['last 2 versions', 'last 5 Chrome versions', 'last 5 Firefox versions', 'Firefox ESR']
   };
 
   grunt.initConfig({
-    env: {
+    env: { // Setting the BABEL_ENV environment variable to use the correct babel config
       server: {
         BABEL_ENV: 'server'
       },
@@ -17,10 +17,11 @@ module.exports = function(grunt) {
         BABEL_ENV: 'babili'
       }
     },
+
     babel: {
       options: {
-        env: {
-          server: {
+        env: { //BABEL_ENV configs
+          server: { // Transpiling for the server
             presets: [
               ['env', {
                 'targets': {
@@ -30,14 +31,14 @@ module.exports = function(grunt) {
               }]
             ]
           },
-          babili: {
+          babili: { // Minifying
             presets: [
               ['babili']
             ]
           }
         }
       },
-      server: {
+      server: { // Transpiling for the server
         files: [{
           expand: true,
           cwd: 'src/server/',
@@ -52,17 +53,19 @@ module.exports = function(grunt) {
           ext: '.js'
         }]
       },
-      babili: {
+      babili: { // Minifying the browser bundle
         files: {
           'html/js/bundle.js': 'html/js/bundle.js'
         }
       }
     },
-    copy: {
+
+    copy: { // Copy index.html from src to html
       'html/index.html': 'src/client/index.html'
     },
+
     browserify: {
-      development: {
+      development: { // Transpile and bundle for development and watch for changes
         src: 'src/client/**/*.js',
         dest: 'html/js/bundle.js',
         options: {
@@ -83,7 +86,7 @@ module.exports = function(grunt) {
           keepAlive: true
         }
       },
-      production: {
+      production: { // Transpile and bundle for production
         src: 'src/client/**/*.js',
         dest: 'html/js/bundle.js',
         options: {

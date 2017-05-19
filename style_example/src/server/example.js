@@ -1,9 +1,17 @@
-let variable = 0;
+/** @type {Number} A counter */
+let counter = 0;
 
-export function printVariable() {
-  console.log('variable = ' + variable);
+/**
+ * Print the current value of the counter to the console
+ */
+export function printCounter() {
+  console.log('counter = ' + counter);
 }
 
-export function incVariable() {
-  variable += 1;
+/**
+ * Increment the counter
+ * @return {Number} The new value of the counter
+ */
+export function incCounter() {
+  return counter += 1;
 }
