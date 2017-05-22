@@ -1,7 +1,9 @@
 {
+  "name": "gp2_style_example",
+  "version": "0.0.1",
   "scripts": {
     "build": "grunt",
-    "start": "npm run serve",
+    "start": "npm run -s serve",
     "serve": "node dist/server/app.js",
     "clientDev": "grunt clientDev",
     "serverDev": "BABEL_ENV=babel-node nodemon --watch src/server --watch src/common src/server/app.js --exec babel-node",
@@ -9,6 +11,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
+    "babel-plugin-dynamic-import-node": "^1.0.2",
     "babel-preset-babili": "0.0.12",
     "babel-preset-env": "^1.4.0",
     "babelify": "^7.3.0",
@@ -22,6 +25,8 @@
     "nodemon": "^1.11.0"
   },
   "dependencies": {
+    "chalk": "^1.1.3",
+    "convict": "^3.0.0",
     "express": "^4.15.2",
     "jquery": "^3.2.1",
     "path": "^0.12.7",

@@ -5,6 +5,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import * as sharedExample from '../common/shared_example';
 import { printCounter, incCounter } from './example';
 import mainRouter from './routers/main_router';
+import conf from './config';
 
 let app = express();
 
@@ -14,9 +15,7 @@ let swaggerDefinition = {
     title: 'GP2 style example',
     version: '1.0.0',
     description: '',
-  },
-  host: 'localhost:1337',
-  basePath: '/',
+  }
 };
 
 // options for the swagger docs
@@ -45,8 +44,8 @@ app.use(mainRouter);
 // Create the server and start listening
 let server = http.createServer(app);
 
-server.listen(1337, function() {
-  console.log('Server running at http://127.0.0.1:1337/');
+server.listen(conf.get('server.port'), function() {
+  console.log('Server running at http://127.0.0.1:' + conf.get('server.port'));
 });
 
 // Test the other modules
@@ -57,3 +56,10 @@ sharedExample.reverseLog(string);
 printCounter();
 incCounter();
 printCounter();
+
+// console.log(conf.get('server.plugins'));
+
+for (let plugin of conf.get('server.plugins')) {
+  import(plugin)
+  .then(plugin => plugin());
+}

@@ -11,7 +11,8 @@
             "debug": false
           }
         ]
-      ]
+      ],
+      "plugins": ["dynamic-import-node"]
     }
   }
 }
