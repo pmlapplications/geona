@@ -1,7 +1,0 @@
-{
-  // See http://jshint.com/docs/options/
-   "esversion": 6,
-   "node": true,
-   "undef": true,
-   "unused": true
-}
