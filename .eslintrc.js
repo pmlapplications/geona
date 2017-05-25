@@ -105,7 +105,7 @@ module.exports = {
     'no-shadow-restricted-names': 2,
     'no-undef': 2, // eslint:recommended
     'no-undef-init': 2,
-    'no-unused-vars': 2, // eslint:recommended
+    'no-unused-vars': 1, // eslint:recommended
     'no-use-before-define': [2, {'functions': false}],
 
     // Stylistic Issues

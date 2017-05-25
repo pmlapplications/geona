@@ -4,7 +4,7 @@
  * @param  {Object} res Express response
  */
 export function world(req, res) {
-  res.send('Hello World!');
+  res.send(req.gettext('Hello World!'));
 }
 
 /**
@@ -13,7 +13,7 @@ export function world(req, res) {
  * @param  {Object} res Express response
  */
 export function galaxy(req, res) {
-  res.send('Hello Galaxy!');
+  res.send(req.gettext('Hello Galaxy!'));
 }
 
 /**
@@ -22,5 +22,5 @@ export function galaxy(req, res) {
  * @param  {Object} res Express response
  */
 export function universe(req, res) {
-  res.send('Hello Universe!');
+  res.send(req.gettext('Hello Universe!'));
 }

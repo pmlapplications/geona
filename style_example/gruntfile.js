@@ -55,20 +55,26 @@ module.exports = function(grunt) {
         }],
       },
       babili: { // Minifying the browser bundle
-        files: {
-          'html/js/bundle.js': 'html/js/bundle.js',
-        },
+        files: [{
+          expand: true,
+          cwd: 'static/i18n/',
+          src: ['**/*.js'],
+          dest: 'static/i18n/',
+          ext: '.js',
+        }, {
+          'static/js/bundle.js': 'static/js/bundle.js',
+        }],
       },
     },
 
     copy: { // Copy index.html from src to html
-      'html/index.html': 'src/client/index.html',
+      'static/index.html': 'src/client/index.html',
     },
 
     browserify: {
       development: { // Transpile and bundle for development and watch for changes
         src: 'src/client/**/*.js',
-        dest: 'html/js/bundle.js',
+        dest: 'static/js/bundle.js',
         options: {
           browserifyOptions: {
             debug: true,
@@ -89,7 +95,7 @@ module.exports = function(grunt) {
       },
       production: { // Transpile and bundle for production
         src: 'src/client/**/*.js',
-        dest: 'html/js/bundle.js',
+        dest: 'static/js/bundle.js',
         options: {
           browserifyOptions: {
             debug: false,
@@ -106,10 +112,49 @@ module.exports = function(grunt) {
         },
       },
     },
+
+    abideExtract: {
+      server: {
+        src: 'dist/**/*.js',
+        dest: 'locale/templates/LC_MESSAGES/messages.pot',
+        options: {
+          language: 'Javascript',
+        },
+      },
+    },
+
+    abideCreate: {
+      default: {
+        options: {
+          template: 'locale/templates/LC_MESSAGES/messages.pot',
+          languages: ['en', 'fr'],
+          localeDir: 'locale',
+        },
+      },
+    },
+
+    abideMerge: {
+      default: {
+        options: {
+          template: 'locale/templates/LC_MESSAGES/messages.pot',
+          localeDir: 'locale',
+        },
+      },
+    },
+
+    abideCompile: {
+      json: {
+        dest: 'static/i18n',
+        options: {
+          type: 'json',
+          localeDir: 'locale',
+        },
+      },
+    },
   });
 
   // Build all
-  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'browserify:production', 'env:babili',
+  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'browserify:production', 'i18nCompile', 'env:babili',
     'babel:babili']);
   // Build the client
   grunt.registerTask('client', ['copy', 'browserify:production', 'env:babili', 'babel:babili']);
@@ -117,4 +162,8 @@ module.exports = function(grunt) {
   grunt.registerTask('server', ['env:server', 'babel:server']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['copy', 'browserify:development']);
+  // Extract strings from the program and build i18n files
+  grunt.registerTask('i18nExtract', ['server', 'abideExtract', 'abideCreate', 'abideMerge']);
+  // Compile the i18n files
+  grunt.registerTask('i18nCompile', ['abideCompile']);
 };

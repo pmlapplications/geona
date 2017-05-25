@@ -6,8 +6,17 @@ import * as sharedExample from '../common/shared_example';
 import {printCounter, incCounter} from './example';
 import mainRouter from './routers/main_router';
 import conf from './config';
+import i18n from 'i18n-abide';
 
 let app = express();
+
+app.use(i18n.abide({
+  supported_languages: ['en', 'fr', 'it-CH'],
+  default_lang: 'en',
+  debug_lang: 'it-CH',
+  translation_directory: 'i18n',
+  locale_on_url: true,
+}));
 
 // swagger definition
 let swaggerDefinition = {
