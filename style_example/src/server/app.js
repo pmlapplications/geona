@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 import * as sharedExample from '../common/shared_example';
-import { printCounter, incCounter } from './example';
+import {printCounter, incCounter} from './example';
 import mainRouter from './routers/main_router';
 import conf from './config';
 
@@ -15,7 +15,7 @@ let swaggerDefinition = {
     title: 'GP2 style example',
     version: '1.0.0',
     description: '',
-  }
+  },
 };
 
 // options for the swagger docs
@@ -60,6 +60,5 @@ printCounter();
 // console.log(conf.get('server.plugins'));
 
 for (let plugin of conf.get('server.plugins')) {
-  import(plugin)
-  .then(plugin => plugin());
+  import(plugin).then((loadedPlugin) => loadedPlugin());
 }

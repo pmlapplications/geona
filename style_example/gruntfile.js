@@ -5,38 +5,39 @@ module.exports = function(grunt) {
   const nodeTarget = 4;
   const browserTargets = {
     'ie': 11,
-    'browsers': ['last 2 versions', 'last 5 Chrome versions', 'last 5 Firefox versions', 'Firefox ESR']
+    'browsers': ['last 2 versions', 'last 5 Chrome versions', 'last 5 Firefox versions', 'Firefox ESR'],
   };
 
   grunt.initConfig({
     env: { // Setting the BABEL_ENV environment variable to use the correct babel config
       server: {
-        BABEL_ENV: 'server'
+        BABEL_ENV: 'server',
       },
       babili: {
-        BABEL_ENV: 'babili'
-      }
+        BABEL_ENV: 'babili',
+      },
     },
 
     babel: {
       options: {
-        env: { //BABEL_ENV configs
+        env: { // BABEL_ENV configs
           server: { // Transpiling for the server
             presets: [
               ['env', {
                 'targets': {
-                  'node': nodeTarget
+                  'node': nodeTarget,
                 },
-                'debug': false
-              }]
-            ]
+                'debug': false,
+              }],
+            ],
+            plugins: ['dynamic-import-node'],
           },
           babili: { // Minifying
             presets: [
-              ['babili']
-            ]
-          }
-        }
+              ['babili'],
+            ],
+          },
+        },
       },
       server: { // Transpiling for the server
         files: [{
@@ -44,24 +45,24 @@ module.exports = function(grunt) {
           cwd: 'src/server/',
           src: ['**/*.js'],
           dest: 'dist/server',
-          ext: '.js'
+          ext: '.js',
         }, {
           expand: true,
           cwd: 'src/common/',
           src: ['**/*.js'],
           dest: 'dist/common',
-          ext: '.js'
-        }]
+          ext: '.js',
+        }],
       },
       babili: { // Minifying the browser bundle
         files: {
-          'html/js/bundle.js': 'html/js/bundle.js'
-        }
-      }
+          'html/js/bundle.js': 'html/js/bundle.js',
+        },
+      },
     },
 
     copy: { // Copy index.html from src to html
-      'html/index.html': 'src/client/index.html'
+      'html/index.html': 'src/client/index.html',
     },
 
     browserify: {
@@ -70,45 +71,46 @@ module.exports = function(grunt) {
         dest: 'html/js/bundle.js',
         options: {
           browserifyOptions: {
-            debug: true
+            debug: true,
           },
           transform: [
             ['babelify', {
               'presets': [
                 ['env', {
                   'targets': browserTargets,
-                  'debug': true
-                }]
-              ]
-            }]
+                  'debug': true,
+                }],
+              ],
+            }],
           ],
           watch: true,
-          keepAlive: true
-        }
+          keepAlive: true,
+        },
       },
       production: { // Transpile and bundle for production
         src: 'src/client/**/*.js',
         dest: 'html/js/bundle.js',
         options: {
           browserifyOptions: {
-            debug: false
+            debug: false,
           },
           transform: [
             ['babelify', {
               'presets': [
                 ['env', {
-                  'targets': browserTargets
-                }]
-              ]
-            }]
-          ]
-        }
-      }
-    }
+                  'targets': browserTargets,
+                }],
+              ],
+            }],
+          ],
+        },
+      },
+    },
   });
 
   // Build all
-  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'browserify:production', 'env:babili', 'babel:babili']);
+  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'browserify:production', 'env:babili',
+    'babel:babili']);
   // Build the client
   grunt.registerTask('client', ['copy', 'browserify:production', 'env:babili', 'babel:babili']);
   // Build the server

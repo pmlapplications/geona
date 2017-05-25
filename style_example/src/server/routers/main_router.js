@@ -6,7 +6,7 @@ const router = express.Router();
 export default router;
 
 // Setup sub routers
-const helloRouter = express.Router({ mergeParams: true });
+const helloRouter = express.Router({mergeParams: true});
 
 // Add sub routers
 router.use('/hello', helloRouter);

@@ -13,5 +13,5 @@ export function printCounter() {
  * @return {Number} The new value of the counter
  */
 export function incCounter() {
-  return counter += 1;
+  return (counter += 1);
 }

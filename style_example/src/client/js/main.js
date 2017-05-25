@@ -1,5 +1,5 @@
 import $ from 'jquery'; // Default import since $() is a function
-import { throttle } from 'lodash'; // Import just throttle from lodash
+import {throttle} from 'lodash'; // Import just throttle from lodash
 import * as sharedExample from '../../common/shared_example'; // Import all from the sharedExample module
 
 // Add click listener to paragraphs

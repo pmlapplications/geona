@@ -7,21 +7,21 @@ let conf = convict({
     port: {
       doc: 'Port to run server on',
       format: 'port',
-      default: 1337
+      default: 1337,
     },
     plugins: {
       doc: 'Server plugins to load',
       format: 'Array',
-      default: []
-    }
-  }
+      default: [],
+    },
+  },
 });
 
 conf.loadFile(path.join(__dirname, '../../config.json'));
 try {
   conf.validate();
 } catch (e) {
-  console.error(chalk.red("\nConfig error: " + e.message + '\n'));
+  console.error(chalk.red('\nConfig error: ' + e.message + '\n'));
 }
 
 export default conf;

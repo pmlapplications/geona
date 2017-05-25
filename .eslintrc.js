@@ -31,7 +31,7 @@ module.exports = {
     // Possible Errors
     // Leave these mostly to eslint:recommended and google
     'no-cond-assign': 2, // override google
-    'no-console': [1, { 'allow': ['warn', 'error'] }],
+    'no-console': [1, {'allow': ['warn', 'error']}],
 
     // Best Practices
     // Specify all we want (to be clear)
@@ -64,7 +64,6 @@ module.exports = {
     'no-labels': 2,
     'no-lone-blocks': 2,
     'no-loop-func': 2,
-    'no-magic-numbers': [1, { 'ignoreArrayIndexes': true }],
     'no-multi-spaces': 2, // google
     'no-multi-str': 2, // google
     'no-new': 2,
@@ -75,7 +74,7 @@ module.exports = {
     'no-param-reassign': 1,
     'no-proto': 2,
     'no-redeclare': 2, // eslint:recommended
-    'no-return-assign': 2,
+    'no-return-assign': 2, // If you must do this, wrap the assignment in parentheses and it will be allowed
     'no-return-await': 2,
     'no-script-url': 2,
     'no-self-assign': 2, // eslint:recommended
@@ -107,13 +106,14 @@ module.exports = {
     'no-undef': 2, // eslint:recommended
     'no-undef-init': 2,
     'no-unused-vars': 2, // eslint:recommended
-    'no-use-before-define': 2,
+    'no-use-before-define': [2, {'functions': false}],
 
     // Stylistic Issues
     // Leave these mostly to google
     'indent': [2, 2],
     'linebreak-style': [2, 'unix'],
     'max-len': [1, {'code': 120, 'tabWidth': 2, 'ignoreTrailingComments': true, 'ignoreUrls': true}], // override google
+    'new-cap': [2, {'capIsNewExceptions': ['express.Router']}], // override google to add expceptions
 
     // ECMAScript 6
     // Leave these to eslint:recommended and google
