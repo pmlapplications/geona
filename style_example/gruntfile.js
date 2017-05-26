@@ -154,14 +154,14 @@ module.exports = function(grunt) {
   });
 
   // Build all
-  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'browserify:production', 'i18nCompile', 'env:babili',
-    'babel:babili']);
+  grunt.registerTask('default', ['env:server', 'babel:server', 'copy', 'i18nCompile', 'browserify:production',
+    'env:babili', 'babel:babili']);
   // Build the client
   grunt.registerTask('client', ['copy', 'browserify:production', 'env:babili', 'babel:babili']);
   // Build the server
   grunt.registerTask('server', ['env:server', 'babel:server']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['copy', 'browserify:development']);
+  grunt.registerTask('clientDev', ['copy', 'i18nCompile', 'browserify:development']);
   // Extract strings from the program and build i18n files
   grunt.registerTask('i18nExtract', ['server', 'abideExtract', 'abideCreate', 'abideMerge']);
   // Compile the i18n files

@@ -14,7 +14,7 @@ app.use(i18n.abide({
   supported_languages: ['en', 'fr', 'it-CH'],
   default_lang: 'en',
   debug_lang: 'it-CH',
-  translation_directory: 'i18n',
+  translation_directory: 'static/i18n',
   locale_on_url: true,
 }));
 
@@ -45,7 +45,7 @@ app.get('/swagger.json', function(req, res) {
 });
 
 // Setup the static path for the html folder
-app.use(express.static(path.join(__dirname, '../../html')));
+app.use(express.static(path.join(__dirname, '../../static')));
 
 // Add the main router
 app.use(mainRouter);
