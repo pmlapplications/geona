@@ -56,19 +56,19 @@ module.exports = function(grunt) {
       },
       babili: { // Minifying the browser bundle
         files: {
-          'html/js/bundle.js': 'html/js/bundle.js',
+          'static/js/bundle.js': 'static/js/bundle.js',
         },
       },
     },
 
     copy: { // Copy index.html from src to html
-      'html/index.html': 'src/client/index.html',
+      'static/index.html': 'src/client/index.html',
     },
 
     browserify: {
       development: { // Transpile and bundle for development and watch for changes
         src: 'src/client/**/*.js',
-        dest: 'html/js/bundle.js',
+        dest: 'static/js/bundle.js',
         options: {
           browserifyOptions: {
             debug: true,
@@ -89,7 +89,7 @@ module.exports = function(grunt) {
       },
       production: { // Transpile and bundle for production
         src: 'src/client/**/*.js',
-        dest: 'html/js/bundle.js',
+        dest: 'static/js/bundle.js',
         options: {
           browserifyOptions: {
             debug: false,
