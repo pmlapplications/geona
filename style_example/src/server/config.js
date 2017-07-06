@@ -17,7 +17,7 @@ let conf = convict({
   },
 });
 
-conf.loadFile(path.join(__dirname, '../../config.json'));
+conf.loadFile(path.join(__dirname, '../../config/config.json'));
 try {
   conf.validate();
 } catch (e) {
