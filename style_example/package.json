@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "scripts": {
     "build": "grunt",
-    "//": "Build and run the server and watch for changes",
     "start": "npm run -s serve",
     "serve": "node lib/server/app.js",
     "clientDev": "grunt clientDev",
