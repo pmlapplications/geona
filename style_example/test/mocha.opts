@@ -1,0 +1,6 @@
+--compilers js:babel-register
+--recursive
+--colors
+--check-leaks
+--trace-deprecation
+--globals mocks,test

@@ -36,17 +36,17 @@ module.exports = {
     // Best Practices
     // Specify all we want (to be clear)
     'block-scoped-var': 2,
-    'class-methods-use-this': 2,
+    'class-methods-use-this': 1,
     'consistent-return': 1,
     'curly': 2,
-    'dot-notation': 2,
+    'dot-notation': 1,
     'eqeqeq': 1,
     'guard-for-in': 2, // google
     'no-alert': 1,
     'no-caller': 2, // google
     'no-case-declarations': 2, // eslint:recommended
     'no-div-regex': 2,
-    'no-empty-function': 2,
+    'no-empty-function': 1,
     'no-empty-pattern': 2, // eslint:recommended
     'no-eq-null': 2,
     'no-eval': 2,
@@ -105,7 +105,7 @@ module.exports = {
     'no-shadow-restricted-names': 2,
     'no-undef': 2, // eslint:recommended
     'no-undef-init': 2,
-    'no-unused-vars': 1, // eslint:recommended
+    'no-unused-vars': [2, {'vars': 'all', 'args': 'after-used'}], // eslint:recommended
     'no-use-before-define': [2, {'functions': false}],
 
     // Stylistic Issues
@@ -114,6 +114,13 @@ module.exports = {
     'linebreak-style': [2, 'unix'],
     'max-len': [1, {'code': 120, 'tabWidth': 2, 'ignoreTrailingComments': true, 'ignoreUrls': true}], // override google
     'new-cap': [2, {'capIsNewExceptions': ['express.Router']}], // override google to add expceptions
+    'require-jsdoc': [1, { // override google
+      require: {
+        FunctionDeclaration: true,
+        MethodDefinition: true,
+        ClassDeclaration: true,
+      },
+    }],
 
     // ECMAScript 6
     // Leave these to eslint:recommended and google

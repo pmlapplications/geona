@@ -36,7 +36,7 @@ app.get('/swagger.json', function(req, res) {
 });
 
 // Setup the static path for the html folder
-app.use(express.static(path.join(__dirname, '../../html')));
+app.use(express.static(path.join(__dirname, '../../static')));
 
 // Add the main router
 app.use(mainRouter);
@@ -62,3 +62,6 @@ printCounter();
 for (let plugin of conf.get('server.plugins')) {
   import(plugin).then((loadedPlugin) => loadedPlugin());
 }
+
+// Export app for testing
+export default app;

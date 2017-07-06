@@ -1,18 +1,71 @@
 {
-  "env": {
-    "babel-node": {
+  "env": { // BABEL_ENV configs
+    "babel-node": { // For npm run serverDev
+      "plugins": [
+        "dynamic-import-node"
+      ],
       "presets": [
         [
           "env",
           {
+            "debug": false,
             "targets": {
               "node": 4
-            },
-            "debug": false
+            }
           }
         ]
+      ]
+    },
+
+    "babelify": { // Browserify babelify
+      "presets": [
+        [
+          "env",
+          {
+            "debug": true,
+            "targets": {
+              "browsers": [
+                "last 2 versions",
+                "last 5 Chrome versions",
+                "last 5 Firefox versions",
+                "Firefox ESR",
+                "not IE <= 10"
+              ]
+            }
+          }
+        ]
+      ]
+    },
+
+    "babili": { // For minifying/uglifying
+      "presets": [
+        [
+          "babili"
+        ]
+      ]
+    },
+
+    "mocha": { // For npm test
+      "presets": [
+        "env"
+      ]
+    },
+
+    "server": { // For building the server
+      "plugins": [
+        "dynamic-import-node"
       ],
-      "plugins": ["dynamic-import-node"]
+      "presets": [
+        [
+          "env",
+          {
+            "debug": false,
+            "targets": {
+              "node": 4
+            }
+          }
+        ]
+      ]
     }
   }
 }
