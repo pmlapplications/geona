@@ -8,7 +8,7 @@
     "clientDev": "grunt clientDev",
     "serverDev": "BABEL_ENV=babel-node nodemon --watch src/server --watch src/common src/server/app.js --exec babel-node",
     "buildServerDev": "nodemon --watch src/server --watch src/common --exec \"grunt server && npm run serve\"",
-    "test": "BABEL_ENV=mocha mocha"
+    "test": "grunt && BABEL_ENV=mocha mocha"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
