@@ -17,6 +17,7 @@
     "babel-plugin-dynamic-import-node": "^1.0.2",
     "babel-preset-babili": "0.0.12",
     "babel-preset-env": "^1.4.0",
+    "babel-register": "^6.24.1",
     "babelify": "^7.3.0",
     "chai": "^4.0.2",
     "chai-http": "^3.0.0",
