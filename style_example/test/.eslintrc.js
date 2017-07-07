@@ -8,6 +8,5 @@ module.exports = {
 
   'rules': {
     'no-unused-expressions': 0,
-    'no-unused-vars': 2,
   },
 };

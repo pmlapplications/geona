@@ -19,6 +19,6 @@ export function reverseLog(string) {
  * @param  {String} string The string to reverse
  * @return {String}        The reversed string
  */
-function reverseString(string) {
+export function reverseString(string) {
   return string.split('').reverse().join('');
 }
