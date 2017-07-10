@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "build": "grunt",
+    "clean": "grunt clean",
     "start": "npm run -s serve",
     "serve": "node lib/server/app.js",
     "clientDev": "grunt clientDev",
