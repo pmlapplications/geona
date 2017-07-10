@@ -7,12 +7,19 @@ let conf = convict({
     port: {
       doc: 'Port to run server on',
       format: 'port',
-      default: 1337,
+      default: 6789,
     },
     plugins: {
       doc: 'Server plugins to load',
       format: 'Array',
       default: [],
+    },
+  },
+  client: {
+    mapLibrary: {
+      doc: 'Which map library to use - leaflet or openlayers.',
+      format: ['openlayers', 'leaflet'],
+      default: 'openlayers',
     },
   },
 });

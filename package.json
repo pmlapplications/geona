@@ -1,5 +1,5 @@
 {
-  "name": "gp2_style_example",
+  "name": "gp2",
   "version": "0.0.1",
   "scripts": {
     "build": "grunt",
@@ -43,6 +43,7 @@
     "handlebars": "^4.0.10",
     "jquery": "^3.2.1",
     "lodash": "^4.17.4",
+    "openlayers": "^4.2.0",
     "path": "^0.12.7",
     "superagent": "^3.5.2",
     "swagger-jsdoc": "^1.9.4"

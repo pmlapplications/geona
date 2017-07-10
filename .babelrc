@@ -18,6 +18,9 @@
     },
 
     "babelify": { // Browserify babelify
+      "plugins": [
+        "dynamic-import-node"
+      ],
       "presets": [
         [
           "env",
