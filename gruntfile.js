@@ -4,19 +4,22 @@ module.exports = function(grunt) {
   grunt.initConfig({
     babel: {
       server: { // Transpiling for the server
-        files: [{
-          expand: true,
-          cwd: 'src/server/',
-          src: ['**/*.js'],
-          dest: 'lib/server',
-          ext: '.js',
-        }, {
-          expand: true,
-          cwd: 'src/common/',
-          src: ['**/*.js'],
-          dest: 'lib/common',
-          ext: '.js',
-        }],
+        files: [
+          {
+            expand: true,
+            cwd: 'src/server/',
+            src: ['**/*.js'],
+            dest: 'lib/server',
+            ext: '.js',
+          },
+          {
+            expand: true,
+            cwd: 'src/common/',
+            src: ['**/*.js'],
+            dest: 'lib/common',
+            ext: '.js',
+          },
+        ],
       },
       babili: { // Minifying the browser bundle
         files: {
@@ -60,7 +63,22 @@ module.exports = function(grunt) {
     },
 
     copy: { // Copy index.html from src to static
-      'static/index.html': 'src/client/index.html',
+      // 'static/index.html': 'src/client/index.html',
+      default: {
+        files: [
+        // 'static/index.html': 'src/client/index.html',
+          {
+            src: 'src/client/index.html',
+            dest: 'static/index.html',
+          },
+          {
+            expand: true,
+            cwd: 'src/client/fonts',
+            src: ['*'],
+            dest: 'static/fonts',
+          },
+        ],
+      },
     },
 
     env: { // Setting the BABEL_ENV environment variable to use the correct .babelrc config

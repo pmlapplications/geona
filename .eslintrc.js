@@ -110,7 +110,7 @@ module.exports = {
 
     // Stylistic Issues
     // Leave these mostly to google
-    'indent': [2, 2],
+    'indent': [1, 2],
     'linebreak-style': [2, 'unix'],
     'max-len': [1, {'code': 120, 'tabWidth': 2, 'ignoreTrailingComments': true, 'ignoreUrls': true}], // override google
     'new-cap': [2, {'capIsNewExceptions': ['express.Router']}], // override google to add expceptions

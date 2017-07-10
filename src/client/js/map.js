@@ -4,6 +4,10 @@ import * as config from './config';
 
 let map;
 
+/**
+ * Select a map library based on the config
+ * @param  {Function} next Function to call when done
+ */
 export function chooseLibrary(next) {
   if (config.get('mapLibrary') === 'openlayers') {
     import('./map_openlayers')
@@ -20,6 +24,9 @@ export function chooseLibrary(next) {
   }
 }
 
+/**
+ * Create the map
+ */
 export function createMap() {
   map.createMap();
 }
