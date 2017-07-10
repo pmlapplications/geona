@@ -41,6 +41,27 @@ module.exports = function(grunt) {
       'static/index.html': 'src/client/index.html',
     },
 
+    sass: {
+      development: {
+        options: {
+          sourcemap: 'inline',
+          style: 'nested',
+        },
+        files: {
+          'static/css/main.css': 'src/client/scss/main.scss',
+        },
+      },
+      production: {
+        options: {
+          sourcemap: 'none',
+          style: 'compressed',
+        },
+        files: {
+          'static/css/main.css': 'src/client/scss/main.scss',
+        },
+      },
+    },
+
     browserify: {
       development: { // Transpile and bundle for development and watch for changes
         src: 'src/client/**/*.js',
@@ -76,7 +97,8 @@ module.exports = function(grunt) {
   // Build the server
   grunt.registerTask('server', ['env:server', 'babel:server']);
   // Build the client
-  grunt.registerTask('client', ['copy', 'env:babelify', 'browserify:production', 'env:babili', 'babel:babili']);
+  grunt.registerTask('client', ['copy', 'sass:development', 'env:babelify', 'browserify:production', 'env:babili',
+    'babel:babili']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['copy', 'env:babelify', 'browserify:development']);
+  grunt.registerTask('clientDev', ['copy', 'sass:development', 'env:babelify', 'browserify:development']);
 };
