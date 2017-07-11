@@ -1,8 +1,7 @@
 import {loadConfig} from './config';
-import * as map from './map';
 
-loadConfig(() => {
-  map.chooseLibrary(() => {
+export default function(map) {
+  loadConfig(() => {
     map.createMap();
   });
-});
+}

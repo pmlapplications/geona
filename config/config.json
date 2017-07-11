@@ -1,5 +1,6 @@
 {
   "server": {
+    "port": 7890,
     "plugins": ["/home/nik/scratch_local/gp2-contribution-guide/plugin_example"]
   },
   "client": {

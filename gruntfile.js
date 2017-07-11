@@ -30,8 +30,11 @@ module.exports = function(grunt) {
 
     browserify: {
       development: { // Transpile and bundle for development and watch for changes
-        src: 'src/client/**/*.js',
-        dest: 'static/js/bundle.js',
+        files: {
+          'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
+          'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
+          'static/js/loader.js': 'src/client/js/loader.js',
+        },
         options: {
           browserifyOptions: {
             debug: true,
@@ -44,8 +47,11 @@ module.exports = function(grunt) {
         },
       },
       production: { // Transpile and bundle for production
-        src: 'src/client/**/*.js',
-        dest: 'static/js/bundle.js',
+        files: {
+          'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
+          'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
+          'static/js/loader.js': 'src/client/js/loader.js',
+        },
         options: {
           browserifyOptions: {
             debug: false,
