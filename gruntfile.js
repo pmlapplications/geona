@@ -40,7 +40,7 @@ module.exports = function(grunt) {
             ['babelify'],
           ],
           watch: true,
-          keepAlive: true,
+          // keepAlive: true,
         },
       },
       production: { // Transpile and bundle for production
@@ -67,10 +67,10 @@ module.exports = function(grunt) {
       default: {
         files: [
         // 'static/index.html': 'src/client/index.html',
-          {
-            src: 'src/client/index.html',
-            dest: 'static/index.html',
-          },
+          // {
+          //   src: 'src/client/index.html',
+          //   dest: 'static/index.html',
+          // },
           {
             expand: true,
             cwd: 'src/client/fonts',
@@ -113,6 +113,17 @@ module.exports = function(grunt) {
         },
       },
     },
+
+    watch: {
+      html: {
+        files: ['src/client/index.html'],
+        tasks: ['copy'],
+      },
+      sass: {
+        files: ['src/client/scss/*.scss'],
+        tasks: ['sass:development'],
+      },
+    },
   });
 
   // Build all
@@ -124,5 +135,5 @@ module.exports = function(grunt) {
     'env:babili', 'babel:babili']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['clean:client', 'copy', 'sass:development', 'env:babelify',
-    'browserify:development']);
+    'browserify:development', 'watch:sass']);
 };

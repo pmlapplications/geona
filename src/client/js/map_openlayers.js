@@ -6,8 +6,9 @@ export function createMap() {
     target: 'map',
     controls: [
       new ol.control.Zoom({
-        zoomInLabel: $('<span class="icon-zoom-in"></span>').appendTo('body'),
-        zoomOutLabel: $('<span class="icon-zoom-out"></span>').appendTo('body'),
+        // zoomInLabel: $('span.icon-zoom-in'),
+        zoomInLabel: $('<span class="icon-zoom-in"></span>').appendTo('body')[0],
+        zoomOutLabel: $('<span class="icon-zoom-out"></span>').appendTo('body')[0],
       }),
     ],
     layers: [

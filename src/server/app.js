@@ -3,10 +3,13 @@ import * as http from 'http';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 
-import mainRouter from './routers/main_router';
 import conf from './config';
+import mainRouter from './routers/main';
+import './hbs_helpers';
 
 let app = express();
+app.set('view engine', 'hbs');
+app.set('views', __dirname + '/templates');
 
 // swagger definition
 let swaggerDefinition = {
