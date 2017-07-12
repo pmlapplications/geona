@@ -43,7 +43,7 @@ module.exports = function(grunt) {
         },
         options: {
           browserifyOptions: {
-            standalone: "gp2",
+            standalone: 'gp2',
             debug: true,
           },
           transform: [
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
         },
         options: {
           browserifyOptions: {
-            standalone: "gp2",
+            standalone: 'gp2',
             debug: false,
           },
           transform: [
@@ -107,6 +107,22 @@ module.exports = function(grunt) {
       },
     },
 
+    eslint: {
+      fix: {
+        options: {
+          fix: true,
+        },
+        src: [
+          'src/**/*.js',
+        ],
+      },
+      check: {
+        src: [
+          'src/**/*.js',
+        ],
+      },
+    },
+
     sass: {
       development: {
         options: {
@@ -129,9 +145,9 @@ module.exports = function(grunt) {
     },
 
     watch: {
-      html: {
-        files: ['src/client/index.html'],
-        tasks: ['copy'],
+      eslint: {
+        files: ['src/**/*.js'],
+        tasks: ['eslint:check'],
       },
       sass: {
         files: ['src/client/scss/*.scss'],
@@ -148,6 +164,6 @@ module.exports = function(grunt) {
   grunt.registerTask('client', ['clean:client', 'copy', 'sass:production', 'env:babelify', 'browserify:production',
     'env:babili', 'babel:babili']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['clean:client', 'copy', 'sass:development', 'env:babelify',
-    'browserify:development', 'watch:sass']);
+  grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy', 'sass:development', 'env:babelify',
+    'browserify:development', 'watch']);
 };
