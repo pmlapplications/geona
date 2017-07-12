@@ -31,7 +31,7 @@ module.exports = {
     // Possible Errors
     // Leave these mostly to eslint:recommended and google
     'no-cond-assign': 2, // override google
-    'no-console': [1, {'allow': ['warn', 'error']}],
+    // 'no-console': [1, {'allow': ['warn', 'error']}],
 
     // Best Practices
     // Specify all we want (to be clear)
@@ -112,7 +112,13 @@ module.exports = {
     // Leave these mostly to google
     'indent': [1, 2],
     'linebreak-style': [2, 'unix'],
-    'max-len': [1, {'code': 120, 'tabWidth': 2, 'ignoreTrailingComments': true, 'ignoreUrls': true}], // override google
+    'max-len': [1, { // override google
+      'code': 120,
+      'tabWidth': 2,
+      'ignoreStrings': true,
+      'ignoreTrailingComments': true,
+      'ignoreUrls': true,
+    }],
     'new-cap': [2, {'capIsNewExceptions': ['express.Router']}], // override google to add expceptions
     'require-jsdoc': [1, { // override google
       require: {
@@ -121,6 +127,7 @@ module.exports = {
         ClassDeclaration: true,
       },
     }],
+    'space-infix-ops': 2,
 
     // ECMAScript 6
     // Leave these to eslint:recommended and google

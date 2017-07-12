@@ -1,6 +1,22 @@
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
+  let clientBundles = {
+    'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
+    'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
+    'static/js/loader.js': 'src/client/js/loader.js',
+  };
+
+  let cssFiles = {
+    'static/css/main.css': 'src/client/scss/main.scss',
+  };
+
+  let clientLibraries = [
+    'convict',
+    'jquery',
+    'lodash',
+  ];
+
   grunt.initConfig({
     babel: {
       server: { // Transpiling for the server
@@ -22,45 +38,45 @@ module.exports = function(grunt) {
         ],
       },
       babili: { // Minifying the browser bundle
-        files: {
-          'static/js/bundle.js': 'static/js/bundle.js',
-        },
+        files: [
+          {
+            expand: true,
+            cwd: 'static/js/',
+            src: ['*.js'],
+            dest: 'static/js/',
+            ext: '.js',
+          },
+        ],
       },
     },
 
     browserify: {
-      development: { // Transpile and bundle for development and watch for changes
-        files: {
-          'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
-          'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
-          'static/js/loader.js': 'src/client/js/loader.js',
+      options: {
+        browserifyOptions: {
+          standalone: 'gp2',
+          debug: true,
         },
+        transform: [
+          ['babelify'],
+        ],
+        external: clientLibraries,
+      },
+      development: { // Transpile and bundle for development and watch for changes
+        files: clientBundles,
         options: {
-          browserifyOptions: {
-            standalone: "gp2",
-            debug: true,
-          },
-          transform: [
-            ['babelify'],
-          ],
           watch: true,
-          // keepAlive: true,
         },
       },
       production: { // Transpile and bundle for production
-        files: {
-          'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
-          'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
-          'static/js/loader.js': 'src/client/js/loader.js',
-        },
+        files: clientBundles,
+      },
+      vendor: {
+        src: ['.'],
+        dest: 'static/js/vendor.js',
         options: {
-          browserifyOptions: {
-            standalone: "gp2",
-            debug: false,
-          },
-          transform: [
-            ['babelify'],
-          ],
+          browserifyOptions: {},
+          alias: clientLibraries,
+          external: null,
         },
       },
     },
@@ -101,31 +117,43 @@ module.exports = function(grunt) {
       },
     },
 
+    eslint: {
+      fix: {
+        options: {
+          fix: true,
+        },
+        src: [
+          'src/**/*.js',
+        ],
+      },
+      check: {
+        src: [
+          'src/**/*.js',
+        ],
+      },
+    },
+
     sass: {
       development: {
         options: {
           sourcemap: 'inline',
           style: 'nested',
         },
-        files: {
-          'static/css/main.css': 'src/client/scss/main.scss',
-        },
+        files: cssFiles,
       },
       production: {
         options: {
           sourcemap: 'none',
           style: 'compressed',
         },
-        files: {
-          'static/css/main.css': 'src/client/scss/main.scss',
-        },
+        files: cssFiles,
       },
     },
 
     watch: {
-      html: {
-        files: ['src/client/index.html'],
-        tasks: ['copy'],
+      eslint: {
+        files: ['src/**/*.js'],
+        tasks: ['eslint:check'],
       },
       sass: {
         files: ['src/client/scss/*.scss'],
@@ -140,8 +168,8 @@ module.exports = function(grunt) {
   grunt.registerTask('server', ['clean:server', 'env:server', 'babel:server']);
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy', 'sass:production', 'env:babelify', 'browserify:production',
-    'env:babili', 'babel:babili']);
+    'browserify:vendor', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['clean:client', 'copy', 'sass:development', 'env:babelify',
-    'browserify:development', 'watch:sass']);
+  grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy', 'sass:development', 'env:babelify',
+    'browserify:development', 'browserify:vendor', 'watch']);
 };
