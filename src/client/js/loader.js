@@ -30,6 +30,7 @@ export class Loader {
       leafletCss.type = "text/css";
       leafletCss.href = 'https://unpkg.com/leaflet@1.1.0/dist/leaflet.css';
       leafletCss.integrity = 'sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==';
+      leafletCss.crossOrigin = '';
       head.appendChild(leafletCss);
       break;
     }
