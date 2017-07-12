@@ -31,7 +31,7 @@ module.exports = {
     // Possible Errors
     // Leave these mostly to eslint:recommended and google
     'no-cond-assign': 2, // override google
-    // 'no-console': [1, {'allow': ['warn', 'error']}],
+    'no-console': [0, {'allow': ['warn', 'error']}],
 
     // Best Practices
     // Specify all we want (to be clear)
