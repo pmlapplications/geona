@@ -14,18 +14,26 @@
     {{/case}}
   {{/switch}}
 
-  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <!--<link rel="stylesheet" type="text/css" href="css/main.css">-->
 
+  <!--Currently decides which mapping library to use-->
   <script>
     window.gp2_config = {
       mapLibrary: 'leaflet',
     };
   </script>
+  
+  <!--Includes the loader in the html-->
   <script src='js/loader.js'></script>
+
+  <!--This script defines a particular config, 
+      then instantiates a new loader-->
+  <script></script>
 </head>
 
 <body>
   <div id="map"></div>
+  <div id="cssTest"></div>
 </body>
 
 </html>
