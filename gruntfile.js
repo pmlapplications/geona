@@ -43,6 +43,7 @@ module.exports = function(grunt) {
         },
         options: {
           browserifyOptions: {
+            standalone: "gp2",
             debug: true,
           },
           transform: [
@@ -60,6 +61,7 @@ module.exports = function(grunt) {
         },
         options: {
           browserifyOptions: {
+            standalone: "gp2",
             debug: false,
           },
           transform: [
