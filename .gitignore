@@ -3,3 +3,5 @@ lib
 static
 .sass-cache
 npm-debug\.log
+
+\.vscode/
