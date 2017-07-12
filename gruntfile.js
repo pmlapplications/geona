@@ -22,9 +22,15 @@ module.exports = function(grunt) {
         ],
       },
       babili: { // Minifying the browser bundle
-        files: {
-          'static/js/bundle.js': 'static/js/bundle.js',
-        },
+        files: [
+          {
+            expand: true,
+            cwd: 'static/js/',
+            src: ['*.js'],
+            dest: 'static/js/',
+            ext: '.js',
+          },
+        ],
       },
     },
 

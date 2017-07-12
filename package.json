@@ -33,9 +33,9 @@
     "grunt-contrib-watch": "^1.0.0",
     "grunt-env": "^0.4.4",
     "load-grunt-tasks": "^3.5.2",
-    "minifyify": "^7.3.5",
     "mocha": "^3.4.2",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "npm-check": "^5.4.4"
   },
   "dependencies": {
     "chalk": "^1.1.3",
