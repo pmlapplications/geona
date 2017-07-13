@@ -88,7 +88,7 @@ module.exports = function(grunt) {
 
     copy: { // Copy index.html from src to static
       // 'static/index.html': 'src/client/index.html',
-      default: {
+      client: {
         files: [
         // 'static/index.html': 'src/client/index.html',
           // {
@@ -100,6 +100,16 @@ module.exports = function(grunt) {
             cwd: 'src/client/fonts',
             src: ['*'],
             dest: 'static/fonts',
+          },
+        ],
+      },
+      server: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/server/templates',
+            src: ['*'],
+            dest: 'lib/server/templates',
           },
         ],
       },
@@ -165,11 +175,11 @@ module.exports = function(grunt) {
   // Build all
   grunt.registerTask('default', ['server', 'client']);
   // Build the server
-  grunt.registerTask('server', ['clean:server', 'env:server', 'babel:server']);
+  grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server']);
   // Build the client
-  grunt.registerTask('client', ['clean:client', 'copy', 'sass:production', 'env:babelify', 'browserify:production',
+  grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'env:babelify', 'browserify:production',
     'browserify:vendor', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy', 'sass:development', 'env:babelify',
+  grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy:client', 'sass:development', 'env:babelify',
     'browserify:development', 'browserify:vendor', 'watch']);
 };
