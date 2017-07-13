@@ -1,4 +1,10 @@
 import * as leaflet from './map_leaflet';
-import main from './main';
+import Main from './main';
 
-main(leaflet);
+/**
+ *
+ * @param {*} config
+ */
+export function testInit() {
+  let lintHappy = new Main(leaflet);
+}

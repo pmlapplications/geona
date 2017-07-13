@@ -1,9 +1,12 @@
 import ol from 'openlayers';
 import $ from 'jquery';
 
-export function createMap() {
+/**
+ * g
+ */
+export function createMap(config) {
   let map = new ol.Map({
-    target: 'map',
+    target: config.mapDivID,
     controls: [
       new ol.control.Zoom({
         // zoomInLabel: $('span.icon-zoom-in'),
