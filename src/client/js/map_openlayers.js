@@ -2,7 +2,8 @@ import ol from 'openlayers';
 import $ from 'jquery';
 
 /**
- * g
+ *
+ * @param {*} config
  */
 export function createMap(config) {
   let map = new ol.Map({
