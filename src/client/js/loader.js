@@ -1,3 +1,6 @@
+/* global gp2 */
+
+
 // Get the head of the page
 let head = document.getElementsByTagName('head')[0];
 
@@ -12,7 +15,10 @@ head.appendChild(mainCss);
 let vendorJs = document.createElement('script');
 vendorJs.async = true;
 vendorJs.src = 'js/vendor.js';
-head.appendChild(vendorJs);
+
+// Used to track whether the respective js has been loaded
+let vendorJsLoaded = false;
+let mapJsLoaded = false;
 
 /**
  * Loads the map js and css for the mapping library specified in the config
@@ -26,7 +32,21 @@ export class Loader {
     let mapLibrary = config.mapLibrary;
 
     let mapJs = document.createElement('script');
-    mapJs.async = true;
+    // mapJs.async = true;
+    mapJs.type = 'text/javascript';
+
+    console.log('mapJsLoaded: ' + mapJsLoaded);
+    if (mapJsLoaded === true) {
+      console.log('mapJsLoaded was determined to be TRUE - now in first IF statement');
+      gp2.testInit(config);
+    } else {
+      console.log('mapJsLoaded was determined to be FALSE - now in second IF statement');
+      mapJs.onload = function() {
+        console.log('mapJs has loaded, and we will now call testInit');
+        gp2.testInit(config);
+        mapJsLoaded = true;
+      };
+    }
 
     let mapCss = document.createElement('link');
 
@@ -36,6 +56,7 @@ export class Loader {
       break;
     case 'leaflet':
       mapJs.src = 'js/bundle_leaflet.js';
+
       mapCss.rel = 'stylesheet';
       mapCss.type = 'text/css';
       mapCss.href = 'https://unpkg.com/leaflet@1.1.0/dist/leaflet.css';
@@ -44,6 +65,21 @@ export class Loader {
       break;
     }
     head.appendChild(mapCss);
-    head.appendChild(mapJs);
+
+    // We make sure the vendor js has loaded to prevent race conditions
+    // However the onload will only work once - so we use the vendorJsLoaded bool
+    // to allow multiple map scripts to be added.
+    console.log('vendorJsLoaded: ' + vendorJsLoaded);
+    if (vendorJsLoaded === true) {
+      console.log('vendorJsLoaded was determined to be TRUE - now in first IF statement');
+      head.appendChild(mapJs);
+    } else {
+      console.log('vendorJsLoaded was determined to be FALSE - now in second IF statement');
+      vendorJs.onload = function() {
+        head.appendChild(mapJs);
+        vendorJsLoaded = true;
+      };
+    }
+    head.appendChild(vendorJs);
   }
 }

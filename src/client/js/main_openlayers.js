@@ -1,4 +1,12 @@
 import * as ol from './map_openlayers';
-import main from './main';
+import Main from './main';
 
-main(ol);
+/**
+ *
+ * @param {*} config
+ */
+export function testInit(config) {
+  console.log('testInit called for OpenLayers');
+  let lintHappy = new Main(ol, config);
+}
+
