@@ -110,7 +110,9 @@ module.exports = {
 
     // Stylistic Issues
     // Leave these mostly to google
-    'indent': [1, 2],
+    'indent': [1, 2, {
+      'SwitchCase': 1,
+    }],
     'linebreak-style': [2, 'unix'],
     'max-len': [1, { // override google
       'code': 120,
@@ -119,7 +121,9 @@ module.exports = {
       'ignoreTrailingComments': true,
       'ignoreUrls': true,
     }],
-    'new-cap': [2, {'capIsNewExceptions': ['express.Router']}], // override google to add expceptions
+    'new-cap': [2, { // override google to add expceptions
+      'capIsNewExceptions': ['express.Router'],
+    }],
     'require-jsdoc': [1, { // override google
       require: {
         FunctionDeclaration: true,

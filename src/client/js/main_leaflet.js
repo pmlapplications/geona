@@ -5,7 +5,7 @@ import Main from './main';
  *
  * @param {*} config
  */
-export function testInit() {
+export function testInit(config) {
   console.log('testInit called for Leaflet');
-  let lintHappy = new Main(leaflet);
+  let lintHappy = new Main(leaflet, config);
 }

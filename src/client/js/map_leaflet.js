@@ -19,8 +19,8 @@ L.Control.Zoom.include({
   },
 });
 
-export function createMap() {
-  let map = L.map('map', {
+export function createMap(config) {
+  let map = L.map(config.mapDivID, {
     crs: L.CRS.EPSG4326,
     center: [0, 0],
     zoom: 2,
