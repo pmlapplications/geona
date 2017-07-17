@@ -1,23 +1,46 @@
-import L from 'leaflet';
-import $ from 'jquery';
+// import L from 'leaflet';
 
-L.Control.Zoom.include({
-  onAdd: function(map) {
-    let zoomName = 'leaflet-control-zoom';
-    let container = L.DomUtil.create('div', zoomName + ' leaflet-bar');
-    let options = this.options;
+let L;
 
-    this._zoomInButton = this._createButton(options.zoomInText, options.zoomInTitle,
-            zoomName + '-in', container, this._zoomIn);
-    this._zoomOutButton = this._createButton(options.zoomOutText, options.zoomOutTitle,
-            zoomName + '-out', container, this._zoomOut);
+export function init(next) {
+  if (L) {
+    // If leaflet has already been loaded
+    next();
+  } else {
+    let head = document.getElementsByTagName('head')[0];
+    let mapJs = document.createElement('script');
+    mapJs.onload = function() {
+      import('leaflet')
+        .then((leaflet) => {
+          L = leaflet;
+          next();
+          // setupZoom();
+        });
+    };
+    mapJs.src = 'js/vendor_leaflet.js';
+    head.appendChild(mapJs);
+  }
+}
 
-    this._updateDisabled();
-    map.on('zoomend zoomlevelschange', this._updateDisabled, this);
+// function setupZoom() {
+//   L.Control.Zoom.include({
+//     onAdd: function(map) {
+//       let zoomName = 'leaflet-control-zoom';
+//       let container = L.DomUtil.create('div', zoomName + ' leaflet-bar');
+//       let options = this.options;
 
-    return container;
-  },
-});
+//       this._zoomInButton = this._createButton(options.zoomInText, options.zoomInTitle,
+//         zoomName + '-in', container, this._zoomIn);
+//       this._zoomOutButton = this._createButton(options.zoomOutText, options.zoomOutTitle,
+//         zoomName + '-out', container, this._zoomOut);
+
+//       this._updateDisabled();
+//       map.on('zoomend zoomlevelschange', this._updateDisabled, this);
+
+//       return container;
+//     },
+//   });
+// }
 
 export function createMap(config) {
   let map = L.map(config.mapDivID, {
