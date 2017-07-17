@@ -2,20 +2,30 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
   let clientBundles = {
-    'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
-    'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
-    'static/js/loader.js': 'src/client/js/loader.js',
+    'static/js/bundle.js': 'src/client/js/init.js',
+    // 'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
+    // 'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
+    // 'static/js/loader.js': 'src/client/js/loader.js',
+  };
+
+  let loaderBundle = {
+    'static/js/loader.js': 'src/client_loader/loader.js',
   };
 
   let cssFiles = {
     'static/css/main.css': 'src/client/scss/main.scss',
   };
 
-  let clientLibraries = [
+  let vendorLibs = [
     'convict',
     'jquery',
     'lodash',
   ];
+
+  let clientExternalLibs = vendorLibs.concat([
+    'openlayers',
+    'leaflet',
+  ]);
 
   grunt.initConfig({
     babel: {
@@ -59,7 +69,7 @@ module.exports = function(grunt) {
         transform: [
           ['babelify'],
         ],
-        external: clientLibraries,
+        external: clientExternalLibs,
       },
       development: { // Transpile and bundle for development and watch for changes
         files: clientBundles,
@@ -70,12 +80,40 @@ module.exports = function(grunt) {
       production: { // Transpile and bundle for production
         files: clientBundles,
       },
+      loader: {
+        files: loaderBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'gp2Loader',
+            debug: true,
+          },
+          external: null,
+        },
+      },
       vendor: {
         src: ['.'],
         dest: 'static/js/vendor.js',
         options: {
           browserifyOptions: {},
-          alias: clientLibraries,
+          alias: vendorLibs,
+          external: null,
+        },
+      },
+      openlayers: {
+        src: ['.'],
+        dest: 'static/js/vendor_openlayers.js',
+        options: {
+          browserifyOptions: {},
+          alias: ['openlayers'],
+          external: null,
+        },
+      },
+      leaflet: {
+        src: ['.'],
+        dest: 'static/js/vendor_leaflet.js',
+        options: {
+          browserifyOptions: {},
+          alias: ['leaflet'],
           external: null,
         },
       },
@@ -178,8 +216,10 @@ module.exports = function(grunt) {
   grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server']);
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'env:babelify', 'browserify:production',
-    'browserify:vendor', 'env:babili', 'babel:babili']);
+    'browserifyOther', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy:client', 'sass:development', 'env:babelify',
-    'browserify:development', 'browserify:vendor', 'watch']);
+    'browserify:development', 'browserifyOther', 'watch']);
+
+  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
 };

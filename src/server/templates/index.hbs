@@ -11,17 +11,21 @@
   <!--This script defines a particular config,
       then instantiates a new loader-->
   <script>
-     var config1 = {
+    var config1 = {
       mapLibrary: "openlayers",
       mapDivID: "ol",
-     };
-     var config2 = {
+    };
+    var config2 = {
       mapLibrary: "leaflet",
       mapDivID: "leaf",
-     };
-     // instantiates new loader for map
-     // var map1 = new gp2.Loader(config1);
-     var map2 = new gp2.Loader(config2);
+    };
+    // instantiates new loader for map
+    gp2Loader.load(config1);
+    gp2Loader.load(config2);
+
+    // setTimeout(function() {
+    //   var map2 = new gp2.Loader(config2);
+    // }, 2000);
   </script>
 
 </head>

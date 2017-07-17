@@ -1,10 +1,26 @@
-import ol from 'openlayers';
 import $ from 'jquery';
 
-/**
- *
- * @param {*} config
- */
+let ol;
+
+export function init(next) {
+  if (ol) {
+    // If ol has already been loaded
+    next();
+  } else {
+    let head = document.getElementsByTagName('head')[0];
+    let mapJs = document.createElement('script');
+    mapJs.onload = function() {
+      import('openlayers')
+        .then((openlayers) => {
+          ol = openlayers;
+          next();
+        });
+    };
+    mapJs.src = 'js/vendor_openlayers.js';
+    head.appendChild(mapJs);
+  }
+}
+
 export function createMap(config) {
   let map = new ol.Map({
     target: config.mapDivID,
