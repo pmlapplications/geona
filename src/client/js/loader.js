@@ -59,9 +59,7 @@ export class Loader {
 
       mapCss.rel = 'stylesheet';
       mapCss.type = 'text/css';
-      mapCss.href = 'https://unpkg.com/leaflet@1.1.0/dist/leaflet.css';
-      mapCss.integrity = 'sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==';
-      mapCss.crossOrigin = '';
+      mapCss.href = 'css/leaflet-custom.css';
       break;
     }
     head.appendChild(mapCss);
