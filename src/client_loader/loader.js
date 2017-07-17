@@ -1,20 +1,20 @@
 /* global gp2 */
 
 // Get the head of the page
-var head = document.getElementsByTagName('head')[0];
+let head = document.getElementsByTagName('head')[0];
 
 // Add the main css to the page
-var mainCss = document.createElement('link');
+let mainCss = document.createElement('link');
 mainCss.rel = 'stylesheet';
 mainCss.type = 'text/css';
 mainCss.href = 'css/main.css';
 head.appendChild(mainCss);
 
-var vendorJsLoaded = false;
-var bundleJsLoaded = false;
+let vendorJsLoaded = false;
+let bundleJsLoaded = false;
 
 // Define the element for the bundle js
-var bundleJs = document.createElement('script');
+let bundleJs = document.createElement('script');
 bundleJs.async = true;
 bundleJs.src = 'js/bundle.js';
 bundleJs.onload = function() {
@@ -23,7 +23,7 @@ bundleJs.onload = function() {
 };
 
 // Add the vendor js to the page
-var vendorJs = document.createElement('script');
+let vendorJs = document.createElement('script');
 vendorJs.async = true;
 vendorJs.src = 'js/vendor.js';
 vendorJs.onload = function() {
@@ -33,39 +33,34 @@ vendorJs.onload = function() {
 };
 head.appendChild(vendorJs);
 
-var queuedMaps = [];
-var cssAdded = [];
+let queuedMaps = [];
+let cssAdded = [];
 
 /**
- * Loads the map js and css for the mapping library specified in the config
+ * Load the map js and css for the mapping library specified in the config
+ * @param  {Object} config The config for the map
  */
-class Loader {
-  /**
-   * Instantiate a loader and load the map js and css for the mapping library specified in the config
-   * @param  {Object} config The config for the map
-   */
-  constructor(config) {
-    let leafletCss;
+export function load(config) {
+  let leafletCss;
 
-    switch (config.mapLibrary) {
-      case 'leaflet':
-        leafletCss = document.createElement('link');
-        leafletCss.rel = 'stylesheet';
-        leafletCss.type = 'text/css';
-        leafletCss.href = 'https://unpkg.com/leaflet@1.1.0/dist/leaflet.css';
-        leafletCss.integrity = 'sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==';
-        leafletCss.crossOrigin = '';
-        head.appendChild(leafletCss);
+  switch (config.mapLibrary) {
+    case 'leaflet':
+      leafletCss = document.createElement('link');
+      leafletCss.rel = 'stylesheet';
+      leafletCss.type = 'text/css';
+      leafletCss.href = 'https://unpkg.com/leaflet@1.1.0/dist/leaflet.css';
+      leafletCss.integrity = 'sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==';
+      leafletCss.crossOrigin = '';
+      head.appendChild(leafletCss);
 
-        cssAdded.push('leaflet');
-        break;
-    }
+      cssAdded.push('leaflet');
+      break;
+  }
 
-    queuedMaps.push(config);
+  queuedMaps.push(config);
 
-    if (vendorJsLoaded && bundleJsLoaded) {
-      addMaps();
-    }
+  if (vendorJsLoaded && bundleJsLoaded) {
+    addMaps();
   }
 }
 

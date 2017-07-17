@@ -8,6 +8,10 @@ module.exports = function(grunt) {
     // 'static/js/loader.js': 'src/client/js/loader.js',
   };
 
+  let loaderBundle = {
+    'static/js/loader.js': 'src/client_loader/loader.js',
+  };
+
   let cssFiles = {
     'static/css/main.css': 'src/client/scss/main.scss',
   };
@@ -76,6 +80,16 @@ module.exports = function(grunt) {
       production: { // Transpile and bundle for production
         files: clientBundles,
       },
+      loader: {
+        files: loaderBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'gp2Loader',
+            debug: true,
+          },
+          external: null,
+        },
+      },
       vendor: {
         src: ['.'],
         dest: 'static/js/vendor.js',
@@ -124,10 +138,6 @@ module.exports = function(grunt) {
             cwd: 'src/client/fonts',
             src: ['*'],
             dest: 'static/fonts',
-          },
-          {
-            src: 'src/client_loader/loader.js',
-            dest: 'static/js/loader.js',
           },
         ],
       },
@@ -193,10 +203,6 @@ module.exports = function(grunt) {
         files: ['src/**/*.js'],
         tasks: ['eslint:check'],
       },
-      loader: {
-        files: ['src/client_loader/loader.js'],
-        tasks: ['copy:client'],
-      },
       sass: {
         files: ['src/client/scss/*.scss'],
         tasks: ['sass:development'],
@@ -210,10 +216,10 @@ module.exports = function(grunt) {
   grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server']);
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'env:babelify', 'browserify:production',
-    'vendor', 'env:babili', 'babel:babili']);
+    'browserifyOther', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy:client', 'sass:development', 'env:babelify',
-    'browserify:development', 'vendor', 'watch']);
+    'browserify:development', 'browserifyOther', 'watch']);
 
-  grunt.registerTask('vendor', ['browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
+  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
 };
