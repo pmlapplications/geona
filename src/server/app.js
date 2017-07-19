@@ -18,7 +18,7 @@ i18next
   .use(i18nextBackend)
   .use(i18nextMiddleware.LanguageDetector)
   .init({
-    debug: 'true',
+    debug: false,
 
     fallbackLng: 'en',
     ns: ['common'],
