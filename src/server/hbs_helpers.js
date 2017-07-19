@@ -1,8 +1,9 @@
 /* eslint no-invalid-this: 0 */
 
 import hbs from 'hbs';
+import i18n from 'i18next';
 
-/**
+/*
  * General logic helpers.
  *
  * Use in the format:
@@ -61,7 +62,7 @@ hbs.registerHelper({
   },
 });
 
-/**
+/*
  * Switch and case helper.
  * Adapted from github.com/wycats/handlebars.js/issues/927#issuecomment-200784792
  *
@@ -82,7 +83,7 @@ hbs.registerHelper('switch', function(value, options) {
   return html;
 });
 
-/**
+/*
  * Case for use with switch.
  *
  * Multiple values can be passed to a case and will be used as OR values:
@@ -97,4 +98,16 @@ hbs.registerHelper('case', function(...args) {
   } else {
     return options.fn(this);
   }
+});
+
+/*
+ * Helper for i18n translation.
+ * Adapted from stackoverflow.com/a/37824273 and github.com/i18next/i18next-node/issues/199
+ *
+ * Use in the format:
+ *   {{{t 'key' interpolationVal=value}}}
+ */
+hbs.registerHelper('t', function(key, options) {
+  let result = i18n.t(key, options.hash);
+  return new hbs.SafeString(result);
 });

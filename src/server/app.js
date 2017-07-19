@@ -1,5 +1,8 @@
-import express from 'express'; // Default import since express() is a function
+import express from 'express';
 import * as http from 'http';
+import i18next from 'i18next';
+import i18nextBackend from 'i18next-node-fs-backend';
+import * as i18nextMiddleware from 'i18next-express-middleware';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 
@@ -7,29 +10,61 @@ import conf from './config';
 import mainRouter from './routers/main';
 import './hbs_helpers';
 
+/*
+ * Setup i18next
+ */
+
+i18next
+  .use(i18nextBackend)
+  .use(i18nextMiddleware.LanguageDetector)
+  .init({
+    debug: 'true',
+
+    fallbackLng: 'en',
+    ns: ['common'],
+    defaultNS: 'common',
+    saveMissing: true,
+    preload: ['en'],
+
+    backend: {
+      loadPath: __dirname + '/locales/{{lng}}/{{ns}}.json',
+      addPath: __dirname + '/locales/{{lng}}/{{ns}}.missing.json',
+      jsonIndent: 2,
+    },
+  });
+
+
+/*
+ * Setup express and the hbs (handlebars) template engine
+ */
+
 let app = express();
 app.set('view engine', 'hbs');
 app.set('views', __dirname + '/templates');
+app.use(i18nextMiddleware.handle(i18next, {}));
 
-// swagger definition
+
+/*
+ * Setup swagger for api docs
+ * TODO: Config option to enable swagger or not
+ */
+
 let swaggerDefinition = {
   info: {
-    title: 'GP2',
-    version: '0.0.1',
-    description: '',
+    title: process.env.npm_package_name,
+    version: process.env.npm_package_version,
+    description: process.env.npm_package_description,
   },
 };
 
-// options for the swagger docs
-let options = {
-  // import swaggerDefinitions
+let swaggerOptions = {
   swaggerDefinition: swaggerDefinition,
   // path to the API docs
   apis: ['./src/server/routers/main_router.js'],
 };
 
 // initialize swagger-jsdoc
-let swaggerSpec = swaggerJSDoc(options);
+let swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 // serve swagger
 app.get('/swagger.json', function(req, res) {
@@ -37,24 +72,42 @@ app.get('/swagger.json', function(req, res) {
   res.send(swaggerSpec);
 });
 
-// Setup the static path for the html folder
+
+/*
+ * Setup routes and routers
+ */
+
+// Setup the static path for the static folder
 app.use(express.static(path.join(__dirname, '../../static')));
 
 // Add the main router
 app.use(mainRouter);
 
-// Create the server and start listening
+
+/*
+ * Create the server and start it
+ */
+
 let server = http.createServer(app);
 
 server.listen(conf.get('server.port'), function() {
   console.log('Server running at http://127.0.0.1:' + conf.get('server.port'));
 });
 
-// console.log(conf.get('server.plugins'));
+
+/*
+ * Handle plugins
+ * TODO: More advanced plugin loading (API?)
+ */
 
 for (let plugin of conf.get('server.plugins')) {
+  console.log('Loading plugin: ' + plugin);
   import(plugin).then((loadedPlugin) => loadedPlugin());
 }
 
-// Export app for testing
+
+/*
+ * Export app for testing
+ */
+
 export default app;
