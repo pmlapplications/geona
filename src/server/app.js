@@ -31,6 +31,25 @@ i18next
       addPath: __dirname + '/locales/{{lng}}/{{ns}}.missing.json',
       jsonIndent: 2,
     },
+
+    detector: {
+      // order and from where user language should be detected
+      order: [/* 'path', 'session', */'querystring', 'cookie', 'header'],
+
+      // keys or params to lookup language from
+      lookupQuerystring: 'lng',
+      lookupCookie: 'i18next',
+      lookupSession: 'lng',
+      // lookupPath: 'lng',
+      lookupFromPathIndex: 0,
+
+      // cache user language
+      caches: false, // ['cookie']
+
+      // optional expire and domain for set cookie
+      // cookieExpirationDate: new Date(),
+      // cookieDomain: 'myDomain',
+    },
   });
 
 
