@@ -48,31 +48,31 @@ export function createMap(config) {
     center: [0, 0],
     zoom: 2,
     zoomControl: false,
+    /* fullscreenControl: true,
+    fullscreenControlOptions: {
+      position: 'topright',
+    },*/
   });
 
-  L.tileLayer.wms('https://tiles.maps.eox.at/wms/', {
+  let baseLayers = new Map();
+
+  baseLayers.set('EOX', L.tileLayer.wms('https://tiles.maps.eox.at/wms/', {
     layers: 'terrain-light',
     version: '1.1.1',
     attribution: 'EOX',
     crs: L.CRS.EPSG4326,
-  }).addTo(map);
+  }));
+  baseLayers.set('MCB', L.tileLayer.wms('http://vmap0.tiles.osgeo.org/wms/vmap0?', {
+    layers: 'basic',
+    version: '1.1.1',
+    attribution: 'Metacarta Basic',
+    crs: L.CRS.EPSG4326,
+  })
+  );
 
-  // new CustomZoom({
-  //   zoomInText: 'test',
-  //   zoomOutText: '',
-  //   position: 'topright',
-  // }).addTo(map);
+  // let blueMarbleMap = L.tile;
 
-  /**
-   * L.control.customZoom = L.Control.extend({
-    options: {
-      position: 'topright',
-      customZoomtext: '<span class="icon-zoom-in"></span>',
-      customZoomTitle: '<span class="icon-zoom-out"></span>',
-    },
-
-  }).addTo(map);
-   */
+  baseLayers.get(config.mapBaseMap).addTo(map);
 
   L.control.zoom({
     zoomInText: '<span class="icon-zoom-in"></span>',
@@ -85,4 +85,37 @@ export function createMap(config) {
     imperial: false,
     position: 'topright',
   }).addTo(map);
+
+  /* L.control.extend({
+    position: 'topright',
+
+    onAdd: function(map) {
+      let fullscreenButton = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+      fullscreenButton.style.backgroundColor = 'white';
+      fullscreenButton.style.width = '40px';
+      fullscreenButton.style.height = '33px';
+
+      fullscreenButton.onclick = function() {
+
+      };
+    },
+  }).addTo(map);*/
 }
+
+// new CustomZoom({
+//   zoomInText: 'test',
+//   zoomOutText: '',
+//   position: 'topright',
+// }).addTo(map);
+
+/**
+   * L.control.customZoom = L.Control.extend({
+    options: {
+      position: 'topright',
+      customZoomtext: '<span class="icon-zoom-in"></span>',
+      customZoomTitle: '<span class="icon-zoom-out"></span>',
+    },
+
+  }).addTo(map);
+   */
