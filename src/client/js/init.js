@@ -1,6 +1,7 @@
 // import {loadConfig} from './config';
 import * as ol from './map_openlayers';
 import * as leaflet from './map_leaflet';
+import {} from './i18n';
 
 function init(map, config) {
   map.init(() => {

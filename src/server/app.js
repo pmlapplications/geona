@@ -24,7 +24,7 @@ i18next
     ns: ['common'],
     defaultNS: 'common',
     saveMissing: true,
-    preload: ['en'],
+    preload: ['en', 'fr'],
 
     backend: {
       loadPath: __dirname + '/locales/{{lng}}/{{ns}}.json',
@@ -32,7 +32,7 @@ i18next
       jsonIndent: 2,
     },
 
-    detector: {
+    detection: {
       // order and from where user language should be detected
       order: [/* 'path', 'session', */'querystring', 'cookie', 'header'],
 
@@ -44,7 +44,7 @@ i18next
       lookupFromPathIndex: 0,
 
       // cache user language
-      caches: false, // ['cookie']
+      caches: ['cookie'], // ['cookie']
 
       // optional expire and domain for set cookie
       // cookieExpirationDate: new Date(),

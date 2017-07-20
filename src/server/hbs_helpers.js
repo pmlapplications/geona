@@ -108,6 +108,6 @@ hbs.registerHelper('case', function(...args) {
  *   {{{t 'key' interpolationVal=value}}}
  */
 hbs.registerHelper('t', function(key, options) {
-  let result = i18n.t(key, options.hash);
+  let result = this.t(key, options.hash);
   return new hbs.SafeString(result);
 });

@@ -1,7 +1,8 @@
-node_modules
-lib
-static
+*.sublime-project
+*.sublime-workspace
 .sass-cache
-npm-debug\.log
-
-\.vscode/
+.vscode/
+lib
+node_modules
+npm-debug.log
+static
