@@ -4,6 +4,8 @@ let ol;
 // baseLayers is an object containing the Tile and View information for
 // various basemap types.
 let baseLayers;
+let map;
+let graticule;
 
 export function init(next) {
   if (ol) {
@@ -27,7 +29,7 @@ export function init(next) {
 }
 
 export function createMap(config) {
-  let map = new ol.Map({
+  map = new ol.Map({
     target: config.mapDivID,
     controls: [
       new ol.control.Zoom({
@@ -55,6 +57,40 @@ export function createMap(config) {
       baseLayers.get(config.mapBaseMap + 'View'),
 
   });
+  createGraticule();
+  if (config.mapGraticule === 'true') {
+    toggleGraticule(config);
+  }
+}
+
+/**
+ * Initialises the graticule, but does not make it visible.
+ */
+function createGraticule() {
+  graticule = new ol.Graticule({
+    strokeStyle: new ol.style.Stroke({
+      color: 'rgba(255,255,255,0.9)',
+      width: 1,
+      lineDash: [0.5, 4],
+    }),
+    showLabels: false,
+  });
+}
+
+/**
+ * Toggles visibility of map graticule.
+ * @param {*} config
+ */
+function toggleGraticule(config) {
+  if (config.mapGraticule) {
+    graticule.setMap(map);
+  } else {
+    try {
+      graticule.setMap();
+    } catch (e) {
+      console.error('Caught error when trying to call graticule.setMap() in function toggleGraticule().');
+    }
+  }
 }
 
 /**

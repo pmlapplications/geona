@@ -70,8 +70,6 @@ export function createMap(config) {
   })
   );
 
-  // let blueMarbleMap = L.tile;
-
   baseLayers.get(config.mapBaseMap).addTo(map);
 
   L.control.zoom({
