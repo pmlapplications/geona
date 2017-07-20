@@ -43,6 +43,10 @@ export function init(next) {
 // }
 
 export function createMap(config) {
+  if (!config.mapBaseMap) {
+    config.mapBaseMap = 'EOX';
+  }
+
   let map = L.map(config.mapDivID, {
     crs: L.CRS.EPSG4326,
     center: [0, 0],

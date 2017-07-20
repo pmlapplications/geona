@@ -29,6 +29,10 @@ export function init(next) {
 }
 
 export function createMap(config) {
+  // If mapBaseMap is undefined, set to EOX as default.
+  if (!config.mapBaseMap) {
+    config.mapBaseMap = 'EOX';
+  }
   map = new ol.Map({
     target: config.mapDivID,
     controls: [
