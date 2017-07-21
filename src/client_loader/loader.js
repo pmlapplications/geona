@@ -1,9 +1,12 @@
 /* global gp2 */
+import $ from 'jquery';
 
 // Get the head of the page
 let head = document.getElementsByTagName('head')[0];
 
-// Add the main css to the page
+// Add all css from main.scss to the page
+// Including custom leaflet css
+// Could this cause problems if individual css files are loaded in different order?
 let mainCss = document.createElement('link');
 mainCss.rel = 'stylesheet';
 mainCss.type = 'text/css';
@@ -38,35 +41,70 @@ let cssAdded = [];
 
 /**
  * Load the map js and css for the mapping library specified in the config
+ * Commented code relating to fullscreen leaflet should be left in for now.
  * @param  {Object} config The config for the map
  */
 export function load(config) {
   let leafletCss;
+  /* let leafletFullscreenJs;
+  let leafletFullscreenCss;
+  let leafletFullscreenJsLoaded = false;*/
 
   switch (config.mapLibrary) {
     case 'leaflet':
       leafletCss = document.createElement('link');
       leafletCss.rel = 'stylesheet';
       leafletCss.type = 'text/css';
-      leafletCss.href = 'https://unpkg.com/leaflet@1.1.0/dist/leaflet.css';
-      leafletCss.integrity = 'sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==';
-      leafletCss.crossOrigin = '';
-      head.appendChild(leafletCss);
+      leafletCss.href = 'css/leaflet-custom.scss';
 
+      /* leafletFullscreenJs = document.createElement('script');
+      leafletFullscreenJs.async = true;
+      leafletFullscreenJs.src = 'https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js';
+      leafletFullscreenJs.onload = function() {
+        leafletFullscreenJsLoaded = true;
+        head.appendChild(leafletFullscreenJs);
+      };
+
+      leafletFullscreenCss = document.createElement('link');
+      leafletFullscreenCss.rel = 'stylesheet';
+      leafletFullscreenCss.type = 'text/css';
+      leafletFullscreenCss.href = 'https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css';
+      */
       cssAdded.push('leaflet');
       break;
   }
 
   queuedMaps.push(config);
 
+  /* if (vendorJsLoaded && bundleJsLoaded && leafletFullscreenJsLoaded) {*/
   if (vendorJsLoaded && bundleJsLoaded) {
     addMaps();
   }
 }
 
+/**
+ * TODO Add proper comment here----
+ *
+ * A geonaDiv is added within the mapDivID div for every map config received.
+ * This allows geona to correctly display maps, and for users to resize their maps
+ * whilst retaining correct behaviour.
+ */
 function addMaps() {
   while (queuedMaps.length) {
     let config = queuedMaps.pop();
+
+    // This code cannot go outside the loop, as a new element must be created
+    // each time (otherwise only one is created from the whole loop)
+    let geonaDiv = document.createElement('div');
+    geonaDiv.className = 'geonaDiv';
+
+    // set the unique id for this geonaDiv element
+    geonaDiv.id = geonaDiv.className + config.mapDivID;
+    // here put the geonaDiv element in the mapDivID element
+    $('#' + config.mapDivID).append(geonaDiv);
+    // here replace mapDivID with the unique geonaDiv id
+    config.mapDivID = geonaDiv.id;
+
     switch (config.mapLibrary) {
       case 'leaflet':
         gp2.initLeaflet(config);
