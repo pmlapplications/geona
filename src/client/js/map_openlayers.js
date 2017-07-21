@@ -65,6 +65,49 @@ export function createMap(config) {
   if (config.mapGraticule === 'true') {
     toggleGraticule(config);
   }
+
+  removeBaseMap();
+  addBaseMap('EOX');
+  changeBaseMap('OSM');
+}
+
+/**
+ * Will remove the current base map, and will add
+ * the newly selected one.
+ * To remove and not replace the current base map use
+ * the removeBaseMap() function only.
+ * @param {*} baseMap
+ */
+function changeBaseMap(baseMap) {
+  removeBaseMap();
+  addBaseMap(baseMap);
+}
+
+/**
+ * Remove the current base map Layer.
+ * TODO test with multiple layers on map (function may be removing ALL layers)
+ */
+function removeBaseMap() {
+  map.removeLayer(map.getLayers().item(0));
+}
+
+/**
+ * Sets new base map layer, and updates the View.
+ * TODO test with multiple layers on map (function may be adding above existing layers)
+ * @param {*} baseMap - the map portion of the Key in baseLayers.
+ */
+function addBaseMap(baseMap) {
+  map.getLayers().insertAt(0, baseLayers.get(baseMap + 'Tile'));
+  map.setView(baseLayers.get(baseMap + 'View'));
+}
+
+/**
+ * Sets the config.mapBaseMap to the map's current base layer
+ * TODO test with real config
+ * @param {*} config
+ */
+function setConfigBaseMap(config) {
+  config.mapBaseMap = map.getLayers().item(0);
 }
 
 /**
