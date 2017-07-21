@@ -65,10 +65,6 @@ export function createMap(config) {
   if (config.mapGraticule === 'true') {
     toggleGraticule(config);
   }
-
-  removeBaseMap();
-  addBaseMap('EOX');
-  changeBaseMap('OSM');
 }
 
 /**
