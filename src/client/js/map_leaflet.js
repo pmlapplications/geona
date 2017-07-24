@@ -22,6 +22,7 @@ export function init(next) {
         .then((leaflet) => {
           L = leaflet;
           createBaseLayers();
+          mapLayers = L.layerGroup();
           next();
           // setupZoom();
         });
@@ -56,10 +57,6 @@ export function init(next) {
 
 
 export function createMap(config) {
-  if (!config.mapBaseMap) {
-    config.mapBaseMap = 'EOX';
-  }
-
   map = L.map(config.mapDivID, {
     crs: L.CRS.EPSG4326,
     center: [0, 0],
@@ -71,8 +68,12 @@ export function createMap(config) {
     },*/
   });
 
-  mapLayers = L.layerGroup().addLayer(baseLayers.get(config.mapBaseMap)).addTo(map);
-  mapLayersTracker.push(baseLayers.get(config.mapBaseMap));
+  // if base map defined in the config, add to the map.
+  if (config.mapBaseMap) {
+    mapLayers.addLayer(baseLayers.get(config.mapBaseMap));
+    mapLayersTracker.push(baseLayers.get(config.mapBaseMap));
+  }
+  mapLayers.addTo(map);
 
   L.control.zoom({
     zoomInText: '<span class="icon-zoom-in"></span>',
@@ -86,10 +87,6 @@ export function createMap(config) {
     position: 'topright',
   }).addTo(map);
 
-
-  removeBaseMap();
-  addBaseMap('EOX');
-  changeBaseMap('MCB');
 
   /* L.control.extend({
     position: 'topright',

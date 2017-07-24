@@ -29,10 +29,6 @@ export function init(next) {
 }
 
 export function createMap(config) {
-  // If mapBaseMap is undefined, set to EOX as default.
-  if (!config.mapBaseMap) {
-    config.mapBaseMap = 'EOX';
-  }
   map = new ol.Map({
     target: config.mapDivID,
     controls: [
@@ -53,14 +49,13 @@ export function createMap(config) {
       new ol.control.ScaleLine({}),
     ],
 
-    layers: [
-      baseLayers.get(config.mapBaseMap + 'Tile'),
-    ],
-
-    view:
-      baseLayers.get(config.mapBaseMap + 'View'),
-
   });
+  // If base map defined in the config, add it to the map.
+  if (config.mapBaseMap) {
+    map.addLayer(baseLayers.get(config.mapBaseMap + 'Tile'));
+    map.setView(baseLayers.get(config.mapBaseMap + 'View'));
+  }
+
   createGraticule();
   if (config.mapGraticule === 'true') {
     toggleGraticule(config);
