@@ -5,7 +5,9 @@ let ol;
 // various basemap types.
 let baseLayers;
 let map;
+let borderLayers;
 let graticule;
+let borderActive = false;
 
 export function init(next) {
   if (ol) {
@@ -56,6 +58,11 @@ export function createMap(config) {
     map.setView(baseLayers.get(config.mapBaseMap + 'View'));
   }
 
+  createCountryBordersLayers();
+  if (config.mapCountryBorders) {
+    addCountryBordersLayer(config.mapCountryBorders);
+  }
+
   createGraticule();
   if (config.mapGraticule === 'true') {
     toggleGraticule(config);
@@ -99,6 +106,83 @@ function addBaseMap(baseMap) {
  */
 function setConfigBaseMap(config) {
   config.mapBaseMap = map.getLayers().item(0);
+}
+
+/**
+ *
+ * @param {*} border -
+ */
+function changeCountryBordersLayer(border) {
+  removeCountryBordersLayer();
+  addCountryBordersLayer(border);
+}
+
+/**
+ *
+ * @param {*} border -
+ */
+function addCountryBordersLayer(border) {
+  try {
+    map.addLayer(borderLayers.get(border));
+    borderActive = true;
+  } catch (e) {
+    // error will have occurred because the borders have not loaded,
+    // or because the specified border does not exist.
+    console.error(e);
+  }
+}
+
+/**
+ * 
+ */
+function removeCountryBordersLayer() {
+  if (borderActive === true) {
+    // Removes the top-most layer (border will always be on top)
+    map.removeLayer(map.getLayers().item(map.getLayers().getLength() - 1));
+    borderActive = false;
+  }
+}
+
+function setConfigCountryBordersLayer(config) {
+  if (borderActive === true) {
+    // sets the config parameter to the top layer
+    config.mapCountryBorders = map.getLayers().item(map.getLayers().getSize() - 1);
+  }
+}
+
+/**
+ *
+ */
+function createCountryBordersLayers() {
+  // new Key-Value map, not OpenLayers map
+  borderLayers = new Map();
+  borderLayers.set('white', new ol.layer.Tile({
+    id: 'countries_all_white',
+    title: 'White border lines',
+    source: new ol.source.TileWMS({
+      url: 'https://rsg.pml.ac.uk/geoserver/wms?',
+      crossOrigin: null,
+      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line-white', SRS: map.getView().getProjection()},
+    }),
+  }));
+  borderLayers.set('black', new ol.layer.Tile({
+    id: 'countries_all_black',
+    title: 'Black border lines',
+    source: new ol.source.TileWMS({
+      url: 'https://rsg.pml.ac.uk/geoserver/wms?',
+      crossOrigin: null,
+      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line_black', SRS: map.getView().getProjection()},
+    }),
+  }));
+  borderLayers.set('blue', new ol.layer.Tile({
+    id: 'countries_all_blue',
+    title: 'Blue border lines',
+    source: new ol.source.TileWMS({
+      url: 'https://rsg.pml.ac.uk/geoserver/wms?',
+      crossOrigin: null,
+      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line', SRS: map.getView().getProjection()},
+    }),
+  }));
 }
 
 /**

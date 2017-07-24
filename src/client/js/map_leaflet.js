@@ -55,7 +55,10 @@ export function init(next) {
 
 // //
 
-
+/**
+ *
+ * @param {*} config -
+ */
 export function createMap(config) {
   map = L.map(config.mapDivID, {
     crs: L.CRS.EPSG4326,
@@ -154,6 +157,20 @@ function addBaseMap(baseMap) {
  */
 function setConfigBaseMap(config) {
   config.mapBaseMap = mapLayersTracker[0];
+}
+
+/**
+ *
+ */
+function addCountryBordersLayer() {
+
+}
+
+/**
+ * 
+ */
+function createCountryBordersLayers() {
+
 }
 
 /**
