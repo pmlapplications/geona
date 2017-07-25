@@ -56,8 +56,8 @@ export class GMap {
     });
     // If base map defined in the config, add it to the map.
     if (this.config.basemap) {
-      this.map.addLayer(this.baseLayers.get(this.config.basemap + 'Tile'));
-      this.map.setView(this.baseLayers.get(this.config.basemap + 'View'));
+      this.map.addLayer(this.baseLayers[this.config.basemap].tile);
+      this.map.setView(this.baseLayers[this.config.basemap].view);
       this.baseActive = true;
     }
 
@@ -100,8 +100,8 @@ export class GMap {
    * @param {String} baseMap The title used to select the new base map.
    */
   addBaseMap(baseMap) {
-    this.map.getLayers().insertAt(0, this.baseLayers.get(baseMap + 'Tile'));
-    this.map.setView(this.baseLayers.get(baseMap + 'View'));
+    this.map.getLayers().insertAt(0, this.baseLayers[baseMap].tile);
+    this.map.setView(this.baseLayers[baseMap].view);
     this.baseActive = true;
   }
 
@@ -124,7 +124,7 @@ export class GMap {
     if (this.baseActive === true) {
       let baseMapTitle = this.map.getLayers().item(0).get('title');
       // If base map supports new projection, we can change it
-      if (this.baseLayers.get(baseMapTitle + 'Tile').get('projections').indexOf(projection) >= 0) {
+      if (this.baseLayers[baseMapTitle].tile.get('projections').indexOf(projection) >= 0) {
         this.map.setView(this.getViewSettings(projection));
       } else {
         alert('Base map ' + baseMapTitle + ' does not support projection type ' + projection + '. Please select a different base map.');
@@ -262,46 +262,50 @@ export class GMap {
    * (Object-style version can be found commented underneath the function).
    */
   createBaseLayers() {
-    this.baseLayers = new Map();
-
-    this.baseLayers.set('EOXTile', new ol.layer.Tile({
-      id: 'EOX',
-      title: 'EOX',
-      description: 'EPSG:4326 only',
-      projections: ['EPSG:4326'],
-      source: new ol.source.TileWMS({
-        url: 'https://tiles.maps.eox.at/wms/?',
-        crossOrigin: null,
-        params: {LAYERS: 'terrain-light', VERSION: '1.1.1', SRS: 'EPSG:4326', wrapDateLine: true},
-        attributions: ['EOX'],
-      }),
-    }));
-    this.baseLayers.set('EOXView', this.getViewSettings('EPSG:4326'));
-
-    this.baseLayers.set('OSMTile', new ol.layer.Tile({
-      id: 'OSM',
-      title: 'OSM',
-      description: 'EPSG:3857 only',
-      projections: ['EPSG:3857'],
-      source: new ol.source.OSM(),
-    }));
-    this.baseLayers.set('OSMView', new ol.View({
-      center: ol.proj.fromLonLat([37.41, 8.82]),
-      zoom: 4,
-    }));
-
-    this.baseLayers.set('GEBCOTile', new ol.layer.Tile({
-      id: 'GEBCO',
-      title: 'GEBCO',
-      projections: ['EPSG:4326', 'EPSG:3857'],
-      source: new ol.source.TileWMS({
-        url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-        crossOrigin: null,
-        params: {LAYERS: 'gebco_08_grid', VERSION: '1.1.1', SRS: this.config.projection, FORMAT: 'image/jpeg', wrapDateLine: true},
-        attributions: ['GEBCO'],
-      }),
-    }));
-    this.baseLayers.set('GEBCOView', this.getViewSettings(this.config.projection));
+    this.baseLayers = {
+      EOX: {
+        tile: new ol.layer.Tile({
+          id: 'EOX',
+          title: 'EOX',
+          description: 'EPSG:4326 only',
+          projections: ['EPSG:4326'],
+          source: new ol.source.TileWMS({
+            url: 'https://tiles.maps.eox.at/wms/?',
+            crossOrigin: null,
+            params: {LAYERS: 'terrain-light', VERSION: '1.1.1', SRS: 'EPSG:4326', wrapDateLine: true},
+            attributions: ['EOX'],
+          }),
+        }),
+        view: this.getViewSettings('EPSG:4326'),
+      },
+      OSM: {
+        tile: new ol.layer.Tile({
+          id: 'OSM',
+          title: 'OSM',
+          description: 'EPSG:3857 only',
+          projections: ['EPSG:3857'],
+          source: new ol.source.OSM(),
+        }),
+        view: new ol.View({
+          center: ol.proj.fromLonLat([37.41, 8.82]),
+          zoom: 4,
+        }),
+      },
+      GEBCO: {
+        tile: new ol.layer.Tile({
+          id: 'GEBCO',
+          title: 'GEBCO',
+          projections: ['EPSG:4326', 'EPSG:3857'],
+          source: new ol.source.TileWMS({
+            url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+            crossOrigin: null,
+            params: {LAYERS: 'gebco_08_grid', VERSION: '1.1.1', SRS: this.config.projection, FORMAT: 'image/jpeg', wrapDateLine: true},
+            attributions: ['GEBCO'],
+          }),
+        }),
+        view: this.getViewSettings(this.config.projection),
+      },
+    };
   }
 
   /**
