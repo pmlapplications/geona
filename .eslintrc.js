@@ -109,11 +109,20 @@ module.exports = {
     'no-use-before-define': [2, {'functions': false}],
 
     // Stylistic Issues
-    // Leave these mostly to google
+    // Leave these mostly to google, but override some to downgrade to warnings
+    'array-bracket-spacing': [1, 'never'], // downgrade google
+    'block-spacing': [1, 'never'], // downgrade google
+    'comma-dangle': [1, 'always-multiline'], // downgrade google
+    'comma-spacing': 1, // downgrade google
+    'computed-property-spacing': 1, // downgrade google
+    'eol-last': 1, // downgrade google
+    'func-call-spacing': 1, // downgrade google
     'indent': [1, 2, {
       'SwitchCase': 1,
     }],
-    'linebreak-style': [2, 'unix'],
+    'key-spacing': 1, // downgrade google
+    'keyword-spacing': 1, // downgrade google
+    'linebreak-style': [2, 'unix'], // override google to be explicit
     'max-len': [1, { // override google
       'code': 120,
       'tabWidth': 2,
@@ -124,14 +133,27 @@ module.exports = {
     'new-cap': [2, { // override google to add expceptions
       'capIsNewExceptions': ['express.Router'],
     }],
-    'require-jsdoc': [1, { // override google
+    'no-multiple-empty-lines': [1, {max: 2}], // downgrade google
+    'no-trailing-spaces': 1, // downgrade google
+    'object-curly-spacing': 1, // downgrade google
+    'padded-blocks': [1, 'never'], // downgrade google
+    'require-jsdoc': [1, { // downgrade google
       require: {
         FunctionDeclaration: true,
         MethodDefinition: true,
         ClassDeclaration: true,
       },
     }],
-    'space-infix-ops': 2,
+    'semi-spacing': 1, // downgrade google
+    'space-before-blocks': 1, // downgrade google
+    'space-before-function-paren': [1, { // downgrade google
+      asyncArrow: 'always',
+      anonymous: 'never',
+      named: 'never',
+    }],
+    'space-infix-ops': 1,
+    'spaced-comment': [1, 'always'], // downgrade google
+    'switch-colon-spacing': 1, // downgrade google
 
     // ECMAScript 6
     // Leave these to eslint:recommended and google
