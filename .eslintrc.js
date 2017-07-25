@@ -37,6 +37,13 @@ module.exports = {
       requireReturnDescription: false,
       requireReturn: false,
       prefer: {returns: 'return'},
+      preferType: {
+        object: 'Object',
+        array: 'Array',
+        string: 'String',
+        number: 'Number',
+        boolean: 'Boolean',
+      },
     }],
 
     // Best Practices

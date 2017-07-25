@@ -63,31 +63,29 @@ export class GMap {
   }
 
   /**
- * Will remove the current base map, and will add
- * the newly selected one.
- * To remove and not replace the current base map use
- * the removeBaseMap() function only.
- * @param {*} baseMap
- */
+   * Remove the current base map and add a new one.
+   *
+   * @param {type} baseMap The new basemap
+   */
   changeBaseMap(baseMap) {
     this.removeBaseMap();
     this.addBaseMap(baseMap);
   }
 
   /**
- * Remove the current base map Layer.
- * TODO test with multiple layers on map (function may be removing ALL layers)
- */
+   * Remove the current base map Layer.
+   * TODO test with multiple layers on map (function may be removing ALL layers)
+   */
   removeBaseMap() {
     this.map.removeLayer(this.map.getLayers().item(0));
     this.baseActive = false;
   }
 
   /**
- * Sets new base map layer, and updates the View.
- * TODO test with multiple layers on map (function may be adding above existing layers)
- * @param {*} baseMap - the map portion of the Key in baseLayers.
- */
+   * Sets new base map layer, and updates the View.
+   * TODO test with multiple layers on map (function may be adding above existing layers)
+   * @param {type} baseMap the map portion of the Key in baseLayers.
+   */
   addBaseMap(baseMap) {
     this.map.getLayers().insertAt(0, this.baseLayers.get(baseMap + 'Tile'));
     this.map.setView(this.baseLayers.get(baseMap + 'View'));
@@ -95,10 +93,10 @@ export class GMap {
   }
 
   /**
- * Sets the this.config.basemap to the map's current base layer
- * TODO test with real config
- * @param {*} config
- */
+   * Sets the this.config.basemap to the map's current base layer
+   * TODO test with real config
+   * @param {*} config
+   */
   setConfigBaseMap() {
     this.config.basemap = this.map.getLayers().item(0);
   }
@@ -117,18 +115,18 @@ export class GMap {
   }
 
   /**
- *
- * @param {*} border -
- */
+   *
+   * @param {*} border -
+   */
   changeCountryBordersLayer(border) {
     this.removeCountryBordersLayer();
     this.addCountryBordersLayer(border);
   }
 
   /**
- *
- * @param {*} border -
- */
+   *
+   * @param {*} border -
+   */
   addCountryBordersLayer(border) {
     try {
       this.map.addLayer(this.borderLayers.get(border));
@@ -141,8 +139,8 @@ export class GMap {
   }
 
   /**
- * 
- */
+   * 
+   */
   removeCountryBordersLayer() {
     if (this.borderActive === true) {
     // Removes the top-most layer (border will always be on top)
@@ -159,8 +157,8 @@ export class GMap {
   }
 
   /**
- *
- */
+   *
+   */
   createCountryBordersLayers() {
   // new Key-Value map, not OpenLayers map
     this.borderLayers = new Map();
@@ -194,8 +192,8 @@ export class GMap {
   }
 
   /**
- * Initialises the graticule, but does not make it visible.
- */
+   * Initialises the graticule, but does not make it visible.
+   */
   createGraticule() {
     this.graticule = new ol.Graticule({
       strokeStyle: new ol.style.Stroke({
@@ -208,9 +206,9 @@ export class GMap {
   }
 
   /**
- * Toggles visibility of map graticule.
- * @param {*} config
- */
+   * Toggles visibility of map graticule.
+   * @param {*} config
+   */
   toggleGraticule() {
     if (this.config.graticules) {
       this.graticule.setMap(this.map);
@@ -224,12 +222,12 @@ export class GMap {
   }
 
   /**
- * Creates a new Key-Value Map containing the necessary Tile and View options
- * which are needed to display each basemap.
- *
- * TODO maybe try and get the object-style version working - but neither Nick could before.
- * (Object-style version can be found commented underneath the function).
- */
+   * Creates a new Key-Value Map containing the necessary Tile and View options
+   * which are needed to display each basemap.
+   *
+   * TODO maybe try and get the object-style version working - but neither Nick could before.
+   * (Object-style version can be found commented underneath the function).
+   */
   createBaseLayers() {
     this.baseLayers = new Map();
 
