@@ -1,0 +1,30 @@
+export let server = {
+  port: {
+    doc: 'Port to run server on',
+    format: 'port',
+    default: 6789,
+  },
+  plugins: {
+    doc: 'Server plugins to load',
+    format: 'Array',
+    default: [],
+  },
+};
+
+export let client = {
+  clientDomain: {
+    doc: 'The domain that this client config is for',
+    format: 'String',
+    default: '',
+  },
+  geonaServer: {
+    doc: 'The URL of the geona server to use',
+    format: 'String',
+    default: '',
+  },
+  mapLibrary: {
+    doc: 'Which map library to use - leaflet or openlayers.',
+    format: ['openlayers', 'leaflet'],
+    default: 'openlayers',
+  },
+};

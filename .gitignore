@@ -1,6 +1,7 @@
 *.sublime-project
 *.sublime-workspace
 .sass-cache
+.tern-project
 .vscode/
 lib
 node_modules

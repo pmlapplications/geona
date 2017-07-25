@@ -2,7 +2,7 @@ module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
   let clientBundles = {
-    'static/js/bundle.js': 'src/client/js/init.js',
+    'static/js/bundle.js': 'src/client/js/geona.js',
     // 'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
     // 'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
     // 'static/js/loader.js': 'src/client/js/loader.js',
@@ -17,7 +17,11 @@ module.exports = function(grunt) {
   };
 
   let vendorLibs = [
+    'babel-runtime/regenerator',
     'convict',
+    'i18next',
+    'i18next-browser-languagedetector',
+    'i18next-xhr-backend',
     'jquery',
     'lodash',
   ];
@@ -212,6 +216,10 @@ module.exports = function(grunt) {
     },
 
     watch: {
+      // eslint: {
+      //   files: ['src/**/*.js'],
+      //   tasks: ['eslint:fix'],
+      // },
       sass: {
         files: ['src/client/scss/*.scss'],
         tasks: ['sass:development'],
@@ -227,7 +235,7 @@ module.exports = function(grunt) {
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'env:babelify', 'browserify:client',
     'browserifyOther', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['eslint:check', 'clean:client', 'copy:client', 'sass:development', 'env:babelify',
+  grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'env:babelify',
     'browserify:client', 'browserifyOther', 'watch']);
 
   grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);

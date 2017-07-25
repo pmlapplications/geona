@@ -6,7 +6,7 @@ import * as i18nextMiddleware from 'i18next-express-middleware';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 
-import conf from './config';
+import {server as configServer} from './config';
 import mainRouter from './routers/main';
 import './hbs_helpers';
 
@@ -109,8 +109,8 @@ app.use(mainRouter);
 
 let server = http.createServer(app);
 
-server.listen(conf.get('server.port'), function() {
-  console.log('Server running at http://127.0.0.1:' + conf.get('server.port'));
+server.listen(configServer.get('port'), function() {
+  console.log('Server running at http://127.0.0.1:' + configServer.get('port'));
 });
 
 
@@ -119,7 +119,7 @@ server.listen(conf.get('server.port'), function() {
  * TODO: More advanced plugin loading (API?)
  */
 
-for (let plugin of conf.get('server.plugins')) {
+for (let plugin of configServer.get('plugins')) {
   console.log('Loading plugin: ' + plugin);
   import(plugin).then((loadedPlugin) => loadedPlugin());
 }

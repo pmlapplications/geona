@@ -46,9 +46,6 @@ let cssAdded = [];
  */
 export function load(config) {
   let leafletCss;
-  /* let leafletFullscreenJs;
-  let leafletFullscreenCss;
-  let leafletFullscreenJsLoaded = false;*/
 
   switch (config.mapLibrary) {
     case 'leaflet':
@@ -57,19 +54,6 @@ export function load(config) {
       leafletCss.type = 'text/css';
       leafletCss.href = 'css/leaflet-custom.scss';
 
-      /* leafletFullscreenJs = document.createElement('script');
-      leafletFullscreenJs.async = true;
-      leafletFullscreenJs.src = 'https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js';
-      leafletFullscreenJs.onload = function() {
-        leafletFullscreenJsLoaded = true;
-        head.appendChild(leafletFullscreenJs);
-      };
-
-      leafletFullscreenCss = document.createElement('link');
-      leafletFullscreenCss.rel = 'stylesheet';
-      leafletFullscreenCss.type = 'text/css';
-      leafletFullscreenCss.href = 'https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css';
-      */
       cssAdded.push('leaflet');
       break;
   }
@@ -105,12 +89,14 @@ function addMaps() {
     // here replace mapDivID with the unique geonaDiv id
     config.mapDivID = geonaDiv.id;
 
-    switch (config.mapLibrary) {
-      case 'leaflet':
-        gp2.initLeaflet(config);
-        break;
-      case 'openlayers':
-        gp2.initOpenlayers(config);
-    }
+    let thingy = new gp2.Geona(config);
+
+    // switch (config.mapLibrary) {
+    //   case 'leaflet':
+    //     gp2.initLeaflet(config);
+    //     break;
+    //   case 'openlayers':
+    //     gp2.initOpenlayers(config);
+    // }
   }
 }

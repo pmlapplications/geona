@@ -6,4 +6,4 @@ const router = express.Router();
 export default router;
 
 router.get('/config', settings.config);
-router.get('/config/schema', settings.configSchema);
+router.get('/config/client_schema', settings.configClientSchema);

@@ -19,7 +19,13 @@
 
     "babelify": { // Browserify babelify
       "plugins": [
-        "dynamic-import-node"
+        "dynamic-import-node",
+        ["transform-runtime", {
+          "helpers": false,
+          "polyfill": false,
+          "regenerator": true,
+          "moduleName": "babel-runtime"
+        }]
       ],
       "presets": [
         [
