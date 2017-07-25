@@ -68,7 +68,7 @@ module.exports = function(grunt) {
       // Default browserify options
       options: {
         browserifyOptions: {
-          standalone: 'gp2',
+          standalone: 'geona',
           debug: true,
         },
         transform: [

@@ -32,6 +32,12 @@ module.exports = {
     // Leave these mostly to eslint:recommended and google
     'no-cond-assign': 2, // override google
     'no-console': [0, {'allow': ['warn', 'error']}],
+    'valid-jsdoc': [1, { // downgrade google
+      requireParamDescription: false,
+      requireReturnDescription: false,
+      requireReturn: false,
+      prefer: {returns: 'return'},
+    }],
 
     // Best Practices
     // Specify all we want (to be clear)

@@ -1,4 +1,4 @@
-/* global gp2 */
+/* global geona */
 import $ from 'jquery';
 
 // Get the head of the page
@@ -89,7 +89,7 @@ function addMaps() {
     // here replace mapDivID with the unique geonaDiv id
     config.mapDivID = geonaDiv.id;
 
-    let thingy = new gp2.Geona(config);
+    let thingy = new geona.Geona(config);
 
     // switch (config.mapLibrary) {
     //   case 'leaflet':
