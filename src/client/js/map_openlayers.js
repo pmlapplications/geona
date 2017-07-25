@@ -12,15 +12,25 @@ let ol;
 
 export class GMap {
   constructor(config) {
+    /** @type {Object} object containing configuration options */
     this.config = config;
+    /** @type {Map} a Key-Value map with base layer Tile and View objects */
     this.baseLayers = null;
+    /** @type {ol.Map} an OpenLayers map used for displaying layers */
     this.map = null;
+    /** @type {Map} a Key-Value map with various country border layers */
     this.borderLayers = null;
+    /** @type {ol.Graticule} an OpenLayers graticule which is added to the map  */
     this.graticule = null;
+    /** @type {Boolean} tracks whether a base map is currently on the map */
     this.baseActive = false;
+    /** @type {Boolean} tracks whether a border layer is currently on the map */
     this.borderActive = false;
   }
 
+  /**
+  * Creates a new OpenLayers map and adds various features and controls to the map.
+  */
   createMap() {
     this.createBaseLayers();
     this.map = new ol.Map({
@@ -65,7 +75,7 @@ export class GMap {
   /**
    * Remove the current base map and add a new one.
    *
-   * @param {type} baseMap The new basemap
+   * @param {String} baseMap The title used to select the new basemap
    */
   changeBaseMap(baseMap) {
     this.removeBaseMap();
@@ -73,7 +83,8 @@ export class GMap {
   }
 
   /**
-   * Remove the current base map Layer.
+   * Remove the current base map layer.
+   *
    * TODO test with multiple layers on map (function may be removing ALL layers)
    */
   removeBaseMap() {
@@ -83,8 +94,10 @@ export class GMap {
 
   /**
    * Sets new base map layer, and updates the View.
+   *
    * TODO test with multiple layers on map (function may be adding above existing layers)
-   * @param {type} baseMap the map portion of the Key in baseLayers.
+   *
+   * @param {String} baseMap The title used to select the new base map.
    */
   addBaseMap(baseMap) {
     this.map.getLayers().insertAt(0, this.baseLayers.get(baseMap + 'Tile'));
@@ -94,13 +107,18 @@ export class GMap {
 
   /**
    * Sets the this.config.basemap to the map's current base layer
+   *
    * TODO test with real config
-   * @param {*} config
    */
   setConfigBaseMap() {
     this.config.basemap = this.map.getLayers().item(0);
   }
 
+  /**
+  * Changes the projection style, if allowed for the current base map.
+  *
+  * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
+  */
   changeProjection(projection) {
   // If there is a base map
     if (this.baseActive === true) {
@@ -115,8 +133,10 @@ export class GMap {
   }
 
   /**
+   * Removes the current country borders layer, and replaces it
+   * with the specified country borders layer.
    *
-   * @param {*} border -
+   * @param {String} border The Key for the border colour in borderLayers
    */
   changeCountryBordersLayer(border) {
     this.removeCountryBordersLayer();
@@ -124,8 +144,9 @@ export class GMap {
   }
 
   /**
+   * Adds the specified country borders layer to the top of the map.
    *
-   * @param {*} border -
+   * @param {String} border The Key for the border colour in borderLayers
    */
   addCountryBordersLayer(border) {
     try {
@@ -139,7 +160,7 @@ export class GMap {
   }
 
   /**
-   * 
+   * Removes the currently active country borders layer.
    */
   removeCountryBordersLayer() {
     if (this.borderActive === true) {
@@ -149,6 +170,10 @@ export class GMap {
     }
   }
 
+  /**
+  * Replaces/creates the countryBorders parameter in the config, setting it
+  * to the current country borders layer.
+  */
   setConfigCountryBordersLayer() {
     if (this.borderActive === true) {
     // sets the config parameter to the top layer
@@ -157,7 +182,10 @@ export class GMap {
   }
 
   /**
+   * Creates a new Key-Value map containing layer information for the
+   * different country border layers.
    *
+   * When adding a new layer, the Key should be set to the colour of the lines.
    */
   createCountryBordersLayers() {
   // new Key-Value map, not OpenLayers map
@@ -193,6 +221,8 @@ export class GMap {
 
   /**
    * Initialises the graticule, but does not make it visible.
+   *
+   * The graticule is made visible in the toggleGraticule() function.
    */
   createGraticule() {
     this.graticule = new ol.Graticule({
@@ -207,7 +237,6 @@ export class GMap {
 
   /**
    * Toggles visibility of map graticule.
-   * @param {*} config
    */
   toggleGraticule() {
     if (this.config.graticules) {
@@ -225,7 +254,11 @@ export class GMap {
    * Creates a new Key-Value Map containing the necessary Tile and View options
    * which are needed to display each basemap.
    *
-   * TODO maybe try and get the object-style version working - but neither Nick could before.
+   * When adding a new layer, the Key should be the title
+   * of the base map, with the word 'Tile' or 'View' appended respectively.
+   *
+   * TODO maybe try and get the object-style version working - but
+   * neither Nick could before.
    * (Object-style version can be found commented underneath the function).
    */
   createBaseLayers() {
@@ -271,6 +304,14 @@ export class GMap {
     this.baseLayers.set('GEBCOView', this.getViewSettings(this.config.projection));
   }
 
+  /**
+  * Returns an OpenLayers View object with correct settings for
+  * the specified projection.
+  *
+  * @param {String} projection The code for the projection (e.g. 'EPSG:4326')
+  *
+  * @return {ol.View} The View object with correct settings for the specified projection.
+  */
   getViewSettings(projection) {
     switch (projection) {
       case 'EPSG:4326':
@@ -337,6 +378,9 @@ export class GMap {
   };
   */
 
+/**
+ * @param {Function} next
+ */
 export function init(next) {
   if (ol) {
     // If ol has already been loaded
