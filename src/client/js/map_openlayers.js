@@ -7,6 +7,7 @@ let baseLayers;
 let map;
 let borderLayers;
 let graticule;
+let baseActive = false;
 let borderActive = false;
 
 export function init(next) {
@@ -20,7 +21,6 @@ export function init(next) {
       import('openlayers')
         .then((openlayers) => {
           ol = openlayers;
-          createBaseLayers();
           next();
         });
     };
@@ -31,6 +31,7 @@ export function init(next) {
 }
 
 export function createMap(config) {
+  createBaseLayers(config);
   map = new ol.Map({
     target: config.mapDivID,
     controls: [
@@ -56,6 +57,7 @@ export function createMap(config) {
   if (config.mapBaseMap) {
     map.addLayer(baseLayers.get(config.mapBaseMap + 'Tile'));
     map.setView(baseLayers.get(config.mapBaseMap + 'View'));
+    baseActive = true;
   }
 
   createCountryBordersLayers();
@@ -87,6 +89,7 @@ function changeBaseMap(baseMap) {
  */
 function removeBaseMap() {
   map.removeLayer(map.getLayers().item(0));
+  baseActive = false;
 }
 
 /**
@@ -97,6 +100,7 @@ function removeBaseMap() {
 function addBaseMap(baseMap) {
   map.getLayers().insertAt(0, baseLayers.get(baseMap + 'Tile'));
   map.setView(baseLayers.get(baseMap + 'View'));
+  baseActive = true;
 }
 
 /**
@@ -106,6 +110,19 @@ function addBaseMap(baseMap) {
  */
 function setConfigBaseMap(config) {
   config.mapBaseMap = map.getLayers().item(0);
+}
+
+function changeProjection(projection) {
+  // If there is a base map
+  if (baseActive === true) {
+    let baseMapTitle = map.getLayers().item(0).get('title');
+    // If base map supports new projection, we can change it
+    if (baseLayers.get(baseMapTitle + 'Tile').get('projections').indexOf(projection) >= 0) {
+      map.setView(getViewSettings(projection));
+    } else {
+      alert('Base map ' + baseMapTitle + ' does not support projection type ' + projection + '. Please select a different base map.');
+    }
+  }
 }
 
 /**
@@ -222,7 +239,7 @@ function toggleGraticule(config) {
  * TODO maybe try and get the object-style version working - but neither Nick could before.
  * (Object-style version can be found commented underneath the function).
  */
-function createBaseLayers() {
+function createBaseLayers(config) {
   baseLayers = new Map();
 
   baseLayers.set('EOXTile', new ol.layer.Tile({
@@ -234,24 +251,56 @@ function createBaseLayers() {
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
       params: {LAYERS: 'terrain-light', VERSION: '1.1.1', SRS: 'EPSG:4326', wrapDateLine: true},
+      attributions: ['EOX'],
     }),
   }));
-  baseLayers.set('EOXView', new ol.View({
-    center: ol.proj.fromLonLat([37.41, 8.82], 'EPSG:4326'),
-    zoom: 4,
-    projection: 'EPSG:4326',
-  })
-  );
+  baseLayers.set('EOXView', getViewSettings('EPSG:4326'));
 
   baseLayers.set('OSMTile', new ol.layer.Tile({
+    id: 'OSM',
+    title: 'OSM',
+    description: 'EPSG:3857 only',
+    projections: ['EPSG:3857'],
     source: new ol.source.OSM(),
-  }),
-  );
+  }));
   baseLayers.set('OSMView', new ol.View({
     center: ol.proj.fromLonLat([37.41, 8.82]),
     zoom: 4,
-  }),
-  );
+  }));
+
+  baseLayers.set('GEBCOTile', new ol.layer.Tile({
+    id: 'GEBCO',
+    title: 'GEBCO',
+    projections: ['EPSG:4326', 'EPSG:3857'],
+    source: new ol.source.TileWMS({
+      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+      crossOrigin: null,
+      params: {LAYERS: 'gebco_08_grid', VERSION: '1.1.1', SRS: config.mapProjection, FORMAT: 'image/jpeg', wrapDateLine: true},
+      attributions: ['GEBCO'],
+    }),
+  }));
+  baseLayers.set('GEBCOView', getViewSettings(config.mapProjection));
+}
+
+function getViewSettings(projection) {
+  switch (projection) {
+    case 'EPSG:4326':
+      return new ol.View({
+        projection: 'EPSG:4326',
+        center: ol.proj.fromLonLat([37.41, 8.82], 'EPSG:4326'),
+        minZoom: 3,
+        maxZoom: 12,
+        zoom: 3,
+      });
+    case 'EPSG:3857':
+      return new ol.View({
+        projection: 'EPSG:3857',
+        center: ol.proj.fromLonLat([37.41, 8.82], 'EPSG:3857'),
+        minZoom: 3,
+        maxZoom: 19,
+        zoom: 3,
+      });
+  }
 }
 
 /**
@@ -295,4 +344,5 @@ function createBaseLayers() {
         }),
       ],
     },
-  };*/
+  };
+  */

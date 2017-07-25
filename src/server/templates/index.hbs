@@ -14,13 +14,16 @@
     var config1 = {
       mapLibrary: "openlayers",
       mapDivID: "ol",
-      mapBaseMap: "OSM",
+      mapBaseMap: "GEBCO",
+      mapProjection: "EPSG:3857",
       mapGraticule: "true",
+      mapCountryBorders: "black",
     };
     var config2 = {
       mapLibrary: "leaflet",
       mapDivID: "leaf",
-      mapBaseMap: "MCB",
+      mapBaseMap: "GEBCO",
+      mapCountryBorders: "black",
     };
     // instantiates new loader for map
     gp2Loader.load(config1);
