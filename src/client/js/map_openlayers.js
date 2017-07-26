@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import {baselayers as commonBasemaps} from './map_common.js';
+import {baselayers as commonBasemaps, borderlayers as commonBorders} from './map_common.js';
 
 let ol;
 // baseLayers is an object containing the Tile and View information for
@@ -71,6 +71,8 @@ export class OlMap {
     if (this.config.graticules === 'true') {
       this.toggleGraticule();
     }
+
+    this.addCountryBordersLayer('countries_all_black');
   }
 
   /**
@@ -151,7 +153,7 @@ export class OlMap {
     */
   addCountryBordersLayer(border) {
     try {
-      this.map.addLayer(this.borderLayers.get(border));
+      this.map.addLayer(this.borderLayers[border]);
       this.borderActive = true;
     } catch (e) {
       // error will have occurred because the borders have not loaded,
@@ -190,7 +192,7 @@ export class OlMap {
     */
   createCountryBordersLayers() {
     // new Key-Value map, not OpenLayers map
-    this.borderLayers = new Map();
+    /* this.borderLayers = {};
     this.borderLayers.set('white', new ol.layer.Tile({
       id: 'countries_all_white',
       title: 'White border lines',
@@ -217,7 +219,28 @@ export class OlMap {
         crossOrigin: null,
         params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line', SRS: this.map.getView().getProjection()},
       }),
-    }));
+    }));*/
+
+    this.borderLayers = {};
+
+    for (let layer of commonBorders) {
+      let source = new ol.source.TileWMS({
+        url: layer.source.url,
+        crossOrigin: layer.source.crossOrigin,
+        params: {
+          LAYERS: layer.source.params.LAYERS,
+          VERSION: layer.source.params.VERSION,
+          STYLES: layer.source.params.STYLES,
+          SRS: this.map.getView().getProjection(),
+        },
+      });
+
+      this.borderLayers[layer.id] = new ol.layer.Tile({
+        id: layer.id,
+        title: layer.title,
+        source: source,
+      });
+    }
   }
 
   /**
@@ -252,15 +275,10 @@ export class OlMap {
   }
 
   /**
-    * Creates a new Key-Value Map containing the necessary Tile and View options
-    * which are needed to display each basemap.
-    *
-    * When adding a new layer, the Key should be the title
-    * of the base map, with the word 'Tile' or 'View' appended respectively.
-    *
-    * TODO maybe try and get the object-style version working - but
-    * neither Nick could before.
-    * (Object-style version can be found commented underneath the function).
+    * Uses the baselayers array imported from './map_common.js'
+    * in order to dynamically create OpenLayers base maps.
+    * Uses a for...of loop to check each object in the array,
+    * and maps the information in the object to a new ol.layer.Tile.
     */
   createBaseLayers() {
     this.baseLayers = {};
@@ -328,49 +346,6 @@ export class OlMap {
     }
   }
 }
-/**
-  * Creates all base layers to be used in createMap().
-  * Object-style version
-
-  baseLayers = {
-    EOX: {
-      Tile: [
-        new ol.layer.Tile({
-          id: 'EOX',
-          title: 'EOX',
-          description: 'EPSG:4326 only',
-          projections: ['EPSG:4326'],
-          source: new ol.source.TileWMS({
-            url: 'https://tiles.maps.eox.at/wms/?',
-            crossOrigin: null,
-            params: {LAYERS: 'terrain-light', VERSION: '1.1.1', SRS: 'EPSG:4326', wrapDateLine: true},
-          }),
-        }),
-      ],
-      View: [
-        new ol.View({
-          center: ol.proj.fromLonLat([37.41, 8.82], 'EPSG:4326'),
-          zoom: 4,
-          projection: 'EPSG:4326',
-        }),
-      ],
-    },
-
-    OSM: {
-      Tile: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM(),
-        }),
-      ],
-      View: [
-        new ol.View({
-          center: ol.proj.fromLonLat([37.41, 8.82]),
-          zoom: 4,
-        }),
-      ],
-    },
-  };
-  */
 
 /**
  * @param {Function} next
