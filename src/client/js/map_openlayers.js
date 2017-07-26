@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import {baselayers as commonBasemaps} from './map_common.js';
 
 let ol;
 // baseLayers is an object containing the Tile and View information for
@@ -12,15 +13,25 @@ let ol;
 
 export class GMap {
   constructor(config) {
+    /** @type {Object} object containing configuration options */
     this.config = config;
+    /** @type {Map} a Key-Value map with base layer Tile and View objects */
     this.baseLayers = null;
+    /** @type {ol.Map} an OpenLayers map used for displaying layers */
     this.map = null;
+    /** @type {Map} a Key-Value map with various country border layers */
     this.borderLayers = null;
+    /** @type {ol.Graticule} an OpenLayers graticule which is added to the map  */
     this.graticule = null;
+    /** @type {Boolean} tracks whether a base map is currently on the map */
     this.baseActive = false;
+    /** @type {Boolean} tracks whether a border layer is currently on the map */
     this.borderActive = false;
   }
 
+  /**
+    * Creates a new OpenLayers map and adds various features and controls to the map.
+    */
   createMap() {
     this.createBaseLayers();
     this.map = new ol.Map({
@@ -63,29 +74,32 @@ export class GMap {
   }
 
   /**
-   * Remove the current base map and add a new one.
-   *
-   * @param {type} baseMap The new basemap
-   */
+    * Remove the current base map and add a new one.
+    *
+    * @param {String} baseMap The title used to select the new basemap
+    */
   changeBaseMap(baseMap) {
     this.removeBaseMap();
     this.addBaseMap(baseMap);
   }
 
   /**
-   * Remove the current base map Layer.
-   * TODO test with multiple layers on map (function may be removing ALL layers)
-   */
+    * Remove the current base map layer.
+    *
+    * TODO test with multiple layers on map (function may be removing ALL layers)
+    */
   removeBaseMap() {
     this.map.removeLayer(this.map.getLayers().item(0));
     this.baseActive = false;
   }
 
   /**
-   * Sets new base map layer, and updates the View.
-   * TODO test with multiple layers on map (function may be adding above existing layers)
-   * @param {type} baseMap the map portion of the Key in baseLayers.
-   */
+    * Sets new base map layer, and updates the View.
+    *
+    * TODO test with multiple layers on map (function may be adding above existing layers)
+    *
+    * @param {String} baseMap The title used to select the new base map.
+    */
   addBaseMap(baseMap) {
     this.map.getLayers().insertAt(0, this.baseLayers[baseMap].tile);
     this.map.setView(this.baseLayers[baseMap].view);
@@ -93,16 +107,21 @@ export class GMap {
   }
 
   /**
-   * Sets the this.config.basemap to the map's current base layer
-   * TODO test with real config
-   * @param {*} config
-   */
+    * Sets the this.config.basemap to the map's current base layer
+    *
+    * TODO test with real config
+    */
   setConfigBaseMap() {
     this.config.basemap = this.map.getLayers().item(0);
   }
 
+  /**
+    * Changes the projection style, if allowed for the current base map.
+    *
+    * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
+    */
   changeProjection(projection) {
-  // If there is a base map
+    // If there is a base map
     if (this.baseActive === true) {
       let baseMapTitle = this.map.getLayers().item(0).get('title');
       // If base map supports new projection, we can change it
@@ -115,52 +134,62 @@ export class GMap {
   }
 
   /**
-   *
-   * @param {*} border -
-   */
+    * Removes the current country borders layer, and replaces it
+    * with the specified country borders layer.
+    *
+    * @param {String} border The Key for the border colour in borderLayers
+    */
   changeCountryBordersLayer(border) {
     this.removeCountryBordersLayer();
     this.addCountryBordersLayer(border);
   }
 
   /**
-   *
-   * @param {*} border -
-   */
+    * Adds the specified country borders layer to the top of the map.
+    *
+    * @param {String} border The Key for the border colour in borderLayers
+    */
   addCountryBordersLayer(border) {
     try {
       this.map.addLayer(this.borderLayers.get(border));
       this.borderActive = true;
     } catch (e) {
-    // error will have occurred because the borders have not loaded,
-    // or because the specified border does not exist.
+      // error will have occurred because the borders have not loaded,
+      // or because the specified border does not exist.
       console.error(e);
     }
   }
 
   /**
-   * 
-   */
+    * Removes the currently active country borders layer.
+    */
   removeCountryBordersLayer() {
     if (this.borderActive === true) {
-    // Removes the top-most layer (border will always be on top)
+      // Removes the top-most layer (border will always be on top)
       this.map.removeLayer(this.map.getLayers().item(this.map.getLayers().getLength() - 1));
       this.borderActive = false;
     }
   }
 
+  /**
+    * Replaces/creates the countryBorders parameter in the config, setting it
+    * to the current country borders layer.
+    */
   setConfigCountryBordersLayer() {
     if (this.borderActive === true) {
-    // sets the config parameter to the top layer
+      // sets the config parameter to the top layer
       this.config.countryBorders = this.map.getLayers().item(this.map.getLayers().getSize() - 1);
     }
   }
 
   /**
-   *
-   */
+    * Creates a new Key-Value map containing layer information for the
+    * different country border layers.
+    *
+    * When adding a new layer, the Key should be set to the colour of the lines.
+    */
   createCountryBordersLayers() {
-  // new Key-Value map, not OpenLayers map
+    // new Key-Value map, not OpenLayers map
     this.borderLayers = new Map();
     this.borderLayers.set('white', new ol.layer.Tile({
       id: 'countries_all_white',
@@ -192,8 +221,10 @@ export class GMap {
   }
 
   /**
-   * Initialises the graticule, but does not make it visible.
-   */
+    * Initialises the graticule, but does not make it visible.
+    *
+    * The graticule is made visible in the toggleGraticule() function.
+    */
   createGraticule() {
     this.graticule = new ol.Graticule({
       strokeStyle: new ol.style.Stroke({
@@ -206,9 +237,8 @@ export class GMap {
   }
 
   /**
-   * Toggles visibility of map graticule.
-   * @param {*} config
-   */
+    * Toggles visibility of map graticule.
+    */
   toggleGraticule() {
     if (this.config.graticules) {
       this.graticule.setMap(this.map);
@@ -222,59 +252,61 @@ export class GMap {
   }
 
   /**
-   * Creates a new Key-Value Map containing the necessary Tile and View options
-   * which are needed to display each basemap.
-   *
-   * TODO maybe try and get the object-style version working - but neither Nick could before.
-   * (Object-style version can be found commented underneath the function).
-   */
+    * Creates a new Key-Value Map containing the necessary Tile and View options
+    * which are needed to display each basemap.
+    *
+    * When adding a new layer, the Key should be the title
+    * of the base map, with the word 'Tile' or 'View' appended respectively.
+    *
+    * TODO maybe try and get the object-style version working - but
+    * neither Nick could before.
+    * (Object-style version can be found commented underneath the function).
+    */
   createBaseLayers() {
-    this.baseLayers = {
-      EOX: {
-        tile: new ol.layer.Tile({
-          id: 'EOX',
-          title: 'EOX',
-          description: 'EPSG:4326 only',
-          projections: ['EPSG:4326'],
-          source: new ol.source.TileWMS({
-            url: 'https://tiles.maps.eox.at/wms/?',
-            crossOrigin: null,
-            params: {LAYERS: 'terrain-light', VERSION: '1.1.1', SRS: 'EPSG:4326', wrapDateLine: true},
-            attributions: ['EOX'],
-          }),
-        }),
-        view: this.getViewSettings('EPSG:4326'),
-      },
-      OSM: {
-        tile: new ol.layer.Tile({
-          id: 'OSM',
-          title: 'OSM',
-          description: 'EPSG:3857 only',
-          projections: ['EPSG:3857'],
-          source: new ol.source.OSM(),
-        }),
-        view: new ol.View({
-          center: ol.proj.fromLonLat([37.41, 8.82]),
-          zoom: 4,
-        }),
-      },
-      GEBCO: {
-        tile: new ol.layer.Tile({
-          id: 'GEBCO',
-          title: 'GEBCO',
-          projections: ['EPSG:4326', 'EPSG:3857'],
-          source: new ol.source.TileWMS({
-            url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-            crossOrigin: null,
-            params: {LAYERS: 'gebco_08_grid', VERSION: '1.1.1', SRS: this.config.projection, FORMAT: 'image/jpeg', wrapDateLine: true},
-            attributions: ['GEBCO'],
-          }),
-        }),
-        view: this.getViewSettings(this.config.projection),
-      },
-    };
+    this.baseLayers = {};
+
+    for (let layer of commonBasemaps) {
+      this.baseLayers[layer.id] = {tile: {}, view: {}};
+
+      let source;
+      switch (layer.source.type) {
+        case 'wms':
+          source = new ol.source.TileWMS({
+            url: layer.source.url,
+            crossOrigin: layer.source.crossOrigin,
+            params: {
+              LAYERS: layer.source.params.LAYERS,
+              VERSION: layer.source.params.VERSION,
+              SRS: layer.source.params.SRS,
+              FORMAT: layer.source.params.FORMAT,
+              wrapDateLine: layer.source.params.wrapDateLine,
+            },
+            attributions: layer.source.attributions,
+          });
+          break;
+        case 'osm':
+          source = new ol.source.OSM();
+          break;
+      }
+      this.baseLayers[layer.id].tile = new ol.layer.Tile({
+        id: layer.id,
+        title: layer.title,
+        description: layer.description,
+        projections: layer.projections,
+        source: source,
+      });
+      this.baseLayers[layer.id].view = this.getViewSettings(layer.projections[0]);
+    }
   }
 
+  /**
+    * Returns an OpenLayers View object with correct settings for
+    * the specified projection.
+    *
+    * @param {String} projection The code for the projection (e.g. 'EPSG:4326')
+    *
+    * @return {ol.View} The View object with correct settings for the specified projection.
+    */
   getViewSettings(projection) {
     switch (projection) {
       case 'EPSG:4326':
@@ -296,7 +328,6 @@ export class GMap {
     }
   }
 }
-
 /**
   * Creates all base layers to be used in createMap().
   * Object-style version
@@ -341,6 +372,9 @@ export class GMap {
   };
   */
 
+/**
+ * @param {Function} next
+ */
 export function init(next) {
   if (ol) {
     // If ol has already been loaded
@@ -349,11 +383,11 @@ export function init(next) {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
     mapJs.onload = function() {
-      import('openlayers')
-        .then((olLib) => {
-          ol = olLib;
-          next();
-        });
+         import('openlayers')
+           .then((olLib) => {
+             ol = olLib;
+             next();
+           });
     };
 
     mapJs.src = 'js/vendor_openlayers.js';
