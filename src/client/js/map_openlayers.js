@@ -1,5 +1,6 @@
 import $ from 'jquery';
-import {baselayers as commonBasemaps, borderlayers as commonBorders} from './map_common.js';
+import GeonaMap from './map';
+import {baselayers as commonBasemaps, borderlayers as commonBorders} from './map_common';
 
 let ol;
 // baseLayers is an object containing the Tile and View information for
@@ -11,8 +12,12 @@ let ol;
 // let baseActive = false;
 // let borderActive = false;
 
-export class OlMap {
+/**
+ * @implements {GeonaMap}
+ */
+export class OlMap extends GeonaMap {
   constructor(config) {
+    super();
     /** @type {Object} object containing configuration options */
     this.config = config;
     /** @type {Map} a Key-Value map with base layer Tile and View objects */
@@ -71,8 +76,6 @@ export class OlMap {
     if (this.config.graticules === 'true') {
       this.toggleGraticule();
     }
-
-    this.addCountryBordersLayer('countries_all_black');
   }
 
   /**
@@ -348,6 +351,7 @@ export class OlMap {
 }
 
 /**
+ * Load the openlayers js library and dynamically import it.
  * @param {Function} next
  */
 export function init(next) {

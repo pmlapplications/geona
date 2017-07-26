@@ -41,7 +41,7 @@ export let client = {
       default: false,
     },
     countryBorders: {
-      default: false,
+      default: 'countries_all_black',
     },
   },
 };

@@ -44,6 +44,7 @@ export default class Config {
   }
 }
 
+// Will be used to download a config from the server if one isn't provided locally
 // export function loadConfig(config, next) {
 //   $.ajax({
 //     url: 'settings/config',
