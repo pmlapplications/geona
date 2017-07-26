@@ -1,28 +1,28 @@
-html  {
-  -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
-}
+// html  {
+//   -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
+// }
 
-body  {
-   color: #111111;
-   overflow-y: hidden;
-}
+// body  {
+//    color: #111111;
+//    overflow-y: hidden;
+// }
 
-// What does this do?
-p  {
-   user-select: initial;
-}
+// // What does this do?
+// p  {
+//    user-select: initial;
+// }
 
-#map  {
-   background: #1a1a1a;
-   clear: both;
-   width: 100%;
-   height: 100%;
-   position: absolute;
-   top: 0;
-   left: 0;
-   margin: 0;
-   padding: 0;
-}
+// #map  {
+//    background: #1a1a1a;
+//    clear: both;
+//    width: 100%;
+//    height: 100%;
+//    position: absolute;
+//    top: 0;
+//    left: 0;
+//    margin: 0;
+//    padding: 0;
+// }
 
 #ol  {
    background: #1a1a1a;
@@ -48,7 +48,7 @@ p  {
    vertical-align: bottom;
 }
 
-.geonaDiv{
+.geona{
   background: #1a1a1a;
    clear: both;
    width: 100%;
