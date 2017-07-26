@@ -11,7 +11,7 @@ let ol;
 // let baseActive = false;
 // let borderActive = false;
 
-export class GMap {
+export class OlMap {
   constructor(config) {
     /** @type {Object} object containing configuration options */
     this.config = config;
