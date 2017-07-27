@@ -2,16 +2,15 @@ import $ from 'jquery';
 import {baselayers as commonBasemaps, borderlayers as commonBorders} from './map_common.js';
 
 let ol;
-// baseLayers is an object containing the Tile and View information for
-// various basemap types.
-// let baseLayers;
-// let map;
-// let borderLayers;
-// let graticule;
-// let baseActive = false;
-// let borderActive = false;
 
+/**
+ *
+ */
 export class OlMap {
+  /**
+   *
+   * @param {*} config
+   */
   constructor(config) {
     /** @type {Object} object containing configuration options */
     this.config = config;
@@ -33,7 +32,7 @@ export class OlMap {
     * Creates a new OpenLayers map and adds various features and controls to the map.
     */
   createMap() {
-    this.createBaseLayers();
+    this.initBaseLayers();
     this.map = new ol.Map({
       target: this.config.divId,
       controls: [
@@ -64,7 +63,7 @@ export class OlMap {
 
     this.createCountryBordersLayers();
     if (this.config.countryBorders) {
-      this.addCountryBordersLayer(this.config.countryBorders);
+      this.changeCountryBordersLayer(this.config.countryBorders);
     }
 
     this.createGraticule();
@@ -72,7 +71,7 @@ export class OlMap {
       this.toggleGraticule();
     }
 
-    this.addCountryBordersLayer('countries_all_black');
+    this.changeCountryBordersLayer('countries_all_black');
   }
 
   /**
@@ -81,8 +80,8 @@ export class OlMap {
     * @param {String} baseMap The title used to select the new basemap
     */
   changeBaseMap(baseMap) {
-    this.removeBaseMap();
-    this.addBaseMap(baseMap);
+    this.removeBaseMap_();
+    this.addBaseMap_(baseMap);
   }
 
   /**
@@ -90,9 +89,11 @@ export class OlMap {
     *
     * TODO test with multiple layers on map (function may be removing ALL layers)
     */
-  removeBaseMap() {
-    this.map.removeLayer(this.map.getLayers().item(0));
-    this.baseActive = false;
+  removeBaseMap_() {
+    if (this.baseActive) {
+      this.map.removeLayer(this.map.getLayers().item(0));
+      this.baseActive = false;
+    }
   }
 
   /**
@@ -102,10 +103,12 @@ export class OlMap {
     *
     * @param {String} baseMap The title used to select the new base map.
     */
-  addBaseMap(baseMap) {
-    this.map.getLayers().insertAt(0, this.baseLayers[baseMap].tile);
-    this.map.setView(this.baseLayers[baseMap].view);
-    this.baseActive = true;
+  addBaseMap_(baseMap) {
+    if (baseMap !== 'none') {
+      this.map.getLayers().insertAt(0, this.baseLayers[baseMap].tile);
+      this.map.setView(this.baseLayers[baseMap].view);
+      this.baseActive = true;
+    }
   }
 
   /**
@@ -123,14 +126,20 @@ export class OlMap {
     * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
     */
   changeProjection(projection) {
-    // If there is a base map
     if (this.baseActive === true) {
-      let baseMapTitle = this.map.getLayers().item(0).get('title');
-      // If base map supports new projection, we can change it
-      if (this.baseLayers[baseMapTitle].tile.get('projections').indexOf(projection) >= 0) {
-        this.map.setView(this.getViewSettings(projection));
+      let baseMapId = this.map.getLayers().item(0).get('id');
+      /* If base map supports new projection, we can change the view */
+      if (this.baseLayers[baseMapId].tile.get('projections').indexOf(projection) >= 0) {
+        let newView = new ol.View({
+          projection: projection,
+          minZoom: this.map.getView().getMinZoom(),
+          maxZoom: this.map.getView().getMaxZoom(),
+          zoom: this.map.getView().getZoom(),
+          center: ol.proj.fromLonLat(this.map.getView().getCenter(), projection),
+        });
+        this.map.setView(newView);
       } else {
-        alert('Base map ' + baseMapTitle + ' does not support projection type ' + projection + '. Please select a different base map.');
+        alert('Base map ' + baseMapId + ' does not support projection type ' + projection + '. Please select a different base map.');
       }
     }
   }
@@ -142,8 +151,8 @@ export class OlMap {
     * @param {String} border The Key for the border colour in borderLayers
     */
   changeCountryBordersLayer(border) {
-    this.removeCountryBordersLayer();
-    this.addCountryBordersLayer(border);
+    this.removeCountryBordersLayer_();
+    this.addCountryBordersLayer_(border);
   }
 
   /**
@@ -151,7 +160,7 @@ export class OlMap {
     *
     * @param {String} border The Key for the border colour in borderLayers
     */
-  addCountryBordersLayer(border) {
+  addCountryBordersLayer_(border) {
     try {
       this.map.addLayer(this.borderLayers[border]);
       this.borderActive = true;
@@ -164,8 +173,9 @@ export class OlMap {
 
   /**
     * Removes the currently active country borders layer.
+    * @private
     */
-  removeCountryBordersLayer() {
+  removeCountryBordersLayer_() {
     if (this.borderActive === true) {
       // Removes the top-most layer (border will always be on top)
       this.map.removeLayer(this.map.getLayers().item(this.map.getLayers().getLength() - 1));
@@ -191,36 +201,6 @@ export class OlMap {
     * When adding a new layer, the Key should be set to the colour of the lines.
     */
   createCountryBordersLayers() {
-    // new Key-Value map, not OpenLayers map
-    /* this.borderLayers = {};
-    this.borderLayers.set('white', new ol.layer.Tile({
-      id: 'countries_all_white',
-      title: 'White border lines',
-      source: new ol.source.TileWMS({
-        url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-        crossOrigin: null,
-        params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line-white', SRS: this.map.getView().getProjection()},
-      }),
-    }));
-    this.borderLayers.set('black', new ol.layer.Tile({
-      id: 'countries_all_black',
-      title: 'Black border lines',
-      source: new ol.source.TileWMS({
-        url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-        crossOrigin: null,
-        params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line_black', SRS: this.map.getView().getProjection()},
-      }),
-    }));
-    this.borderLayers.set('blue', new ol.layer.Tile({
-      id: 'countries_all_blue',
-      title: 'Blue border lines',
-      source: new ol.source.TileWMS({
-        url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-        crossOrigin: null,
-        params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line', SRS: this.map.getView().getProjection()},
-      }),
-    }));*/
-
     this.borderLayers = {};
 
     for (let layer of commonBorders) {
@@ -277,10 +257,8 @@ export class OlMap {
   /**
     * Uses the baselayers array imported from './map_common.js'
     * in order to dynamically create OpenLayers base maps.
-    * Uses a for...of loop to check each object in the array,
-    * and maps the information in the object to a new ol.layer.Tile.
     */
-  createBaseLayers() {
+  initBaseLayers() {
     this.baseLayers = {};
 
     for (let layer of commonBasemaps) {
@@ -313,40 +291,73 @@ export class OlMap {
         projections: layer.projections,
         source: source,
       });
-      this.baseLayers[layer.id].view = this.getViewSettings(layer.projections[0]);
+      this.baseLayers[layer.id].view = this.initView(layer.id);
     }
   }
 
   /**
-    * Returns an OpenLayers View object with correct settings for
-    * the specified projection.
-    *
-    * @param {String} projection The code for the projection (e.g. 'EPSG:4326')
-    *
-    * @return {ol.View} The View object with correct settings for the specified projection.
-    */
-  getViewSettings(projection) {
-    switch (projection) {
-      case 'EPSG:4326':
-        return new ol.View({
-          projection: 'EPSG:4326',
-          center: ol.proj.fromLonLat([37.41, 8.82], 'EPSG:4326'),
-          minZoom: 3,
-          maxZoom: 12,
-          zoom: 3,
-        });
-      case 'EPSG:3857':
-        return new ol.View({
-          projection: 'EPSG:3857',
-          center: ol.proj.fromLonLat([37.41, 8.82], 'EPSG:3857'),
-          minZoom: 3,
-          maxZoom: 19,
-          zoom: 3,
-        });
+   * Creates a View with the correct center and zoom settings.
+   * 'Correct' refers to two situations:
+   * - When initialising the map, setting the default center and zoom as the same
+   *   longitude and latitude for all base maps
+   * - When changing the base map, keeping the center and zoom in the current
+   *   position, UNLESS the new base map only shows a specific area of the
+   *   world, in which case it will relocate to that area.
+   *
+   * @param {*} baseMap The id of the base map.
+   * @return {ol.View} A new View to set on the map.
+   */
+  initView(baseMap) {
+    // TODO should these have variable comments?
+    let baseMapSettings = {};
+    for (let i = 0; i < commonBasemaps.length; i++) {
+      baseMapSettings[commonBasemaps[i].id] = commonBasemaps[i];
     }
+    let projection = baseMapSettings[baseMap].projections[0];
+    let minZoom = 3;
+    let maxZoom = 12;
+    let zoom = 3;
+    let center = [0, 0];
+
+    /* The current center and zoom values */
+    if (this.map && this.map.getView().getCenter()) {
+      center = this.map.getView().getCenter();
+      zoom = this.map.getView().getZoom();
+    }
+
+    /* Settings taken from map_common.js */
+    if (baseMapSettings[baseMap].viewSettings) {
+      if (baseMapSettings[baseMap].viewSettings.minZoom) {
+        minZoom = baseMapSettings[baseMap].viewSettings.minZoom;
+      }
+      if (baseMapSettings[baseMap].viewSettings.maxZoom) {
+        maxZoom = baseMapSettings[baseMap].viewSettings.maxZoom;
+      }
+      /* Maps which only display a certain part of the world have
+         their zoom and center set to their custom default */
+      if (baseMapSettings[baseMap].viewSettings.zoom) {
+        zoom = baseMapSettings[baseMap].viewSettings.zoom;
+      }
+      if (baseMapSettings[baseMap].viewSettings.center) {
+        center = baseMapSettings[baseMap].viewSettings.center;
+      }
+    }
+
+    /* Makes sure the zoom value is valid for the new base map */
+    if (zoom > baseMapSettings[baseMap].viewSettings.maxZoom) {
+      zoom = baseMapSettings[baseMap].viewSettings.maxZoom;
+    }
+
+    let view = new ol.View({
+      projection: projection,
+      center: ol.proj.fromLonLat(center, projection),
+      minZoom: minZoom,
+      maxZoom: maxZoom,
+      zoom: zoom,
+    });
+    return view;
   }
 }
-
 /**
  * @param {Function} next
  */
