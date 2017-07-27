@@ -30,7 +30,7 @@
  */
 export let baselayers = [
   {
-    id: 'EOX',
+    id: 'eox',
     title: 'EOX',
     description: 'EPSG:4326 only',
     projections: ['EPSG:4326'],
@@ -52,7 +52,7 @@ export let baselayers = [
     },
   },
   {
-    id: 'OSM',
+    id: 'osm',
     title: 'OSM',
     description: 'EPSG:3857 only',
     projections: ['EPSG:3857'],
@@ -64,7 +64,7 @@ export let baselayers = [
     },
   },
   {
-    id: 'GEBCO',
+    id: 'gebco',
     title: 'GEBCO',
     projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
@@ -99,7 +99,7 @@ export let baselayers = [
 
 export let borderlayers = [
   {
-    id: 'countries_all_white',
+    id: 'white',
     title: 'White border lines',
     source: {
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
@@ -108,7 +108,7 @@ export let borderlayers = [
     },
   },
   {
-    id: 'countries_all_black',
+    id: 'black',
     title: 'Black border lines',
     source: {
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
@@ -117,7 +117,7 @@ export let borderlayers = [
     },
   },
   {
-    id: 'countries_all_blue',
+    id: 'blue',
     title: 'Blue border lines',
     source: {
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
