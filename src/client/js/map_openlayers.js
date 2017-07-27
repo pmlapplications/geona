@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {baselayers as commonBasemaps, borderlayers as commonBorders} from './map_common';
+import {baseLayers as commonBasemaps, borderLayers as commonBorders} from './map_common';
 
 let ol;
 
@@ -12,15 +12,15 @@ export class OlMap extends GeonaMap {
     super();
     /** @type {Object} object containing configuration options */
     this.config = config;
-    /** @type {Map} a Key-Value map with base layer Tile and View objects */
-    this.baseLayers = null;
-    /** @type {ol.Map} an OpenLayers map used for displaying layers */
-    this.map = null;
-    /** @type {Map} a Key-Value map with various country border layers */
-    this.borderLayers = null;
-    /** @type {ol.Graticule} an OpenLayers graticule which is added to the map  */
-    this.graticule = null;
-    /** @type {Boolean} tracks whether a base map is currently on the map */
+    /** @private @type {Object} object containing OpenLayers Tile objects for each basemap */
+    this.baseLayers_ = null;
+    /** @private @type {ol.Map} an OpenLayers map used for displaying layers */
+    this.map_ = null;
+    /** @private @type {Object} object containing OpenLayers Tile objects for each country border layer */
+    this.borderLayers_ = null;
+    /** @private @type {ol.Graticule} an OpenLayers graticule which is added to the map  */
+    this.graticule_ = null;
+    /** @type {Boolean} tracks whether a basemap is currently on the map */
     this.baseActive = false;
     /** @type {Boolean} tracks whether a border layer is currently on the map */
     this.borderActive = false;
@@ -31,7 +31,7 @@ export class OlMap extends GeonaMap {
     */
   createMap() {
     this.initBaseLayers();
-    this.map = new ol.Map({
+    this.map_ = new ol.Map({
       target: this.config.divId,
       controls: [
         new ol.control.Zoom({
@@ -52,16 +52,16 @@ export class OlMap extends GeonaMap {
       ],
 
     });
-    // If base map defined in the config, add it to the map.
+    // If basemap defined in the config, add it to the map.
     if (this.config.basemap) {
-      this.map.addLayer(this.baseLayers[this.config.basemap].tile);
-      this.map.setView(this.baseLayers[this.config.basemap].view);
+      this.map_.addLayer(this.baseLayers_[this.config.basemap].tile);
+      this.map_.setView(this.baseLayers_[this.config.basemap].view);
       this.baseActive = true;
     }
 
     this.createCountryBordersLayers();
     if (this.config.countryBorders) {
-      this.changeCountryBordersLayer(this.config.countryBorders);
+      this.setCountryBordersLayer(this.config.countryBorders);
     }
 
     this.createGraticule();
@@ -71,38 +71,40 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Remove the current base map and add a new one.
+    * Remove the current basemap and add a new one.
     *
-    * @param {String} baseMap The title used to select the new basemap
+    * @param {String} basemap The title used to select the new basemap
     */
-  changeBaseMap(baseMap) {
+  setBaseMap(basemap) {
     this.removeBaseMap_();
-    this.addBaseMap_(baseMap);
+    this.addBaseMap_(basemap);
   }
 
   /**
-    * Remove the current base map layer.
+    * Remove the current basemap layer.
     *
     * TODO test with multiple layers on map (function may be removing ALL layers)
+    * @private
     */
   removeBaseMap_() {
     if (this.baseActive) {
-      this.map.removeLayer(this.map.getLayers().item(0));
+      this.map_.removeLayer(this.map_.getLayers().item(0));
       this.baseActive = false;
     }
   }
 
   /**
-    * Sets new base map layer, and updates the View.
+    * Sets new basemap layer, and updates the View.
     *
     * TODO test with multiple layers on map (function may be adding above existing layers)
     *
-    * @param {String} baseMap The title used to select the new base map.
+    * @private
+    * @param {String} basemap The title used to select the new basemap.
     */
-  addBaseMap_(baseMap) {
-    if (baseMap !== 'none') {
-      this.map.getLayers().insertAt(0, this.baseLayers[baseMap].tile);
-      this.map.setView(this.baseLayers[baseMap].view);
+  addBaseMap_(basemap) {
+    if (basemap !== 'none') {
+      this.map_.getLayers().insertAt(0, this.baseLayers_[basemap].tile);
+      this.map_.setView(this.baseLayers_[basemap].view);
       this.baseActive = true;
     }
   }
@@ -113,29 +115,29 @@ export class OlMap extends GeonaMap {
     * TODO test with real config
     */
   setConfigBaseMap() {
-    this.config.basemap = this.map.getLayers().item(0);
+    this.config.basemap = this.map_.getLayers().item(0);
   }
 
   /**
-    * Changes the projection style, if allowed for the current base map.
+    * Changes the projection style, if allowed for the current basemap.
     *
     * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
     */
-  changeProjection(projection) {
+  setProjection(projection) {
     if (this.baseActive === true) {
-      let baseMapId = this.map.getLayers().item(0).get('id');
-      /* If base map supports new projection, we can change the view */
-      if (this.baseLayers[baseMapId].tile.get('projections').indexOf(projection) >= 0) {
+      let basemapId = this.map_.getLayers().item(0).get('id');
+      /* If basemap supports new projection, we can change the view */
+      if (this.baseLayers_[basemapId].tile.get('projections').indexOf(projection) >= 0) {
         let newView = new ol.View({
           projection: projection,
-          minZoom: this.map.getView().getMinZoom(),
-          maxZoom: this.map.getView().getMaxZoom(),
-          zoom: this.map.getView().getZoom(),
-          center: ol.proj.fromLonLat(this.map.getView().getCenter(), projection),
+          minZoom: this.map_.getView().getMinZoom(),
+          maxZoom: this.map_.getView().getMaxZoom(),
+          zoom: this.map_.getView().getZoom(),
+          center: ol.proj.fromLonLat(this.map_.getView().getCenter(), projection),
         });
-        this.map.setView(newView);
+        this.map_.setView(newView);
       } else {
-        alert('Base map ' + baseMapId + ' does not support projection type ' + projection + '. Please select a different base map.');
+        alert('basemap ' + basemapId + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     }
   }
@@ -144,9 +146,9 @@ export class OlMap extends GeonaMap {
     * Removes the current country borders layer, and replaces it
     * with the specified country borders layer.
     *
-    * @param {String} border The Key for the border colour in borderLayers
+    * @param {String} border The Key for the border colour in borderLayers_
     */
-  changeCountryBordersLayer(border) {
+  setCountryBordersLayer(border) {
     this.removeCountryBordersLayer_();
     this.addCountryBordersLayer_(border);
   }
@@ -154,16 +156,19 @@ export class OlMap extends GeonaMap {
   /**
     * Adds the specified country borders layer to the top of the map.
     *
-    * @param {String} border The Key for the border colour in borderLayers
+    * @private
+    * @param {String} border The Key for the border colour in borderLayers_
     */
   addCountryBordersLayer_(border) {
-    try {
-      this.map.addLayer(this.borderLayers[border]);
-      this.borderActive = true;
-    } catch (e) {
+    if (border !== 'none') {
+      try {
+        this.map_.addLayer(this.borderLayers_[border]);
+        this.borderActive = true;
+      } catch (e) {
       // error will have occurred because the borders have not loaded,
       // or because the specified border does not exist.
-      console.error(e);
+        console.error(e);
+      }
     }
   }
 
@@ -174,7 +179,7 @@ export class OlMap extends GeonaMap {
   removeCountryBordersLayer_() {
     if (this.borderActive === true) {
       // Removes the top-most layer (border will always be on top)
-      this.map.removeLayer(this.map.getLayers().item(this.map.getLayers().getLength() - 1));
+      this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
       this.borderActive = false;
     }
   }
@@ -186,7 +191,7 @@ export class OlMap extends GeonaMap {
   setConfigCountryBordersLayer() {
     if (this.borderActive === true) {
       // sets the config parameter to the top layer
-      this.config.countryBorders = this.map.getLayers().item(this.map.getLayers().getSize() - 1);
+      this.config.countryBorders = this.map_.getLayers().item(this.map_.getLayers().getSize() - 1);
     }
   }
 
@@ -197,7 +202,7 @@ export class OlMap extends GeonaMap {
     * When adding a new layer, the Key should be set to the colour of the lines.
     */
   createCountryBordersLayers() {
-    this.borderLayers = {};
+    this.borderLayers_ = {};
 
     for (let layer of commonBorders) {
       let source = new ol.source.TileWMS({
@@ -207,11 +212,11 @@ export class OlMap extends GeonaMap {
           LAYERS: layer.source.params.LAYERS,
           VERSION: layer.source.params.VERSION,
           STYLES: layer.source.params.STYLES,
-          SRS: this.map.getView().getProjection(),
+          SRS: this.map_.getView().getProjection(),
         },
       });
 
-      this.borderLayers[layer.id] = new ol.layer.Tile({
+      this.borderLayers_[layer.id] = new ol.layer.Tile({
         id: layer.id,
         title: layer.title,
         source: source,
@@ -225,7 +230,7 @@ export class OlMap extends GeonaMap {
     * The graticule is made visible in the toggleGraticule() function.
     */
   createGraticule() {
-    this.graticule = new ol.Graticule({
+    this.graticule_ = new ol.Graticule({
       strokeStyle: new ol.style.Stroke({
         color: 'rgba(255,255,255,0.9)',
         width: 1,
@@ -240,10 +245,10 @@ export class OlMap extends GeonaMap {
     */
   toggleGraticule() {
     if (this.config.graticules) {
-      this.graticule.setMap(this.map);
+      this.graticule_.setMap(this.map_);
     } else {
       try {
-        this.graticule.setMap();
+        this.graticule_.setMap();
       } catch (e) {
         console.error('Caught error when trying to call graticule.setMap() in function toggleGraticule().');
       }
@@ -251,14 +256,14 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Uses the baselayers array imported from './map_common.js'
-    * in order to dynamically create OpenLayers base maps.
+    * Uses the commonBasemaps array imported from './map_common.js'
+    * in order to dynamically create OpenLayers basemaps.
     */
   initBaseLayers() {
-    this.baseLayers = {};
+    this.baseLayers_ = {};
 
     for (let layer of commonBasemaps) {
-      this.baseLayers[layer.id] = {tile: {}, view: {}};
+      this.baseLayers_[layer.id] = {tile: {}, view: {}};
 
       let source;
       switch (layer.source.type) {
@@ -280,14 +285,14 @@ export class OlMap extends GeonaMap {
           source = new ol.source.OSM();
           break;
       }
-      this.baseLayers[layer.id].tile = new ol.layer.Tile({
+      this.baseLayers_[layer.id].tile = new ol.layer.Tile({
         id: layer.id,
         title: layer.title,
         description: layer.description,
         projections: layer.projections,
         source: source,
       });
-      this.baseLayers[layer.id].view = this.initView(layer.id);
+      this.baseLayers_[layer.id].view = this.initView(layer.id);
     }
   }
 
@@ -295,53 +300,53 @@ export class OlMap extends GeonaMap {
    * Creates a View with the correct center and zoom settings.
    * 'Correct' refers to two situations:
    * - When initialising the map, setting the default center and zoom as the same
-   *   longitude and latitude for all base maps
-   * - When changing the base map, keeping the center and zoom in the current
-   *   position, UNLESS the new base map only shows a specific area of the
+   *   longitude and latitude for all basemaps
+   * - When changing the basemap, keeping the center and zoom in the current
+   *   position, UNLESS the new basemap only shows a specific area of the
    *   world, in which case it will relocate to that area.
    *
-   * @param {*} baseMap The id of the base map.
+   * @param {*} basemap The id of the basemap.
    * @return {ol.View} A new View to set on the map.
    */
-  initView(baseMap) {
+  initView(basemap) {
     // TODO should these have variable comments?
-    let baseMapSettings = {};
+    let basemapSettings = {};
     for (let i = 0; i < commonBasemaps.length; i++) {
-      baseMapSettings[commonBasemaps[i].id] = commonBasemaps[i];
+      basemapSettings[commonBasemaps[i].id] = commonBasemaps[i];
     }
-    let projection = baseMapSettings[baseMap].projections[0];
+    let projection = basemapSettings[basemap].projections[0];
     let minZoom = 3;
     let maxZoom = 12;
     let zoom = 3;
     let center = [0, 0];
 
     /* The current center and zoom values */
-    if (this.map && this.map.getView().getCenter()) {
-      center = this.map.getView().getCenter();
-      zoom = this.map.getView().getZoom();
+    if (this.map_ && this.map_.getView().getCenter()) {
+      center = this.map_.getView().getCenter();
+      zoom = this.map_.getView().getZoom();
     }
 
     /* Settings taken from map_common.js */
-    if (baseMapSettings[baseMap].viewSettings) {
-      if (baseMapSettings[baseMap].viewSettings.minZoom) {
-        minZoom = baseMapSettings[baseMap].viewSettings.minZoom;
+    if (basemapSettings[basemap].viewSettings) {
+      if (basemapSettings[basemap].viewSettings.minZoom) {
+        minZoom = basemapSettings[basemap].viewSettings.minZoom;
       }
-      if (baseMapSettings[baseMap].viewSettings.maxZoom) {
-        maxZoom = baseMapSettings[baseMap].viewSettings.maxZoom;
+      if (basemapSettings[basemap].viewSettings.maxZoom) {
+        maxZoom = basemapSettings[basemap].viewSettings.maxZoom;
       }
       /* Maps which only display a certain part of the world have
          their zoom and center set to their custom default */
-      if (baseMapSettings[baseMap].viewSettings.zoom) {
-        zoom = baseMapSettings[baseMap].viewSettings.zoom;
+      if (basemapSettings[basemap].viewSettings.zoom) {
+        zoom = basemapSettings[basemap].viewSettings.zoom;
       }
-      if (baseMapSettings[baseMap].viewSettings.center) {
-        center = baseMapSettings[baseMap].viewSettings.center;
+      if (basemapSettings[basemap].viewSettings.center) {
+        center = basemapSettings[basemap].viewSettings.center;
       }
     }
 
-    /* Makes sure the zoom value is valid for the new base map */
-    if (zoom > baseMapSettings[baseMap].viewSettings.maxZoom) {
-      zoom = baseMapSettings[baseMap].viewSettings.maxZoom;
+    /* Makes sure the zoom value is valid for the new basemap */
+    if (zoom > basemapSettings[basemap].viewSettings.maxZoom) {
+      zoom = basemapSettings[basemap].viewSettings.maxZoom;
     }
 
     let view = new ol.View({

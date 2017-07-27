@@ -32,7 +32,7 @@ export let client = {
       default: 'geona',
     },
     basemap: {
-      default: 'EOX',
+      default: 'eox',
     },
     projection: {
       default: 'EPSG:4326',
@@ -41,7 +41,7 @@ export let client = {
       default: false,
     },
     countryBorders: {
-      default: 'countries_all_black',
+      default: 'black',
     },
   },
 };

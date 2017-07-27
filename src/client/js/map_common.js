@@ -1,6 +1,6 @@
 /**
- * New base maps should be added here by defining an object within
- * the baselayers array. The object must contain the following information:
+ * New basemaps should be added here by defining an object within
+ * the baseLayers array. The object must contain the following information:
  * - id
  * - title
  * - description
@@ -28,7 +28,7 @@
  * (i.e. at the same depth as id, title etc.). Then enter any different
  * settings within this 'viewSettings' object.
  */
-export let baselayers = [
+export let baseLayers = [
   {
     id: 'eox',
     title: 'EOX',
@@ -86,8 +86,8 @@ export let baselayers = [
 ];
 
 /**
- * New base maps should be added here by defining an object within
- * the baselayers array. The object must contain the following information:
+ * New border layers should be added here by defining an object within
+ * the borderLayers array. The object must contain the following information:
  * - id
  * - title
  * - source: url
@@ -97,7 +97,7 @@ export let baselayers = [
  * - source: params: STYLES
  */
 
-export let borderlayers = [
+export let borderLayers = [
   {
     id: 'white',
     title: 'White border lines',
