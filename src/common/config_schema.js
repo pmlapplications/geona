@@ -37,11 +37,20 @@ export let client = {
     projection: {
       default: 'EPSG:4326',
     },
-    graticules: {
+    viewSettings: {
+      center: [0, 0],
+      minZoom: 12,
+      maxZoom: 3,
+      zoom: 3,
+    },
+    graticule: {
       default: false,
     },
     countryBorders: {
       default: 'black',
+    },
+    bingMapsApiKey: {
+      default: '',
     },
   },
 };

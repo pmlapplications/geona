@@ -5,7 +5,7 @@
  * - title
  * - description
  * - projections []
- * - source: type - valid types are 'wms','osm'
+ * - source: type - valid types are 'wms','osm','bing'
  *
  * A wms tile must also include the following information:
  * - source: url
@@ -17,11 +17,15 @@
  * - source: params: FORMAT
  * - source: params: wrapDateLine
  *
+ * A bing tile must also include the following information:
+ * - source: imagerySet
+ *
  * The default view options are set as:
  * - zoom: 3
  * - minZoom: 3
  * - maxZoom: 12
  * - center: [0, 0]
+ * - extent: undefined
  *
  * If you wish to change one or more these options for a layer, create
  * an object 'viewSettings' at the top layer within the main object
@@ -81,6 +85,121 @@ export let baseLayers = [
     },
     viewSettings: {
       maxZoom: 7,
+    },
+  },
+  {
+    id: 'eoxS2Cloudless',
+    title: 'EOX Sentinel-2 Cloudless',
+    description: 'EPSG:4326 only, Europe only',
+    projections: ['EPSG:4326'],
+    source: {
+      type: 'wms',
+      url: 'https://tiles.maps.eox.at/wms/?',
+      crossOrigin: null,
+      params: {
+        LAYERS: 's2cloudless',
+        VERSION: '1.1.1',
+        SRS: 'EPSG:4326',
+        wrapDateLine: true,
+      },
+    },
+    viewSettings: {
+      maxZoom: 14,
+    },
+  },
+  {
+    id: 'blueMarble',
+    title: 'Blue Marble',
+    description: 'EPSG:4326 only',
+    projections: ['EPSG:4326'],
+    source: {
+      type: 'wms',
+      url: 'https://tiles.maps.eox.at/wms/?',
+      crossOrigin: null,
+      params: {
+        LAYERS: 'bluemarble',
+        VERSION: '1.1.1',
+        SRS: 'EPSG:4326',
+        wrapDateLine: true,
+      },
+    },
+    viewSettings: {
+      maxZoom: 8,
+    },
+  },
+  {
+    id: 'blackMarble',
+    title: 'Black Marble',
+    description: 'EPSG:4326 only',
+    projections: ['EPSG:4326'],
+    source: {
+      type: 'wms',
+      url: 'https://tiles.maps.eox.at/wms/?',
+      crossOrigin: null,
+      params: {
+        LAYERS: 'blackmarble',
+        VERSION: '1.1.1',
+        SRS: 'EPSG:4326',
+        wrapDateLine: true,
+      },
+    },
+    viewSettings: {
+      maxZoom: 8,
+    },
+  },
+  {
+    id: 'bingMapsAerial',
+    title: 'Bing Maps - Aerial imagery',
+    description: 'EPSG:3857 only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'bing',
+      imagerySet: 'Aerial',
+    },
+    viewSettings: {
+      maxZoom: 19,
+    },
+  },
+  {
+    id: 'bingMapsAerialWithLabels',
+    title: 'Bing Maps - Aerial imagery with labels',
+    description: 'EPSG:3857 only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'bing',
+      imagerySet: 'AerialWithLabels',
+    },
+    viewSettings: {
+      maxZoom: 19,
+    },
+  },
+  {
+    id: 'bingMapsRoad',
+    title: 'Bing Maps - Road',
+    description: 'EPSG:3857 only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'bing',
+      imagerySet: 'Road',
+    },
+    viewSettings: {
+      maxZoom: 19,
+    },
+  },
+  {
+    id: 'bingMapsOS',
+    title: 'Ordnance Survey',
+    description: 'EPSG:3857 only, coverage of UK only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'bing',
+      imagerySet: 'ordnanceSurvey',
+    },
+    viewSettings: {
+      minZoom: 10,
+      maxZoom: 16,
+      defaultCenter: [53.825564, -2.421976],
+      extent: [-6.33, 49.83, -0.77, 60.87],
     },
   },
 ];
