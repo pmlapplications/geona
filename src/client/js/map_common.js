@@ -31,6 +31,7 @@
  * an object 'viewSettings' at the top layer within the main object
  * (i.e. at the same depth as id, title etc.). Then enter any different
  * settings within this 'viewSettings' object.
+ * 'center' and 'extent' should be defined as Lat,Lon (y,x)
  */
 export let baseLayers = [
   {
@@ -198,8 +199,8 @@ export let baseLayers = [
     viewSettings: {
       minZoom: 10,
       maxZoom: 16,
-      defaultCenter: [53.825564, -2.421976],
-      extent: [-6.33, 49.83, -0.77, 60.87],
+      center: [51.502874, -0.126704],
+      extent: [49.83, -6.33, 60.87, 1.84],
     },
   },
 ];
