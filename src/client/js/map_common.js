@@ -1,36 +1,32 @@
-/**
- * New basemaps should be added here by defining an object within
- * the baseLayers array. The object must contain the following information:
- * - id
- * - title
- * - description
- * - projections []
- * - source: type - valid types are 'wms','osm','bing'
+/*
+ * Default basemaps.
  *
- * A wms tile must also include the following information:
- * - source: url
- * - source: crossOrigin
- * - source: attributions []
- * - source: params: LAYERS
- * - source: params: VERSION
- * - source: params: SRS
- * - source: params: FORMAT
- * - source: params: wrapDateLine
+ * Basemap object format:
+ * {String} id                    ID for this basemap
+ * {String} title
+ * {String} description
+ * {Array}  projections           Projections supported
+ * {Object} source
+ * {String} source.type           The type of basemap - wms, osm, bing
  *
- * A bing tile must also include the following information:
- * - source: imagerySet
+ * For a WMS source:
+ *   {String} source.url          WMS url
+ *   {String} source.crossOrigin  The crossOrigin attribute for loaded images
+ *   {Array}  source.attributions
+ *   {Object} source.params       WMS request parameters
  *
- * The default view options are set as:
- * - zoom: 3
- * - minZoom: 3
- * - maxZoom: 12
- * - center: [0, 0]
- * - extent: undefined
+ * For a Bing source:
+ *   {String} source.imagerySet   Bing imagery to use
  *
- * If you wish to change one or more these options for a layer, create
- * an object 'viewSettings' at the top layer within the main object
- * (i.e. at the same depth as id, title etc.). Then enter any different
- * settings within this 'viewSettings' object.
+ * {Object} viewSettings          View settings for this basemap
+ * {Number} viewSettings.center   Map center to move to when loading this basemap.
+ *                                Defaults to undefined
+ * {Array}  viewSettings.extent   The extent of this basemap. Array in the format [minLat, minLon, maxLat, maxLon].
+ *                                Defaults to [-90, -180, 90, 180].
+ * {Number} viewSettings.maxZoom  The maximum (closest) allowed zoom.
+ *                                Defaults to 12.
+ * {Number} viewSettings.minZoom  The minimum (furthest) allowed zoom.
+ *                                Defaults to 3.
  */
 export let baseLayers = [
   {
