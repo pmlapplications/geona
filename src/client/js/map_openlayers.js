@@ -326,8 +326,6 @@ export class OlMap extends GeonaMap {
   * @param {Object} properties An Object containing various properties used in order to set the View of the map. Valid
                                properties are projection | extent | center | minZoom | maxZoom | zoom.
   * @param {Boolean} fitToExtent If true, the zoom will adjust to show the whole extent of the new View.
-  *
-  * TODO fitToExtent working
   */
   setView(properties, fitToExtent = false) {
     /** These are the default values used in Geona */
@@ -337,8 +335,6 @@ export class OlMap extends GeonaMap {
     let minZoom = 3;
     let maxZoom = 12;
     let zoom = 3;
-
-    console.log(properties);
 
     /** The current values if the map exists */
     if (this.mapInitiallyCreated_ === true) {
@@ -377,15 +373,11 @@ export class OlMap extends GeonaMap {
       zoom = properties.zoom;
     }
 
-    /** Optionally fit the map in the extent */
-    if ((extent) && (fitToExtent)) {
-
-    }
-
     /** Ensure that the center is within the extent */
     if ((extent) && (!ol.extent.containsCoordinate(extent, center))) {
       console.log('Center is not in extent');
-      center = ol.proj.fromLonLat(ol.extent.getCenter(extent), projection);
+      center = ol.extent.getCenter(extent);
+      console.log();
     }
 
     /** Ensure that the zoom is within the accepted bounds */
@@ -408,6 +400,17 @@ export class OlMap extends GeonaMap {
     });
 
     this.map_.setView(newView);
+
+    /** Optionally fit the map in the extent */
+    if ((extent) && (fitToExtent)) {
+      // let polygon = ol.geom.Polygon.fromExtent(extent);
+      this.map_.getView().fit(extent, ol.extent.getSize(extent));
+      if ((this.map_.getView().getZoom() < minZoom) || (this.map_.getView().getZoom() > maxZoom)) {
+        this.map_.getView().setZoom(zoom);
+        this.map_.getView().setCenter(center);
+      }
+    }
+
 
     /** Skips the first layer, refreshes the rest */
     for (let i = 1; i < this.map_.getLayers().getLength(); i++) {
