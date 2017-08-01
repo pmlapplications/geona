@@ -11,16 +11,16 @@
  */
 export default class GeonaMap {
   /**
-   * Set the basemap.
-   * @param {String} basemap The basemap to use, or 'none'
+   * Set the graticles as visible or not.
+   * @param  {Boolean} display True to display graticles
    */
-  setBasemap(basemap) {}
+  displayGraticules(display) {}
 
   /**
-   * Set the projection.
-   * @param {String} projection The projection to use
+   * Set the basemap.
+   * @param {String} basemap The id of the basemap to use, or 'none'
    */
-  setProjection(projection) {}
+  setBasemap(basemap) {}
 
   /**
    * Set the country borders to display, or none.
@@ -29,10 +29,10 @@ export default class GeonaMap {
   setCountryBorders(borders) {}
 
   /**
-   * Set the graticles as visible or not.
-   * @param  {Boolean} display True to display graticles
+   * Set the projection.
+   * @param {String} projection The projection to use
    */
-  displayGraticules(display) {}
+  setProjection(projection) {}
 
   /**
    * Set the map view with the provided options
@@ -49,5 +49,9 @@ export default class GeonaMap {
 }
 
 // Fields
-/** @type {Object} The config for the map. Also used to hold the current state of the map. */
+/**
+ * @type {Object} The config for the map. Also used to hold the current state of the map.
+ *                It may be read from outside the class to read/save the map state, but must never be modified by
+ *                anything outside the class.
+ */
 GeonaMap.prototype.config;

@@ -57,7 +57,7 @@ export let client = {
       default: false,
     },
     projection: {
-      doc: 'The projection to use.',
+      doc: 'The projection to use. Must be supported by the chosen basemap.',
       format: ['EPSG:3857', 'EPSG:4326'],
       default: 'EPSG:4326',
     },
