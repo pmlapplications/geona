@@ -13,7 +13,6 @@
  * - source: attributions []
  * - source: params: LAYERS
  * - source: params: VERSION
- * - source: params: SRS
  * - source: params: FORMAT
  * - source: params: wrapDateLine
  *
@@ -47,7 +46,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'terrain-light',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         FORMAT: 'image/jpeg',
         wrapDateLine: true,
       },
@@ -80,7 +78,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'gebco_08_grid',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         FORMAT: 'image/jpeg',
         wrapDateLine: true},
     },
@@ -100,7 +97,6 @@ export let baseLayers = [
       params: {
         LAYERS: 's2cloudless',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         wrapDateLine: true,
       },
     },
@@ -120,7 +116,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'bluemarble',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         wrapDateLine: true,
       },
     },
@@ -140,7 +135,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'blackmarble',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         wrapDateLine: true,
       },
     },
@@ -222,6 +216,7 @@ export let borderLayers = [
     id: 'white',
     title: 'White border lines',
     source: {
+      type: 'border',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
       params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line-white'},
@@ -231,6 +226,7 @@ export let borderLayers = [
     id: 'black',
     title: 'Black border lines',
     source: {
+      type: 'border',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
       params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line_black'},
@@ -240,6 +236,7 @@ export let borderLayers = [
     id: 'blue',
     title: 'Blue border lines',
     source: {
+      type: 'border',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
       params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line'},
