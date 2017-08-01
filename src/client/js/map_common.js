@@ -40,6 +40,7 @@ export let baseLayers = [
       crossOrigin: null,
       attributions: ['EOX'],
       params: {
+        // TODO these should be lowercase
         LAYERS: 'terrain-light',
         VERSION: '1.1.1',
         SRS: 'EPSG:4326',

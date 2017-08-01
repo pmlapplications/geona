@@ -56,8 +56,12 @@ export class LMap extends GeonaMap {
     }
 
     if (basemap !== 'none') {
+      let newBasemap = this.baseLayers_[basemap];
       // TODO throw error if the provided basemap doesn't exist
-      this.baseLayers_[basemap].addTo(this.map_).bringToBack();
+      newBasemap.addTo(this.map_).bringToBack();
+      if (!newBasemap.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
+        this.setProjection(newBasemap.options.projections[0]);
+      }
     }
 
     this.config.basemap = basemap;
@@ -79,9 +83,19 @@ export class LMap extends GeonaMap {
     // This is a bit of a hack and isn't officially supported by leaflet. Everything may fall over!
     let LeafletProjection = leafletizeProjection(projection);
     let center = this.map_.getCenter();
+    let zoom = this.map_.getZoom();
+
+    switch (projection) {
+      case 'EPSG:3857':
+        zoom += 1;
+        break;
+      case 'EPSG:4326':
+        zoom -= 1;
+        break;
+    }
+
     this.map_.options.crs = LeafletProjection;
-    this.map_.setView(center);
-    this.map_._resetView(this.map_.getCenter(), this.map_.getZoom(), true);
+    this.map_._resetView(center, zoom);
   }
 
   initBaseLayers_() {
@@ -96,6 +110,7 @@ export class LMap extends GeonaMap {
             layers: layer.source.params.LAYERS,
             version: layer.source.params.VERSION,
             attribution: layer.source.attributions,
+            projections: layer.projections,
           });
           break;
       }
@@ -114,6 +129,15 @@ function leafletizeZoom(zoom) {
 }
 
 /**
+ * Adjust a provided Leaflet style zoom level to be correct for OpenLayers.
+ * @param  {Number} zoom Leaflet style zoom level
+ * @return {Number}      OpenLayers style zoom level
+ */
+function deLeafletizeZoom(zoom) {
+  return zoom + 1;
+}
+
+/**
  * Convert a projection string to a Leaflet CRS object
  * @param  {String} projection A projection string
  * @return {L.CRS}             A leaflet CRS object
@@ -126,6 +150,24 @@ function leafletizeProjection(projection) {
       return L.CRS.EPSG3857;
     case 'EPSG:4326':
       return L.CRS.EPSG4326;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Convert a Leaflet CRS object into a projection string
+ * @param  {L.CRS}  projection A leaflet CRS object
+ * @return {String}            A projection string
+ */
+function deLeafletizeProjection(projection) {
+  switch (projection) {
+    case L.CRS.EPSG3395:
+      return 'EPSG:3395';
+    case L.CRS.EPSG3857:
+      return 'EPSG:3857';
+    case L.CRS.EPSG4326:
+      return 'EPSG:4326';
     default:
       return null;
   }
