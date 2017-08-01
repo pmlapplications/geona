@@ -36,13 +36,16 @@ export default class GeonaMap {
 
   /**
    * Set the map view with the provided options
-   * @param {Array}  centre     [lat,lon] array
-   * @param {Number} zoom       (optional) The  zoom level to use
-   * @param {Array}  extent     (optional) [min lat, min lon, max lat, max lon] array to set the maximum extents
-   *                            of the map
-   * @param {String} projection (optional) The projection to use
+   * @param {Object}  options            View options. All are optional
+   * @param {String}  options.projection The projection
+   * @param {Array}   options.extent     The extent as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.center     The centre as [lat, lon]
+   * @param {Number}  options.minZoom    The minimum allowed zoom
+   * @param {Number}  options.maxZoom    The maximum allowed zoom
+   * @param {Number}  options.zoom       The zoom
+   * @param {Boolean} fitToExtent        Move the view so the whole extent is visible
    */
-  setView(centre, zoom = undefined, extent = undefined, projection = undefined) {}
+  setView(options, fitToExtent = false) {}
 }
 
 // Fields
