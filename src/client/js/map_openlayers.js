@@ -26,7 +26,7 @@ export class OlMap extends GeonaMap {
     /** @private @type {Boolean} tracks whether a border layer is currently on the map */
     this.borderActive_ = false;
     /** @private @type {Boolean} tracks whether the map has been created for the first time */
-    this.mapInitiallyCreated_ = false;
+    this.initialized = false;
 
     this.initBaseLayers();
     this.map_ = new ol.Map({
@@ -72,6 +72,9 @@ export class OlMap extends GeonaMap {
       this.toggleGraticule();
     }
 
+    /** Must come last in the method */
+    this.initialized = true;
+
     window.testMap = this;
     window.ol = ol;
   }
@@ -82,34 +85,12 @@ export class OlMap extends GeonaMap {
    * @param {String} basemap The id used to select the new basemap.
    */
   setBasemap(basemap) {
-    this.removeBasemap_();
-    this.addBasemap_(basemap);
-  }
-
-  /**
-   * Remove the current basemap layer.
-   *
-   * TODO test with multiple layers on map (function may be removing ALL layers)
-   * @private
-   */
-  removeBasemap_() {
-    if (this.baseActive_) {
+    if (this.initialized === true && this.config.basemap !== 'none') {
+      console.log('removing layer');
       this.map_.removeLayer(this.map_.getLayers().item(0));
-      this.baseActive_ = false;
     }
-  }
 
-  /**
-   * Sets new basemap layer, and updates the View.
-   *
-   * TODO test with multiple layers on map (function may be adding above existing layers)
-   * TODO 'basemap id not found' error check? Might not matter actually
-   *
-   * @private
-   * @param {String} basemap The id used to select the new basemap.
-   */
-  addBasemap_(basemap) {
-    if (basemap !== 'none') {
+    if (basemap !== 'none' ) {
       this.map_.getLayers().insertAt(0, this.baseLayers_[basemap]);
       if (this.baseLayers_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
         console.log('Projection doesnt need to change');
@@ -121,17 +102,8 @@ export class OlMap extends GeonaMap {
         console.log(options);
         this.setView(options);
       }
-      this.baseActive_ = true;
     }
-  }
-
-  /**
-   * Sets the this.config.basemap to the map's current base layer
-   *
-   * TODO test with real config
-   */
-  setConfigBasemap() {
-    this.config.basemap = this.map_.getLayers().item(0);
+    this.config.basemap = basemap;
   }
 
   /**
@@ -151,6 +123,8 @@ export class OlMap extends GeonaMap {
         alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     }
+
+    this.config.projection = projection;
   }
 
   /**
@@ -160,8 +134,26 @@ export class OlMap extends GeonaMap {
    * @param {String} border The Key for the border colour in borderLayers_
    */
   setCountryBordersLayer(border) {
-    this.removeCountryBordersLayer_();
-    this.addCountryBordersLayer_(border);
+    console.log(this.initialized);
+    if (this.initialized === true && this.config.countryBorders !== 'none') {
+      /** Removes the top-most layer (border will always be on top) */
+      console.log(this.map_.getLayers().getLength());
+      console.log('removing border layer');
+      this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
+    }
+
+    if (border !== 'none') {
+      console.log('adding border layer');
+      try {
+        this.map_.addLayer(this.borderLayers_[border]);
+      } catch (e) {
+      /** error will have occurred because the borders have not loaded,
+          or because the specified border does not exist. */
+        console.error(e);
+      }
+    }
+
+    this.config.countryBorders = border;
   }
 
   /**
@@ -192,17 +184,6 @@ export class OlMap extends GeonaMap {
       // Removes the top-most layer (border will always be on top)
       this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
       this.borderActive_ = false;
-    }
-  }
-
-  /**
-   * Replaces/creates the countryBorders parameter in the config, setting it
-   * to the current country borders layer.
-   */
-  setConfigCountryBordersLayer() {
-    if (this.borderActive_ === true) {
-      // sets the config parameter to the top layer
-      this.config.countryBorders = this.map_.getLayers().item(this.map_.getLayers().getSize() - 1);
     }
   }
 
@@ -253,6 +234,7 @@ export class OlMap extends GeonaMap {
 
   /**
    * Toggles visibility of map graticule.
+   * //TODO fix
    */
   toggleGraticule() {
     if (this.config.graticules) {
@@ -318,6 +300,7 @@ export class OlMap extends GeonaMap {
    * @param {Object} properties An Object containing various properties used in order to set the View of the map. Valid
    *                           properties are: projection, extent, center, minZoom, maxZoom, zoom.
    * @param {Boolean} fitToExtent If true, the zoom will adjust to show the whole extent of the new View.
+   * //TODO save settings to config
    */
   setView(properties, fitToExtent = false) {
     /** These are the default values used in Geona */
@@ -331,7 +314,7 @@ export class OlMap extends GeonaMap {
     console.log(properties);
 
     /** The current values if the map exists */
-    if (this.mapInitiallyCreated_ === true) {
+    if (this.initialized === true) {
       if (this.map_.getView().getProjection()) {
         projection = this.map_.getView().getProjection().getCode();
       }
@@ -390,8 +373,6 @@ export class OlMap extends GeonaMap {
     });
 
     this.map_.setView(newView);
-
-    this.mapInitiallyCreated_ = true;
 
     /** Optionally fit the map in the extent */
     if ((extent) && (fitToExtent)) {
