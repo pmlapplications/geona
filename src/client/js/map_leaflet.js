@@ -89,6 +89,8 @@ export class LMap extends GeonaMap {
       }
       newBorders.addTo(this.map_).bringToFront();
     }
+
+    this.config.countryBorders = borders;
   }
 
   /**
@@ -112,6 +114,8 @@ export class LMap extends GeonaMap {
 
     this.map_.options.crs = LeafletProjection;
     this.map_._resetView(center, zoom);
+
+    this.config.projection = projection;
   }
 
   /**
