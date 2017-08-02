@@ -43,7 +43,6 @@ export let baseLayers = [
         // TODO these should be lowercase
         LAYERS: 'terrain-light',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         FORMAT: 'image/jpeg',
         wrapDateLine: true,
       },
@@ -76,7 +75,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'gebco_08_grid',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         FORMAT: 'image/jpeg',
         wrapDateLine: true},
     },
@@ -96,7 +94,6 @@ export let baseLayers = [
       params: {
         LAYERS: 's2cloudless',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         wrapDateLine: true,
       },
     },
@@ -116,7 +113,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'bluemarble',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         wrapDateLine: true,
       },
     },
@@ -136,7 +132,6 @@ export let baseLayers = [
       params: {
         LAYERS: 'blackmarble',
         VERSION: '1.1.1',
-        SRS: 'EPSG:4326',
         wrapDateLine: true,
       },
     },
@@ -202,43 +197,55 @@ export let baseLayers = [
 ];
 
 /**
- * New border layers should be added here by defining an object within
- * the borderLayers array. The object must contain the following information:
- * - id
- * - title
- * - source: url
- * - source: crossOrigin
- * - source: params: LAYERS
- * - source: params: VERSION
- * - source: params: STYLES
+ * Default border layers.
+ *
+ * The object format is the same as for basemaps.
+ * Additional border layers also need to be added to config_schema.js in client.map.countryBorders.format.
  */
-
 export let borderLayers = [
   {
     id: 'white',
     title: 'White border lines',
+    projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
+      type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line-white'},
+      params: {
+        LAYERS: 'rsg:full_10m_borders',
+        VERSION: '1.1.0',
+        STYLES: 'line-white',
+      },
     },
   },
   {
     id: 'black',
     title: 'Black border lines',
+    projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
+      type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line_black'},
+      params: {
+        LAYERS: 'rsg:full_10m_borders',
+        VERSION: '1.1.0',
+        STYLES: 'line_black',
+      },
     },
   },
   {
     id: 'blue',
     title: 'Blue border lines',
+    projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
+      type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line'},
+      params: {
+        LAYERS: 'rsg:full_10m_borders',
+        VERSION: '1.1.0',
+        STYLES: 'line',
+      },
     },
   },
 ];

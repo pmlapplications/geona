@@ -1,5 +1,5 @@
 import GeonaMap from './map';
-import {baseLayers as commonBasemaps, borderLayers as commonBorders} from './map_common';
+import {baseLayers as defaultBasemaps, borderLayers as defaultBorders} from './map_common';
 
 let L;
 
@@ -15,9 +15,14 @@ export class LMap extends GeonaMap {
     super();
     // TODO this is only for testing
     window.LMap = this;
+
     /** @type {Object} The map config */
     this.config = config;
+    this.baseLayers_ = {};
+    this.countryBorderLayers_ = {};
+
     this.initBaseLayers_();
+    this.initCountryBorderLayers_();
 
     /** @type {L.map} The Leaflet map */
     this.map_ = L.map(this.config.divId, {
@@ -56,12 +61,12 @@ export class LMap extends GeonaMap {
     }
 
     if (basemap !== 'none') {
-      let newBasemap = this.baseLayers_[basemap];
       // TODO throw error if the provided basemap doesn't exist
-      newBasemap.addTo(this.map_).bringToBack();
+      let newBasemap = this.baseLayers_[basemap];
       if (!newBasemap.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
         this.setProjection(newBasemap.options.projections[0]);
       }
+      newBasemap.addTo(this.map_).bringToBack();
     }
 
     this.config.basemap = basemap;
@@ -72,7 +77,18 @@ export class LMap extends GeonaMap {
    * @param {String} borders The borders to display, or 'none'
    */
   setCountryBorders(borders) {
-    // TODO
+    if (this.config.countryBorders !== 'none' && this.config.countryBorders !== borders) {
+      this.countryBorderLayers_[this.config.countryBorders].remove();
+    }
+
+    if (borders !== 'none') {
+      // TODO throw error if the provided borders don't exist
+      let newBorders = this.countryBorderLayers_[borders];
+      if (!newBorders.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
+        this.setProjection(newBorders.options.projections[0]);
+      }
+      newBorders.addTo(this.map_).bringToFront();
+    }
   }
 
   /**
@@ -98,12 +114,11 @@ export class LMap extends GeonaMap {
     this.map_._resetView(center, zoom);
   }
 
+  /**
+   * Load the default basemaps, and any defined in the config.
+   */
   initBaseLayers_() {
-    this.baseLayers_ = {};
-
-    for (let layer of commonBasemaps) {
-      this.baseLayers_[layer.id] = {};
-
+    for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
           this.baseLayers_[layer.id] = L.tileLayer.wms(layer.source.url, {
@@ -116,6 +131,25 @@ export class LMap extends GeonaMap {
       }
     }
   }
+
+  /**
+   * Load the default border layers, and any defined in the config.
+   */
+  initCountryBorderLayers_() {
+    for (let layer of defaultBorders) {
+      switch (layer.source.type) {
+        case 'wms':
+          this.countryBorderLayers_[layer.id] = L.tileLayer.wms(layer.source.url, {
+            layers: layer.source.params.LAYERS,
+            version: layer.source.params.VERSION,
+            styles: layer.source.params.STYLES,
+            format: 'image/png',
+            transparent: true,
+            projections: layer.projections,
+          });
+      }
+    }
+  }
 }
 
 /**
@@ -124,6 +158,7 @@ export class LMap extends GeonaMap {
  * @return {Number}      Leaflet style zoom level
  */
 function leafletizeZoom(zoom) {
+  // TODO needs to handle the zoom differing between different projections
   // OpenLayers' zoom levels are one greater than Leaflet's for the same visible zoom
   return zoom - 1;
 }
@@ -134,6 +169,7 @@ function leafletizeZoom(zoom) {
  * @return {Number}      OpenLayers style zoom level
  */
 function deLeafletizeZoom(zoom) {
+  // TODO needs to handle the zoom differing between different projections
   return zoom + 1;
 }
 
