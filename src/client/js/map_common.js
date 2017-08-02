@@ -213,7 +213,11 @@ export let borderLayers = [
       type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line-white'},
+      params: {
+        layers: 'rsg:full_10m_borders',
+        version: '1.1.0',
+        styles: 'line-white',
+      },
     },
   },
   {
@@ -224,7 +228,11 @@ export let borderLayers = [
       type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line_black'},
+      params: {
+        layers: 'rsg:full_10m_borders',
+        version: '1.1.0',
+        styles: 'line_black',
+      },
     },
   },
   {
@@ -235,7 +243,11 @@ export let borderLayers = [
       type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line'},
+      params: {
+        layers: 'rsg:full_10m_borders',
+        version: '1.1.0',
+        styles: 'line',
+      },
     },
   },
 ];

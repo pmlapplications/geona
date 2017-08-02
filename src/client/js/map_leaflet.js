@@ -126,8 +126,8 @@ export class LMap extends GeonaMap {
       switch (layer.source.type) {
         case 'wms':
           this.baseLayers_[layer.id] = L.tileLayer.wms(layer.source.url, {
-            layers: layer.source.params.LAYERS,
-            version: layer.source.params.VERSION,
+            layers: layer.source.params.layers,
+            version: layer.source.params.version,
             attribution: layer.source.attributions,
             projections: layer.projections,
           });
@@ -144,9 +144,9 @@ export class LMap extends GeonaMap {
       switch (layer.source.type) {
         case 'wms':
           this.countryBorderLayers_[layer.id] = L.tileLayer.wms(layer.source.url, {
-            layers: layer.source.params.LAYERS,
-            version: layer.source.params.VERSION,
-            styles: layer.source.params.STYLES,
+            layers: layer.source.params.layers,
+            version: layer.source.params.version,
+            styles: layer.source.params.styles,
             format: 'image/png',
             transparent: true,
             projections: layer.projections,
