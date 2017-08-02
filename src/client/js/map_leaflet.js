@@ -18,14 +18,14 @@ export class LMap extends GeonaMap {
 
     /** @type {Object} The map config */
     this.config = config;
+    /** @private @type {Object} The available basemaps */
     this.baseLayers_ = {};
+    /** @private @type {Object} The available country border layers */
     this.countryBorderLayers_ = {};
+    /** @private @type {L.latlngGraticule} The map graticule */
     this.graticule_ = L.latlngGraticule();
 
-    this.initBaseLayers_();
-    this.initCountryBorderLayers_();
-
-    /** @type {L.map} The Leaflet map */
+    /** @private @type {L.map} The Leaflet map */
     this.map_ = L.map(this.config.divId, {
       crs: leafletizeProjection(this.config.projection),
       center: [0, 0],
@@ -46,6 +46,10 @@ export class LMap extends GeonaMap {
       imperial: false,
       position: 'topright',
     }).addTo(this.map_);
+
+    // Load the default base layers and borders layers, plus any custom ones defined in the config
+    this.loadBaseLayers_();
+    this.loadCountryBorderLayers_();
 
     if (this.config.basemap !== 'none') {
       this.setBasemap(this.config.basemap);
@@ -133,8 +137,9 @@ export class LMap extends GeonaMap {
 
   /**
    * Load the default basemaps, and any defined in the config.
+   * @private
    */
-  initBaseLayers_() {
+  loadBaseLayers_() {
     for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
@@ -151,8 +156,9 @@ export class LMap extends GeonaMap {
 
   /**
    * Load the default border layers, and any defined in the config.
+   * @private
    */
-  initCountryBorderLayers_() {
+  loadCountryBorderLayers_() {
     for (let layer of defaultBorders) {
       switch (layer.source.type) {
         case 'wms':
@@ -171,23 +177,36 @@ export class LMap extends GeonaMap {
 
 /**
  * Adjust a provided OpenLayers style zoom level to be correct for leaflet.
- * @param  {Number} zoom OpenLayers style zoom level
- * @return {Number}      Leaflet style zoom level
+ * @param  {Number} zoom       OpenLayers style zoom level
+ * @param  {String} projection The projection that the zoom is for
+ * @return {Number}            Leaflet style zoom level
  */
-function leafletizeZoom(zoom) {
-  // TODO needs to handle the zoom differing between different projections
-  // OpenLayers' zoom levels are one greater than Leaflet's for the same visible zoom
-  return zoom - 1;
+function leafletizeZoom(zoom, projection) {
+  switch (projection) {
+    case 'EPSG:3857':
+      return zoom;
+    case 'EPSG:4326':
+      return zoom - 1;
+    default:
+      return zoom;
+  }
 }
 
 /**
  * Adjust a provided Leaflet style zoom level to be correct for OpenLayers.
- * @param  {Number} zoom Leaflet style zoom level
- * @return {Number}      OpenLayers style zoom level
+ * @param  {Number} zoom       Leaflet style zoom level
+ * @param  {String} projection The projection that the zoom is for
+ * @return {Number}            OpenLayers style zoom level
  */
-function deLeafletizeZoom(zoom) {
-  // TODO needs to handle the zoom differing between different projections
-  return zoom + 1;
+function deLeafletizeZoom(zoom, projection) {
+  switch (projection) {
+    case 'EPSG:3857':
+      return zoom;
+    case 'EPSG:4326':
+      return zoom + 1;
+    default:
+      return zoom;
+  }
 }
 
 /**
@@ -226,6 +245,10 @@ function deLeafletizeProjection(projection) {
   }
 }
 
+/**
+ * Load the Leaflet library and any Leaflet plugins
+ * @param  {Function} next
+ */
 export function init(next) {
   if (L) {
     // If leaflet has already been loaded
