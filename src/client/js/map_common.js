@@ -40,10 +40,9 @@ export let baseLayers = [
       crossOrigin: null,
       attributions: ['EOX'],
       params: {
-        // TODO these should be lowercase
-        LAYERS: 'terrain-light',
-        VERSION: '1.1.1',
-        FORMAT: 'image/jpeg',
+        layers: 'terrain-light',
+        version: '1.1.1',
+        format: 'image/jpeg',
         wrapDateLine: true,
       },
     },
@@ -73,9 +72,9 @@ export let baseLayers = [
       crossOrigin: null,
       attributions: ['GEBCO'],
       params: {
-        LAYERS: 'gebco_08_grid',
-        VERSION: '1.1.1',
-        FORMAT: 'image/jpeg',
+        layers: 'gebco_08_grid',
+        version: '1.1.1',
+        format: 'image/jpeg',
         wrapDateLine: true},
     },
     viewSettings: {
@@ -91,9 +90,10 @@ export let baseLayers = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
+      attributions: ['EOX Sentinel-2'],
       params: {
-        LAYERS: 's2cloudless',
-        VERSION: '1.1.1',
+        layers: 's2cloudless',
+        version: '1.1.1',
         wrapDateLine: true,
       },
     },
@@ -110,9 +110,10 @@ export let baseLayers = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
+      attributions: ['Blue Marble Attribution'],
       params: {
-        LAYERS: 'bluemarble',
-        VERSION: '1.1.1',
+        layers: 'bluemarble',
+        version: '1.1.1',
         wrapDateLine: true,
       },
     },
@@ -129,9 +130,10 @@ export let baseLayers = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
+      attributions: ['Black Marble Attribution'],
       params: {
-        LAYERS: 'blackmarble',
-        VERSION: '1.1.1',
+        layers: 'blackmarble',
+        version: '1.1.1',
         wrapDateLine: true,
       },
     },
@@ -190,8 +192,8 @@ export let baseLayers = [
     viewSettings: {
       minZoom: 10,
       maxZoom: 16,
-      defaultCenter: [53.825564, -2.421976],
-      extent: [-6.33, 49.83, -0.77, 60.87],
+      center: [51.502874, -0.126704],
+      extent: [49.83, -6.33, 60.87, 1.84],
     },
   },
 ];
@@ -211,11 +213,7 @@ export let borderLayers = [
       type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {
-        LAYERS: 'rsg:full_10m_borders',
-        VERSION: '1.1.0',
-        STYLES: 'line-white',
-      },
+      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line-white'},
     },
   },
   {
@@ -226,11 +224,7 @@ export let borderLayers = [
       type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {
-        LAYERS: 'rsg:full_10m_borders',
-        VERSION: '1.1.0',
-        STYLES: 'line_black',
-      },
+      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line_black'},
     },
   },
   {
@@ -241,11 +235,7 @@ export let borderLayers = [
       type: 'wms',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {
-        LAYERS: 'rsg:full_10m_borders',
-        VERSION: '1.1.0',
-        STYLES: 'line',
-      },
+      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line'},
     },
   },
 ];

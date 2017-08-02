@@ -9,6 +9,7 @@ let ol;
  */
 export class OlMap extends GeonaMap {
   constructor(config) {
+    // TODO JSDoc comment for class OlMap
     super();
     /** @type {Object} object containing configuration options */
     this.config = config;
@@ -24,13 +25,9 @@ export class OlMap extends GeonaMap {
     this.baseActive_ = false;
     /** @private @type {Boolean} tracks whether a border layer is currently on the map */
     this.borderActive_ = false;
-    window.testMap = this;
-  }
+    /** @private @type {Boolean} tracks whether the map has been created for the first time */
+    this.mapInitiallyCreated_ = false;
 
-  /**
-    * Creates a new OpenLayers map and adds various features and controls to the map.
-    */
-  createMap() {
     this.initBaseLayers();
     this.map_ = new ol.Map({
       view: new ol.View(
@@ -60,7 +57,7 @@ export class OlMap extends GeonaMap {
       ],
 
     });
-    // If basemap defined in the config, add it to the map.
+
     if (this.config.basemap) {
       this.setBasemap(this.config.basemap);
     }
@@ -75,26 +72,26 @@ export class OlMap extends GeonaMap {
       this.toggleGraticule();
     }
 
-    this.setBasemap('bingMapsOS');
-    // this.setProjection('EPSG:3857');
+    window.testMap = this;
+    window.ol = ol;
   }
 
   /**
-    * Remove the current basemap and add a new one.
-    *
-    * @param {String} basemap The id used to select the new basemap.
-    */
+   * Remove the current basemap and add a new one.
+   *
+   * @param {String} basemap The id used to select the new basemap.
+   */
   setBasemap(basemap) {
     this.removeBasemap_();
     this.addBasemap_(basemap);
   }
 
   /**
-    * Remove the current basemap layer.
-    *
-    * TODO test with multiple layers on map (function may be removing ALL layers)
-    * @private
-    */
+   * Remove the current basemap layer.
+   *
+   * TODO test with multiple layers on map (function may be removing ALL layers)
+   * @private
+   */
   removeBasemap_() {
     if (this.baseActive_) {
       this.map_.removeLayer(this.map_.getLayers().item(0));
@@ -103,71 +100,76 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Sets new basemap layer, and updates the View.
-    *
-    * TODO test with multiple layers on map (function may be adding above existing layers)
-    *
-    * @private
-    * @param {String} basemap The id used to select the new basemap.
-    */
+   * Sets new basemap layer, and updates the View.
+   *
+   * TODO test with multiple layers on map (function may be adding above existing layers)
+   * TODO 'basemap id not found' error check? Might not matter actually
+   *
+   * @private
+   * @param {String} basemap The id used to select the new basemap.
+   */
   addBasemap_(basemap) {
     if (basemap !== 'none') {
-      this.map_.getLayers().insertAt(0, this.baseLayers_[basemap].tile);
-      this.setView(this.populateSetViewProperties_(basemap));
+      this.map_.getLayers().insertAt(0, this.baseLayers_[basemap]);
+      if (this.baseLayers_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
+        console.log('Projection doesnt need to change');
+        this.setView(this.baseLayers_[basemap].get('viewSettings'));
+      } else {
+        console.log('Projection needs to change');
+        let options = this.baseLayers_[basemap].get('viewSettings');
+        options.projection = this.baseLayers_[basemap].get('projections')[0];
+        console.log(options);
+        this.setView(options);
+      }
       this.baseActive_ = true;
     }
   }
 
   /**
-    * Sets the this.config.basemap to the map's current base layer
-    *
-    * TODO test with real config
-    */
+   * Sets the this.config.basemap to the map's current base layer
+   *
+   * TODO test with real config
+   */
   setConfigBasemap() {
     this.config.basemap = this.map_.getLayers().item(0);
   }
 
   /**
-    * Changes the projection style, if allowed for the current basemap.
-    *
-    * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
-    */
+   * Changes the projection style, if allowed for the current basemap.
+   *
+   * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
+   */
   setProjection(projection) {
+    // TODO test with different basemap with support for multiple projections (might be resetting to projections[0])
     if (this.baseActive_ === true) {
       let basemapId = this.map_.getLayers().item(0).get('id');
       /* If basemap supports new projection, we can change the view */
-      if (this.baseLayers_[basemapId].tile.get('projections').indexOf(projection) >= 0) {
-        let newView = new ol.View({
-          projection: projection,
-          minZoom: this.map_.getView().getMinZoom(),
-          maxZoom: this.map_.getView().getMaxZoom(),
-          zoom: this.map_.getView().getZoom(),
-          center: ol.proj.fromLonLat(this.map_.getView().getCenter(), projection),
-        });
-        this.map_.setView(newView);
+      if (this.baseLayers_[basemapId].get('projections').includes(projection)) {
+        this.setView({projection: projection}, false);
       } else {
-        alert('basemap ' + basemapId + ' does not support projection type ' + projection + '. Please select a different basemap.');
+        // TODO replace with notification
+        alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     }
   }
 
   /**
-    * Removes the current country borders layer, and replaces it
-    * with the specified country borders layer.
-    *
-    * @param {String} border The Key for the border colour in borderLayers_
-    */
+   * Removes the current country borders layer, and replaces it
+   * with the specified country borders layer.
+   *
+   * @param {String} border The Key for the border colour in borderLayers_
+   */
   setCountryBordersLayer(border) {
     this.removeCountryBordersLayer_();
     this.addCountryBordersLayer_(border);
   }
 
   /**
-    * Adds the specified country borders layer to the top of the map.
-    *
-    * @private
-    * @param {String} border The Key for the border colour in borderLayers_
-    */
+   * Adds the specified country borders layer to the top of the map.
+   *
+   * @private
+   * @param {String} border The Key for the border colour in borderLayers_
+   */
   addCountryBordersLayer_(border) {
     if (border !== 'none') {
       try {
@@ -182,9 +184,9 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Removes the currently active country borders layer.
-    * @private
-    */
+   * Removes the currently active country borders layer.
+   * @private
+   */
   removeCountryBordersLayer_() {
     if (this.borderActive_ === true) {
       // Removes the top-most layer (border will always be on top)
@@ -194,9 +196,9 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Replaces/creates the countryBorders parameter in the config, setting it
-    * to the current country borders layer.
-    */
+   * Replaces/creates the countryBorders parameter in the config, setting it
+   * to the current country borders layer.
+   */
   setConfigCountryBordersLayer() {
     if (this.borderActive_ === true) {
       // sets the config parameter to the top layer
@@ -205,11 +207,11 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Creates a new Key-Value map containing layer information for the
-    * different country border layers.
-    *
-    * When adding a new layer, the Key should be set to the colour of the lines.
-    */
+   * Creates a new Key-Value map containing layer information for the
+   * different country border layers.
+   *
+   * When adding a new layer, the Key should be set to the colour of the lines.
+   */
   initCountryBordersLayers() {
     this.borderLayers_ = {};
 
@@ -217,11 +219,11 @@ export class OlMap extends GeonaMap {
       let source = new ol.source.TileWMS({
         url: layer.source.url,
         crossOrigin: layer.source.crossOrigin,
+        projection: this.map_.getView().getProjection(),
         params: {
-          LAYERS: layer.source.params.LAYERS,
-          VERSION: layer.source.params.VERSION,
-          STYLES: layer.source.params.STYLES,
-          SRS: this.map_.getView().getProjection(),
+          LAYERS: layer.source.params.layers,
+          VERSION: layer.source.params.version,
+          STYLES: layer.source.params.styles,
         },
       });
 
@@ -234,10 +236,10 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Initialises the graticule, but does not make it visible.
-    *
-    * The graticule is made visible in the toggleGraticule() function.
-    */
+   * Initialises the graticule, but does not make it visible.
+   *
+   * The graticule is made visible in the toggleGraticule() function.
+   */
   initGraticule() {
     this.graticule_ = new ol.Graticule({
       strokeStyle: new ol.style.Stroke({
@@ -250,30 +252,26 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-    * Toggles visibility of map graticule.
-    */
+   * Toggles visibility of map graticule.
+   */
   toggleGraticule() {
     if (this.config.graticules) {
       this.graticule_.setMap(this.map_);
     } else {
-      try {
-        this.graticule_.setMap();
-      } catch (e) {
-        console.error('Caught error when trying to call graticule.setMap() in function toggleGraticule().');
-      }
+      this.graticule_.setMap();
     }
   }
 
   /**
-    * Uses the commonBasemaps array imported from './map_common.js'
-    * in order to dynamically create OpenLayers basemaps.
-    */
+   * Uses the commonBasemaps array imported from './map_common.js'
+   * in order to dynamically create OpenLayers basemaps.
+   */
   initBaseLayers() {
     this.baseLayers_ = {};
 
     for (let layer of commonBasemaps) {
-      if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey !== 'none')) {
-        this.baseLayers_[layer.id] = {tile: {}, view: {}};
+      if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey)) {
+        this.baseLayers_[layer.id] = {};
 
         let source;
         switch (layer.source.type) {
@@ -281,11 +279,11 @@ export class OlMap extends GeonaMap {
             source = new ol.source.TileWMS({
               url: layer.source.url,
               crossOrigin: layer.source.crossOrigin,
+              projection: layer.projections[0],
               params: {
-                LAYERS: layer.source.params.LAYERS,
-                VERSION: layer.source.params.VERSION,
-                SRS: layer.source.params.SRS,
-                FORMAT: layer.source.params.FORMAT,
+                LAYERS: layer.source.params.layers,
+                VERSION: layer.source.params.version,
+                FORMAT: layer.source.params.format,
                 wrapDateLine: layer.source.params.wrapDateLine,
               },
               attributions: layer.source.attributions,
@@ -300,12 +298,13 @@ export class OlMap extends GeonaMap {
               imagerySet: layer.source.imagerySet,
             });
         }
-        this.baseLayers_[layer.id].tile = new ol.layer.Tile({
+        this.baseLayers_[layer.id] = new ol.layer.Tile({
           id: layer.id,
           title: layer.title,
           description: layer.description,
           projections: layer.projections,
           source: source,
+          viewSettings: layer.viewSettings,
         });
       } else {
         console.error('bingMapsApiKey is null or undefined');
@@ -314,15 +313,14 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-  * Changes the map view based on the properties of the object passed in.
-  *
-  * @param {Object} properties An Object containing various properties used in order to set the View of the map.
-  * @param {Boolean} fitToExtent If true, the zoom will adjust to show the whole extent of the new View.
-  *
-  * TODO zoomToExtent parameter
-  */
+   * Changes the map view based on the properties of the object passed in.
+   *
+   * @param {Object} properties An Object containing various properties used in order to set the View of the map. Valid
+   *                           properties are: projection, extent, center, minZoom, maxZoom, zoom.
+   * @param {Boolean} fitToExtent If true, the zoom will adjust to show the whole extent of the new View.
+   */
   setView(properties, fitToExtent = false) {
-    /* These are the default values used in Geona */
+    /** These are the default values used in Geona */
     let projection = this.config.projection;
     let extent;
     let center = [0, 0];
@@ -330,35 +328,34 @@ export class OlMap extends GeonaMap {
     let maxZoom = 12;
     let zoom = 3;
 
-    /* The current values if the map exists */
-    if (this.map_.getView().getProjection()) {
-      projection = this.map_.getView().getProjection().code;
-    }
-    if (this.map_.getView().calculateExtent(this.map_.getSize())) {
-      extent = this.map_.getView().calculateExtent(this.map_.getSize());
-    }
-    if (this.map_.getView().getCenter()) {
-      center = this.map_.getView().getCenter();
-    }
-    if (this.map_.getView().getMinZoom()) {
-      minZoom = this.map_.getView().getMinZoom();
-    }
-    if (this.map_.getView().getMaxZoom()) {
-      maxZoom = this.map_.getView().getMaxZoom();
-    }
-    if (this.map_.getView().getZoom()) {
-      zoom = this.map_.getView().getZoom();
+    console.log(properties);
+
+    /** The current values if the map exists */
+    if (this.mapInitiallyCreated_ === true) {
+      if (this.map_.getView().getProjection()) {
+        projection = this.map_.getView().getProjection().getCode();
+      }
+      if ((properties.projection) && (this.map_.getView().getProjection().getCode() !== properties.projection)) {
+        center = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode());
+        center = ol.proj.fromLonLat(center, properties.projection);
+      } else {
+        center = this.map_.getView().getCenter();
+      }
+      if (this.map_.getView().getZoom()) {
+        zoom = this.map_.getView().getZoom();
+      }
     }
 
-    /* The properties that might be defined in the parameter */
+    /** The properties that might be defined in the parameter */
     if (properties.projection) {
       projection = properties.projection;
     }
     if (properties.extent) {
-      extent = properties.extent;
+      /* Converts the min and max coordinates from LatLon to current projection */
+      extent = ol.proj.fromLonLat([properties.extent[1], properties.extent[0]], projection).concat(ol.proj.fromLonLat([properties.extent[3], properties.extent[2]], projection));
     }
     if (properties.center) {
-      center = properties.center;
+      center = ol.proj.fromLonLat([properties.center[1], properties.center[0]], projection);
     }
     if (properties.minZoom) {
       minZoom = properties.minZoom;
@@ -370,79 +367,40 @@ export class OlMap extends GeonaMap {
       zoom = properties.zoom;
     }
 
-    /* Ensure that the center is within the extent */
+    /** Ensure that the center is within the extent */
     if ((extent) && (!ol.extent.containsCoordinate(extent, center))) {
       center = ol.extent.getCenter(extent);
     }
 
-    /* Ensure that the zoom is within the accepted bounds */
-    if ((zoom < minZoom) || (zoom > maxZoom)) {
+    /** Ensure that the zoom is within the accepted bounds */
+    if (zoom < minZoom) {
       zoom = minZoom;
     }
+    if (zoom > maxZoom) {
+      zoom = maxZoom;
+    }
 
-    let newView = this.map_.getView();
-      newView.projection = projection,
+    let newView = new ol.View({
+      projection: projection,
       extent: extent,
-      center: ol.proj.fromLonLat(center, projection),
+      center: center,
       minZoom: minZoom,
       maxZoom: maxZoom,
       zoom: zoom,
     });
-  }
 
-  /**
-   * Populates an object with a new basemap's specific options.
-   * (i.e. when a new basemap is added, this makes sure the specified properties from viewSettings are applied).
-   *
-   * @private
-   * @param {String} basemap The id of the basemap for which we will make the View.
-   * @return {Object} an object with certain properties set.
-   */
-  populateSetViewProperties_(basemap) {
-    let basemapSettings = this.searchObjectArray_(commonBasemaps, 'id', basemap);
-    let properties = {};
+    this.map_.setView(newView);
 
-    if (basemapSettings.projections.includes(this.config.projection)) {
-      properties.projection = this.config.projection;
-    } else {
-      properties.projection = basemapSettings.projections[0];
-    }
-    if (basemapSettings.viewSettings.extent) {
-      properties.extent = basemapSettings.viewSettings.extent;
-    }
-    if (basemapSettings.viewSettings.center) {
-      properties.center = basemapSettings.viewSettings.center;
-    }
-    if (basemapSettings.viewSettings.minZoom) {
-      properties.minZoom = basemapSettings.viewSettings.minZoom;
-    }
-    if (basemapSettings.viewSettings.maxZoom) {
-      properties.maxZoom = basemapSettings.viewSettings.maxZoom;
-    }
-    if (basemapSettings.viewSettings.zoom) {
-      properties.zoom = basemapSettings.viewSettings.zoom;
-    }
+    this.mapInitiallyCreated_ = true;
 
-    return properties;
-  }
-
-  /**
-  * Searches an array of objects for a specific value of a property, then returns the object if found, or null if not.
-  *
-  * @private
-  * @param {Array} arrayOfObjects The array to search.
-  * @param {String} property The property to check in each object.
-  * @param {*} value The desired value of the property.
-  *
-  * @return {Object | null} The object with the specified value in its property.
-  */
-  searchObjectArray_(arrayOfObjects, property, value) {
-    for (let i = 0; i < arrayOfObjects.length; i++) {
-      if (arrayOfObjects[i][property] === value) {
-        return arrayOfObjects[i];
+    /** Optionally fit the map in the extent */
+    if ((extent) && (fitToExtent)) {
+      this.map_.getView().fit(extent, ol.extent.getSize(extent));
+      if ((this.map_.getView().getZoom() < minZoom) || (this.map_.getView().getZoom() > maxZoom)) {
+        this.map_.getView().setZoom(zoom);
+        this.map_.getView().setCenter(center);
       }
     }
-    return null;
   }
 }
 /**
