@@ -26,7 +26,11 @@ module.exports = function(grunt) {
     'lodash',
   ];
 
-  let clientExternalLibs = vendorLibs.concat([
+  let leafletPlugins = [
+    './src/client/vendor/js/leaflet_latlng_graticule.js',
+  ];
+
+  let clientExternalLibs = vendorLibs.concat(leafletPlugins).concat([
     'openlayers',
     'leaflet',
   ]);
@@ -124,7 +128,7 @@ module.exports = function(grunt) {
         dest: 'static/js/vendor_leaflet.js',
         options: {
           browserifyOptions: {},
-          alias: ['leaflet'],
+          alias: ['leaflet'].concat(leafletPlugins),
           external: null,
         },
       },
@@ -146,9 +150,9 @@ module.exports = function(grunt) {
           // },
           {
             expand: true,
-            cwd: 'src/client/fonts',
+            cwd: 'src/client/vendor/fonts',
             src: ['*'],
-            dest: 'static/fonts',
+            dest: 'static/vendor/fonts',
           },
         ],
       },
@@ -189,11 +193,13 @@ module.exports = function(grunt) {
         },
         src: [
           'src/**/*.js',
+          '!src/client/vendor/**',
         ],
       },
       check: {
         src: [
           'src/**/*.js',
+          '!src/client/vendor/**',
         ],
       },
     },

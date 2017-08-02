@@ -11,10 +11,10 @@
  */
 export default class GeonaMap {
   /**
-   * Set the graticles as visible or not.
-   * @param  {Boolean} display True to display graticles
+   * Set the graticule as visible or not.
+   * @param  {Boolean} display True to display graticule
    */
-  displayGraticules(display) {}
+  displayGraticule(display) {}
 
   /**
    * Set the basemap.

@@ -8,6 +8,10 @@ let ol;
  * @implements {GeonaMap}
  */
 export class OlMap extends GeonaMap {
+  /**
+   * Instantiate a new OlMap and create a new OpenLayers map
+   * @param  {Object} config The map config to load
+   */
   constructor(config) {
     // TODO JSDoc comment for class OlMap
     super();

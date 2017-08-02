@@ -20,6 +20,7 @@ export class LMap extends GeonaMap {
     this.config = config;
     this.baseLayers_ = {};
     this.countryBorderLayers_ = {};
+    this.graticule_ = L.latlngGraticule();
 
     this.initBaseLayers_();
     this.initCountryBorderLayers_();
@@ -52,11 +53,23 @@ export class LMap extends GeonaMap {
   }
 
   /**
+   * Set the graticles as visible or not.
+   * @param  {Boolean} display True to display graticles
+   */
+  displayGraticule(display) {
+    if (display) {
+      this.graticule_.addTo(this.map_);
+    } else {
+      this.graticule_.remove();
+    }
+  }
+
+  /**
    * Set the basemap.
    * @param {String} basemap The id of the basemap to use, or 'none'
    */
   setBasemap(basemap) {
-    if (this.config.basemap !== 'none' && this.config.basemap !== basemap) {
+    if (this.config.basemap !== 'none') {
       this.baseLayers_[this.config.basemap].remove();
     }
 
@@ -224,10 +237,14 @@ export function init(next) {
       import('leaflet')
         .then((leaflet) => {
           L = leaflet;
-          // createBaseLayers();
-          // mapLayers = L.layerGroup();
+
+          // Import Leaflet plugins
+          return Promise.all([
+            import('../vendor/js/leaflet_latlng_graticule'),
+          ]);
+        })
+        .then(() => {
           next();
-          // setupZoom();
         });
     };
     mapJs.src = 'js/vendor_leaflet.js';
