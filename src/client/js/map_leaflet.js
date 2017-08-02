@@ -80,9 +80,14 @@ export class LMap extends GeonaMap {
     if (basemap !== 'none') {
       // TODO throw error if the provided basemap doesn't exist
       let newBasemap = this.baseLayers_[basemap];
+      let viewSettings = newBasemap.options.viewSettings;
+
       if (!newBasemap.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
-        this.setProjection(newBasemap.options.projections[0]);
+        viewSettings.projection = newBasemap.options.projections[0];
       }
+
+      this.setView(viewSettings);
+
       newBasemap.addTo(this.map_).bringToBack();
     }
 
@@ -116,23 +121,85 @@ export class LMap extends GeonaMap {
    */
   setProjection(projection) {
     // This is a bit of a hack and isn't officially supported by leaflet. Everything may fall over!
-    let LeafletProjection = leafletizeProjection(projection);
-    let center = this.map_.getCenter();
-    let zoom = this.map_.getZoom();
+    let leafletProjection = leafletizeProjection(projection);
 
-    switch (projection) {
-      case 'EPSG:3857':
-        zoom += 1;
-        break;
-      case 'EPSG:4326':
-        zoom -= 1;
-        break;
+    if (this.map_.options.crs !== leafletProjection) {
+      // If the map isn't already in the provided projection
+      let center = this.map_.getCenter();
+      let zoom = this.map_.getZoom();
+      let maxZoom = this.map_.getMaxZoom();
+      let minZoom = this.map_.getMinZoom();
+
+      console.log(zoom + ' ' + maxZoom + ' ' + minZoom);
+
+      switch (projection) {
+        case 'EPSG:3857':
+          zoom += 1;
+          maxZoom += 1;
+          minZoom += 1;
+          break;
+        case 'EPSG:4326':
+          zoom -= 1;
+          maxZoom -= 1;
+          minZoom -= 1;
+          break;
+      }
+
+      this.setView({
+        maxZoom: maxZoom,
+        minZoom: minZoom,
+      });
+
+      this.map_.options.crs = leafletProjection;
+      this.map_._resetView(center, zoom);
+
+      console.log(zoom + ' ' + maxZoom + ' ' + minZoom);
+
+      this.config.projection = projection;
+    }
+  }
+
+  /**
+   * Set the map view with the provided options
+   * @param {Object}  options            View options. All are optional
+   * @param {Array}   options.bounds     Bounds to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.center     The centre as [lat, lon]
+   * @param {Array}   options.extent     An extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Number}  options.maxZoom    The maximum allowed zoom
+   * @param {Number}  options.minZoom    The minimum allowed zoom
+   * @param {String}  options.projection The projection
+   * @param {Number}  options.zoom       The zoom
+   */
+  setView(options) {
+    if (options.projection) {
+      this.setProjection(options.projection);
     }
 
-    this.map_.options.crs = LeafletProjection;
-    this.map_._resetView(center, zoom);
+    if (options.bounds) {
+      this.map_.setMaxBounds([options.extent.slice(0, 2), options.extent.slice(2, 4)]);
+    }
 
-    this.config.projection = projection;
+    if (options.extent) {
+      this.map_.fitBounds([options.extent.slice(0, 2), options.extent.slice(2, 4)]);
+    }
+
+    if (options.center) {
+      this.map_.panTo(options.center);
+    }
+
+    if (options.maxZoom || options.minZoom || options.zoom) {
+      let projection = leafletizeProjection(options.projection) || this.map_.options.crs;
+
+      if (options.maxZoom) {
+        this.map_.setMaxZoom(leafletizeZoom(options.maxZoom, projection));
+      }
+      if (options.minZoom) {
+        this.map_.setMinZoom(leafletizeZoom(options.minZoom, projection));
+      }
+      if (options.zoom) {
+        this.setZoom(leafletizeZoom(options.zoom, projection));
+      }
+    }
   }
 
   /**
@@ -148,6 +215,7 @@ export class LMap extends GeonaMap {
             version: layer.source.params.version,
             attribution: layer.source.attributions,
             projections: layer.projections,
+            viewSettings: layer.viewSettings,
           });
           break;
       }
@@ -178,14 +246,14 @@ export class LMap extends GeonaMap {
 /**
  * Adjust a provided OpenLayers style zoom level to be correct for leaflet.
  * @param  {Number} zoom       OpenLayers style zoom level
- * @param  {String} projection The projection that the zoom is for
+ * @param  {L.CRS}  projection The projection that the zoom is for
  * @return {Number}            Leaflet style zoom level
  */
 function leafletizeZoom(zoom, projection) {
   switch (projection) {
-    case 'EPSG:3857':
+    case L.CRS.EPSG3857:
       return zoom;
-    case 'EPSG:4326':
+    case L.CRS.EPSG4326:
       return zoom - 1;
     default:
       return zoom;
@@ -195,14 +263,14 @@ function leafletizeZoom(zoom, projection) {
 /**
  * Adjust a provided Leaflet style zoom level to be correct for OpenLayers.
  * @param  {Number} zoom       Leaflet style zoom level
- * @param  {String} projection The projection that the zoom is for
+ * @param  {L.CRS}  projection The projection that the zoom is for
  * @return {Number}            OpenLayers style zoom level
  */
 function deLeafletizeZoom(zoom, projection) {
   switch (projection) {
-    case 'EPSG:3857':
+    case L.CRS.EPSG3857:
       return zoom;
-    case 'EPSG:4326':
+    case L.CRS.EPSG4326:
       return zoom + 1;
     default:
       return zoom;
