@@ -11,9 +11,9 @@
  * - source: url
  * - source: crossOrigin
  * - source: attributions []
- * - source: params: LAYERS
- * - source: params: VERSION
- * - source: params: FORMAT
+ * - source: params: layers
+ * - source: params: version
+ * - source: params: format
  * - source: params: wrapDateLine
  *
  * A bing tile must also include the following information:
@@ -44,9 +44,9 @@ export let baseLayers = [
       crossOrigin: null,
       attributions: ['EOX'],
       params: {
-        LAYERS: 'terrain-light',
-        VERSION: '1.1.1',
-        FORMAT: 'image/jpeg',
+        layers: 'terrain-light',
+        version: '1.1.1',
+        format: 'image/jpeg',
         wrapDateLine: true,
       },
     },
@@ -76,9 +76,9 @@ export let baseLayers = [
       crossOrigin: null,
       attributions: ['GEBCO'],
       params: {
-        LAYERS: 'gebco_08_grid',
-        VERSION: '1.1.1',
-        FORMAT: 'image/jpeg',
+        layers: 'gebco_08_grid',
+        version: '1.1.1',
+        format: 'image/jpeg',
         wrapDateLine: true},
     },
     viewSettings: {
@@ -94,9 +94,10 @@ export let baseLayers = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
+      attributions: ['EOX Sentinel-2'],
       params: {
-        LAYERS: 's2cloudless',
-        VERSION: '1.1.1',
+        layers: 's2cloudless',
+        version: '1.1.1',
         wrapDateLine: true,
       },
     },
@@ -113,9 +114,10 @@ export let baseLayers = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
+      attributions: ['Blue Marble Attribution'],
       params: {
-        LAYERS: 'bluemarble',
-        VERSION: '1.1.1',
+        layers: 'bluemarble',
+        version: '1.1.1',
         wrapDateLine: true,
       },
     },
@@ -132,9 +134,10 @@ export let baseLayers = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
+      attributions: ['Black Marble Attribution'],
       params: {
-        LAYERS: 'blackmarble',
-        VERSION: '1.1.1',
+        layers: 'blackmarble',
+        version: '1.1.1',
         wrapDateLine: true,
       },
     },
@@ -206,9 +209,9 @@ export let baseLayers = [
  * - title
  * - source: url
  * - source: crossOrigin
- * - source: params: LAYERS
- * - source: params: VERSION
- * - source: params: STYLES
+ * - source: params: layers
+ * - source: params: version
+ * - source: params: styles
  */
 
 export let borderLayers = [
@@ -219,7 +222,7 @@ export let borderLayers = [
       type: 'border',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line-white'},
+      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line-white'},
     },
   },
   {
@@ -229,7 +232,7 @@ export let borderLayers = [
       type: 'border',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line_black'},
+      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line_black'},
     },
   },
   {
@@ -239,7 +242,7 @@ export let borderLayers = [
       type: 'border',
       url: 'https://rsg.pml.ac.uk/geoserver/wms?',
       crossOrigin: null,
-      params: {LAYERS: 'rsg:full_10m_borders', VERSION: '1.1.0', STYLES: 'line'},
+      params: {layers: 'rsg:full_10m_borders', version: '1.1.0', styles: 'line'},
     },
   },
 ];

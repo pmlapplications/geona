@@ -20,7 +20,6 @@ export class Geona {
       case 'openlayers':
         ol.init(() => {
           this.map = new ol.OlMap(this.config.get('map'));
-          this.map.createMap();
         });
         break;
       case 'leaflet':
