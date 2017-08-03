@@ -24,13 +24,15 @@
  * - minZoom: 3
  * - maxZoom: 12
  * - center: [0, 0]
- * - extent: undefined
+ * - maxExtent: undefined
+ * - fitExtent: undefined
  *
  * If you wish to change one or more these options for a layer, create
  * an object 'viewSettings' at the top layer within the main object
  * (i.e. at the same depth as id, title etc.). Then enter any different
  * settings within this 'viewSettings' object.
- * 'center' and 'extent' should be defined as Lat,Lon (y,x)
+ * 'center' should be defined as Lat,Lon (y,x)
+ * 'maxExtent' and 'fitExtent' should be defined as MinLat, MinLon, MaxLat, MaxLon
  */
 export let baseLayers = [
   {
@@ -103,6 +105,7 @@ export let baseLayers = [
     },
     viewSettings: {
       maxZoom: 14,
+      fitExtent: [22.02, -33.86, 82.85, 56.12],
     },
   },
   {
@@ -197,7 +200,7 @@ export let baseLayers = [
       minZoom: 10,
       maxZoom: 16,
       center: [51.502874, -0.126704],
-      extent: [49.83, -6.33, 60.87, 1.84],
+      maxExtent: [49.83, -6.33, 60.87, 1.84],
     },
   },
 ];

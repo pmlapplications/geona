@@ -113,7 +113,7 @@ export class OlMap extends GeonaMap {
       let basemapId = this.map_.getLayers().item(0).get('id');
       /* If basemap supports new projection, we can change the view */
       if (this.baseLayers_[basemapId].get('projections').includes(projection)) {
-        this.setView({projection: projection}, false);
+        this.setView({projection: projection});
       } else {
         // TODO replace with notification
         alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
@@ -150,37 +150,6 @@ export class OlMap extends GeonaMap {
     }
 
     this.config.countryBorders = border;
-  }
-
-  /**
-   * Adds the specified country borders layer to the top of the map.
-   *
-   * @private
-   * @param {String} border The Key for the border colour in borderLayers_
-   */
-  addCountryBordersLayer_(border) {
-    if (border !== 'none') {
-      try {
-        this.map_.addLayer(this.borderLayers_[border]);
-        this.borderActive_ = true;
-      } catch (e) {
-      // error will have occurred because the borders have not loaded,
-      // or because the specified border does not exist.
-        console.error(e);
-      }
-    }
-  }
-
-  /**
-   * Removes the currently active country borders layer.
-   * @private
-   */
-  removeCountryBordersLayer_() {
-    if (this.borderActive_ === true) {
-      // Removes the top-most layer (border will always be on top)
-      this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
-      this.borderActive_ = false;
-    }
   }
 
   /**
@@ -295,14 +264,14 @@ export class OlMap extends GeonaMap {
    * Changes the map view based on the properties of the object passed in.
    *
    * @param {Object} properties An Object containing various properties used in order to set the View of the map. Valid
-   *                           properties are: projection, extent, center, minZoom, maxZoom, zoom.
-   * @param {Boolean} fitToExtent If true, the zoom will adjust to show the whole extent of the new View.
+   *                           properties are: projection, maxExtent, fitExtent, center, minZoom, maxZoom, zoom.
    * //TODO save settings to config
    */
-  setView(properties, fitToExtent = false) {
+  setView(properties) {
     /** These are the default values used in Geona */
     let projection = this.config.projection;
-    let extent;
+    let maxExtent;
+    let fitExtent;
     let center = [0, 0];
     let minZoom = 3;
     let maxZoom = 12;
@@ -315,7 +284,7 @@ export class OlMap extends GeonaMap {
       if (this.map_.getView().getProjection()) {
         projection = this.map_.getView().getProjection().getCode();
       }
-      if ((properties.projection) && (this.map_.getView().getProjection().getCode() !== properties.projection)) {
+      if (properties.projection && this.map_.getView().getProjection().getCode() !== properties.projection) {
         center = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode());
         center = ol.proj.fromLonLat(center, properties.projection);
       } else {
@@ -330,9 +299,14 @@ export class OlMap extends GeonaMap {
     if (properties.projection) {
       projection = properties.projection;
     }
-    if (properties.extent) {
+    if (properties.maxExtent) {
       /* Converts the min and max coordinates from LatLon to current projection */
-      extent = ol.proj.fromLonLat([properties.extent[1], properties.extent[0]], projection).concat(ol.proj.fromLonLat([properties.extent[3], properties.extent[2]], projection));
+      maxExtent = ol.proj.fromLonLat([properties.maxExtent[1], properties.maxExtent[0]], projection)
+        .concat(ol.proj.fromLonLat([properties.maxExtent[3], properties.maxExtent[2]], projection));
+    }
+    if (properties.fitExtent) {
+      fitExtent = ol.proj.fromLonLat([properties.fitExtent[1], properties.fitExtent[0]], projection)
+        .concat(ol.proj.fromLonLat([properties.fitExtent[3], properties.fitExtent[2]], projection));
     }
     if (properties.center) {
       center = ol.proj.fromLonLat([properties.center[1], properties.center[0]], projection);
@@ -347,9 +321,9 @@ export class OlMap extends GeonaMap {
       zoom = properties.zoom;
     }
 
-    /** Ensure that the center is within the extent */
-    if ((extent) && (!ol.extent.containsCoordinate(extent, center))) {
-      center = ol.extent.getCenter(extent);
+    /** Ensure that the center is within the maxExtent */
+    if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
+      center = ol.extent.getCenter(maxExtent);
     }
 
     /** Ensure that the zoom is within the accepted bounds */
@@ -362,7 +336,7 @@ export class OlMap extends GeonaMap {
 
     let newView = new ol.View({
       projection: projection,
-      extent: extent,
+      extent: maxExtent,
       center: center,
       minZoom: minZoom,
       maxZoom: maxZoom,
@@ -371,10 +345,11 @@ export class OlMap extends GeonaMap {
 
     this.map_.setView(newView);
 
-    /** Optionally fit the map in the extent */
-    if ((extent) && (fitToExtent)) {
-      this.map_.getView().fit(extent, ol.extent.getSize(extent));
-      if ((this.map_.getView().getZoom() < minZoom) || (this.map_.getView().getZoom() > maxZoom)) {
+    /** Fit the map in the fitExtent */
+    if (fitExtent) {
+      console.log(fitExtent);
+      this.map_.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
+      if (this.map_.getView().getZoom() < minZoom || this.map_.getView().getZoom() > maxZoom) {
         this.map_.getView().setZoom(zoom);
         this.map_.getView().setCenter(center);
       }
@@ -387,7 +362,7 @@ export class OlMap extends GeonaMap {
  */
 export function init(next) {
   if (ol) {
-    // If ol has already been loaded
+    /** If ol has already been loaded */
     next();
   } else {
     let head = document.getElementsByTagName('head')[0];
