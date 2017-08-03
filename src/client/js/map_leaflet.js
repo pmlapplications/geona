@@ -162,9 +162,9 @@ export class LMap extends GeonaMap {
   /**
    * Set the map view with the provided options
    * @param {Object}  options            View options. All are optional
-   * @param {Array}   options.bounds     Bounds to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
    * @param {Array}   options.center     The centre as [lat, lon]
-   * @param {Array}   options.extent     An extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
    * @param {String}  options.projection The projection
@@ -175,11 +175,11 @@ export class LMap extends GeonaMap {
       this.setProjection(options.projection);
     }
 
-    if (options.bounds) {
+    if (options.maxExtent) {
       this.map_.setMaxBounds([options.extent.slice(0, 2), options.extent.slice(2, 4)]);
     }
 
-    if (options.extent) {
+    if (options.fitExtent) {
       this.map_.fitBounds([options.extent.slice(0, 2), options.extent.slice(2, 4)]);
     }
 
