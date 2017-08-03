@@ -13,24 +13,27 @@
   <script>
     var config1 = {
       map: {
-        divId: 'ol'
+        divId: 'ol',
+        graticule: true,
+        bingMapsApiKey: 'AgNtBFpBNF81T-ODIf_9WzE8UF_epbsfiSu9RYMbLfq_wXU_bBVAoyBw8VzfSjkd',
+        viewSettings: {
+          fitExtent: [0,0,10,10],
+        }
       }
-      // mapLibrary: "openlayers",
-      // mapDivID: "ol",
-      // mapBaseMap: "GEBCO",
-      // mapProjection: "EPSG:3857",
-      // mapGraticule: "true",
-      // mapCountryBorders: "black",
     };
     var config2 = {
-      mapLibrary: "leaflet",
-      mapDivID: "leaf",
-      mapBaseMap: "GEBCO",
-      mapCountryBorders: "black",
+      map: {
+        divId: 'leaflet',
+        library: 'leaflet',
+        graticule: true,
+        viewSettings: {
+          fitExtent: [0,0,10,10],
+        }
+      }
     };
     // instantiates new loader for map
     gp2Loader.load(config1);
-    //gp2Loader.load(config2);
+    gp2Loader.load(config2);
 
     // setTimeout(function() {
     //   var map2 = new gp2.Loader(config2);
@@ -38,12 +41,26 @@
 
   </script>
 
+  <style type="text/css">
+    #ol {
+      position: absolute;
+      left: 0;
+      width: 50%;
+      height: 100%;
+    }
+    #leaflet {
+      position: absolute;
+      right: 0;
+      width: 50%;
+      height: 100%;
+    }
+  </style>
+
 </head>
 
 <body>
-  <div id="map"></div>
   <div id="ol"></div>
-  <div id="leaf"></div>
+  <div id="leaflet"></div>
 </body>
 
 </html>
