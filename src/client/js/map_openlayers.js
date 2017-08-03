@@ -24,7 +24,7 @@ export class OlMap extends GeonaMap {
     /** @private @type {Boolean} tracks whether the map has been created for the first time */
     this.initialized = false;
 
-    this.initBaseLayers();
+    this.loadBaseLayers();
     this.map_ = new ol.Map({
       view: new ol.View(
         {
@@ -58,14 +58,14 @@ export class OlMap extends GeonaMap {
       this.setBasemap(this.config.basemap);
     }
 
-    this.initCountryBordersLayers();
+    this.loadCountryBordersLayers();
     if (this.config.countryBorders) {
       this.setCountryBordersLayer(this.config.countryBorders);
     }
 
     this.initGraticule();
     if (this.config.graticule) {
-      this.toggleGraticule();
+      this.displayGraticule(this.config.graticule);
     }
 
     /** Must come last in the method */
@@ -158,7 +158,7 @@ export class OlMap extends GeonaMap {
    *
    * When adding a new layer, the Key should be set to the colour of the lines.
    */
-  initCountryBordersLayers() {
+  loadCountryBordersLayers() {
     this.borderLayers_ = {};
 
     for (let layer of commonBorders) {
@@ -199,14 +199,16 @@ export class OlMap extends GeonaMap {
 
   /**
    * Toggles visibility of map graticule.
+   * 
+   * @param {Boolean} display if true, display the graticule
    */
-  toggleGraticule() {
-    if (this.config.graticule && this.initialized) {
-      this.graticule_.setMap();
-      this.config.graticule = false;
-    } else {
+  displayGraticule(display) {
+    if (display) {
       this.graticule_.setMap(this.map_);
       this.config.graticule = true;
+    } else {
+      this.graticule_.setMap();
+      this.config.graticule = false;
     }
   }
 
@@ -214,7 +216,7 @@ export class OlMap extends GeonaMap {
    * Uses the commonBasemaps array imported from './map_common.js'
    * in order to dynamically create OpenLayers basemaps.
    */
-  initBaseLayers() {
+  loadBaseLayers() {
     this.baseLayers_ = {};
 
     for (let layer of commonBasemaps) {
