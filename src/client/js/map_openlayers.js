@@ -21,10 +21,6 @@ export class OlMap extends GeonaMap {
     this.borderLayers_ = null;
     /** @private @type {ol.Graticule} an OpenLayers graticule which is added to the map  */
     this.graticule_ = null;
-    /** @private @type {Boolean} tracks whether a basemap is currently on the map */
-    this.baseActive_ = false;
-    /** @private @type {Boolean} tracks whether a border layer is currently on the map */
-    this.borderActive_ = false;
     /** @private @type {Boolean} tracks whether the map has been created for the first time */
     this.initialized = false;
 
@@ -68,7 +64,7 @@ export class OlMap extends GeonaMap {
     }
 
     this.initGraticule();
-    if (this.config.graticules === 'true') {
+    if (this.config.graticule) {
       this.toggleGraticule();
     }
 
@@ -234,13 +230,14 @@ export class OlMap extends GeonaMap {
 
   /**
    * Toggles visibility of map graticule.
-   * //TODO fix
    */
   toggleGraticule() {
-    if (this.config.graticules) {
-      this.graticule_.setMap(this.map_);
-    } else {
+    if (this.config.graticule && this.initialized) {
       this.graticule_.setMap();
+      this.config.graticule = false;
+    } else {
+      this.graticule_.setMap(this.map_);
+      this.config.graticule = true;
     }
   }
 
