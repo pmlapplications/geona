@@ -11,16 +11,16 @@
  */
 export default class GeonaMap {
   /**
-   * Set the basemap.
-   * @param {String} basemap The basemap to use, or 'none'
+   * Set the graticule as visible or not.
+   * @param  {Boolean} display True to display graticule
    */
-  setBasemap(basemap) {}
+  displayGraticule(display) {}
 
   /**
-   * Set the projection.
-   * @param {String} projection The projection to use
+   * Set the basemap.
+   * @param {String} basemap The id of the basemap to use, or 'none'
    */
-  setProjection(projection) {}
+  setBasemap(basemap) {}
 
   /**
    * Set the country borders to display, or none.
@@ -29,22 +29,29 @@ export default class GeonaMap {
   setCountryBorders(borders) {}
 
   /**
-   * Set the graticles as visible or not.
-   * @param  {Boolean} display True to display graticles
+   * Set the projection.
+   * @param {String} projection The projection to use
    */
-  displayGraticules(display) {}
+  setProjection(projection) {}
 
   /**
    * Set the map view with the provided options
-   * @param {Array}  centre     [lat,lon] array
-   * @param {Number} zoom       (optional) The  zoom level to use
-   * @param {Array}  extent     (optional) [min lat, min lon, max lat, max lon] array to set the maximum extents
-   *                            of the map
-   * @param {String} projection (optional) The projection to use
+   * @param {Object}  options            View options. All are optional
+   * @param {Array}   options.center     The centre as [lat, lon]
+   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Number}  options.maxZoom    The maximum allowed zoom
+   * @param {Number}  options.minZoom    The minimum allowed zoom
+   * @param {String}  options.projection The projection
+   * @param {Number}  options.zoom       The zoom
    */
-  setView(centre, zoom = undefined, extent = undefined, projection = undefined) {}
+  setView(options) {}
 }
 
 // Fields
-/** @type {Object} The config for the map. Also used to hold the current state of the map. */
+/**
+ * @type {Object} The config for the map. Also used to hold the current state of the map.
+ *                It may be read from outside the class to read/save the map state, but must never be modified by
+ *                anything outside the class.
+ */
 GeonaMap.prototype.config;

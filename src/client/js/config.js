@@ -14,6 +14,7 @@ export default class Config {
     /** @const @type {Object} The convict config instance */
     this.config_ = convict(schema);
     this.config_.load(clientConfig);
+    this.config_.validate();
   }
 
   /**

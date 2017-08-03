@@ -25,7 +25,6 @@ export class Geona {
       case 'leaflet':
         leaflet.init(() => {
           this.map = new leaflet.LMap(this.config.get('map'));
-          this.map.createMap();
         });
         break;
     }
