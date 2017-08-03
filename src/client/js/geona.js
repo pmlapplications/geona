@@ -1,7 +1,10 @@
-import Config from './config';
-import * as ol from './map_openlayers';
-import * as leaflet from './map_leaflet';
 import $ from 'jquery';
+import * as templates from '../templates/compiled';
+import Config from './config';
+import * as leaflet from './map_leaflet';
+import * as ol from './map_openlayers';
+
+window.templates = templates;
 
 /**
  * The entry class for Geona.
@@ -13,7 +16,7 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.addDiv_();
+    this.loadTemplate_();
 
     // TODO this should perhaps go a in seperate init method that returns a callback or promise
     switch (this.config.get('map.library')) {
@@ -31,21 +34,13 @@ export class Geona {
   }
 
   /**
-   * Add our geona div underneith the parent map div in the config
+   * Add the geona template underneith the parent map div in the config
    * @private
    */
-  addDiv_() {
+  loadTemplate_() {
     let parentDivId = this.config.get('map.divId');
-    let geonaDiv = document.createElement('div');
-    geonaDiv.className = 'geona';
-
-    // Set the unique id for this geonaDiv element
-    geonaDiv.id = parentDivId + '-' + geonaDiv.className;
-
-    // Add our div to the parent div
-    $('#' + parentDivId).append(geonaDiv);
-
-    // Set our new div as the map div in the config
-    this.config.set('map.divId', geonaDiv.id);
+    let geonaDivId = 'geona-' + parentDivId;
+    $('#' + parentDivId).html(templates.geona({parentDivId: parentDivId}));
+    this.config.set('map.divId', geonaDivId);
   }
 }

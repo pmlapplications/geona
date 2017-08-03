@@ -19,6 +19,7 @@ module.exports = function(grunt) {
   let vendorLibs = [
     'babel-runtime/regenerator',
     'convict',
+    'handlebars/runtime',
     'i18next',
     'i18next-browser-languagedetector',
     'i18next-xhr-backend',
@@ -194,13 +195,28 @@ module.exports = function(grunt) {
         src: [
           'src/**/*.js',
           '!src/client/vendor/**',
+          '!src/client/templates/**',
         ],
       },
       check: {
         src: [
           'src/**/*.js',
           '!src/client/vendor/**',
+          '!src/client/templates/**',
         ],
+      },
+    },
+
+    handlebars: {
+      compile: {
+        options: {
+          namespace: '',
+          exportCommonJS: 'handlebars/runtime',
+          returnTemplates: true,
+        },
+        files: {
+          'src/client/templates/compiled.js': 'src/client/templates/*.hbs',
+        },
       },
     },
 
@@ -230,6 +246,11 @@ module.exports = function(grunt) {
         files: ['src/client/scss/*.scss'],
         tasks: ['sass:development'],
       },
+
+      handlebars: {
+        files: ['src/client/templates/*.hbs'],
+        tasks: ['handlebars'],
+      },
     },
   });
 
@@ -238,10 +259,10 @@ module.exports = function(grunt) {
   // Build the server
   grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server']);
   // Build the client
-  grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'env:babelify', 'browserify:client',
+  grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
     'browserifyOther', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'env:babelify',
+  grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
     'browserify:client', 'browserifyOther', 'watch']);
 
   grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
