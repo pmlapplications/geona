@@ -270,7 +270,8 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    let center = options.center || ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode());
+    let center = options.center ||
+      ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode()).reverse();
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this.map_.getView().getMaxZoom();
@@ -293,7 +294,7 @@ export class OlMap extends GeonaMap {
       fitExtent = ol.proj.fromLonLat([fitExtent[1], fitExtent[0]], projection)
         .concat(ol.proj.fromLonLat([fitExtent[3], fitExtent[2]], projection));
     }
-    center = ol.proj.fromLonLat([center[1], center[0]], projection);
+    center = ol.proj.fromLonLat(center.reverse(), projection);
 
     // Ensure that the center is within the maxExtent
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
