@@ -130,8 +130,6 @@ export class LMap extends GeonaMap {
       let maxZoom = this.map_.getMaxZoom();
       let minZoom = this.map_.getMinZoom();
 
-      console.log(zoom + ' ' + maxZoom + ' ' + minZoom);
-
       switch (projection) {
         case 'EPSG:3857':
           zoom += 1;
@@ -145,22 +143,18 @@ export class LMap extends GeonaMap {
           break;
       }
 
-      this.setView({
-        maxZoom: maxZoom,
-        minZoom: minZoom,
-      });
-
       this.map_.options.crs = leafletProjection;
       this.map_._resetView(center, zoom);
 
-      console.log(zoom + ' ' + maxZoom + ' ' + minZoom);
+      this.map_.setMaxZoom(maxZoom);
+      this.map_.setMinZoom(minZoom);
 
       this.config.projection = projection;
     }
   }
 
   /**
-   * Set the map view with the provided options
+   * Set the map view with the provided options. Takes in OpenLayers style zooms.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
    * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
@@ -200,6 +194,39 @@ export class LMap extends GeonaMap {
         this.setZoom(leafletizeZoom(options.zoom, projection));
       }
     }
+  }
+
+  /**
+   * Set the map view with the provided options. The same as setView, but takes in Leaflet style zooms and projection.
+   * @param {Object}  options            View options. All are optional
+   * @param {Array}   options.center     The centre as [lat, lon]
+   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Number}  options.maxZoom    The maximum allowed zoom
+   * @param {Number}  options.minZoom    The minimum allowed zoom
+   * @param {L.CRS}   options.projection The projection
+   * @param {Number}  options.zoom       The zoom
+   */
+  setView_(options) {
+    if (options.projection) {
+      options.projection = deLeafletizeProjection(options.projection);
+    }
+
+    if (options.maxZoom || options.minZoom || options.zoom) {
+      let projection = options.projection || this.map_.options.crs;
+
+      if (options.maxZoom) {
+        options.maxZoom = deLeafletizeZoom(options.maxZoom, projection);
+      }
+      if (options.minZoom) {
+        options.minZoom = deLeafletizeZoom(options.minZoom, projection);
+      }
+      if (options.zoom) {
+        options.zoom = deLeafletizeZoom(options.zoom, projection);
+      }
+    }
+
+    this.setView(options);
   }
 
   /**
