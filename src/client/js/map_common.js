@@ -28,7 +28,7 @@
  * {Number} viewSettings.minZoom  The minimum (furthest) allowed zoom.
  *                                Defaults to 3.
  */
-export let baseLayers = [
+export const basemaps = [
   {
     id: 'eox',
     title: 'EOX',
@@ -198,6 +198,25 @@ export let baseLayers = [
     },
   },
 ];
+
+for (let basemap of basemaps) {
+  basemap = addBasemapDefaults(basemap);
+}
+
+function addBasemapDefaults(basemap) {
+  switch (basemap.source.type) {
+    case 'wms':
+      if (basemap.source.crossOrigin === undefined) {
+        basemap.source.crossOrigin = null;
+      }
+      basemap.source.params.version = basemap.source.params.version || '1.1.1';
+      basemap.source.params.format = basemap.source.params.format || 'image/jpeg';
+      if (basemap.source.params.wrapDateLine === undefined) {
+        basemap.source.params.wrapDateLine = true;
+      }
+  }
+  return basemap;
+}
 
 /**
  * Default border layers.

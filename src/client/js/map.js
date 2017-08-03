@@ -4,7 +4,7 @@
 /* eslint no-unused-vars: 0 */
 
 /**
- * Interface for a map.
+ * Base class and interface for a map.
  * @interface
  *
  * @param {Object} config A map config to initialise the map with.
@@ -46,6 +46,14 @@ export default class GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {}
+
+  loadConfig_() {
+    this.setBasemap(this.config.basemap);
+    this.setCountryBorders(this.config.countryBorders);
+    this.displayGraticule(this.config.graticule);
+    this.setProjection(this.config.projection);
+    // this.setView(this.config.viewSettings);
+  }
 }
 
 // Fields

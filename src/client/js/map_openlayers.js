@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {baseLayers as commonBasemaps, borderLayers as commonBorders} from './map_common';
+import {basemaps as commonBasemaps, borderLayers as commonBorders} from './map_common';
 
 let ol;
 
@@ -28,13 +28,14 @@ export class OlMap extends GeonaMap {
     /** @private @type {Boolean} tracks whether the map has been created for the first time */
     this.initialized = false;
 
-    this.loadBaseLayers();
     this.map_ = new ol.Map({
       view: new ol.View(
         {
           center: this.config.viewSettings.center,
-          minZoom: this.config.viewSettings.minZoom,
+          extent: this.config.viewSettings.maxExtent,
           maxZoom: this.config.viewSettings.maxZoom,
+          minZoom: this.config.viewSettings.minZoom,
+          projection: this.config.projection,
           zoom: this.config.viewSettings.zoom,
         }),
       target: this.config.divId,
@@ -55,22 +56,13 @@ export class OlMap extends GeonaMap {
 
         new ol.control.ScaleLine({}),
       ],
-
     });
 
-    if (this.config.basemap) {
-      this.setBasemap(this.config.basemap);
-    }
-
+    this.loadBaseLayers();
     this.loadCountryBordersLayers();
-    if (this.config.countryBorders) {
-      this.setCountryBordersLayer(this.config.countryBorders);
-    }
-
     this.initGraticule();
-    if (this.config.graticule) {
-      this.displayGraticule(this.config.graticule);
-    }
+
+    this.loadConfig_();
 
     /** Must come last in the method */
     this.initialized = true;
@@ -267,91 +259,59 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Changes the map view based on the properties of the object passed in.
-   *
-   * @param {Object} properties An Object containing various properties used in order to set the View of the map. Valid
-   *                           properties are: projection, maxExtent, fitExtent, center, minZoom, maxZoom, zoom.
-   * //TODO save settings to config
+   * Set the map view with the provided options
+   * @param {Object}  options            View options. All are optional
+   * @param {Array}   options.center     The centre as [lat, lon]
+   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Number}  options.maxZoom    The maximum allowed zoom
+   * @param {Number}  options.minZoom    The minimum allowed zoom
+   * @param {String}  options.projection The projection
+   * @param {Number}  options.zoom       The zoom
    */
-  setView(properties) {
-    /** These are the default values used in Geona */
-    let projection = this.config.projection;
-    let maxExtent;
-    let fitExtent;
-    let center = [0, 0];
-    let minZoom = 3;
-    let maxZoom = 12;
-    let zoom = 3;
+  setView(options) {
+    let center = options.center || ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode());
+    let fitExtent = options.fitExtent;
+    let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
+    let maxZoom = options.maxZoom || this.map_.getView().getMaxZoom();
+    let minZoom = options.minZoom || this.map_.getView().getMinZoom();
+    let projection = options.projection || this.map_.getView().getProjection().getCode();
+    let zoom = options.zoom || this.map_.getView().getZoom();
 
-    console.log(properties);
+    this.config.projection = projection;
+    this.config.viewSettings.center = center;
+    this.config.viewSettings.maxExtent = maxExtent;
+    this.config.viewSettings.maxZoom = maxZoom;
+    this.config.viewSettings.minZoom = minZoom;
+    this.config.viewSettings.zoom = zoom;
 
-    /** The current values if the map exists */
-    if (this.initialized === true) {
-      if (this.map_.getView().getProjection()) {
-        projection = this.map_.getView().getProjection().getCode();
-      }
-      if (properties.projection && this.map_.getView().getProjection().getCode() !== properties.projection) {
-        center = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode());
-        center = ol.proj.fromLonLat(center, properties.projection);
-      } else {
-        center = this.map_.getView().getCenter();
-      }
-      if (this.map_.getView().getZoom()) {
-        zoom = this.map_.getView().getZoom();
-      }
-    }
+    // Converts the min and max coordinates from LatLon to current projection
+    maxExtent = ol.proj.fromLonLat([maxExtent[1], maxExtent[0]], projection)
+      .concat(ol.proj.fromLonLat([maxExtent[3], maxExtent[2]], projection));
 
-    /** The properties that might be defined in the parameter */
-    if (properties.projection) {
-      projection = properties.projection;
+    if (fitExtent) {
+      fitExtent = ol.proj.fromLonLat([fitExtent[1], fitExtent[0]], projection)
+        .concat(ol.proj.fromLonLat([fitExtent[3], fitExtent[2]], projection));
     }
-    if (properties.maxExtent) {
-      /* Converts the min and max coordinates from LatLon to current projection */
-      maxExtent = ol.proj.fromLonLat([properties.maxExtent[1], properties.maxExtent[0]], projection)
-        .concat(ol.proj.fromLonLat([properties.maxExtent[3], properties.maxExtent[2]], projection));
-    }
-    if (properties.fitExtent) {
-      fitExtent = ol.proj.fromLonLat([properties.fitExtent[1], properties.fitExtent[0]], projection)
-        .concat(ol.proj.fromLonLat([properties.fitExtent[3], properties.fitExtent[2]], projection));
-    }
-    if (properties.center) {
-      center = ol.proj.fromLonLat([properties.center[1], properties.center[0]], projection);
-    }
-    if (properties.minZoom) {
-      minZoom = properties.minZoom;
-    }
-    if (properties.maxZoom) {
-      maxZoom = properties.maxZoom;
-    }
-    if (properties.zoom) {
-      zoom = properties.zoom;
-    }
+    center = ol.proj.fromLonLat([center[1], center[0]], projection);
 
-    /** Ensure that the center is within the maxExtent */
+    // Ensure that the center is within the maxExtent
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
       center = ol.extent.getCenter(maxExtent);
     }
 
-    /** Ensure that the zoom is within the accepted bounds */
-    if (zoom < minZoom) {
-      zoom = minZoom;
-    }
-    if (zoom > maxZoom) {
-      zoom = maxZoom;
-    }
-
     let newView = new ol.View({
-      projection: projection,
-      extent: maxExtent,
       center: center,
-      minZoom: minZoom,
+      extent: maxExtent,
       maxZoom: maxZoom,
+      minZoom: minZoom,
+      projection: projection,
       zoom: zoom,
     });
 
     this.map_.setView(newView);
 
-    /** Fit the map in the fitExtent */
+    // Fit the map in the fitExtent
     if (fitExtent) {
       console.log(fitExtent);
       this.map_.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
@@ -360,14 +320,6 @@ export class OlMap extends GeonaMap {
         this.map_.getView().setCenter(center);
       }
     }
-
-    this.config.projection = projection;
-    this.config.viewSettings.maxExtent = maxExtent;
-    this.config.viewSettings.fitExtent = fitExtent;
-    this.config.viewSettings.zoom = zoom;
-    this.config.viewSettings.minZoom = minZoom;
-    this.config.viewSettings.maxZoom = maxZoom;
-    this.config.viewSettings.center = center;
   }
 }
 /**

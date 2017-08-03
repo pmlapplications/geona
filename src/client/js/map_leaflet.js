@@ -1,5 +1,5 @@
 import GeonaMap from './map';
-import {baseLayers as defaultBasemaps, borderLayers as defaultBorders} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders} from './map_common';
 
 let L;
 
@@ -28,10 +28,11 @@ export class LMap extends GeonaMap {
     /** @private @type {L.map} The Leaflet map */
     this.map_ = L.map(this.config.divId, {
       crs: leafletizeProjection(this.config.projection),
-      center: [0, 0],
-      zoom: 2,
-      minZoom: 2,
-      maxZoom: 13,
+      center: this.config.viewSettings.center,
+      maxBounds: [this.config.viewSettings.maxExtent.slice(0, 2), this.config.viewSettings.maxExtent.slice(2, 4)],
+      maxZoom: leafletizeZoom(this.config.viewSettings.maxZoom, leafletizeProjection(this.config.projection)),
+      minZoom: leafletizeZoom(this.config.viewSettings.minZoom, leafletizeProjection(this.config.projection)),
+      zoom: leafletizeZoom(this.config.viewSettings.zoom, leafletizeProjection(this.config.projection)),
       zoomControl: false,
     });
 
@@ -51,9 +52,7 @@ export class LMap extends GeonaMap {
     this.loadBaseLayers_();
     this.loadCountryBorderLayers_();
 
-    if (this.config.basemap !== 'none') {
-      this.setBasemap(this.config.basemap);
-    }
+    this.loadConfig_();
   }
 
   /**
@@ -167,18 +166,17 @@ export class LMap extends GeonaMap {
   setView(options) {
     if (options.projection) {
       this.setProjection(options.projection);
+      this.config.projection = options.projection;
     }
 
     if (options.maxExtent) {
-      this.map_.setMaxBounds([options.extent.slice(0, 2), options.extent.slice(2, 4)]);
-    }
-
-    if (options.fitExtent) {
-      this.map_.fitBounds([options.extent.slice(0, 2), options.extent.slice(2, 4)]);
+      this.map_.setMaxBounds([options.maxExtent.slice(0, 2), options.maxExtent.slice(2, 4)]);
+      this.config.viewSettings.maxExtent = options.maxExtent;
     }
 
     if (options.center) {
       this.map_.panTo(options.center);
+      this.config.viewSettings.center = options.center;
     }
 
     if (options.maxZoom || options.minZoom || options.zoom) {
@@ -186,13 +184,21 @@ export class LMap extends GeonaMap {
 
       if (options.maxZoom) {
         this.map_.setMaxZoom(leafletizeZoom(options.maxZoom, projection));
+        this.config.viewSettings.maxZoom = options.maxZoom;
       }
       if (options.minZoom) {
         this.map_.setMinZoom(leafletizeZoom(options.minZoom, projection));
+        this.config.viewSettings.minZoom = options.minZoom;
       }
       if (options.zoom) {
-        this.setZoom(leafletizeZoom(options.zoom, projection));
+        this.map_.setZoom(leafletizeZoom(options.zoom, projection));
+        this.config.viewSettings.zoom = options.zoom;
       }
+    }
+
+    if (options.fitExtent) {
+      this.map_.fitBounds([options.fitExtent.slice(0, 2), options.fitExtent.slice(2, 4)]);
+      this.config.viewSettings.fitExtent = options.fitExtent;
     }
   }
 
