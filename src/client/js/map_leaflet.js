@@ -23,7 +23,21 @@ export class LMap extends GeonaMap {
     /** @private @type {Object} The available country border layers */
     this.countryBorderLayers_ = {};
     /** @private @type {L.latlngGraticule} The map graticule */
-    this.graticule_ = L.latlngGraticule();
+    this.graticule_ = L.latlngGraticule({
+      showLabel: true,
+      color: '#ccc',
+      fontColor: '#ccc',
+      opacity: 1,
+      weight: 0.5,
+      zoomInterval: [
+        {start: 2, end: 2, interval: 20},
+        {start: 3, end: 3, interval: 10},
+        {start: 4, end: 4, interval: 5},
+        {start: 5, end: 5, interval: 2},
+        {start: 6, end: 6, interval: 1},
+        {start: 7, end: 20, interval: 0.5},
+      ],
+    });
 
     /** @private @type {L.map} The Leaflet map */
     this.map_ = L.map(this.config.divId, {
