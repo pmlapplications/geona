@@ -103,8 +103,13 @@ export let client = {
         format: 'Array',
         default: [0, 0],
       },
-      extent: {
-        doc: 'Limit the map extent. Array in the format [minLat, minLon, maxLat, maxLon]',
+      maxExtent: {
+        doc: 'Limit the map to the maxExtent. Array in the format [minLat, minLon, maxLat, maxLon]',
+        format: 'Array',
+        default: [-90, -180, 90, 180],
+      },
+      fitExtent: {
+        doc: 'Zoom the map to fit the fitExtent. Array in the format [minLat, minLon, maxLat, maxLon]',
         format: 'Array',
         default: [-90, -180, 90, 180],
       },

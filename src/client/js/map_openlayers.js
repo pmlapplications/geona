@@ -360,6 +360,14 @@ export class OlMap extends GeonaMap {
         this.map_.getView().setCenter(center);
       }
     }
+
+    this.config.projection = projection;
+    this.config.viewSettings.maxExtent = maxExtent;
+    this.config.viewSettings.fitExtent = fitExtent;
+    this.config.viewSettings.zoom = zoom;
+    this.config.viewSettings.minZoom = minZoom;
+    this.config.viewSettings.maxZoom = maxZoom;
+    this.config.viewSettings.center = center;
   }
 }
 /**
