@@ -29,12 +29,18 @@ export class OlMap extends GeonaMap {
     this.countryBorderLayers_ = null;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
+      showLabels: true,
       strokeStyle: new ol.style.Stroke({
         color: 'rgba(204,204,204,1)',
         width: 1,
         lineDash: [1, 4],
       }),
-      showLabels: true,
+      latLabelFormatter: function(latitude) {
+        return latLonLabelFormatter(latitude, 'N', 'S');
+      },
+      lonLabelFormatter: function(longitude) {
+        return latLonLabelFormatter(longitude, 'E', 'W');
+      },
     });
     /** @private @type {Boolean} Tracks whether the map has been initialized */
     this.initialized_ = false;
@@ -300,6 +306,33 @@ export class OlMap extends GeonaMap {
     }
   }
 }
+
+/**
+ * Format a latLon Label for the graticule.
+ * @param  {Number} latLonValue    The lat or lon value
+ * @param  {String} positiveEnding Ending to use for positive values. For example, 'N'
+ * @param  {String} negativeEnding Ending to use for negative values. For example, 'S'
+ * @return {String}                The formatted string
+ */
+function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding) {
+  // Modulus with floats is evil, so convert our latLonValue to an integer first
+  let value = Math.round(latLonValue.toFixed(2) * 100);
+  // Equivalent to (latLonValue % 0.1 === 0)
+  if (value % 10 === 0) {
+    // Convert back to a float
+    value = value / 100;
+    if (value > 0) {
+      return (value + positiveEnding);
+    } else if (value < 0) {
+      return (value * -1 + negativeEnding);
+    } else {
+      return '0';
+    }
+  } else {
+    return '';
+  }
+}
+
 /**
  * Load the openlayers js library and dynamically import it.
  * @param {Function} next
