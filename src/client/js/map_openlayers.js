@@ -1,33 +1,45 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as commonBasemaps, borderLayers as commonBorders} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders} from './map_common';
 
 let ol;
 
 /**
+ * Class for an OpenLayers map.
+ *
  * @implements {GeonaMap}
  */
 export class OlMap extends GeonaMap {
   /**
-   * Instantiate a new OlMap and create a new OpenLayers map
+   * Instantiate a new OlMap and create a new OpenLayers map.
    * @param  {Object} config The map config to load
    */
   constructor(config) {
-    // TODO JSDoc comment for class OlMap
     super();
-    /** @type {Object} object containing configuration options */
-    this.config = config;
-    /** @private @type {Object} object containing OpenLayers Tile objects for each basemap */
-    this.baseLayers_ = null;
-    /** @private @type {ol.Map} an OpenLayers map used for displaying layers */
-    this.map_ = null;
-    /** @private @type {Object} object containing OpenLayers Tile objects for each country border layer */
-    this.borderLayers_ = null;
-    /** @private @type {ol.Graticule} an OpenLayers graticule which is added to the map  */
-    this.graticule_ = null;
-    /** @private @type {Boolean} tracks whether the map has been created for the first time */
-    this.initialized = false;
 
+    // TODO this is only for testing
+    window.olmap = this;
+    window.ol = ol;
+
+    /** @type {Object} The map config */
+    this.config = config;
+    /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
+    this.basemaps_ = null;
+    /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
+    this.countryBorderLayers_ = null;
+    /** @private @type {ol.Graticule} The map graticule */
+    this.graticule_ = new ol.Graticule({
+      strokeStyle: new ol.style.Stroke({
+        color: 'rgba(204,204,204,1)',
+        width: 1,
+        lineDash: [1, 4],
+      }),
+      showLabels: true,
+    });
+    /** @private @type {Boolean} Tracks whether the map has been initialized */
+    this.initialized_ = false;
+
+    /** @private @type {ol.Map} The OpenLayers map */
     this.map_ = new ol.Map({
       view: new ol.View(
         {
@@ -58,145 +70,18 @@ export class OlMap extends GeonaMap {
       ],
     });
 
-    this.loadBaseLayers();
-    this.loadCountryBordersLayers();
-    this.initGraticule();
+    this.loadBasemaps_();
+    this.loadCountryBorderLayers_();
 
     this.loadConfig_();
 
-    /** Must come last in the method */
-    this.initialized = true;
-
-    window.testMap = this;
-    window.ol = ol;
+    // Must come last in the method
+    this.initialized_ = true;
   }
 
   /**
-   * Remove the current basemap and add a new one.
-   *
-   * @param {String} basemap The id used to select the new basemap.
-   */
-  setBasemap(basemap) {
-    if (this.initialized === true && this.config.basemap !== 'none') {
-      console.log('removing layer');
-      this.map_.removeLayer(this.map_.getLayers().item(0));
-    }
-
-    if (basemap !== 'none' ) {
-      this.map_.getLayers().insertAt(0, this.baseLayers_[basemap]);
-      if (this.baseLayers_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
-        console.log('Projection doesnt need to change');
-        this.setView(this.baseLayers_[basemap].get('viewSettings'));
-      } else {
-        console.log('Projection needs to change');
-        let options = this.baseLayers_[basemap].get('viewSettings');
-        options.projection = this.baseLayers_[basemap].get('projections')[0];
-        console.log(options);
-        this.setView(options);
-      }
-    }
-    this.config.basemap = basemap;
-  }
-
-  /**
-   * Changes the projection style, if allowed for the current basemap.
-   *
-   * @param {String} projection The full code of the projection style (e.g. 'ESPG:4326')
-   */
-  setProjection(projection) {
-    // TODO test with different basemap with support for multiple projections (might be resetting to projections[0])
-    if (this.baseActive_ === true) {
-      let basemapId = this.map_.getLayers().item(0).get('id');
-      /* If basemap supports new projection, we can change the view */
-      if (this.baseLayers_[basemapId].get('projections').includes(projection)) {
-        this.setView({projection: projection});
-      } else {
-        // TODO replace with notification
-        alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
-      }
-    }
-
-    this.config.projection = projection;
-  }
-
-  /**
-   * Removes the current country borders layer, and replaces it
-   * with the specified country borders layer.
-   *
-   * @param {String} border The Key for the border colour in borderLayers_
-   */
-  setCountryBordersLayer(border) {
-    console.log(this.initialized);
-    if (this.initialized === true && this.config.countryBorders !== 'none') {
-      /** Removes the top-most layer (border will always be on top) */
-      console.log(this.map_.getLayers().getLength());
-      console.log('removing border layer');
-      this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
-    }
-
-    if (border !== 'none') {
-      console.log('adding border layer');
-      try {
-        this.map_.addLayer(this.borderLayers_[border]);
-      } catch (e) {
-      /** error will have occurred because the borders have not loaded,
-          or because the specified border does not exist. */
-        console.error(e);
-      }
-    }
-
-    this.config.countryBorders = border;
-  }
-
-  /**
-   * Creates a new Key-Value map containing layer information for the
-   * different country border layers.
-   *
-   * When adding a new layer, the Key should be set to the colour of the lines.
-   */
-  loadCountryBordersLayers() {
-    this.borderLayers_ = {};
-
-    for (let layer of commonBorders) {
-      let source = new ol.source.TileWMS({
-        url: layer.source.url,
-        crossOrigin: layer.source.crossOrigin,
-        projection: this.map_.getView().getProjection(),
-        params: {
-          LAYERS: layer.source.params.layers,
-          VERSION: layer.source.params.version,
-          STYLES: layer.source.params.styles,
-        },
-      });
-
-      this.borderLayers_[layer.id] = new ol.layer.Tile({
-        id: layer.id,
-        title: layer.title,
-        source: source,
-      });
-    }
-  }
-
-  /**
-   * Initialises the graticule, but does not make it visible.
-   *
-   * The graticule is made visible in the toggleGraticule() function.
-   */
-  initGraticule() {
-    this.graticule_ = new ol.Graticule({
-      strokeStyle: new ol.style.Stroke({
-        color: 'rgba(204,204,204,1)',
-        width: 1,
-        lineDash: [1, 4],
-      }),
-      showLabels: false,
-    });
-  }
-
-  /**
-   * Toggles visibility of map graticule.
-   * 
-   * @param {Boolean} display if true, display the graticule
+   * Set the graticule as visible or not.
+   * @param  {Boolean} display True to display graticule
    */
   displayGraticule(display) {
     if (display) {
@@ -209,64 +94,78 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Uses the commonBasemaps array imported from './map_common.js'
-   * in order to dynamically create OpenLayers basemaps.
+   * Set the basemap, changing the projection if required.
+   * @param {String} basemap The id of the basemap to use, or 'none'
    */
-  loadBaseLayers() {
-    this.baseLayers_ = {};
+  setBasemap(basemap) {
+    if (this.initialized_ === true && this.config.basemap !== 'none') {
+      this.map_.removeLayer(this.map_.getLayers().item(0));
+    }
 
-    for (let layer of commonBasemaps) {
-      if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey)) {
-        this.baseLayers_[layer.id] = {};
-
-        let source;
-        switch (layer.source.type) {
-          case 'wms':
-            source = new ol.source.TileWMS({
-              url: layer.source.url,
-              crossOrigin: layer.source.crossOrigin,
-              projection: layer.projections[0],
-              params: {
-                LAYERS: layer.source.params.layers,
-                VERSION: layer.source.params.version,
-                FORMAT: layer.source.params.format,
-                wrapDateLine: layer.source.params.wrapDateLine,
-              },
-              attributions: layer.source.attributions,
-            });
-            break;
-          case 'osm':
-            source = new ol.source.OSM();
-            break;
-          case 'bing':
-            source = new ol.source.BingMaps({
-              key: this.config.bingMapsApiKey,
-              imagerySet: layer.source.imagerySet,
-            });
-        }
-        this.baseLayers_[layer.id] = new ol.layer.Tile({
-          id: layer.id,
-          title: layer.title,
-          description: layer.description,
-          projections: layer.projections,
-          source: source,
-          viewSettings: layer.viewSettings,
-        });
+    if (basemap !== 'none' ) {
+      this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
+      if (this.basemaps_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
+        this.setView(this.basemaps_[basemap].get('viewSettings'));
       } else {
-        console.error('bingMapsApiKey is null or undefined');
+        let options = this.basemaps_[basemap].get('viewSettings');
+        options.projection = this.basemaps_[basemap].get('projections')[0];
+        this.setView(options);
       }
     }
+    this.config.basemap = basemap;
   }
 
   /**
-   * Set the map view with the provided options
+   * Set the country borders to display.
+   * @param {String} borders The borders to display, or 'none'
+   */
+  setCountryBorders(borders) {
+    if (this.initialized_ === true && this.config.countryBorders !== 'none') {
+      // Removes the top-most layer (borders will always be on top)
+      this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
+    }
+
+    if (borders !== 'none') {
+      try {
+        this.map_.addLayer(this.countryBorderLayers_[borders]);
+      } catch (e) {
+        // TODO handle error
+        // error will have occurred because the borders have not loaded, or because the specified border does not exist.
+        console.error(e);
+      }
+    }
+
+    this.config.countryBorders = borders;
+  }
+
+  /**
+   * Set the projection, if supported by the current basemap.
+   * @param {String} projection The projection to use, such as 'EPSG:4326'
+   */
+  setProjection(projection) {
+    if (this.baseActive_ === true) {
+      let basemapId = this.map_.getLayers().item(0).get('id');
+      // If basemap supports new projection, we can change the view
+      if (this.basemaps_[basemapId].get('projections').includes(projection)) {
+        this.setView({projection: projection});
+      } else {
+        // TODO replace with notification
+        alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
+      }
+    }
+
+    this.config.projection = projection;
+  }
+
+  /**
+   * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
    * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
    * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection
+   * @param {String}  options.projection The projection, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
@@ -314,12 +213,90 @@ export class OlMap extends GeonaMap {
 
     // Fit the map in the fitExtent
     if (fitExtent) {
-      console.log(fitExtent);
       this.map_.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
       if (this.map_.getView().getZoom() < minZoom || this.map_.getView().getZoom() > maxZoom) {
         this.map_.getView().setZoom(zoom);
         this.map_.getView().setCenter(center);
       }
+    }
+  }
+
+  /**
+   * Load the default basemaps, and any defined in the config.
+   * @private
+   */
+  loadBasemaps_() {
+    // TODO load from config too
+    this.basemaps_ = {};
+
+    for (let layer of defaultBasemaps) {
+      if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey)) {
+        this.basemaps_[layer.id] = {};
+
+        let source;
+        switch (layer.source.type) {
+          case 'wms':
+            source = new ol.source.TileWMS({
+              url: layer.source.url,
+              crossOrigin: layer.source.crossOrigin,
+              projection: layer.projections[0],
+              params: {
+                LAYERS: layer.source.params.layers,
+                VERSION: layer.source.params.version,
+                FORMAT: layer.source.params.format,
+                wrapDateLine: layer.source.params.wrapDateLine,
+              },
+              attributions: layer.source.attributions,
+            });
+            break;
+          case 'osm':
+            source = new ol.source.OSM();
+            break;
+          case 'bing':
+            source = new ol.source.BingMaps({
+              key: this.config.bingMapsApiKey,
+              imagerySet: layer.source.imagerySet,
+            });
+        }
+        this.basemaps_[layer.id] = new ol.layer.Tile({
+          id: layer.id,
+          title: layer.title,
+          description: layer.description,
+          projections: layer.projections,
+          source: source,
+          viewSettings: layer.viewSettings,
+        });
+      } else {
+        console.error('bingMapsApiKey is null or undefined');
+      }
+    }
+  }
+
+  /**
+   * Load the default border layers, and any defined in the config.
+   * @private
+   */
+  loadCountryBorderLayers_() {
+    // TODO load from config too
+    this.countryBorderLayers_ = {};
+
+    for (let layer of defaultBorders) {
+      let source = new ol.source.TileWMS({
+        url: layer.source.url,
+        crossOrigin: layer.source.crossOrigin,
+        projection: this.map_.getView().getProjection(),
+        params: {
+          LAYERS: layer.source.params.layers,
+          VERSION: layer.source.params.version,
+          STYLES: layer.source.params.styles,
+        },
+      });
+
+      this.countryBorderLayers_[layer.id] = new ol.layer.Tile({
+        id: layer.id,
+        title: layer.title,
+        source: source,
+      });
     }
   }
 }
@@ -329,7 +306,7 @@ export class OlMap extends GeonaMap {
  */
 export function init(next) {
   if (ol) {
-    /** If ol has already been loaded */
+    // If ol has already been loaded
     next();
   } else {
     let head = document.getElementsByTagName('head')[0];

@@ -17,42 +17,48 @@ export default class GeonaMap {
   displayGraticule(display) {}
 
   /**
-   * Set the basemap.
+   * Set the basemap, changing the projection if required.
    * @param {String} basemap The id of the basemap to use, or 'none'
    */
   setBasemap(basemap) {}
 
   /**
-   * Set the country borders to display, or none.
+   * Set the country borders to display.
    * @param {String} borders The borders to display, or 'none'
    */
   setCountryBorders(borders) {}
 
   /**
-   * Set the projection.
-   * @param {String} projection The projection to use
+   * Set the projection, if supported by the current basemap.
+   * @param {String} projection The projection to use, such as 'EPSG:4326'
    */
   setProjection(projection) {}
 
   /**
-   * Set the map view with the provided options
+   * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
    * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
    * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection
+   * @param {String}  options.projection The projection, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {}
 
+  /**
+   * Use the config to setup the map view.
+   *
+   * This should be called at the end of a map constructor.
+   * This function should not be overridden.
+   */
   loadConfig_() {
     this.setBasemap(this.config.basemap);
     this.setCountryBorders(this.config.countryBorders);
     this.displayGraticule(this.config.graticule);
     this.setProjection(this.config.projection);
-    // this.setView(this.config.viewSettings);
+    this.setView(this.config.viewSettings);
   }
 }
 

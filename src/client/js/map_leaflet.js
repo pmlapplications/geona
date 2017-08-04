@@ -4,22 +4,26 @@ import {basemaps as defaultBasemaps, borderLayers as defaultBorders} from './map
 let L;
 
 /**
+ * Class for a Leaflet map.
+ *
  * @implements {GeonaMap}
  */
 export class LMap extends GeonaMap {
   /**
-   * Instantiate a new LMap and create a new Leaflet map
+   * Instantiate a new LMap and create a new Leaflet map.
    * @param  {Object} config The map config to load
    */
   constructor(config) {
     super();
+
     // TODO this is only for testing
-    window.LMap = this;
+    window.lmap = this;
+    window.L = L;
 
     /** @type {Object} The map config */
     this.config = config;
     /** @private @type {Object} The available basemaps */
-    this.baseLayers_ = {};
+    this.basemaps_ = {};
     /** @private @type {Object} The available country border layers */
     this.countryBorderLayers_ = {};
     /** @private @type {L.latlngGraticule} The map graticule */
@@ -63,16 +67,16 @@ export class LMap extends GeonaMap {
       position: 'topright',
     }).addTo(this.map_);
 
-    // Load the default base layers and borders layers, plus any custom ones defined in the config
-    this.loadBaseLayers_();
+    // Load the default basemaps and borders layers, plus any custom ones defined in the config
+    this.loadBasemaps_();
     this.loadCountryBorderLayers_();
 
     this.loadConfig_();
   }
 
   /**
-   * Set the graticles as visible or not.
-   * @param  {Boolean} display True to display graticles
+   * Set the graticule as visible or not.
+   * @param  {Boolean} display True to display graticule
    */
   displayGraticule(display) {
     if (display) {
@@ -83,17 +87,17 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Set the basemap.
+   * Set the basemap, changing the projection if required.
    * @param {String} basemap The id of the basemap to use, or 'none'
    */
   setBasemap(basemap) {
     if (this.config.basemap !== 'none') {
-      this.baseLayers_[this.config.basemap].remove();
+      this.basemaps_[this.config.basemap].remove();
     }
 
     if (basemap !== 'none') {
       // TODO throw error if the provided basemap doesn't exist
-      let newBasemap = this.baseLayers_[basemap];
+      let newBasemap = this.basemaps_[basemap];
       let viewSettings = newBasemap.options.viewSettings;
 
       if (!newBasemap.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
@@ -109,7 +113,7 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Set the country borders to display, or none.
+   * Set the country borders to display.
    * @param {String} borders The borders to display, or 'none'
    */
   setCountryBorders(borders) {
@@ -130,10 +134,11 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Set the projection.
-   * @param {String} projection The projection to use
+   * Set the projection, if supported by the current basemap.
+   * @param {String} projection The projection to use, such as 'EPSG:4326'
    */
   setProjection(projection) {
+    // TODO check the basemap supports the projection.
     // This is a bit of a hack and isn't officially supported by leaflet. Everything may fall over!
     let leafletProjection = leafletizeProjection(projection);
 
@@ -168,7 +173,7 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Set the map view with the provided options. Takes in OpenLayers style zooms.
+   * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
    * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
@@ -218,7 +223,7 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Set the map view with the provided options. The same as setView, but takes in Leaflet style zooms and projection.
+   * Set the map view with the provided options. The same as setView, but uses Leaflet style zoom levels and projection.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
    * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
@@ -254,11 +259,12 @@ export class LMap extends GeonaMap {
    * Load the default basemaps, and any defined in the config.
    * @private
    */
-  loadBaseLayers_() {
+  loadBasemaps_() {
+    // TODO load from config too
     for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
-          this.baseLayers_[layer.id] = L.tileLayer.wms(layer.source.url, {
+          this.basemaps_[layer.id] = L.tileLayer.wms(layer.source.url, {
             layers: layer.source.params.layers,
             version: layer.source.params.version,
             attribution: layer.source.attributions,
@@ -275,6 +281,7 @@ export class LMap extends GeonaMap {
    * @private
    */
   loadCountryBorderLayers_() {
+    // TODO load from config too
     for (let layer of defaultBorders) {
       switch (layer.source.type) {
         case 'wms':
