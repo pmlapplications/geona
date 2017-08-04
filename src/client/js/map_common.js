@@ -37,9 +37,9 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
     // Convert back to a float
     value = value / 100;
     if (value > 0) {
-      return (value + positiveEnding);
+      return (value + ' ' + positiveEnding);
     } else if (value < 0) {
-      return (value * -1 + negativeEnding);
+      return (value * -1 + ' ' + negativeEnding);
     } else {
       return '0';
     }
