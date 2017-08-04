@@ -185,9 +185,9 @@ export class OlMap extends GeonaMap {
   initGraticule() {
     this.graticule_ = new ol.Graticule({
       strokeStyle: new ol.style.Stroke({
-        color: 'rgba(255,255,255,0.9)',
+        color: 'rgba(204,204,204,1)',
         width: 1,
-        lineDash: [0.5, 4],
+        lineDash: [1, 4],
       }),
       showLabels: false,
     });

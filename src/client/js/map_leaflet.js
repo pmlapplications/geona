@@ -28,7 +28,8 @@ export class LMap extends GeonaMap {
       color: '#ccc',
       fontColor: '#ccc',
       opacity: 1,
-      weight: 0.5,
+      weight: 1,
+      lineDash: [2, 3],
       zoomInterval: [
         {start: 2, end: 2, interval: 20},
         {start: 3, end: 3, interval: 10},

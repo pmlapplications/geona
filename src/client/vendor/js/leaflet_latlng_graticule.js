@@ -3,7 +3,13 @@
 *  and show the axis tick label on the edge of the map.
 *  Author: lanwei@cloudybay.com.tw
 *  GitHub: https://github.com/Leaflet/Leaflet.Graticule
+*
+*******************************************************
+* Modified for Geona to add support for dashed lines. *
+*******************************************************
 */
+
+/* globals L */
 
 L.LatLngGraticule = L.Layer.extend({
     options: {
@@ -12,6 +18,7 @@ L.LatLngGraticule = L.Layer.extend({
         weight: 0.8,
         color: '#aaa',
         font: '12px Verdana',
+        lineDash: [],
         lngLineCurved: 0,
         latLineCurved: 0,
         zoomInterval: [
@@ -304,6 +311,7 @@ L.LatLngGraticule = L.Layer.extend({
             ctx.lineWidth = this.options.weight;
             ctx.strokeStyle = this.options.color;
             ctx.fillStyle = this.options.fontColor;
+            ctx.setLineDash(this.options.lineDash);
 
             if (this.options.font) {
                 ctx.font = this.options.font;
