@@ -1,5 +1,5 @@
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
 
 let L;
 
@@ -40,8 +40,17 @@ export class LMap extends GeonaMap {
         {start: 4, end: 4, interval: 5},
         {start: 5, end: 5, interval: 2},
         {start: 6, end: 6, interval: 1},
-        {start: 7, end: 20, interval: 0.5},
+        {start: 7, end: 7, interval: 0.5},
+        {start: 8, end: 8, interval: 0.2},
+        {start: 9, end: 9, interval: 0.1},
+        {start: 10, end: 20, interval: 0.05},
       ],
+      latFormatTickLabel: function(latitude) {
+        return latLonLabelFormatter(latitude, 'N', 'S');
+      },
+      lngFormatTickLabel: function(longitude) {
+        return latLonLabelFormatter(longitude, 'E', 'W');
+      },
     });
 
     /** @private @type {L.map} The Leaflet map */

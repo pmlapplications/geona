@@ -1,4 +1,54 @@
-/*
+/**
+ * Variables and functions common to all map types.
+ */
+
+/**
+ * Add the default options to a basemap definition.
+ * @param  {Object} basemap A basemap definition
+ * @return {Object}         The basemap with defaults added
+ */
+export function addBasemapDefaults(basemap) {
+  switch (basemap.source.type) {
+    case 'wms':
+      if (basemap.source.crossOrigin === undefined) {
+        basemap.source.crossOrigin = null;
+      }
+      basemap.source.params.version = basemap.source.params.version || '1.1.1';
+      basemap.source.params.format = basemap.source.params.format || 'image/jpeg';
+      if (basemap.source.params.wrapDateLine === undefined) {
+        basemap.source.params.wrapDateLine = true;
+      }
+  }
+  return basemap;
+}
+
+/**
+ * Format a latitude or longitude label for a graticule line.
+ * @param  {Number} latLonValue    The lat or lon value
+ * @param  {String} positiveEnding Ending to use for positive values. For example, 'N'
+ * @param  {String} negativeEnding Ending to use for negative values. For example, 'S'
+ * @return {String}                The formatted string
+ */
+export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding) {
+  // Modulus with floats is evil, so convert our latLonValue to an integer first
+  let value = Math.round(latLonValue.toFixed(2) * 100);
+  // Equivalent to (latLonValue % 0.1 === 0)
+  if (value % 10 === 0) {
+    // Convert back to a float
+    value = value / 100;
+    if (value > 0) {
+      return (value + positiveEnding);
+    } else if (value < 0) {
+      return (value * -1 + negativeEnding);
+    } else {
+      return '0';
+    }
+  } else {
+    return '';
+  }
+}
+
+/**
  * Default basemaps.
  *
  * Basemap object format:
@@ -203,28 +253,13 @@ for (let basemap of basemaps) {
   basemap = addBasemapDefaults(basemap);
 }
 
-function addBasemapDefaults(basemap) {
-  switch (basemap.source.type) {
-    case 'wms':
-      if (basemap.source.crossOrigin === undefined) {
-        basemap.source.crossOrigin = null;
-      }
-      basemap.source.params.version = basemap.source.params.version || '1.1.1';
-      basemap.source.params.format = basemap.source.params.format || 'image/jpeg';
-      if (basemap.source.params.wrapDateLine === undefined) {
-        basemap.source.params.wrapDateLine = true;
-      }
-  }
-  return basemap;
-}
-
 /**
  * Default border layers.
  *
  * The object format is the same as for basemaps.
  * Additional border layers also need to be added to config_schema.js in client.map.countryBorders.format.
  */
-export let borderLayers = [
+export const borderLayers = [
   {
     id: 'white',
     title: 'White border lines',

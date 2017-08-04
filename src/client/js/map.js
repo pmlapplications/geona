@@ -1,3 +1,7 @@
+/**
+ * This file defines the base class and interface for a map.
+ */
+
 /* eslint class-methods-use-this: 0 */
 /* eslint no-empty-function: 0 */
 /* eslint no-unused-expressions: 0 */

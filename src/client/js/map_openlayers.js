@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
 
 let ol;
 
@@ -304,32 +304,6 @@ export class OlMap extends GeonaMap {
         source: source,
       });
     }
-  }
-}
-
-/**
- * Format a latLon Label for the graticule.
- * @param  {Number} latLonValue    The lat or lon value
- * @param  {String} positiveEnding Ending to use for positive values. For example, 'N'
- * @param  {String} negativeEnding Ending to use for negative values. For example, 'S'
- * @return {String}                The formatted string
- */
-function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding) {
-  // Modulus with floats is evil, so convert our latLonValue to an integer first
-  let value = Math.round(latLonValue.toFixed(2) * 100);
-  // Equivalent to (latLonValue % 0.1 === 0)
-  if (value % 10 === 0) {
-    // Convert back to a float
-    value = value / 100;
-    if (value > 0) {
-      return (value + positiveEnding);
-    } else if (value < 0) {
-      return (value * -1 + negativeEnding);
-    } else {
-      return '0';
-    }
-  } else {
-    return '';
   }
 }
 
