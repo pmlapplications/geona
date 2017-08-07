@@ -4,7 +4,9 @@ import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
 
+// TODO These are for testing only
 window.templates = templates;
+window.$ = $;
 
 /**
  * The entry class for Geona.
@@ -16,18 +18,21 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.loadTemplate_();
+    this.loadMainTemplate_();
+
+    // Get the HTMLElement div to put the map in
+    let mapDiv = $(this.config.get('divId') + ' .geona-map')[0];
 
     // TODO this should perhaps go a in seperate init method that returns a callback or promise
     switch (this.config.get('map.library')) {
       case 'openlayers':
         ol.init(() => {
-          this.map = new ol.OlMap(this.config.get('map'));
+          this.map = new ol.OlMap(this.config.get('map'), mapDiv);
         });
         break;
       case 'leaflet':
         leaflet.init(() => {
-          this.map = new leaflet.LMap(this.config.get('map'));
+          this.map = new leaflet.LMap(this.config.get('map'), mapDiv);
         });
         break;
     }
@@ -37,10 +42,9 @@ export class Geona {
    * Add the geona template underneith the parent map div in the config
    * @private
    */
-  loadTemplate_() {
-    let parentDivId = this.config.get('map.divId');
-    let geonaDivId = 'geona-' + parentDivId;
-    $('#' + parentDivId).html(templates.geona({parentDivId: parentDivId}));
-    this.config.set('map.divId', geonaDivId);
+  loadMainTemplate_() {
+    let parentDivId = this.config.get('divId');
+    let mapDivId = parentDivId + '-geona-map';
+    $(parentDivId).html(templates.geona({parentDivId: parentDivId}));
   }
 }

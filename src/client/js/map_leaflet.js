@@ -12,8 +12,9 @@ export class LMap extends GeonaMap {
   /**
    * Instantiate a new LMap and create a new Leaflet map.
    * @param  {Object} config The map config to load
+   * @param {HTMLElement} mapDiv The div to put the map in
    */
-  constructor(config) {
+  constructor(config, mapDiv) {
     super();
 
     // TODO this is only for testing
@@ -54,7 +55,7 @@ export class LMap extends GeonaMap {
     });
 
     /** @private @type {L.map} The Leaflet map */
-    this.map_ = L.map(this.config.divId, {
+    this.map_ = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
       center: this.config.viewSettings.center,
       maxBounds: [this.config.viewSettings.maxExtent.slice(0, 2), this.config.viewSettings.maxExtent.slice(2, 4)],

@@ -22,20 +22,20 @@ export let client = {
     format: 'String',
     default: '',
   },
+  divId: {
+    doc: 'The div ID to put the Geona instance in.',
+    format: 'String',
+    default: '#geona',
+  },
   map: {
-    // Most important options
-    divId: {
-      doc: 'The div to put the map in.',
-      format: 'String',
-      default: 'geona',
-    },
+    /* Most important options */
     library: {
       doc: 'Which map library to use.',
       format: ['openlayers', 'leaflet'],
       default: 'openlayers',
     },
 
-    // Common options
+    /* Common options */
     basemap: {
       doc: 'The basemap to use, or \'none\'.',
       format: 'String',
@@ -62,7 +62,7 @@ export let client = {
       default: 'EPSG:4326',
     },
 
-    // Other options
+    /* Other options */
     additionalBasemaps: {
       doc: 'Basemaps to add in addition to the defaults.',
       format: 'Array',
@@ -96,7 +96,7 @@ export let client = {
        */
     },
     viewSettings: {
-      doc: 'Settings for the view.  Basemap specific options may override these.',
+      // Settings for the view.  Basemap specific options may override these.
 
       center: {
         doc: 'The map center.',

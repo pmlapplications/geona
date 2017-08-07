@@ -13,8 +13,9 @@ export class OlMap extends GeonaMap {
   /**
    * Instantiate a new OlMap and create a new OpenLayers map.
    * @param  {Object} config The map config to load
+   * @param {HTMLElement} mapDiv The div to put the map in
    */
-  constructor(config) {
+  constructor(config, mapDiv) {
     super();
 
     // TODO this is only for testing
@@ -56,7 +57,7 @@ export class OlMap extends GeonaMap {
           projection: this.config.projection,
           zoom: this.config.viewSettings.zoom,
         }),
-      target: this.config.divId,
+      target: mapDiv,
       controls: [
         new ol.control.Zoom({
           zoomInLabel: $('<span class="icon-zoom-in"></span>').appendTo('body')[0],

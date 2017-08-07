@@ -14,6 +14,11 @@ export default class Config {
     /** @const @type {Object} The convict config instance */
     this.config_ = convict(schema);
     this.config_.load(clientConfig);
+
+    if (!this.config_.get('divId').startsWith('#')) {
+      this.config_.set('divId', '#' + this.config_.get('divId'));
+    }
+
     this.config_.validate();
   }
 

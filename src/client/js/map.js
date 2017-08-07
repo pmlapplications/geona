@@ -11,7 +11,8 @@
  * Base class and interface for a map.
  * @interface
  *
- * @param {Object} config A map config to initialise the map with.
+ * @param {Object}      config A map config to initialise the map with.
+ * @param {HTMLElement} mapDiv The div to put the map in
  */
 export default class GeonaMap {
   /**
