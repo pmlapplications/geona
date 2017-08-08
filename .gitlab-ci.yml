@@ -9,5 +9,5 @@ test:
     - node --version
     - npm --version
     - npm install --silent --depth 0
-    - grunt eslint:check
+    - grunt eslint:strict
     - npm test

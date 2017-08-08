@@ -200,6 +200,12 @@ module.exports = function(grunt) {
       check: {
         src: eslintFiles,
       },
+      strict: {
+        options: {
+          configFile: '.eslintrc_strict.js',
+        },
+        src: eslintFiles,
+      },
     },
 
     handlebars: {
