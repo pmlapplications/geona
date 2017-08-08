@@ -1,18 +1,13 @@
 image: pmlrsg/gisportal-host
 
 stages:
-  - install
   - test
-
-install:
-  stage: install
-  script:
-    - node --version
-    - npm --version
-    - npm install --silent --depth 0
 
 test:
   stage: test
   script:
+    - node --version
+    - npm --version
+    - npm install --silent --depth 0
     - grunt eslint:check
     - npm test
