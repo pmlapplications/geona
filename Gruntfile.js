@@ -1,19 +1,12 @@
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
-  let clientBundles = {
+  let clientBundle = {
     'static/js/bundle.js': 'src/client/js/geona.js',
-    // 'static/js/bundle_openlayers.js': 'src/client/js/main_openlayers.js',
-    // 'static/js/bundle_leaflet.js': 'src/client/js/main_leaflet.js',
-    // 'static/js/loader.js': 'src/client/js/loader.js',
   };
 
   let loaderBundle = {
     'static/js/loader.js': 'src/client_loader/loader.js',
-  };
-
-  let cssFiles = {
-    'static/css/main.css': 'src/client/scss/main.scss',
   };
 
   let vendorLibs = [
@@ -35,6 +28,16 @@ module.exports = function(grunt) {
     'openlayers',
     'leaflet',
   ]);
+
+  let cssFiles = {
+    'static/css/main.css': 'src/client/scss/main.scss',
+  };
+
+  let eslintFiles = [
+    'src/**/*.js',
+    '!src/client/vendor/**',
+    '!src/client/templates/**',
+  ];
 
   grunt.initConfig({
     babel: {
@@ -84,7 +87,7 @@ module.exports = function(grunt) {
 
       // Make client bundle
       client: {
-        files: clientBundles,
+        files: clientBundle,
         options: {
           watch: true,
         },
@@ -192,18 +195,10 @@ module.exports = function(grunt) {
         options: {
           fix: true,
         },
-        src: [
-          'src/**/*.js',
-          '!src/client/vendor/**',
-          '!src/client/templates/**',
-        ],
+        src: eslintFiles,
       },
       check: {
-        src: [
-          'src/**/*.js',
-          '!src/client/vendor/**',
-          '!src/client/templates/**',
-        ],
+        src: eslintFiles,
       },
     },
 
