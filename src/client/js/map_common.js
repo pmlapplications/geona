@@ -32,8 +32,11 @@ export function addBasemapDefaults(basemap) {
 export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding) {
   // Modulus with floats is evil, so convert our latLonValue to an integer first
   let value = Math.round(latLonValue.toFixed(2) * 100);
-  // Equivalent to (latLonValue % 0.1 === 0)
-  if (value % 10 === 0) {
+
+  // Equivalent to if (latLonValue % 0.1 === 0 && value <= 180 && value >= -180)
+  if (value % 10 === 0 && value >= -18000 && value <= 18000) {
+    // If the value is divisible by 0.1, and between 180W and 180E
+
     // Convert back to a float
     value = value / 100;
     if (value > 0) {

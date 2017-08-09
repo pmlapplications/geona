@@ -6,7 +6,7 @@ export let server = {
   },
   plugins: {
     doc: 'Server plugins to load.',
-    format: 'Array',
+    format: Array,
     default: [],
   },
 };
@@ -27,30 +27,36 @@ export let client = {
     format: String,
     default: '#geona',
   },
-  displayTermsAndConditions: {
-    doc: 'Whether we will display the terms and conditions on page load.',
-    format: 'Boolean',
-    default: true,
-  },
-  termsAndConditionsImage: {
-    doc: 'The image to use as the background on the terms and conditions screen.',
-    format: String,
-    default: 'http://htmlcolorcodes.com/assets/images/html-color-codes-color-tutorials-hero-00e10b1f.jpg',
-  },
-  splashScreenHtml: {
-    doc: 'The HTML that will be displayed on the splash screen.',
-    format: String,
-    default: '<p>The GIS portal provides model simulated, earth observation and in-situ data for global water resources.</p><p>Enter the portal now and plot data on a map, analyse it through graphs or export and share.</p>',
-  },
-  displaySplashScreen: {
-    doc: 'Whether we will display the splash screen on page load.',
-    format: 'Boolean',
-    default: true,
-  },
-  splashScreenImage: {
-    doc: 'The image to use as the background on the splash screen.',
-    format: String,
-    default: 'https://www.planwallpaper.com/static/images/cool-background.jpg',
+  intro: {
+    termsAndConditions: {
+      require: {
+        doc: 'Whether we will display and require accepting the terms and conditions on page load.',
+        format: Boolean,
+        default: true,
+      },
+      backgroundImage: {
+        doc: 'The image to use as the background on the terms and conditions screen.',
+        format: String,
+        default: 'http://htmlcolorcodes.com/assets/images/html-color-codes-color-tutorials-hero-00e10b1f.jpg',
+      },
+    },
+    splashScreen: {
+      display: {
+        doc: 'Whether we will display the splash screen on page load.',
+        format: Boolean,
+        default: true,
+      },
+      html: {
+        doc: 'The HTML that will be displayed on the splash screen.',
+        format: String,
+        default: '<p>The GIS portal provides model simulated, earth observation and in-situ data for global water resources.</p><p>Enter the portal now and plot data on a map, analyse it through graphs or export and share.</p>',
+      },
+      backgroundImage: {
+        doc: 'The image to use as the background on the splash screen.',
+        format: 'url',
+        default: 'https://www.planwallpaper.com/static/images/cool-background.jpg',
+      },
+    },
   },
   map: {
     /* Most important options */
@@ -78,7 +84,7 @@ export let client = {
     },
     graticule: {
       doc: 'Display a graticule or not.',
-      format: 'Boolean',
+      format: Boolean,
       default: false,
     },
     projection: {
@@ -90,7 +96,7 @@ export let client = {
     /* Other options */
     additionalBasemaps: {
       doc: 'Basemaps to add in addition to the defaults.',
-      format: 'Array',
+      format: Array,
       default: [],
       /* Basemap object format:
        * {String} id                    ID for this basemap
@@ -125,32 +131,32 @@ export let client = {
 
       center: {
         doc: 'The map center.',
-        format: 'Array',
+        format: Array,
         default: [0, 0],
       },
       fitExtent: {
         doc: 'Extent to fit the view to. Will override zoom. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: 'Array',
+        format: Array,
         default: [-90, -180, 90, 180],
       },
       maxExtent: {
         doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: 'Array',
-        default: [-90, -180, 90, 180],
+        format: Array,
+        default: [-90, -200, 90, 200],
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',
-        format: 'Number',
+        format: Number,
         default: 12,
       },
       minZoom: {
         doc: 'The minimum (furthest) allowed zoom.',
-        format: 'Number',
+        format: Number,
         default: 3,
       },
       zoom: {
         doc: 'The starting zoom level.',
-        format: 'Number',
+        format: Number,
         default: 3,
       },
     },
