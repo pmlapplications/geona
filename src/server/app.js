@@ -38,8 +38,8 @@ i18next
 
       // keys or params to lookup language from
       lookupQuerystring: 'lng',
-      lookupCookie: 'i18next',
-      lookupSession: 'lng',
+      lookupCookie: 'geona-i18n',
+      lookupSession: 'geona-i18n',
       // lookupPath: 'lng',
       lookupFromPathIndex: 0,
 

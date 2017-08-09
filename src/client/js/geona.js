@@ -1,8 +1,13 @@
 import $ from 'jquery';
+import handlebars from 'handlebars/runtime';
 import * as templates from '../templates/compiled';
 import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
+import {registerHelpers} from '../../common/hbs_helpers';
+import {initI18n} from './i18n';
+
+registerHelpers(handlebars);
 
 // TODO These are for testing only
 window.templates = templates;
@@ -19,7 +24,9 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.loadInitialTemplate_();
+    initI18n().then(() => {
+      this.loadInitialTemplate_();
+    });
   }
 
   /**

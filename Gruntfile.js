@@ -143,15 +143,15 @@ module.exports = function(grunt) {
       server: ['lib'],
     },
 
-    copy: { // Copy index.html from src to static
-      // 'static/index.html': 'src/client/index.html',
+    copy: {
       client: {
         files: [
-        // 'static/index.html': 'src/client/index.html',
-          // {
-          //   src: 'src/client/index.html',
-          //   dest: 'static/index.html',
-          // },
+          {
+            expand: true,
+            cwd: 'src/client/locales',
+            src: ['**/*'],
+            dest: 'static/locales',
+          },
           {
             expand: true,
             cwd: 'src/client/vendor/fonts',
@@ -243,14 +243,17 @@ module.exports = function(grunt) {
       //   files: ['src/**/*.js'],
       //   tasks: ['eslint:fix'],
       // },
-      sass: {
-        files: ['src/client/scss/*.scss'],
-        tasks: ['sass:development'],
-      },
-
       handlebars: {
         files: ['src/client/templates/*.hbs'],
         tasks: ['handlebars'],
+      },
+      locales: {
+        files: ['src/client/locales/**'],
+        tasks: ['copy:client'],
+      },
+      sass: {
+        files: ['src/client/scss/*.scss'],
+        tasks: ['sass:development'],
       },
     },
   });

@@ -8,7 +8,7 @@ registerHelpers(hbs);
 
 /*
  * Helper for i18n translation.
- * Adapted from stackoverflow.com/a/37824273 and github.com/i18next/i18next-node/issues/199
+ * Adapted from stackoverflow.com/a/37824273 and github.com/i18next/i18next-node/issues/199#issuecomment-129258127
  *
  * Use in the format:
  *   {{{t 'key' interpolationVal=value}}}
