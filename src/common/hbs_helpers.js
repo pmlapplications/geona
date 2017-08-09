@@ -43,22 +43,10 @@ export function registerHelpers(hbs) {
       return v1 >= v2;
     },
     and: (...args) => {
-      // // Convert arguments into normal array in safe, optimisable way
-      // let args = new Array(arguments.length - 1);
-      // for (let i = 0; i < args.length; ++i) {
-      //   args[i] = arguments[i];
-      // }
-
       // Test that all arguments are true
       return args.every(Boolean);
     },
     or: (...args) => {
-      // // Convert arguments into normal array in safe, optimisable way
-      // let args = new Array(arguments.length - 1);
-      // for (let i = 0; i < args.length; ++i) {
-      //   args[i] = arguments[i];
-      // }
-
       // Test that some arguments are true
       return args.some(Boolean);
     },
