@@ -6,7 +6,7 @@ import app from '../../src/server/app';
 chai.use(chaiHttp);
 let expect = chai.expect;
 
-describe('app', function() {
+describe('server app', function() {
   describe('GET /swagger.json', function() {
     it('should return the swagger json', function(done) {
       chai.request(app)
