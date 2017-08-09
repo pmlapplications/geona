@@ -71,7 +71,7 @@ export class Geona {
    * @private
    */
   loadMainTemplate_(parentDivId) {
-    $(parentDivId).html(templates.geona({parentDivId: parentDivId}));
+    $(parentDivId).html(templates.geona({}));
     this.initialiseMapDiv_();
 
     if (this.config.get('displaySplashScreen')) {
