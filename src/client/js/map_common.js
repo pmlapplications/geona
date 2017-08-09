@@ -3,23 +3,23 @@
  */
 
 /**
- * Add the default options to a basemap definition.
- * @param  {Object} basemap A basemap definition
- * @return {Object}         The basemap with defaults added
+ * Add the default options to a layer definition.
+ * @param  {Object} layer A layer definition
+ * @return {Object}         The layer with defaults added
  */
-export function addBasemapDefaults(basemap) {
-  switch (basemap.source.type) {
+export function addLayerDefaults(layer) {
+  switch (layer.source.type) {
     case 'wms':
-      if (basemap.source.crossOrigin === undefined) {
-        basemap.source.crossOrigin = null;
+      if (layer.source.crossOrigin === undefined) {
+        layer.source.crossOrigin = null;
       }
-      basemap.source.params.version = basemap.source.params.version || '1.1.1';
-      basemap.source.params.format = basemap.source.params.format || 'image/jpeg';
-      if (basemap.source.params.wrapDateLine === undefined) {
-        basemap.source.params.wrapDateLine = true;
+      layer.source.params.version = layer.source.params.version || '1.1.1';
+      layer.source.params.format = layer.source.params.format || 'image/jpeg';
+      if (layer.source.params.wrapDateLine === undefined) {
+        layer.source.params.wrapDateLine = true;
       }
   }
-  return basemap;
+  return layer;
 }
 
 /**
@@ -78,6 +78,7 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
  * {Number} viewSettings.minZoom  The minimum (furthest) allowed zoom.
  *                                Defaults to 3.
  */
+
 export const basemaps = [
   {
     id: 'eox',
@@ -250,7 +251,7 @@ export const basemaps = [
 ];
 
 for (let basemap of basemaps) {
-  basemap = addBasemapDefaults(basemap);
+  basemap = addLayerDefaults(basemap);
 }
 
 /**

@@ -40,6 +40,12 @@ export default class GeonaMap {
   setProjection(projection) {}
 
   /**
+   * Add the specified data layer onto the map.
+   * @param {String} layerId The id of the data layer being added
+   */
+  addLayer(layerId) {}
+
+  /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]

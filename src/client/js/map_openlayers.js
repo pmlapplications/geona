@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
 
 let ol;
 
@@ -28,6 +28,8 @@ export class OlMap extends GeonaMap {
     this.basemaps_ = null;
     /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
     this.countryBorderLayers_ = null;
+    /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
+    this.layers_ = null;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -79,11 +81,14 @@ export class OlMap extends GeonaMap {
 
     this.loadBasemaps_();
     this.loadCountryBorderLayers_();
+    this.loadLayers_();
 
     this.loadConfig_();
 
     // Must come last in the method
     this.initialized_ = true;
+
+    this.addLayer_('chlor_a');
   }
 
   /**
@@ -165,6 +170,24 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * Add the specified data layer onto the map.
+   * @param {*} layerId The id of the data layer being added
+   * TODO setProjection isn't working, add more layers, do all OpenLayers milestone tasks before starting on Leaflet
+   */
+  addLayer_(layerId) {
+    if (this.layers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
+      if (this.config.countryBorders !== 'none') {
+        // Insert below the top layer
+        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.layers_[layerId]);
+      } else {
+        this.map_.addLayer(this.layers_[layerId]);
+      }
+    } else {
+      alert(this.layers_[layerId].get('title') + ' cannot be displayed with the current map projection.');
+    }
+  }
+
+  /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
@@ -229,6 +252,50 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * Load the data layers defined in the config
+   * @private
+   */
+  loadLayers_() {
+    this.layers_ = {};
+
+    for (let layer of this.config.layers) {
+      layer = addLayerDefaults(layer);
+      let source;
+      switch (layer.source.type) {
+        case 'wms':
+          source = new ol.source.TileWMS({
+            url: layer.source.url,
+            crossOrigin: layer.source.crossOrigin,
+            projection: layer.projections[0],
+            attributions: layer.source.attributions,
+            params: {
+              LAYERS: layer.source.params.layers,
+              VERSION: layer.source.params.version,
+              FORMAT: layer.source.params.format,
+              STYLES: layer.source.params.styles,
+              NUMCOLORBANDS: layer.source.params.numcolorbands,
+              time: layer.source.params.time,
+              wrapDateLine: layer.source.params.wrapDateLine,
+            },
+          });
+          break;
+        case 'wmts':
+          console.error('WMTS not yet supported (TODO)');
+          break;
+      }
+
+      this.layers_[layer.id] = new ol.layer.Tile({
+        id: layer.id,
+        title: layer.title,
+        description: layer.description,
+        projections: layer.projections,
+        source: source,
+        viewSettings: layer.viewSettings,
+      });
+    }
+  }
+
+  /**
    * Load the default basemaps, and any defined in the config.
    * @private
    */
@@ -247,13 +314,13 @@ export class OlMap extends GeonaMap {
               url: layer.source.url,
               crossOrigin: layer.source.crossOrigin,
               projection: layer.projections[0],
+              attributions: layer.source.attributions,
               params: {
                 LAYERS: layer.source.params.layers,
                 VERSION: layer.source.params.version,
                 FORMAT: layer.source.params.format,
                 wrapDateLine: layer.source.params.wrapDateLine,
               },
-              attributions: layer.source.attributions,
             });
             break;
           case 'osm':
