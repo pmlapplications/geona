@@ -8,6 +8,7 @@ import * as ol from './map_openlayers';
 window.templates = templates;
 window.$ = $;
 
+
 /**
  * The entry class for Geona.
  */
@@ -18,8 +19,35 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.loadMainTemplate_();
+    this.loadInitialTemplate_();
+  }
 
+  /**
+   * The first screen the user sees if terms and conditions are displayed, in which case the map will not be loaded
+   * unless the accept button is clicked.
+   * @private
+   */
+  loadInitialTemplate_() {
+    let parentDivId = this.config.get('divId');
+    if (this.config.get('displayTermsAndConditions')) {
+      $(parentDivId).html(templates.terms_and_conditions({}));
+      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + this.config.get('termsAndConditionsImage') + ')');
+      $(parentDivId + ' .agree-terms-and-conditions').click( () => {
+        $(parentDivId + ' .terms-and-conditions').toggleClass('inactive', true);
+        $(parentDivId + ' .geona-overlay').toggleClass('inactive', true);
+        this.loadMainTemplate_(parentDivId);
+        // TODO Save that T&C accepted
+      });
+    } else {
+      this.loadMainTemplate_(parentDivId);
+    }
+  }
+
+  /**
+   * Finds the correct div to put the map in, then constructs the map.
+   * @private
+   */
+  initialiseMapDiv_() {
     // Get the HTMLElement div to put the map in
     let mapDiv = $(this.config.get('divId') + ' .geona-map')[0];
 
@@ -39,12 +67,24 @@ export class Geona {
   }
 
   /**
-   * Add the geona template underneith the parent map div in the config
+   * Add the geona template underneath the parent map div in the config
    * @private
    */
-  loadMainTemplate_() {
-    let parentDivId = this.config.get('divId');
-    let mapDivId = parentDivId + '-geona-map';
-    $(parentDivId).html(templates.geona({parentDivId: parentDivId}));
+  loadMainTemplate_(parentDivId) {
+    $(parentDivId).html(templates.geona({}));
+    this.initialiseMapDiv_();
+
+    if (this.config.get('displaySplashScreen')) {
+      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + this.config.get('splashScreenImage') + ')');
+      $(parentDivId + ' .geona-overlay').toggleClass('inactive', false);
+      $(parentDivId + ' .geona-overlay').append(templates.splash_screen({splashMessage: this.config.get('splashScreenHtml')}));
+      $(parentDivId + ' .load-previous-map').click( () => {
+        // TODO If previous, load, otherwise just normal map
+        alert('Load from state');
+      });
+      $(parentDivId + ' .start-building-map').click( () => {
+        $(parentDivId + ' .geona-overlay').toggleClass('inactive', true);
+      });
+    }
   }
 }

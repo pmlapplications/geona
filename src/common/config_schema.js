@@ -14,18 +14,43 @@ export let server = {
 export let client = {
   clientDomain: {
     doc: 'The domain that this client config is for.',
-    format: 'String',
+    format: String,
     default: '',
   },
   geonaServer: {
     doc: 'The URL of the geona server to use.',
-    format: 'String',
+    format: String,
     default: '',
   },
   divId: {
     doc: 'The div ID to put the Geona instance in.',
-    format: 'String',
+    format: String,
     default: '#geona',
+  },
+  displayTermsAndConditions: {
+    doc: 'Whether we will display the terms and conditions on page load.',
+    format: 'Boolean',
+    default: true,
+  },
+  termsAndConditionsImage: {
+    doc: 'The image to use as the background on the terms and conditions screen.',
+    format: String,
+    default: 'http://htmlcolorcodes.com/assets/images/html-color-codes-color-tutorials-hero-00e10b1f.jpg',
+  },
+  splashScreenHtml: {
+    doc: 'The HTML that will be displayed on the splash screen.',
+    format: String,
+    default: '<p>The GIS portal provides model simulated, earth observation and in-situ data for global water resources.</p><p>Enter the portal now and plot data on a map, analyse it through graphs or export and share.</p>',
+  },
+  displaySplashScreen: {
+    doc: 'Whether we will display the splash screen on page load.',
+    format: 'Boolean',
+    default: true,
+  },
+  splashScreenImage: {
+    doc: 'The image to use as the background on the splash screen.',
+    format: String,
+    default: 'https://www.planwallpaper.com/static/images/cool-background.jpg',
   },
   map: {
     /* Most important options */
@@ -38,12 +63,12 @@ export let client = {
     /* Common options */
     basemap: {
       doc: 'The basemap to use, or \'none\'.',
-      format: 'String',
+      format: String,
       default: 'eox',
     },
     bingMapsApiKey: {
       doc: 'An API key to use Bing maps basemaps.',
-      format: 'String',
+      format: String,
       default: '',
     },
     countryBorders: {
