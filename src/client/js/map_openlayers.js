@@ -88,7 +88,7 @@ export class OlMap extends GeonaMap {
     // Must come last in the method
     this.initialized_ = true;
 
-    this.addLayer_('chlor_a');
+    //    this.addLayer('chlor_a');
   }
 
   /**
@@ -155,7 +155,7 @@ export class OlMap extends GeonaMap {
    * @param {String} projection The projection to use, such as 'EPSG:4326'
    */
   setProjection(projection) {
-    if (this.baseActive_ === true) {
+    if (this.config.basemap !== 'none') {
       let basemapId = this.map_.getLayers().item(0).get('id');
       // If basemap supports new projection, we can change the view
       if (this.basemaps_[basemapId].get('projections').includes(projection)) {
@@ -172,9 +172,9 @@ export class OlMap extends GeonaMap {
   /**
    * Add the specified data layer onto the map.
    * @param {*} layerId The id of the data layer being added
-   * TODO setProjection isn't working, add more layers, do all OpenLayers milestone tasks before starting on Leaflet
+   * TODO add more layers, do all OpenLayers milestone tasks before starting on Leaflet
    */
-  addLayer_(layerId) {
+  addLayer(layerId) {
     if (this.layers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
       if (this.config.countryBorders !== 'none') {
         // Insert below the top layer
