@@ -88,7 +88,8 @@ export class OlMap extends GeonaMap {
     // Must come last in the method
     this.initialized_ = true;
 
-    //    this.addLayer('chlor_a');
+    this.addLayer('chlor_a');
+    this.addLayer('ph_hcmr');
   }
 
   /**
@@ -182,9 +183,30 @@ export class OlMap extends GeonaMap {
       } else {
         this.map_.addLayer(this.layers_[layerId]);
       }
+      // if the config doesn't already contain this layerId, add it to the layers object
+      // if(this.config.layers){}
     } else {
       alert(this.layers_[layerId].get('title') + ' cannot be displayed with the current map projection.');
     }
+  }
+
+  /**
+   * Remove the specified data layer from the map
+   * @param {*} layerId The id of the data layer being added
+   */
+  removeLayer(layerId) {
+    if (this.map_.getLayers().getArray().includes(this.layers_[layerId])) {
+      this.map_.removeLayer(this.layers_[layerId]);
+      // remove this layerId from the config
+    }
+  }
+
+  showLayer(layerId) {
+    this.layers_[layerId].setVisible(true);
+  }
+
+  hideLayer(layerId) {
+    this.layers_[layerId].setVisible(false);
   }
 
   /**

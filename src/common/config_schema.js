@@ -110,6 +110,26 @@ export let client = {
             },
           },
         },
+        {
+          id: 'ph_hcmr',
+          title: 'pH - Mediterranean Sea - HCMR',
+          description: 'pH of Mediterranean Sea by HCMR',
+          projections: ['EPSG:4326', 'EPSG:3857'],
+          source: {
+            type: 'wms',
+            url: 'http://ogc.hcmr.gr:8080/thredds/wms/POMERSEM_MED_MONTHLY',
+            attributions: ['HCMR'],
+            params: {
+              layers: 'pH',
+              version: '1.1.1',
+              format: 'image/png',
+              styles: 'boxfill/rainbow',
+              numColorBands: 255,
+              time: '2013-12-15T00:00:00.000Z',
+              wrapDateLine: true,
+            },
+          },
+        },
       ],
     },
 
