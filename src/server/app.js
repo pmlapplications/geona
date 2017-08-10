@@ -34,20 +34,17 @@ i18next
 
     detection: {
       // order and from where user language should be detected
-      order: [/* 'path', 'session', */'querystring', 'cookie', 'header'],
+      order: ['querystring', 'cookie', 'header'],
 
       // keys or params to lookup language from
       lookupQuerystring: 'lng',
-      lookupCookie: 'i18next',
-      lookupSession: 'lng',
-      // lookupPath: 'lng',
-      lookupFromPathIndex: 0,
+      lookupCookie: 'geona-i18n',
 
       // cache user language
-      caches: ['cookie'], // ['cookie']
+      caches: ['cookie'],
 
       // optional expire and domain for set cookie
-      // cookieExpirationDate: new Date(),
+      cookieExpirationDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // One year
       // cookieDomain: 'myDomain',
     },
   });

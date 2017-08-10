@@ -1,8 +1,13 @@
 import $ from 'jquery';
+import handlebars from 'handlebars/runtime';
 import * as templates from '../templates/compiled';
 import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
+import {registerHelpers} from '../../common/hbs_helpers';
+import {initI18n} from './i18n';
+
+registerHelpers(handlebars);
 
 // TODO These are for testing only
 window.templates = templates;
@@ -19,7 +24,9 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.loadInitialTemplate_();
+    initI18n().then(() => {
+      this.loadInitialTemplate_();
+    });
   }
 
   /**
@@ -29,10 +36,12 @@ export class Geona {
    */
   loadInitialTemplate_() {
     let parentDivId = this.config.get('divId');
-    if (this.config.get('displayTermsAndConditions')) {
-      $(parentDivId).html(templates.terms_and_conditions({}));
-      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + this.config.get('termsAndConditionsImage') + ')');
-      $(parentDivId + ' .agree-terms-and-conditions').click( () => {
+    if (this.config.get('intro.termsAndConditions.require')) {
+      $(parentDivId).html(templates.terms_and_conditions());
+
+      let backgroundImage = this.config.get('intro.termsAndConditions.backgroundImage');
+      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + backgroundImage + ')');
+      $(parentDivId + ' .agree-terms-and-conditions').click(() => {
         $(parentDivId + ' .terms-and-conditions').toggleClass('inactive', true);
         $(parentDivId + ' .geona-overlay').toggleClass('inactive', true);
         this.loadMainTemplate_(parentDivId);
@@ -74,10 +83,10 @@ export class Geona {
     $(parentDivId).html(templates.geona({}));
     this.initialiseMapDiv_();
 
-    if (this.config.get('displaySplashScreen')) {
-      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + this.config.get('splashScreenImage') + ')');
+    if (this.config.get('intro.splashScreen.display')) {
+      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + this.config.get('intro.splashScreen.backgroundImage') + ')');
       $(parentDivId + ' .geona-overlay').toggleClass('inactive', false);
-      $(parentDivId + ' .geona-overlay').append(templates.splash_screen({splashMessage: this.config.get('splashScreenHtml')}));
+      $(parentDivId + ' .geona-overlay').append(templates.splash_screen({splashMessage: this.config.get('intro.splashScreen.html')}));
       $(parentDivId + ' .load-previous-map').click( () => {
         // TODO If previous, load, otherwise just normal map
         alert('Load from state');

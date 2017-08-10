@@ -32,7 +32,7 @@ module.exports = {
     // Leave these mostly to eslint:recommended and google
     'no-cond-assign': 2, // override google
     'no-console': [0, {'allow': ['warn', 'error']}],
-    'valid-jsdoc': [1, { // downgrade google
+    'valid-jsdoc': [1, { // downgrade and override google to add more options
       requireParamDescription: false,
       requireReturnDescription: false,
       requireReturn: false,
@@ -118,7 +118,7 @@ module.exports = {
     'no-shadow-restricted-names': 2,
     'no-undef': 2, // eslint:recommended
     'no-undef-init': 2,
-    'no-unused-vars': [1, {'vars': 'all', 'args': 'after-used'}], // eslint:recommended
+    'no-unused-vars': [1, {'vars': 'all', 'args': 'after-used'}], // eslint:recommended and override google to add options
     'no-use-before-define': [2, {'functions': false}],
 
     // Stylistic Issues
@@ -136,7 +136,7 @@ module.exports = {
     'key-spacing': 1, // downgrade google
     'keyword-spacing': 1, // downgrade google
     'linebreak-style': [2, 'unix'], // override google to be explicit
-    'max-len': [1, { // override google
+    'max-len': [1, { // override google to change options
       'code': 120,
       'tabWidth': 2,
       'ignoreStrings': true,

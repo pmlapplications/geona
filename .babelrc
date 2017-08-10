@@ -1,7 +1,25 @@
 {
   "env": { // BABEL_ENV configs
-    "babel-node": { // For npm run serverDev
+    "server": { // For building or running the server
       "plugins": [
+        "dynamic-import-node"
+      ],
+      "presets": [
+        [
+          "env",
+          {
+            "debug": false,
+            "targets": {
+              "node": 4
+            }
+          }
+        ]
+      ]
+    },
+
+    "test": { // For npm test
+      "plugins": [
+        "istanbul",
         "dynamic-import-node"
       ],
       "presets": [
@@ -47,34 +65,7 @@
     },
 
     "babili": { // For minifying/uglifying
-      "presets": [
-        [
-          "babili"
-        ]
-      ]
-    },
-
-    "mocha": { // For npm test
-      "presets": [
-        "env"
-      ]
-    },
-
-    "server": { // For building the server
-      "plugins": [
-        "dynamic-import-node"
-      ],
-      "presets": [
-        [
-          "env",
-          {
-            "debug": false,
-            "targets": {
-              "node": 4
-            }
-          }
-        ]
-      ]
+      "presets": [["babili"]]
     }
   }
 }

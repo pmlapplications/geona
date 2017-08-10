@@ -4,22 +4,33 @@
   "description": "",
   "homepage": "",
   "license": "",
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "sourceMap": false,
+    "instrument": false,
+    "all": true
+  },
   "scripts": {
     "build": "grunt",
     "clean": "grunt clean",
     "start": "npm run -s serve",
     "serve": "node lib/server/app.js",
     "clientDev": "grunt clientDev",
-    "serverDev": "BABEL_ENV=babel-node  nodemon -w src/server -w src/common -w config -i src/server/locales  src/server/app.js --exec babel-node",
+    "serverDev": "BABEL_ENV=server  nodemon -w src/server -w src/common -w config -i src/server/locales  src/server/app.js --exec babel-node",
     "buildServerDev": "nodemon -w src/server -w src/common --exec \"grunt server && npm run serve\"",
-    "test": "grunt && npm run -s mocha",
-    "mocha": "BABEL_ENV=mocha mocha",
+    "test": "BABEL_ENV=test nyc mocha",
     "eslint-fix": "grunt eslint:fix"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-plugin-dynamic-import-node": "^1.0.2",
+    "babel-plugin-istanbul": "^4.1.4",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-babili": "^0.1.4",
     "babel-preset-env": "^1.4.0",
@@ -41,7 +52,8 @@
     "load-grunt-tasks": "^3.5.2",
     "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
-    "npm-check": "^5.4.4"
+    "npm-check": "^5.4.4",
+    "nyc": "^11.1.0"
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
