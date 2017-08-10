@@ -148,12 +148,6 @@ module.exports = function(grunt) {
         files: [
           {
             expand: true,
-            cwd: 'src/client/locales',
-            src: ['**/*'],
-            dest: 'static/locales',
-          },
-          {
-            expand: true,
             cwd: 'src/client/vendor/fonts',
             src: ['*'],
             dest: 'static/vendor/fonts',
@@ -167,12 +161,6 @@ module.exports = function(grunt) {
             cwd: 'src/server/templates',
             src: ['*'],
             dest: 'lib/server/templates',
-          },
-          {
-            expand: true,
-            cwd: 'src/server/locales',
-            src: ['**/*'],
-            dest: 'lib/server/locales',
           },
         ],
       },
@@ -246,10 +234,6 @@ module.exports = function(grunt) {
       handlebars: {
         files: ['src/client/templates/*.hbs'],
         tasks: ['handlebars'],
-      },
-      locales: {
-        files: ['src/client/locales/**'],
-        tasks: ['copy:client'],
       },
       sass: {
         files: ['src/client/scss/*.scss'],
