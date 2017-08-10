@@ -20,10 +20,10 @@ i18next
   .init({
     debug: false,
 
-    // All namespaces must be added here
-    ns: ['common', 'intro'],
-    // All languages must be added here
+    // All languages must be defined here
     preload: ['en', 'fr'],
+    // All namespaces must be defined here
+    ns: ['common', 'intro'],
 
     fallbackLng: 'en',
     defaultNS: 'common',
@@ -31,7 +31,6 @@ i18next
 
     backend: {
       loadPath: path.join(__dirname, '../../locales/{{lng}}/{{ns}}.json'),
-      addPath: path.join(__dirname, '../../locales/{{lng}}/{{ns}}.missing.json'),
       jsonIndent: 2,
     },
 
@@ -51,8 +50,6 @@ i18next
       // cookieDomain: 'myDomain',
     },
   });
-
-console.log(path.join(__dirname, '../../locales/{{lng}}/{{ns}}.json'));
 
 
 /*

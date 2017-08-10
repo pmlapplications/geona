@@ -10,7 +10,7 @@ let initPromise = new Promise((resolve) => {
     .init({
       debug: false,
 
-      // All namespaces used by the client must be added here
+      // All namespaces used by the client must be defined here
       ns: ['common', 'intro'],
 
       fallbackLng: 'en',
@@ -35,10 +35,7 @@ let initPromise = new Promise((resolve) => {
         cookieMinutes: 525600, // One year
         // cookieDomain: 'myDomain',
       },
-    }, (err) => {
-      if (err) {
-        console.warn('i18n: ' + JSON.stringify(err));
-      }
+    }, () => {
       resolve();
     });
 });
