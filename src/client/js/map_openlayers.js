@@ -192,7 +192,7 @@ export class OlMap extends GeonaMap {
 
   /**
    * Remove the specified data layer from the map
-   * @param {*} layerId The id of the data layer being added
+   * @param {*} layerId The id of the data layer being removed
    */
   removeLayer(layerId) {
     if (this.map_.getLayers().getArray().includes(this.layers_[layerId])) {
@@ -201,10 +201,18 @@ export class OlMap extends GeonaMap {
     }
   }
 
+  /**
+   * Makes an invisible layer visible
+   * @param {*} layerId The id of the data layer being made visible
+   */
   showLayer(layerId) {
     this.layers_[layerId].setVisible(true);
   }
 
+  /**
+   * Makes a layer invisible, but keeps it on the map
+   * @param {*} layerId The id of the data layer being made hidden
+   */
   hideLayer(layerId) {
     this.layers_[layerId].setVisible(false);
   }
