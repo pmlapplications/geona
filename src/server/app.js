@@ -36,7 +36,7 @@ i18next
 
     detection: {
       // order and from where user language should be detected
-      order: ['querystring', 'cookie', 'header'],
+      order: ['cookie', 'header'],
 
       // keys or params to lookup language from
       lookupQuerystring: 'lng',
