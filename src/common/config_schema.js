@@ -49,7 +49,7 @@ export let client = {
       html: {
         doc: 'The HTML that will be displayed on the splash screen.',
         format: String,
-        default: '<p>The GIS portal provides model simulated, earth observation and in-situ data for global water resources.</p><p>Enter the portal now and plot data on a map, analyse it through graphs or export and share.</p>',
+        default: 'intro:splashScreen.content',
       },
       backgroundImage: {
         doc: 'The image to use as the background on the splash screen.',

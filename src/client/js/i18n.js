@@ -11,7 +11,7 @@ let initPromise = new Promise((resolve) => {
       debug: false,
 
       fallbackLng: 'en',
-      ns: ['common'],
+      ns: ['common', 'intro'],
       defaultNS: 'common',
 
       backend: {
@@ -19,24 +19,18 @@ let initPromise = new Promise((resolve) => {
       },
 
       detection: {
-      // order and from where user language should be detected
+        // order and from where user language should be detected
         order: ['cookie'],
 
         // keys or params to lookup language from
-        lookupQuerystring: 'lng',
         lookupCookie: 'geona-i18n',
-        lookupLocalStorage: 'geona-i18n',
 
         // cache user language on
         caches: ['cookie'],
-        // excludeCacheFor: ['cimode'], // languages to not persist (cookie, localStorage)
 
         // optional expire and domain for set cookie
-        cookieMinutes: 525600,
-      // cookieDomain: 'myDomain',
-
-      // optional htmlTag with lang attribute, the default is:
-      // htmlTag: document.documentElement,
+        cookieMinutes: 525600, // One year
+        // cookieDomain: 'myDomain',
       },
     }, (err) => {
       if (err) {
@@ -58,7 +52,6 @@ export function initI18n() {
  *   {{{t 'key' interpolationVal=value}}}
  */
 handlebars.registerHelper('t', function(key, options) {
-  console.log('handlebars t helper called');
   let result = i18next.t(key, options.hash);
   return new handlebars.SafeString(result);
 });
