@@ -109,7 +109,7 @@ export let client = {
        * For a WMS source:
        *   {String} source.url          WMS url
        *   {String} source.crossOrigin  The crossOrigin attribute for loaded images
-       *   {Array}  source.attributions
+       *   {String} source.attributions
        *   {Object} source.params       WMS request parameters
        *
        * For a Bing source:

@@ -65,7 +65,7 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
  * For a WMS source:
  *   {String} source.url          WMS url
  *   {String} source.crossOrigin  The crossOrigin attribute for loaded images
- *   {Array}  source.attributions
+ *   {String} source.attributions
  *   {Object} source.params       WMS request parameters
  *
  * For a Bing source:
@@ -91,7 +91,7 @@ export const basemaps = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
-      attributions: ['EOX'],
+      attributions: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
       params: {
         layers: 'terrain-light',
         version: '1.1.1',
@@ -104,37 +104,6 @@ export const basemaps = [
     },
   },
   {
-    id: 'osm',
-    title: 'OSM',
-    description: 'EPSG:3857 only',
-    projections: ['EPSG:3857'],
-    source: {
-      type: 'osm',
-    },
-    viewSettings: {
-      maxZoom: 19,
-    },
-  },
-  {
-    id: 'gebco',
-    title: 'GEBCO',
-    projections: ['EPSG:4326', 'EPSG:3857'],
-    source: {
-      type: 'wms',
-      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-      crossOrigin: null,
-      attributions: ['GEBCO'],
-      params: {
-        layers: 'gebco_08_grid',
-        version: '1.1.1',
-        format: 'image/jpeg',
-        wrapDateLine: true},
-    },
-    viewSettings: {
-      maxZoom: 7,
-    },
-  },
-  {
     id: 'eoxS2Cloudless',
     title: 'EOX Sentinel-2 Cloudless',
     description: 'EPSG:4326 only, Europe only',
@@ -143,7 +112,7 @@ export const basemaps = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
-      attributions: ['EOX Sentinel-2'],
+      attributions: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
       params: {
         layers: 's2cloudless',
         version: '1.1.1',
@@ -156,6 +125,25 @@ export const basemaps = [
     },
   },
   {
+    id: 'gebco',
+    title: 'GEBCO',
+    projections: ['EPSG:4326', 'EPSG:3857'],
+    source: {
+      type: 'wms',
+      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+      crossOrigin: null,
+      attributions: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
+      params: {
+        layers: 'gebco_08_grid',
+        version: '1.1.1',
+        format: 'image/jpeg',
+        wrapDateLine: true},
+    },
+    viewSettings: {
+      maxZoom: 7,
+    },
+  },
+  {
     id: 'blueMarble',
     title: 'Blue Marble',
     description: 'EPSG:4326 only',
@@ -164,7 +152,7 @@ export const basemaps = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
-      attributions: ['Blue Marble Attribution'],
+      attributions: 'Blue Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
       params: {
         layers: 'bluemarble',
         version: '1.1.1',
@@ -184,7 +172,7 @@ export const basemaps = [
       type: 'wms',
       url: 'https://tiles.maps.eox.at/wms/?',
       crossOrigin: null,
-      attributions: ['Black Marble Attribution'],
+      attributions: 'Black Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
       params: {
         layers: 'blackmarble',
         version: '1.1.1',
@@ -193,6 +181,18 @@ export const basemaps = [
     },
     viewSettings: {
       maxZoom: 8,
+    },
+  },
+  {
+    id: 'osm',
+    title: 'OSM',
+    description: 'EPSG:3857 only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'osm',
+    },
+    viewSettings: {
+      maxZoom: 19,
     },
   },
   {
