@@ -53,7 +53,7 @@ export let client = {
       },
       backgroundImage: {
         doc: 'The image to use as the background on the splash screen.',
-        format: 'url',
+        format: String,
         default: 'https://www.planwallpaper.com/static/images/cool-background.jpg',
       },
     },

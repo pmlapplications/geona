@@ -25,7 +25,12 @@ export class Geona {
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
     initI18n().then(() => {
-      this.loadInitialTemplate_();
+      let parentDivId = this.config.get('divId');
+      if (this.config.get('intro.termsAndConditions.require')) {
+        this.loadTermsAndConditions_(parentDivId);
+      } else {
+        this.loadMainTemplate_(parentDivId);
+      }
     });
   }
 
@@ -34,22 +39,17 @@ export class Geona {
    * unless the accept button is clicked.
    * @private
    */
-  loadInitialTemplate_() {
-    let parentDivId = this.config.get('divId');
-    if (this.config.get('intro.termsAndConditions.require')) {
-      $(parentDivId).html(templates.terms_and_conditions());
+  loadTermsAndConditions_(parentDivId) {
+    $(parentDivId).html(templates.terms_and_conditions());
 
-      let backgroundImage = this.config.get('intro.termsAndConditions.backgroundImage');
-      $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + backgroundImage + ')');
-      $(parentDivId + ' .agree-terms-and-conditions').click(() => {
-        $(parentDivId + ' .terms-and-conditions').toggleClass('inactive', true);
-        $(parentDivId + ' .geona-overlay').toggleClass('inactive', true);
-        this.loadMainTemplate_(parentDivId);
-        // TODO Save that T&C accepted
-      });
-    } else {
+    let backgroundImage = this.config.get('intro.termsAndConditions.backgroundImage');
+    $(parentDivId + ' .geona-overlay').css('background-image', 'url(' + backgroundImage + ')');
+    $(parentDivId + ' .agree-terms-and-conditions').click(() => {
+      $(parentDivId + ' .geona-terms-and-conditions').toggleClass('inactive', true);
+      $(parentDivId + ' .geona-overlay').toggleClass('inactive', true);
       this.loadMainTemplate_(parentDivId);
-    }
+      // TODO Save that T&C accepted
+    });
   }
 
   /**
@@ -92,8 +92,12 @@ export class Geona {
         alert('Load from state');
       });
       $(parentDivId + ' .start-building-map').click( () => {
+        $(parentDivId + ' .geona-splash-screen').toggleClass('inactive', true);
         $(parentDivId + ' .geona-overlay').toggleClass('inactive', true);
       });
     }
+
+    // TODO 'if menu is open by default':
+    // $(parentDivId + ' .geona-controls').append(templates.menu({}));
   }
 }

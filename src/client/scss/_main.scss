@@ -107,6 +107,7 @@
 \*------------------------------------*/
 
 .geona-menu-open{
+  position: absolute;
   width: 200px;
   height: 80%;
   top: 50px;
@@ -118,7 +119,7 @@
     Utilities
 \*------------------------------------*/
 
-// Must be placed above .inactive
+// Must be placed directly above .inactive
 .hidden{
   display: hidden;
 }

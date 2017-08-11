@@ -29,7 +29,7 @@ export class OlMap extends GeonaMap {
     /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
     this.countryBorderLayers_ = null;
     /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
-    this.layers_ = null;
+    this.availableLayers_ = null;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -172,21 +172,30 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {*} layerId The id of the data layer being added
-   * TODO add more layers, do all OpenLayers milestone tasks before starting on Leaflet
+   * @param {String} layerId The id of the data layer being added.
+   * @param {Integer} [index] The zero-based index to insert the layer into.
+   * TODO do all OpenLayers milestone tasks before starting on Leaflet
    */
-  addLayer(layerId) {
-    if (this.layers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
-      if (this.config.countryBorders !== 'none') {
+  addLayer(layerId, index) {
+    if (this.availableLayers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
+      // If we are re-ordering we will have an index
+      if (index) {
+        if (this.config.basemap !== 'none') {
+          this.map_.getLayers().insertAt(index + 1, this.availableLayers_[layerId]);
+        } else {
+          this.map_.getLayers().insertAt(index, this.availableLayers_[layerId]);
+        }
+      } else if (this.config.countryBorders !== 'none') {
         // Insert below the top layer
-        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.layers_[layerId]);
+        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.availableLayers_[layerId]);
       } else {
-        this.map_.addLayer(this.layers_[layerId]);
+        this.map_.addLayer(this.availableLayers_[layerId]);
       }
+
       // if the config doesn't already contain this layerId, add it to the layers object
       // if(this.config.layers){}
     } else {
-      alert(this.layers_[layerId].get('title') + ' cannot be displayed with the current map projection.');
+      alert(this.availableLayers_[layerId].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
     }
   }
 
@@ -195,8 +204,8 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being removed
    */
   removeLayer(layerId) {
-    if (this.map_.getLayers().getArray().includes(this.layers_[layerId])) {
-      this.map_.removeLayer(this.layers_[layerId]);
+    if (this.map_.getLayers().getArray().includes(this.availableLayers_[layerId])) {
+      this.map_.removeLayer(this.availableLayers_[layerId]);
       // remove this layerId from the config
     }
   }
@@ -206,7 +215,7 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being made visible
    */
   showLayer(layerId) {
-    this.layers_[layerId].setVisible(true);
+    this.availableLayers_[layerId].setVisible(true);
   }
 
   /**
@@ -214,7 +223,7 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being made hidden
    */
   hideLayer(layerId) {
-    this.layers_[layerId].setVisible(false);
+    this.availableLayers_[layerId].setVisible(false);
   }
 
   /**
@@ -286,7 +295,7 @@ export class OlMap extends GeonaMap {
    * @private
    */
   loadLayers_() {
-    this.layers_ = {};
+    this.availableLayers_ = {};
 
     for (let layer of this.config.layers) {
       layer = addLayerDefaults(layer);
@@ -314,7 +323,7 @@ export class OlMap extends GeonaMap {
           break;
       }
 
-      this.layers_[layer.id] = new ol.layer.Tile({
+      this.availableLayers_[layer.id] = new ol.layer.Tile({
         id: layer.id,
         title: layer.title,
         description: layer.description,
