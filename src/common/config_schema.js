@@ -57,6 +57,18 @@ export let client = {
         default: 'https://www.planwallpaper.com/static/images/cool-background.jpg',
       },
     },
+    menu: {
+      opened: {
+        doc: 'Whether the full menu is displayed on load.',
+        format: Boolean,
+        default: true,
+      },
+      collapsible: {
+        doc: 'Whether the controls to show and hide the menu are shown.',
+        format: Boolean,
+        default: true,
+      },
+    },
   },
   map: {
     /* Most important options */
