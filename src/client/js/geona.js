@@ -1,7 +1,5 @@
 import $ from 'jquery';
-window.jQuery = window.$ = $;
-require('jquery-ui');
-// import 'jquery-ui';
+import 'jquery-ui/ui/widgets/sortable';
 import handlebars from 'handlebars/runtime';
 import * as templates from '../templates/compiled';
 import Config from './config';

@@ -20,21 +20,23 @@ i18next
   .init({
     debug: false,
 
-    fallbackLng: 'en',
-    ns: ['common'],
-    defaultNS: 'common',
-    saveMissing: true,
+    // All languages must be defined here
     preload: ['en', 'fr'],
+    // All namespaces must be defined here
+    ns: ['common', 'intro'],
+
+    fallbackLng: 'en',
+    defaultNS: 'common',
+    saveMissing: false,
 
     backend: {
-      loadPath: __dirname + '/locales/{{lng}}/{{ns}}.json',
-      addPath: __dirname + '/locales/{{lng}}/{{ns}}.missing.json',
+      loadPath: path.join(__dirname, '../../locales/{{lng}}/{{ns}}.json'),
       jsonIndent: 2,
     },
 
     detection: {
       // order and from where user language should be detected
-      order: ['querystring', 'cookie', 'header'],
+      order: ['cookie', 'header'],
 
       // keys or params to lookup language from
       lookupQuerystring: 'lng',
@@ -51,13 +53,14 @@ i18next
 
 
 /*
- * Setup express and the hbs (handlebars) template engine
+ * Setup express, the hbs (handlebars) template engine, and i18next handling and multiload backend route
  */
 
 let app = express();
 app.set('view engine', 'hbs');
 app.set('views', __dirname + '/templates');
 app.use(i18nextMiddleware.handle(i18next, {}));
+app.get('/locales/resources.json', i18nextMiddleware.getResourcesHandler(i18next)); // i18next multiload backend route
 
 
 /*

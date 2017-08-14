@@ -10,12 +10,15 @@ let initPromise = new Promise((resolve) => {
     .init({
       debug: false,
 
-      fallbackLng: 'en',
+      // All namespaces used by the client must be defined here
       ns: ['common', 'intro'],
+
+      fallbackLng: 'en',
       defaultNS: 'common',
 
       backend: {
-        loadPath: 'locales/{{lng}}/{{ns}}.json',
+        loadPath: 'locales/resources.json?lng={{lng}}&ns={{ns}}',
+        allowMultiLoading: true,
       },
 
       detection: {
@@ -32,10 +35,7 @@ let initPromise = new Promise((resolve) => {
         cookieMinutes: 525600, // One year
         // cookieDomain: 'myDomain',
       },
-    }, (err) => {
-      if (err) {
-        console.warn('i18n: ' + JSON.stringify(err));
-      }
+    }, () => {
       resolve();
     });
 });
@@ -49,7 +49,7 @@ export function initI18n() {
  * Adapted from stackoverflow.com/a/37824273 and github.com/i18next/i18next-node/issues/199#issuecomment-129258127
  *
  * Use in the format:
- *   {{{t 'key' interpolationVal=value}}}
+ *   {{t 'key' interpolationVal=value}}
  */
 handlebars.registerHelper('t', function(key, options) {
   let result = i18next.t(key, options.hash);
