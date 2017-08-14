@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
+import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 
 let ol;
 
@@ -224,6 +225,21 @@ export class OlMap extends GeonaMap {
    */
   hideLayer(layerId) {
     this.availableLayers_[layerId].setVisible(false);
+  }
+
+  findLayerInformation(layerName) {
+    // let layerData = JSON.parse(CCI5DAY);
+    // console.log(layerData);
+    let layerData;
+    for (let layer of CCI5DAY.server.Layers) {
+      if (layer.Name === layerName) {
+        layerData = layer;
+      }
+    }
+    // let layerData = CCI5DAY.server.Layers;
+    console.log(CCI5DAY);
+    console.log(layerData);
+    console.log(JSON.parse('{"Name": "chlor_a","Title": "Mass Concentration of Chlorophyll a in Sea Water","tags": {"indicator_type": "CCI","niceName": "Mass Concentration of Chlorophyll a in Sea Water","data_provider": "Plymouth Marine Laboratory"}}'));
   }
 
   /**
