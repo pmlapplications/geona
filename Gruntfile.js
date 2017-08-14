@@ -80,7 +80,8 @@ module.exports = function(grunt) {
           debug: true,
         },
         transform: [
-          ['babelify'],
+          'babelify',
+          ['deamdify', {global: true}],
         ],
         external: clientExternalLibs,
       },
