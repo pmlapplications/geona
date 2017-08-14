@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
 
 let ol;
 
@@ -28,6 +28,8 @@ export class OlMap extends GeonaMap {
     this.basemaps_ = null;
     /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
     this.countryBorderLayers_ = null;
+    /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
+    this.availableLayers_ = null;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -79,11 +81,15 @@ export class OlMap extends GeonaMap {
 
     this.loadBasemaps_();
     this.loadCountryBorderLayers_();
+    this.loadLayers_();
 
     this.loadConfig_();
 
     // Must come last in the method
     this.initialized_ = true;
+
+    this.addLayer('chlor_a');
+    this.addLayer('ph_hcmr');
   }
 
   /**
@@ -150,7 +156,7 @@ export class OlMap extends GeonaMap {
    * @param {String} projection The projection to use, such as 'EPSG:4326'
    */
   setProjection(projection) {
-    if (this.baseActive_ === true) {
+    if (this.config.basemap !== 'none') {
       let basemapId = this.map_.getLayers().item(0).get('id');
       // If basemap supports new projection, we can change the view
       if (this.basemaps_[basemapId].get('projections').includes(projection)) {
@@ -162,6 +168,62 @@ export class OlMap extends GeonaMap {
     }
 
     this.config.projection = projection;
+  }
+
+  /**
+   * Add the specified data layer onto the map.
+   * @param {String} layerId The id of the data layer being added.
+   * @param {Integer} [index] The zero-based index to insert the layer into.
+   * TODO do all OpenLayers milestone tasks before starting on Leaflet
+   */
+  addLayer(layerId, index) {
+    if (this.availableLayers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
+      // If we are re-ordering we will have an index
+      if (index) {
+        if (this.config.basemap !== 'none') {
+          this.map_.getLayers().insertAt(index + 1, this.availableLayers_[layerId]);
+        } else {
+          this.map_.getLayers().insertAt(index, this.availableLayers_[layerId]);
+        }
+      } else if (this.config.countryBorders !== 'none') {
+        // Insert below the top layer
+        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.availableLayers_[layerId]);
+      } else {
+        this.map_.addLayer(this.availableLayers_[layerId]);
+      }
+
+      // if the config doesn't already contain this layerId, add it to the layers object
+      // if(this.config.layers){}
+    } else {
+      alert(this.availableLayers_[layerId].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+    }
+  }
+
+  /**
+   * Remove the specified data layer from the map
+   * @param {*} layerId The id of the data layer being removed
+   */
+  removeLayer(layerId) {
+    if (this.map_.getLayers().getArray().includes(this.availableLayers_[layerId])) {
+      this.map_.removeLayer(this.availableLayers_[layerId]);
+      // remove this layerId from the config
+    }
+  }
+
+  /**
+   * Makes an invisible layer visible
+   * @param {*} layerId The id of the data layer being made visible
+   */
+  showLayer(layerId) {
+    this.availableLayers_[layerId].setVisible(true);
+  }
+
+  /**
+   * Makes a layer invisible, but keeps it on the map
+   * @param {*} layerId The id of the data layer being made hidden
+   */
+  hideLayer(layerId) {
+    this.availableLayers_[layerId].setVisible(false);
   }
 
   /**
@@ -229,6 +291,50 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * Load the data layers defined in the config
+   * @private
+   */
+  loadLayers_() {
+    this.availableLayers_ = {};
+
+    for (let layer of this.config.layers) {
+      layer = addLayerDefaults(layer);
+      let source;
+      switch (layer.source.type) {
+        case 'wms':
+          source = new ol.source.TileWMS({
+            url: layer.source.url,
+            crossOrigin: layer.source.crossOrigin,
+            projection: layer.projections[0],
+            attributions: layer.source.attributions,
+            params: {
+              LAYERS: layer.source.params.layers,
+              VERSION: layer.source.params.version,
+              FORMAT: layer.source.params.format,
+              STYLES: layer.source.params.styles,
+              NUMCOLORBANDS: layer.source.params.numcolorbands,
+              time: layer.source.params.time,
+              wrapDateLine: layer.source.params.wrapDateLine,
+            },
+          });
+          break;
+        case 'wmts':
+          console.error('WMTS not yet supported (TODO)');
+          break;
+      }
+
+      this.availableLayers_[layer.id] = new ol.layer.Tile({
+        id: layer.id,
+        title: layer.title,
+        description: layer.description,
+        projections: layer.projections,
+        source: source,
+        viewSettings: layer.viewSettings,
+      });
+    }
+  }
+
+  /**
    * Load the default basemaps, and any defined in the config.
    * @private
    */
@@ -247,13 +353,13 @@ export class OlMap extends GeonaMap {
               url: layer.source.url,
               crossOrigin: layer.source.crossOrigin,
               projection: layer.projections[0],
+              attributions: layer.source.attributions,
               params: {
                 LAYERS: layer.source.params.layers,
                 VERSION: layer.source.params.version,
                 FORMAT: layer.source.params.format,
                 wrapDateLine: layer.source.params.wrapDateLine,
               },
-              attributions: layer.source.attributions,
             });
             break;
           case 'osm':

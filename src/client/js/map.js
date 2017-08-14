@@ -40,6 +40,30 @@ export default class GeonaMap {
   setProjection(projection) {}
 
   /**
+   * Add the specified data layer onto the map.
+   * @param {String} layerId The id of the data layer being added.
+   */
+  addLayer(layerId) {}
+
+  /**
+   * Remove the specified data layer from the map.
+   * @param {*} layerId The id of the data layer being removed.
+   */
+  removeLayer(layerId) {}
+
+  /**
+   * Makes an invisible layer visible.
+   * @param {*} layerId The id of the data layer being made visible.
+   */
+  showLayer(layerId) {}
+
+  /**
+   * Makes a layer invisible, but keeps it on the map.
+   * @param {*} layerId The id of the data layer being made hidden.
+   */
+  hideLayer(layerId) {}
+
+  /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
