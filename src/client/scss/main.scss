@@ -1,5 +1,15 @@
-@import "_main.scss";
-@import "_openlayers-custom.scss";
-@import "_streamline.scss";
-@import "_streamline-filled-in.scss";
-@import "_leaflet-custom.scss";
+@import 'themes/_default.scss';
+
+@import '_main.scss';
+
+// Components
+@import 'components/_overlay.scss';
+
+// Vendors
+@import 'vendors/_leaflet.scss';
+@import 'vendors/_openlayers-custom.scss';
+@import 'vendors/_streamline-filled-in.scss';
+@import 'vendors/_streamline.scss';
+
+// Vendors extensions
+@import 'vendors_extensions/_leaflet.scss';

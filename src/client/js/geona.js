@@ -25,13 +25,16 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.parentDivId = undefined;
+
     initI18n().then(() => {
-      this.parentDivId = this.config.get('divId');
+      let parentDiv = $(this.config.get('divId'));
+      parentDiv.toggleClass('geona-container', true);
       if (this.config.get('intro.termsAndConditions.require')) {
-        this.loadTermsAndConditions_();
+        this.loadTermsAndConditions_(parentDiv, () => {
+          this.loadMainTemplate_(parentDiv);
+        });
       } else {
-        this.loadMainTemplate_();
+        this.loadMainTemplate_(parentDiv);
       }
     });
   }
@@ -41,15 +44,13 @@ export class Geona {
    * unless the accept button is clicked.
    * @private
    */
-  loadTermsAndConditions_() {
-    $(this.parentDivId).html(templates.terms_and_conditions());
+  loadTermsAndConditions_(parentDiv, next) {
+    parentDiv.html(templates.terms_and_conditions());
 
     let backgroundImage = this.config.get('intro.termsAndConditions.backgroundImage');
-    $(this.parentDivId + ' .js-geona-overlay').css('background-image', 'url(' + backgroundImage + ')');
-    $(this.parentDivId + ' .js-geona-terms-and-conditions__accept').click(() => {
-      $(this.parentDivId + ' .js-geona-terms-and-conditions').toggleClass('inactive', true);
-      $(this.parentDivId + ' .js-geona-overlay').toggleClass('inactive', true);
-      this.loadMainTemplate_();
+    parentDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + backgroundImage + ')');
+    parentDiv.find('.js-geona-terms-and-conditions__accept').click(() => {
+      next();
       // TODO Save that T&C accepted
     });
   }
@@ -81,35 +82,31 @@ export class Geona {
    * Add the geona template underneath the parent map div in the config
    * @private
    */
-  loadMainTemplate_() {
-    $(this.parentDivId).html(templates.geona({}));
+  loadMainTemplate_(parentDiv) {
+    parentDiv.html(templates.geona());
     this.initialiseMapDiv_();
 
     if (this.config.get('intro.splashScreen.display')) {
-      $(this.parentDivId + ' .js-geona-overlay').css('background-image', 'url(' + this.config.get('intro.splashScreen.backgroundImage') + ')');
-      $(this.parentDivId + ' .js-geona-overlay').toggleClass('inactive', false);
-      $(this.parentDivId + ' .js-geona-overlay').append(templates.splash_screen({splashMessage: this.config.get('intro.splashScreen.html')}));
-      $(this.parentDivId + ' .load-previous-map').click( () => {
+      parentDiv.append(templates.splash_screen({splashMessage: this.config.get('intro.splashScreen.html')}));
+      parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + this.config.get('intro.splashScreen.backgroundImage') + ')');
+      parentDiv.find('.js-geona-splash-screen__load-previous').click( () => {
         // TODO If previous, load, otherwise just normal map
         alert('Load from state');
       });
-      $(this.parentDivId + ' .start-building-map').click( () => {
-        $(this.parentDivId + ' .geona-splash-screen').toggleClass('inactive', true);
-        $(this.parentDivId + ' .js-geona-overlay').toggleClass('inactive', true);
+      parentDiv.find('.js-geona-splash-screen__start-new').click( () => {
+        parentDiv.find('.js-geona-splash-screen').remove();
       });
-    } else {
-      $(this.parentDivId + ' .js-geona-overlay').toggleClass('inactive', true);
     }
 
     if (this.config.get('intro.menu.opened')) {
-      $(this.parentDivId + ' .js-geona-controls').append(templates.menu({}));
-      $(this.parentDivId + ' .geona-menu-open').append(templates.layers_list({}));
+      parentDiv.find('.js-geona-controls').append(templates.menu({}));
+      parentDiv.find('.geona-menu-open').append(templates.layers_list({}));
       $(() => {
-        $(this.parentDivId + ' .sortable').sortable();
-        $(this.parentDivId + ' .sortable').disableSelection();
+        parentDiv.find('.sortable').sortable();
+        parentDiv.find('.sortable').disableSelection();
       });
     } else if (this.config.get('intro.menu.collapsible')) {
-      $(this.parentDivId + ' .js-geona-controls').append(templates.menu_toggle_control({}));
+      parentDiv.find('.js-geona-controls').append(templates.menu_toggle_control({}));
       // TODO button onclick open menu and hide menu toggle control
     }
   }

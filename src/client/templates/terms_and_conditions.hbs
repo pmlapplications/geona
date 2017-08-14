@@ -2,16 +2,14 @@
        How to store that they've accepted.
       Also About button should give option of viewing T&C but that's the last thing to do
    -->
-<div class="geona js-geona-overlay">
-  <div class="geona-overlay-box js-geona-terms-and-conditions">
-    <div class="geona-overlay-box-content">
-      <section class="geona-overlay-box-content-actions-description">
-        <h2>{{t 'intro:termsConditions.header'}}</h2>
-        {{t 'intro:termsConditions.content'}}
-      </section>
-      <section class="geona geona-overlay-box-content-actions">
-        <button type="submit" class="geona geona-button js-geona-terms-and-conditions__accept">{{t 'intro:termsConditions.accept'}}</button>
-      </section>
+<div class="geona-overlay js-geona-terms-and-conditions">
+  <div class="geona-overlay__container">
+    <div class="geona-overlay__content">
+      <h2>{{t 'intro:termsConditions.header'}}</h2>
+      {{t 'intro:termsConditions.content'}}
+    </div>
+    <div class="geona-overlay__actions">
+      <button type="submit" class="geona-button js-geona-terms-and-conditions__accept">{{t 'intro:termsConditions.accept'}}</button>
     </div>
   </div>
 </div>
