@@ -1,6 +1,5 @@
 .leaflet-container {
-  // TODO change for leaflet and openlayers
-  font-family: Cantarell;
+  background: #1a1a1a;
 }
 
 .leaflet-bar a, .leaflet-bar a:hover {
@@ -31,8 +30,7 @@
 
 .leaflet-control-zoom-in,
 .leaflet-control-zoom-out {
-  font: inherit;
-  text-indent: inherit;
+  text-indent: 0;
 }
 
 .leaflet-right .leaflet-control-scale {
@@ -43,7 +41,6 @@
 .leaflet-control-scale-line {
   @include vertical-align();
   background: none;
-  font-size: 12px;
 }
 
 .leaflet-container .leaflet-control-attribution {
