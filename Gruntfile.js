@@ -234,11 +234,11 @@ module.exports = function(grunt) {
       //   tasks: ['eslint:fix'],
       // },
       handlebars: {
-        files: ['src/client/templates/*.hbs'],
+        files: ['src/client/templates/**/*.hbs'],
         tasks: ['handlebars'],
       },
       sass: {
-        files: ['src/client/scss/*.scss'],
+        files: ['src/client/scss/**/*.scss'],
         tasks: ['sass:development'],
       },
     },

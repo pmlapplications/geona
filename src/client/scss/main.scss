@@ -1,3 +1,6 @@
+@import 'helpers/_functions.scss';
+@import 'helpers/_mixins.scss';
+
 @import 'themes/_default.scss';
 
 @import '_main.scss';
@@ -6,8 +9,8 @@
 @import 'components/_overlay.scss';
 
 // Vendors
-@import 'vendors/_leaflet.scss';
 @import 'vendors/_openlayers-custom.scss';
+@import 'vendors/_leaflet.scss';
 @import 'vendors/_streamline-filled-in.scss';
 @import 'vendors/_streamline.scss';
 
