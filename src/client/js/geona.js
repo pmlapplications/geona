@@ -89,12 +89,12 @@ export class Geona {
       $(this.parentDivId + ' .js-geona-overlay').css('background-image', 'url(' + this.config.get('intro.splashScreen.backgroundImage') + ')');
       $(this.parentDivId + ' .js-geona-overlay').toggleClass('inactive', false);
       $(this.parentDivId + ' .js-geona-overlay').append(templates.splash_screen({splashMessage: this.config.get('intro.splashScreen.html')}));
-      $(this.parentDivId + ' .load-previous-map').click( () => {
+      $(this.parentDivId + ' .js-load-previous-map').click( () => {
         // TODO If previous, load, otherwise just normal map
         alert('Load from state');
       });
-      $(this.parentDivId + ' .start-building-map').click( () => {
-        $(this.parentDivId + ' .geona-splash-screen').toggleClass('inactive', true);
+      $(this.parentDivId + ' .js-start-building-map').click( () => {
+        $(this.parentDivId + ' .js-geona-splash-screen').toggleClass('inactive', true);
         $(this.parentDivId + ' .js-geona-overlay').toggleClass('inactive', true);
       });
     } else {
@@ -103,14 +103,34 @@ export class Geona {
 
     if (this.config.get('intro.menu.opened')) {
       $(this.parentDivId + ' .js-geona-controls').append(templates.menu({}));
-      $(this.parentDivId + ' .geona-menu-open').append(templates.layers_list({}));
-      $(() => {
-        $(this.parentDivId + ' .sortable').sortable();
-        $(this.parentDivId + ' .sortable').disableSelection();
-      });
     } else if (this.config.get('intro.menu.collapsible')) {
       $(this.parentDivId + ' .js-geona-controls').append(templates.menu_toggle_control({}));
       // TODO button onclick open menu and hide menu toggle control
     }
+
+    // Because the layer menu may update while the layers pane is closed, we remove
+    // and re-add the layers when closing and opening
+    $(this.parentDivId + ' .js-geona-sidebar__layers').click( () => {
+      if ($(this.parentDivId + ' .js-geona-panel-container').length === 0) {
+        $(this.parentDivId + ' .js-geona-sidebar').append(templates.panel_container({}));
+        $(this.parentDivId + ' .js-geona-panel-container').toggleClass('inactive', false);
+        $(this.parentDivId + ' .js-geona-panel-container').append(templates.layers_pane({}));
+        switch (this.config.get('map.library')) {
+          case 'openlayers':
+            for (let layer in this.map.availableLayers_) {
+              let data = this.map.availableLayers_[layer].get('layerData');
+              $(this.parentDivId + ' .js-geona-layers-list').append(templates.layers_list({data}));
+            }
+            break;
+          case 'leaflet':
+            break;
+        }
+      } else {
+        $(this.parentDivId + ' .js-geona-panel-container').remove();
+      }
+
+      // Occurs last to apply sortable() to all new elements
+      $(this.parentDivId + ' .js-sortable').sortable();
+    });
   }
 }

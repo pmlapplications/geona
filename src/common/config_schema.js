@@ -32,7 +32,7 @@ export let client = {
       require: {
         doc: 'Whether we will display and require accepting the terms and conditions on page load.',
         format: Boolean,
-        default: false,
+        default: true,
       },
       backgroundImage: {
         doc: 'The image to use as the background on the terms and conditions screen.',
@@ -44,7 +44,7 @@ export let client = {
       display: {
         doc: 'Whether we will display the splash screen on page load.',
         format: Boolean,
-        default: false,
+        default: true,
       },
       html: {
         doc: 'The HTML that will be displayed on the splash screen.',
@@ -54,7 +54,7 @@ export let client = {
       backgroundImage: {
         doc: 'The image to use as the background on the splash screen.',
         format: String,
-        default: 'https://www.planwallpaper.com/static/images/cool-background.jpg',
+        default: 'http://www.hdwallpaperspulse.com/wp-content/uploads/2016/08/24/colorful-background-hd.jpg',
       },
     },
     menu: {
