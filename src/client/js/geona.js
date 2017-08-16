@@ -25,7 +25,7 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-
+    this.layerNames = [];
     initI18n().then(() => {
       let parentDiv = $(this.config.get('divId'));
       parentDiv.toggleClass('geona-container', true);
@@ -100,14 +100,90 @@ export class Geona {
 
     if (this.config.get('intro.menu.opened')) {
       parentDiv.find('.js-geona-controls').append(templates.menu({}));
-      parentDiv.find('.geona-menu-open').append(templates.layers_list({}));
-      $(() => {
-        parentDiv.find('.sortable').sortable();
-        parentDiv.find('.sortable').disableSelection();
-      });
     } else if (this.config.get('intro.menu.collapsible')) {
       parentDiv.find('.js-geona-controls').append(templates.menu_toggle_control({}));
       // TODO button onclick open menu and hide menu toggle control
     }
+
+    // Because the layer menu may update while the layers pane is closed, we remove
+    // and re-add the layers when closing and opening
+    $(this.parentDivId + ' .js-geona-sidebar__layers').click( () => {
+      if ($(this.parentDivId + ' .js-geona-panel-container').length === 0) {
+        $(this.parentDivId + ' .js-geona-sidebar').append(templates.panel_container({}));
+        $(this.parentDivId + ' .js-geona-panel-container').toggleClass('inactive', false);
+        $(this.parentDivId + ' .js-geona-panel-container').append(templates.layers_pane({}));
+        this.layerNames = [];
+        switch (this.config.get('map.library')) {
+          case 'openlayers':
+            for (let layer in this.map.availableLayers_) {
+              let data = this.map.availableLayers_[layer].get('layerData');
+              if (data !== undefined) {
+                let name = data.Name;
+                $(this.parentDivId + ' .js-geona-layers-list').append(templates.layers_list({layerName: name, data: data}));
+                this.layerNames.push(data.Name);
+              } else { // TODO remove this once the data is available
+                let name = 'ph_hcmr';
+                $(this.parentDivId + ' .js-geona-layers-list').append(templates.layers_list({layerName: name, data: data}));
+                this.layerNames.push('ph_hcmr');
+              }
+            }
+            break;
+          case 'leaflet':
+            break;
+        }
+      } else {
+        $(this.parentDivId + ' .js-geona-panel-container').remove();
+      }
+
+      // Occurs last to apply sortable() to all new elements
+      let originalIndex;
+      let itemMoved;
+      $(this.parentDivId + ' .js-sortable').sortable({
+        start: (event, ui) => {
+          originalIndex = ui.item.index();
+          itemMoved = this.layerNames[ui.item.index()];
+        },
+        stop: (event, ui) => {
+          // Make the layerNames match the sortable ul based on the value of each (remake layerNames)
+          // Actually might not need layerNames
+          // see what sortable toArray does
+
+          console.log($(this.parentDivId + ' .js-geona-layers-list').sortable('toArray', {attribute: 'value'}));
+          let sortableToArray = $(this.parentDivId + ' .js-geona-layers-list').sortable('toArray', {attribute: 'value'});
+          this.map.removeLayer(sortableToArray[ui.item.index()]);
+          this.map.addLayer(sortableToArray[ui.item.index()], ui.item.index());
+
+          // if (ui.item.index() > originalIndex) {
+          //   console.log('Index has increased from original');
+          //   // If splicing would be above the highest index of the array
+          //   if (ui.item.index() + 1 === this.layerNames.length) {
+          //     this.layerNames.push(this.layerNames[originalIndex]);
+          //   } else {
+          //     this.layerNames.splice(ui.item.index() + 1, this.layerNames[originalIndex]);
+          //   }
+          //   console.log(this.layerNames);
+          //   this.layerNames.splice(this.layerNames.indexOf(itemMoved), 1);
+          // } else if (ui.item.index() < originalIndex) {
+          //   console.log('Index has decreased from original');
+          //   console.log(ui.item.index());
+          //   console.log(this.layerNames[originalIndex]);
+          //   console.log(this.layerNames[originalIndex + 1]);
+
+
+          //   console.log(this.layerNames);
+          //   this.layerNames.splice(this.layerNames.lastIndexOf(itemMoved), 1);
+          // }
+          // console.log(this.layerNames);
+          // console.log(ui.item.index());
+          // // TODO is this working on the actual map? check when PML is working again
+          // this.map.removeLayer(this.layerNames[originalIndex]);
+          // this.map.addLayer(this.layerNames[originalIndex], ui.item.index());
+          // this.layerNames.splice(ui.item.index(), 0, this.layerNames[originalIndex]);
+          // console.log(this.layerNames);
+          // this.layerNames.splice(originalIndex, 1);
+          // console.log(this.layerNames);
+        },
+      });
+    });
   }
 }

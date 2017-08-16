@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
+import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 
 let ol;
 
@@ -228,6 +229,14 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * 
+   * @param {*} layerName The unique name of the layer to return the information for.
+   */
+  getLayerData(layerName) {
+    return this.availableLayers_[layerName].layerData;
+  }
+
+  /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
@@ -298,24 +307,24 @@ export class OlMap extends GeonaMap {
   loadLayers_() {
     this.availableLayers_ = {};
 
-    for (let layer of this.config.layers) {
-      layer = addLayerDefaults(layer);
+    for (let addedLayer of this.config.layers) {
+      addedLayer = addLayerDefaults(addedLayer);
       let source;
-      switch (layer.source.type) {
+      switch (addedLayer.source.type) {
         case 'wms':
           source = new ol.source.TileWMS({
-            url: layer.source.url,
-            crossOrigin: layer.source.crossOrigin,
-            projection: layer.projections[0],
-            attributions: layer.source.attributions,
+            url: addedLayer.source.url,
+            crossOrigin: addedLayer.source.crossOrigin,
+            projection: addedLayer.projections[0],
+            attributions: addedLayer.source.attributions,
             params: {
-              LAYERS: layer.source.params.layers,
-              VERSION: layer.source.params.version,
-              FORMAT: layer.source.params.format,
-              STYLES: layer.source.params.styles,
-              NUMCOLORBANDS: layer.source.params.numcolorbands,
-              time: layer.source.params.time,
-              wrapDateLine: layer.source.params.wrapDateLine,
+              LAYERS: addedLayer.source.params.layers,
+              VERSION: addedLayer.source.params.version,
+              FORMAT: addedLayer.source.params.format,
+              STYLES: addedLayer.source.params.styles,
+              NUMCOLORBANDS: addedLayer.source.params.numcolorbands,
+              time: addedLayer.source.params.time,
+              wrapDateLine: addedLayer.source.params.wrapDateLine,
             },
           });
           break;
@@ -324,13 +333,21 @@ export class OlMap extends GeonaMap {
           break;
       }
 
-      this.availableLayers_[layer.id] = new ol.layer.Tile({
-        id: layer.id,
-        title: layer.title,
-        description: layer.description,
-        projections: layer.projections,
+      let layerData;
+      for (let serverLayer of CCI5DAY.server.Layers) {
+        if (serverLayer.Name === addedLayer.id) {
+          layerData = serverLayer;
+        }
+      }
+
+      this.availableLayers_[addedLayer.id] = new ol.layer.Tile({
+        id: addedLayer.id,
+        title: addedLayer.title,
+        description: addedLayer.description,
+        projections: addedLayer.projections,
         source: source,
-        viewSettings: layer.viewSettings,
+        viewSettings: addedLayer.viewSettings,
+        layerData: layerData,
       });
     }
   }
