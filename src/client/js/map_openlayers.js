@@ -116,7 +116,7 @@ export class OlMap extends GeonaMap {
       this.map_.removeLayer(this.map_.getLayers().item(0));
     }
 
-    if (basemap !== 'none' ) {
+    if (basemap !== 'none') {
       this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
       if (this.basemaps_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
         this.setView(this.basemaps_[basemap].get('viewSettings'));
@@ -181,7 +181,7 @@ export class OlMap extends GeonaMap {
     if (this.availableLayers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
       // If we are re-ordering we will have an index
       if (index) {
-        if (this.config.basemap !== 'none') {
+        if (this.config.basemap === 'none') {
           this.map_.getLayers().insertAt(index + 1, this.availableLayers_[layerId]);
         } else {
           this.map_.getLayers().insertAt(index, this.availableLayers_[layerId]);
@@ -192,7 +192,6 @@ export class OlMap extends GeonaMap {
       } else {
         this.map_.addLayer(this.availableLayers_[layerId]);
       }
-
       // if the config doesn't already contain this layerId, add it to the layers object
       // if(this.config.layers){}
     } else {
@@ -443,11 +442,11 @@ export function init(next) {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
     mapJs.onload = function() {
-         import('openlayers')
-           .then((olLib) => {
-             ol = olLib;
-             next();
-           });
+      import('openlayers')
+        .then((olLib) => {
+          ol = olLib;
+          next();
+        });
     };
 
     mapJs.src = 'js/vendor_openlayers.js';
