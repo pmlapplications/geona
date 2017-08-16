@@ -1,0 +1,71 @@
+.geona-container {
+  .ol-viewport {
+    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  .ol-zoom, .ol-zoom:hover,
+  .ol-full-screen, .ol-full-screen:hover,
+  .ol-scale-line {
+    position: absolute;
+    top: 25px;
+    left: auto;
+    padding: 0;
+    height: 35px;
+    background-color: #fafafb;
+    box-shadow: 0px 0px 11px -2px black;
+    border-radius: 0;
+    z-index: 10;
+  }
+
+  .ol-zoom {
+    right: 15px;
+  }
+
+  .ol-full-screen {
+    right: 110px;
+  }
+
+  .ol-scale-line {
+    right: 165px;
+    padding: 0 7px;
+  }
+
+  .ol-control button, .ol-control button:hover, .ol-control button:focus {
+    @include vertical-align();
+    border: none;
+    cursor: pointer;
+    background: none;
+    margin: 0 10px;
+    width: 20px;
+    height: auto;
+    font-size: 16px;
+    color: #000;
+    display: inline-block;
+  }
+
+  .ol-scale-line-inner {
+    @include vertical-align();
+    border: 1px solid #777;
+    border-top: none;
+    padding: 2px 5px 1px;
+    color: #000;
+    font-size: 11px;
+    line-height: 1.1;
+    text-align: left;
+    box-sizing: border-box;
+  }
+
+  .ol-attribution {
+    height: auto;
+    padding: 0;
+  }
+
+  .ol-attribution ul {
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 0 5px;
+  }
+
+  .ol-attribution button {
+    display: none;
+  }
+}

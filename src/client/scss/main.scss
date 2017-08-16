@@ -9,10 +9,11 @@
 @import 'components/_overlay.scss';
 
 // Vendors
-@import 'vendors/_openlayers-custom.scss';
 @import 'vendors/_leaflet.scss';
+@import 'vendors/_openlayers.scss';
 @import 'vendors/_streamline-filled-in.scss';
 @import 'vendors/_streamline.scss';
 
 // Vendors extensions
 @import 'vendors_extensions/_leaflet.scss';
+@import 'vendors_extensions/_openlayers.scss';
