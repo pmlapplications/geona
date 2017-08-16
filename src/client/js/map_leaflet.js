@@ -1,5 +1,6 @@
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
+import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 
 let L;
 
@@ -27,6 +28,10 @@ export class LMap extends GeonaMap {
     this.basemaps_ = {};
     /** @private @type {Object} The available country border layers */
     this.countryBorderLayers_ = {};
+    /** @private @type {Object} The available data layers */
+    this.availableLayers_ = {};
+    /** @private @type {L.featureGroup} The layers on the map */
+    this.mapLayers_ = undefined;
     /** @private @type {L.latlngGraticule} The map graticule */
     this.graticule_ = L.latlngGraticule({
       showLabel: true,
@@ -183,6 +188,21 @@ export class LMap extends GeonaMap {
   }
 
   /**
+   * Add the specified data layer onto the map.
+   * @param {String} layerId The id of the data layer being added.
+   * @param {Integer} [index] The zero-based index to insert the layer into.
+   */
+  addLayer(layerId, index) {
+    if (this.availableLayers_[layerId].get('projections').includes(this.map_.options.crs.code)) {
+      if (this.config.countryBorders !== 'none') {
+        // this.map_.getLayers().length
+      } else {
+        //
+      }
+    }
+  }
+
+  /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Array}   options.center     The centre as [lat, lon]
@@ -263,6 +283,40 @@ export class LMap extends GeonaMap {
     }
 
     this.setView(options);
+  }
+
+  /**
+   * Load the data layers defined in the config
+   * @private
+   */
+  loadLayers_() {
+    for (let addedLayer of this.config.layers) {
+      addedLayer = addLayerDefaults(addedLayer);
+
+      let layerData;
+      for (let serverLayer of CCI5DAY.server.Layers) {
+        if (serverLayer.Name === addedLayer.id) {
+          layerData = serverLayer;
+        }
+      }
+
+      let tile;
+      switch (addedLayer.source.type) {
+        case 'wms':
+          this.availableLayers_[addedLayer.id] = L.tileLayer.wms(addedLayer.source.url, {
+            layers: addedLayer.source.params.layers,
+            version: addedLayer.source.params.version,
+            attribution: addedLayer.source.attributions,
+            projections: addedLayer.projections,
+            viewSettings: addedLayer.viewSettings,
+            layerData: layerData,
+          });
+          break;
+        case 'wmts':
+          console.error('WMTS not yet supported (TODO)');
+          break;
+      }
+    }
   }
 
   /**

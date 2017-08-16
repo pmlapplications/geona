@@ -26,11 +26,11 @@ export class OlMap extends GeonaMap {
     /** @type {Object} The map config */
     this.config = config;
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
-    this.basemaps_ = null;
+    this.basemaps_ = {};
     /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
-    this.countryBorderLayers_ = null;
+    this.countryBorderLayers_ = {};
     /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
-    this.availableLayers_ = null;
+    this.availableLayers_ = {};
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -175,7 +175,6 @@ export class OlMap extends GeonaMap {
    * Add the specified data layer onto the map.
    * @param {String} layerId The id of the data layer being added.
    * @param {Integer} [index] The zero-based index to insert the layer into.
-   * TODO do all OpenLayers milestone tasks before starting on Leaflet
    */
   addLayer(layerId, index) {
     if (this.availableLayers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
@@ -224,14 +223,6 @@ export class OlMap extends GeonaMap {
    */
   hideLayer(layerId) {
     this.availableLayers_[layerId].setVisible(false);
-  }
-
-  /**
-   * 
-   * @param {*} layerName The unique name of the layer to return the information for.
-   */
-  getLayerData(layerName) {
-    return this.availableLayers_[layerName].layerData;
   }
 
   /**
@@ -303,8 +294,6 @@ export class OlMap extends GeonaMap {
    * @private
    */
   loadLayers_() {
-    this.availableLayers_ = {};
-
     for (let addedLayer of this.config.layers) {
       addedLayer = addLayerDefaults(addedLayer);
       let source;
@@ -356,8 +345,6 @@ export class OlMap extends GeonaMap {
    */
   loadBasemaps_() {
     // TODO load from config too
-    this.basemaps_ = {};
-
     for (let layer of defaultBasemaps) {
       if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey)) {
         this.basemaps_[layer.id] = {};
@@ -407,8 +394,6 @@ export class OlMap extends GeonaMap {
    */
   loadCountryBorderLayers_() {
     // TODO load from config too
-    this.countryBorderLayers_ = {};
-
     for (let layer of defaultBorders) {
       let source = new ol.source.TileWMS({
         url: layer.source.url,
