@@ -107,11 +107,11 @@ export class Geona {
 
     // Because the layer menu may update while the layers pane is closed, we remove
     // and re-add the layers when closing and opening
-    $(this.parentDivId + ' .js-geona-sidebar__layers').click( () => {
-      if ($(this.parentDivId + ' .js-geona-panel-container').length === 0) {
-        $(this.parentDivId + ' .js-geona-sidebar').append(templates.panel_container({}));
-        $(this.parentDivId + ' .js-geona-panel-container').toggleClass('inactive', false);
-        $(this.parentDivId + ' .js-geona-panel-container').append(templates.layers_pane({}));
+    parentDiv.find('.js-geona-sidebar__layers').click( () => {
+      if (parentDiv.find('.js-geona-panel-container').length === 0) {
+        parentDiv.find('.js-geona-sidebar').append(templates.panel_container({}));
+        parentDiv.find('.js-geona-panel-container').toggleClass('inactive', false);
+        parentDiv.find('.js-geona-panel-container').append(templates.layers_pane({}));
         this.layerNames = [];
         switch (this.config.get('map.library')) {
           case 'openlayers':
@@ -120,11 +120,11 @@ export class Geona {
                 let data = this.map.availableLayers_[layer].get('layerData');
                 if (data !== undefined) {
                   let name = data.Name;
-                  $(this.parentDivId + ' .js-geona-layers-list').prepend(templates.layers_list({layerName: name, data: data}));
+                  parentDiv.find('.js-geona-layers-list').prepend(templates.layers_list({layerName: name, data: data}));
                   this.layerNames.push(data.Name);
                 } else { // TODO remove this once the data is available
                   let name = 'ph_hcmr';
-                  $(this.parentDivId + ' .js-geona-layers-list').prepend(templates.layers_list({layerName: name, data: data}));
+                  parentDiv.find('.js-geona-layers-list').prepend(templates.layers_list({layerName: name, data: data}));
                   this.layerNames.push('ph_hcmr');
                 }
               }
@@ -134,14 +134,14 @@ export class Geona {
             break;
         }
       } else {
-        $(this.parentDivId + ' .js-geona-panel-container').remove();
+        parentDiv.find('.js-geona-panel-container').remove();
       }
 
       // Occurs last to apply sortable() to all new elements
-      $(this.parentDivId + ' .js-sortable').sortable({
+      parentDiv.find('.js-sortable').sortable({
         stop: (event, ui) => {
           // TODO I'm not confident this works correctly - test with three or more layers
-          let layersListToArray = $(this.parentDivId + ' .js-geona-layers-list').sortable('toArray', {attribute: 'value'});
+          let layersListToArray = parentDiv.find('.js-geona-layers-list').sortable('toArray', {attribute: 'value'});
           this.map.removeLayer(layersListToArray[ui.item.index()]);
           this.map.addLayer(layersListToArray[ui.item.index()], ui.item.index());
         },

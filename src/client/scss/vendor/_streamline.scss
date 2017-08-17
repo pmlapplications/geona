@@ -1,16 +1,14 @@
-
-@charset "UTF-8";
-
-@font-face {
-  font-family: "streamline-24px";
-  src:url("../vendor/fonts/streamline-24px.eot");
-  src:url("../vendor/fonts/streamline-24px.eot?#iefix") format("embedded-opentype"),
-    url("../vendor/fonts/streamline-24px.ttf") format("truetype"),
-    url("../vendor/fonts/streamline-24px.svg#streamline-24px") format("svg"),
-    url("../vendor/fonts/streamline-24px.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-
+@at-root {
+  @font-face {
+    font-family: "streamline-24px";
+    src:url("../vendor/fonts/streamline-24px.eot");
+    src:url("../vendor/fonts/streamline-24px.eot?#iefix") format("embedded-opentype"),
+      url("../vendor/fonts/streamline-24px.ttf") format("truetype"),
+      url("../vendor/fonts/streamline-24px.svg#streamline-24px") format("svg"),
+      url("../vendor/fonts/streamline-24px.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+  }
 }
 
 [data-icon]:before {
