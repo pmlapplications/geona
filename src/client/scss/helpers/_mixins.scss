@@ -1,0 +1,7 @@
+// Vertical align anything center
+// Adapted from http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/
+@mixin vertical-align($position: relative) {
+  position: $position;
+  top: 50%;
+  transform: perspective(1px) translateY(-50%);
+}

@@ -1,5 +1,25 @@
-@import "_main.scss";
-@import "_openlayers-custom.scss";
-@import "_streamline.scss";
-@import "_streamline-filled-in.scss";
-@import "_leaflet-custom.scss";
+@charset "UTF-8";
+
+@import 'helpers/_functions.scss';
+@import 'helpers/_mixins.scss';
+
+@import 'themes/_default.scss';
+
+@import '_main.scss';
+
+// Components
+@import 'components/_overlay.scss';
+
+// Vendor
+.geona-container {
+  @import 'vendor/_leaflet.scss';
+  @import 'vendor/_openlayers.scss';
+  @import 'vendor/_streamline-filled-in.scss';
+  @import 'vendor/_streamline.scss';
+}
+
+// Vendor extensions
+.geona-container {
+  @import 'vendor_extensions/_leaflet.scss';
+  @import 'vendor_extensions/_openlayers.scss';
+}

@@ -1,0 +1,10 @@
+{
+  "termsConditions": {
+    "header": "Termes et conditions",
+    "accept": "Acceptez"
+  },
+  "splashScreen": {
+    "loadPreviousMap": "Chargez votre carte précédente",
+    "startBuildingMap": "Commencez à créer une carte"
+  }
+}

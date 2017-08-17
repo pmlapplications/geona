@@ -1,93 +1,33 @@
-// html  {
-//   -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
-// }
-
-// body  {
-//    color: #111111;
-//    overflow-y: hidden;
-// }
-
-// // What does this do?
-// p  {
-//    user-select: initial;
-// }
-
-// #map  {
-//    background: #1a1a1a;
-//    clear: both;
-//    width: 100%;
-//    height: 100%;
-//    position: absolute;
-//    top: 0;
-//    left: 0;
-//    margin: 0;
-//    padding: 0;
-// }
-
-.geona{
+.geona-container{
   font-family: 'Open Sans',sans-serif;
 }
 
 .geona-map{
   background: #1a1a1a;
   clear: both;
-   width: 100%;
-   height: 100%;
-   position: absolute;
-   top: 0;
-   left: 0;
-   margin: 0;
-   padding: 0;
-   vertical-align: bottom;
-   z-index: 0;
-}
-
-
-/*------------------------------------*\
-    Overlay
-\*------------------------------------*/
-
-.geona-overlay{
-  background: rgba(0,0,0,0.7);
   width: 100%;
   height: 100%;
   position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  vertical-align: bottom;
+  z-index: 0;
 }
 
-.geona-overlay-box{
-  max-width: 650px;
-  width: 100%;
-  height: auto;
-  background-color: #32273d;
-  color: #f7f6f8;
-  padding: 25px;
-  margin: auto;
-  -webkit-box-shadow: 0px 0px 30px 2px rgba(255,255,255,0.3);
-  -moz-box-shadow: 0px 0px 30px 2px rgba(255,255,255,0.3);
-  box-shadow:0px 0px 30px 2px rgba(255,255,255,0.3);
-
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.geona-overlay-box-content-actions{
-  position: relative;
-  width: 100%;
-  height: 50px;
-  padding: 20px 15px;
+.geona-controls{
 }
 
 .geona-button{
-  background-color: #a19d63;
-  color: #fff;
+  background-color: $button-background;
+  color: $button-color;
   border-style: none;
   border-radius: 5px;
   padding: 7px 35px;
   text-align: center;
   cursor: pointer;
   font-size: .875rem;
-  float: right;
 }
 
 /*------------------------------------*\
@@ -145,12 +85,10 @@
     Utilities
 \*------------------------------------*/
 
-// Must be placed directly above .inactive
-.hidden{
-  display: hidden;
+.invisible{
+  display: hidden !important;
 }
 
-// Must be final style in file
-.inactive{
-  display: none;
+.hidden{
+  display: none !important;
 }

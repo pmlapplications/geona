@@ -17,6 +17,7 @@ module.exports = function(grunt) {
     'i18next-browser-languagedetector',
     'i18next-xhr-backend',
     'jquery',
+    'jquery-ui/ui/widgets/sortable',
     'lodash',
   ];
 
@@ -233,11 +234,11 @@ module.exports = function(grunt) {
       //   tasks: ['eslint:fix'],
       // },
       handlebars: {
-        files: ['src/client/templates/*.hbs'],
+        files: ['src/client/templates/**/*.hbs'],
         tasks: ['handlebars'],
       },
       sass: {
-        files: ['src/client/scss/*.scss'],
+        files: ['src/client/scss/**/*.scss'],
         tasks: ['sass:development'],
       },
     },
