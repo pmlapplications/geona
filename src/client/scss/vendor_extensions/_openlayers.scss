@@ -28,17 +28,22 @@
   padding: 0 7px;
 }
 
-.ol-control button, .ol-control button:hover, .ol-control button:focus {
-  @include vertical-align();
-  border: none;
-  cursor: pointer;
-  background: none;
-  margin: 0 10px;
-  width: 20px;
-  height: auto;
-  font-size: 16px;
-  color: #000;
-  display: inline-block;
+.ol-control {
+  button,
+  button:hover,
+  button:focus {
+    @include vertical-align();
+    border: none;
+    cursor: pointer;
+    background: none;
+    margin: 0 10px;
+    width: 20px;
+    height: auto;
+    font-size: 16px;
+    color: #000;
+    display: inline-block;
+    line-height: normal;
+  }
 }
 
 .ol-scale-line-inner {
@@ -53,20 +58,43 @@
   box-sizing: border-box;
 }
 
-.ol-attribution.ol-uncollapsible {
+.ol-attribution,
+.ol-attribution:not(.ol-collapsed) {
+  background: rgba(255, 255, 255, 0.7);
   height: auto;
   padding: 0;
+  bottom: 0;
+  right: 0;
+  border-radius: 4px 0 0;
+  line-height: 1;
 }
 
-.ol-attribution ul {
-  padding: 0 5px;
+.ol-attribution.ol-collapsed {
+  line-height: normal;
 }
 
-.ol-attribution ul li {
-  font-size: 11px;
-  line-height: 1.5;
-}
+.ol-attribution {
+  ul {
+    padding: 0 5px;
 
-.ol-attribution button {
-  display: none;
+    li {
+      font-size: 11px;
+      line-height: 1.5;
+    }
+  }
+
+  button,
+  button:hover,
+  button:focus {
+    font-size: 14px;
+    top: auto;
+    transform: unset;
+    margin: 0;
+    line-height: inherit;
+  }
+
+  img {
+    height: 15px;
+    vertical-align: bottom;
+  }
 }
