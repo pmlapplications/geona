@@ -26,11 +26,11 @@ export class OlMap extends GeonaMap {
     /** @type {Object} The map config */
     this.config = config;
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
-    this.basemaps_ = null;
+    this.basemaps_ = {};
     /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
-    this.countryBorderLayers_ = null;
+    this.countryBorderLayers_ = {};
     /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
-    this.availableLayers_ = null;
+    this.availableLayers_ = {};
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -117,7 +117,7 @@ export class OlMap extends GeonaMap {
       this.map_.removeLayer(this.map_.getLayers().item(0));
     }
 
-    if (basemap !== 'none' ) {
+    if (basemap !== 'none') {
       this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
       if (this.basemaps_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
         this.setView(this.basemaps_[basemap].get('viewSettings'));
@@ -176,13 +176,12 @@ export class OlMap extends GeonaMap {
    * Add the specified data layer onto the map.
    * @param {String} layerId The id of the data layer being added.
    * @param {Integer} [index] The zero-based index to insert the layer into.
-   * TODO do all OpenLayers milestone tasks before starting on Leaflet
    */
   addLayer(layerId, index) {
     if (this.availableLayers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
       // If we are re-ordering we will have an index
       if (index) {
-        if (this.config.basemap !== 'none') {
+        if (this.config.basemap === 'none') {
           this.map_.getLayers().insertAt(index + 1, this.availableLayers_[layerId]);
         } else {
           this.map_.getLayers().insertAt(index, this.availableLayers_[layerId]);
@@ -193,7 +192,6 @@ export class OlMap extends GeonaMap {
       } else {
         this.map_.addLayer(this.availableLayers_[layerId]);
       }
-
       // if the config doesn't already contain this layerId, add it to the layers object
       // if(this.config.layers){}
     } else {
@@ -226,14 +224,6 @@ export class OlMap extends GeonaMap {
    */
   hideLayer(layerId) {
     this.availableLayers_[layerId].setVisible(false);
-  }
-
-  /**
-   * 
-   * @param {*} layerName The unique name of the layer to return the information for.
-   */
-  getLayerData(layerName) {
-    return this.availableLayers_[layerName].layerData;
   }
 
   /**
@@ -305,8 +295,6 @@ export class OlMap extends GeonaMap {
    * @private
    */
   loadLayers_() {
-    this.availableLayers_ = {};
-
     for (let addedLayer of this.config.layers) {
       addedLayer = addLayerDefaults(addedLayer);
       let source;
@@ -358,8 +346,6 @@ export class OlMap extends GeonaMap {
    */
   loadBasemaps_() {
     // TODO load from config too
-    this.basemaps_ = {};
-
     for (let layer of defaultBasemaps) {
       if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey)) {
         this.basemaps_[layer.id] = {};
@@ -409,8 +395,6 @@ export class OlMap extends GeonaMap {
    */
   loadCountryBorderLayers_() {
     // TODO load from config too
-    this.countryBorderLayers_ = {};
-
     for (let layer of defaultBorders) {
       let source = new ol.source.TileWMS({
         url: layer.source.url,
@@ -444,11 +428,11 @@ export function init(next) {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
     mapJs.onload = function() {
-         import('openlayers')
-           .then((olLib) => {
-             ol = olLib;
-             next();
-           });
+      import('openlayers')
+        .then((olLib) => {
+          ol = olLib;
+          next();
+        });
     };
 
     mapJs.src = 'js/vendor_openlayers.js';

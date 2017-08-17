@@ -42,8 +42,9 @@ export default class GeonaMap {
   /**
    * Add the specified data layer onto the map.
    * @param {String} layerId The id of the data layer being added.
+   * @param {Integer} [index] The zero-based index to insert the layer into.
    */
-  addLayer(layerId) {}
+  addLayer(layerId, index) {}
 
   /**
    * Remove the specified data layer from the map.
