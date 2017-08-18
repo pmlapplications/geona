@@ -7,13 +7,14 @@ import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
 import {registerHelpers} from '../../common/hbs_helpers';
 import {initI18n} from './i18n';
+import {GeonaLayer} from './layer';
 
 registerHelpers(handlebars);
 
 // TODO These are for testing only
 window.templates = templates;
 window.$ = $;
-
+window.GeonaLayer = GeonaLayer;
 
 /**
  * The entry class for Geona.
@@ -110,7 +111,7 @@ export class Geona {
     parentDiv.find('.js-geona-sidebar__layers').click( () => {
       if (parentDiv.find('.js-geona-panel-container').length === 0) {
         parentDiv.find('.js-geona-sidebar').append(templates.panel_container({}));
-        parentDiv.find('.js-geona-panel-container').toggleClass('inactive', false);
+        parentDiv.find('.js-geona-panel-container').toggleClass('hidden', false);
         parentDiv.find('.js-geona-panel-container').append(templates.layers_pane({}));
         this.layerNames = [];
         switch (this.config.get('map.library')) {
