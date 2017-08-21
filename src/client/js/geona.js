@@ -26,7 +26,7 @@ export class Geona {
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
     this.layerNames = [];
-    initI18n().then(() => {
+    initI18n(this.config.get('geonaServer')).then(() => {
       let parentDiv = $(this.config.get('divId'));
       parentDiv.toggleClass('geona-container', true);
       if (this.config.get('intro.termsAndConditions.require')) {

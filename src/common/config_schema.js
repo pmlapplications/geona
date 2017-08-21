@@ -13,12 +13,12 @@ export let server = {
 
 export let client = {
   clientDomain: {
-    doc: 'The domain that this client config is for.',
+    doc: 'The domain that this client config is for. Only required when loading client config from the server.',
     format: String,
     default: '',
   },
   geonaServer: {
-    doc: 'The URL of the geona server to use.',
+    doc: 'The URL of the geona server to use, including "http://" or "https://", and without a trailing "/".',
     format: String,
     default: '',
   },
@@ -106,7 +106,7 @@ export let client = {
     },
     layers: {
       doc: 'Initial layers to load.',
-      format: 'Array',
+      format: Array,
       default: [
         {
           id: 'chlor_a',
