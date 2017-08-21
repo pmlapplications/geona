@@ -40,8 +40,15 @@
   width: 11%;
   height: auto;
   top: 6%;
-  background-color: rgba(230,230,230,1);
+  background-color: rgba(230,230,230,0.7);
   border: 3px, #000;
+
+  :hover{
+    background-color: rgba(255,255,255,1);
+  }
+  :target{
+    background-color: #444;
+  }
 }
 
 .geona-sidebar__block{
@@ -49,6 +56,10 @@
   padding-top: 100%;
   border-right: 2px solid #000;
   border-bottom: 2px solid #000;
+
+  // :hover{
+  //   background-color: rgba(255,255,255,1);
+  // }
 }
 
 .geona-sidebar__explore{
@@ -62,7 +73,7 @@
   height: 130%;
   top: 0;
   border: 1px solid #000;
-  background-color: rgba(230,230,230,1);
+  background-color: rgba(255,255,255,1);
   padding: 3px;
 }
 

@@ -12,6 +12,7 @@ module.exports = function(grunt) {
   let vendorLibs = [
     'babel-runtime/regenerator',
     'convict',
+    'eventemitter3',
     'handlebars/runtime',
     'i18next',
     'i18next-browser-languagedetector',
