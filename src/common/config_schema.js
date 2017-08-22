@@ -46,8 +46,8 @@ export let client = {
         format: Boolean,
         default: true,
       },
-      html: {
-        doc: 'The HTML that will be displayed on the splash screen.',
+      content: {
+        doc: 'The HTML (or a translation key) that will be displayed on the splash screen.',
         format: String,
         default: 'intro:splashScreen.content',
       },
