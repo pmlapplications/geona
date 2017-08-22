@@ -32,23 +32,7 @@ export class Geona {
       let parentDiv = $(this.config.get('divId'));
       console.log(this.config);
       parentDiv.toggleClass('geona-container', true);
-      this.gui = new Gui(this.config, parentDiv);
-    });
-  }
-
-  /**
-   * The first screen the user sees if terms and conditions are displayed, in which case the map will not be loaded
-   * unless the accept button is clicked.
-   * @private
-   */
-  loadTermsAndConditions_(parentDiv, next) {
-    parentDiv.html(templates.terms_and_conditions());
-
-    let backgroundImage = this.config.get('intro.termsAndConditions.backgroundImage');
-    parentDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + backgroundImage + ')');
-    parentDiv.find('.js-geona-terms-and-conditions__accept').click(() => {
-      next();
-      // TODO Save that T&C accepted
+      this.gui = new Gui(this.config, parentDiv, this);
     });
   }
 
@@ -56,7 +40,8 @@ export class Geona {
    * Finds the correct div to put the map in, then constructs the map.
    * @private
    */
-  initialiseMapDiv_() {
+  initialiseMapDiv_(parentDiv) {
+    parentDiv.html(templates.geona());
     // Get the HTMLElement div to put the map in
     let mapDiv = $(this.config.get('divId') + ' .geona-map')[0];
 
@@ -73,77 +58,6 @@ export class Geona {
         });
         break;
     }
-  }
-
-  /**
-   * Add the geona template underneath the parent map div in the config
-   * @private
-   */
-  loadMainTemplate_(parentDiv) {
-    parentDiv.html(templates.geona());
-    this.initialiseMapDiv_();
-
-    if (this.config.get('intro.splashScreen.display')) {
-      parentDiv.append(templates.splash_screen({splashMessage: this.config.get('intro.splashScreen.html')}));
-      parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + this.config.get('intro.splashScreen.backgroundImage') + ')');
-      parentDiv.find('.js-geona-splash-screen__load-previous').click( () => {
-        // TODO If previous, load, otherwise just normal map
-        alert('Load from state');
-      });
-      parentDiv.find('.js-geona-splash-screen__start-new').click( () => {
-        parentDiv.find('.js-geona-splash-screen').remove();
-      });
-    }
-
-    if (this.config.get('intro.menu.opened')) {
-      parentDiv.find('.js-geona-controls').append(templates.menu({}));
-    } else if (this.config.get('intro.menu.collapsible')) {
-      parentDiv.find('.js-geona-controls').append(templates.menu_toggle_control({}));
-      // TODO button onclick open menu and hide menu toggle control
-    }
-
-    // Because the layer menu may update while the layers pane is closed, we remove
-    // and re-add the layers when closing and opening
-    parentDiv.find('.js-geona-sidebar__layers').click( () => {
-      if (parentDiv.find('.js-geona-panel-container').length === 0) {
-        parentDiv.find('.js-geona-sidebar').append(templates.panel_container({}));
-        parentDiv.find('.js-geona-panel-container').toggleClass('hidden', false);
-        parentDiv.find('.js-geona-panel-container').append(templates.layers_pane({}));
-        this.layerNames = [];
-        switch (this.config.get('map.library')) {
-          case 'openlayers':
-            for (let layer in this.map.availableLayers_) {
-              if (Object.prototype.hasOwnProperty.call(this.map.availableLayers_, layer)) {
-                let data = this.map.availableLayers_[layer].get('layerData');
-                if (data !== undefined) {
-                  let name = data.Name;
-                  parentDiv.find('.js-geona-layers-list').prepend(templates.layers_list({layerName: name, data: data}));
-                  this.layerNames.push(data.Name);
-                } else { // TODO remove this once the data is available
-                  let name = 'ph_hcmr';
-                  parentDiv.find('.js-geona-layers-list').prepend(templates.layers_list({layerName: name, data: data}));
-                  this.layerNames.push('ph_hcmr');
-                }
-              }
-            }
-            break;
-          case 'leaflet':
-            break;
-        }
-      } else {
-        parentDiv.find('.js-geona-panel-container').remove();
-      }
-
-      // Occurs last to apply sortable() to all new elements
-      parentDiv.find('.js-sortable').sortable({
-        stop: (event, ui) => {
-          // TODO I'm not confident this works correctly - test with three or more layers
-          let layersListToArray = parentDiv.find('.js-geona-layers-list').sortable('toArray', {attribute: 'value'});
-          this.map.removeLayer(layersListToArray[ui.item.index()]);
-          this.map.addLayer(layersListToArray[ui.item.index()], ui.item.index());
-        },
-      });
-    });
   }
 }
 

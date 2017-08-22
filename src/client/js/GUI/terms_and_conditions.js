@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import 'jquery';
 import handlebars from 'handlebars/runtime';
 import * as templates from '../../templates/compiled';
 import {registerHelpers} from '../../../common/hbs_helpers';
