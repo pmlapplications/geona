@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
-import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 
 let ol;
 
@@ -30,7 +29,7 @@ export class OlMap extends GeonaMap {
     /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
     this.countryBorderLayers_ = {};
     /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
-    this.availableLayers_ = {};
+    this.activeLayers_ = {};
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -83,15 +82,15 @@ export class OlMap extends GeonaMap {
 
     this.loadBasemaps_();
     this.loadCountryBorderLayers_();
-    this.loadLayers_();
+    // this.loadLayers_();
 
     this.loadConfig_();
 
     // Must come last in the method
     this.initialized_ = true;
 
-    this.addLayer('chlor_a');
-    this.addLayer('ph_hcmr');
+    // this.addLayer('chlor_a');
+    // this.addLayer('ph_hcmr');
   }
 
   /**
@@ -174,28 +173,122 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {String} layerId The id of the data layer being added.
+   * @param {GeonaLayer} geonaLayer The GeonaLayer object to be created on the map.
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
-  addLayer(layerId, index) {
-    if (this.availableLayers_[layerId].get('projections').includes(this.map_.getView().getProjection().getCode())) {
+  addLayer(geonaLayer, index) {
+    if (geonaLayer.crs.includes(this.map_.getView().getProjection().getCode())) {
+      console.log(geonaLayer);
+      let source;
+      switch (geonaLayer.serviceType) {
+        case 'wms':
+          source = new ol.source.TileWMS({
+            url: geonaLayer.serviceUrl,
+            attributions: geonaLayer.attributions,
+            // TODO projection 
+            projection: this.map_.getView().getProjection().getCode() || geonaLayer.crs[0],
+            crossOrigin: null,
+            params: {
+              LAYERS: geonaLayer.name,
+              FORMAT: 'image/png', // TODO maybe change later
+              // TODO STYLES:
+              STYLES: 'boxfill/alg',
+              // TODO time
+              time: '2015-12-27T00:00:00.000Z',
+              // TODO wrapDateLine
+              wrapDateLine: true,
+              // TODO NUMCOLORBANDS
+              NUMCOLORBANDS: 255,
+              VERSION: '1.1.1',
+            },
+          });
+          break;
+        case 'wmts':
+        // TODO wmts
+      }
+
+      // TODO remove and fix where geona.js gets its layer data from
+      let layerData = {
+        name: geonaLayer.name,
+        title: geonaLayer.title,
+        abstract: geonaLayer.abstract,
+        firstDate: geonaLayer.firstDate,
+        lastDate: geonaLayer.lastDate,
+        boundingBox: geonaLayer.boundingBox,
+        serviceUrl: geonaLayer.serviceUrl,
+        serviceType: geonaLayer.serviceType,
+      };
+
+      this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
+        name: geonaLayer.name,
+        viewSettings: this.config.viewSettings,
+        projections: geonaLayer.crs,
+        source: source,
+        layerData: layerData,
+      });
+
+      // for (let configLayer of this.config.layers) {
+      //   if (configLayer.name === geonaLayer.name) {
+      //     configLayer = addLayerDefaults(configLayer);
+      //     let source;
+      //     switch (configLayer.source.type) {
+      //       case 'wms':
+      //         source = new ol.source.TileWMS({
+      //           url: configLayer.source.url,
+      //           attributions: configLayer.source.attributions,
+      //           projection: geonaLayer.crs[0],
+      //           crossOrigin: null,
+      //           params: {
+      //             LAYERS: configLayer.source.params.layers,
+      //             FORMAT: configLayer.source.params.format,
+      //             STYLES: configLayer.source.params.styles,
+      //             time: configLayer.source.params.time,
+      //             wrapDateLine: configLayer.source.params.wrapDateLine,
+      //             NUMCOLORBANDS: geonaLayer.colorBands,
+      //             VERSION: '1.1.1',
+      //           },
+      //         });
+      //         break;
+      //       case 'wmts':
+      //         console.error('WMTS not yet supported (TODO)');
+      //         break;
+      //     }
+
+      //     let layerData;
+      //     for (let serverLayer of CCI5DAY.server.Layers) {
+      //       if (serverLayer.Name === configLayer.name) {
+      //         layerData = serverLayer;
+      //       }
+      //     }
+
+      //     this.activeLayers_[configLayer.name] = new ol.layer.Tile({
+      //       name: configLayer.name,
+      //       viewSettings: configLayer.viewSettings,
+      //       projections: geonaLayer.crs,
+      //       source: source,
+      //       layerData: layerData,
+      //     });
+      //   }
+      // }
+
+
       // If we are re-ordering we will have an index
       if (index) {
         if (this.config.basemap === 'none') {
-          this.map_.getLayers().insertAt(index + 1, this.availableLayers_[layerId]);
+          this.map_.getLayers().insertAt(index + 1, this.activeLayers_[geonaLayer.name]);
         } else {
-          this.map_.getLayers().insertAt(index, this.availableLayers_[layerId]);
+          this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
         }
       } else if (this.config.countryBorders !== 'none') {
         // Insert below the top layer
-        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.availableLayers_[layerId]);
+        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
       } else {
-        this.map_.addLayer(this.availableLayers_[layerId]);
+        this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
       }
-      // if the config doesn't already contain this layerId, add it to the layers object
+      // if the config doesn't already contain this geonaLayer.name, add it to the layers object
       // if(this.config.layers){}
     } else {
-      alert(this.availableLayers_[layerId].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+      alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
     }
   }
 
@@ -204,8 +297,8 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being removed
    */
   removeLayer(layerId) {
-    if (this.map_.getLayers().getArray().includes(this.availableLayers_[layerId])) {
-      this.map_.removeLayer(this.availableLayers_[layerId]);
+    if (this.map_.getLayers().getArray().includes(this.activeLayers_[layerId])) {
+      this.map_.removeLayer(this.activeLayers_[layerId]);
       // remove this layerId from the config
     }
   }
@@ -215,7 +308,7 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being made visible
    */
   showLayer(layerId) {
-    this.availableLayers_[layerId].setVisible(true);
+    this.activeLayers_[layerId].setVisible(true);
   }
 
   /**
@@ -223,7 +316,7 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being made hidden
    */
   hideLayer(layerId) {
-    this.availableLayers_[layerId].setVisible(false);
+    this.activeLayers_[layerId].setVisible(false);
   }
 
   /**
@@ -294,51 +387,51 @@ export class OlMap extends GeonaMap {
    * Load the data layers defined in the config
    * @private
    */
-  loadLayers_() {
-    for (let addedLayer of this.config.layers) {
-      addedLayer = addLayerDefaults(addedLayer);
-      let source;
-      switch (addedLayer.source.type) {
-        case 'wms':
-          source = new ol.source.TileWMS({
-            url: addedLayer.source.url,
-            crossOrigin: addedLayer.source.crossOrigin,
-            projection: addedLayer.projections[0],
-            attributions: addedLayer.source.attributions,
-            params: {
-              LAYERS: addedLayer.source.params.layers,
-              VERSION: addedLayer.source.params.version,
-              FORMAT: addedLayer.source.params.format,
-              STYLES: addedLayer.source.params.styles,
-              NUMCOLORBANDS: addedLayer.source.params.numcolorbands,
-              time: addedLayer.source.params.time,
-              wrapDateLine: addedLayer.source.params.wrapDateLine,
-            },
-          });
-          break;
-        case 'wmts':
-          console.error('WMTS not yet supported (TODO)');
-          break;
-      }
+  // loadLayers_() {
+  //   for (let addedLayer of this.config.layers) {
+  //     addedLayer = addLayerDefaults(addedLayer);
+  //     let source;
+  //     switch (addedLayer.source.type) {
+  //       case 'wms':
+  //         source = new ol.source.TileWMS({
+  //           url: addedLayer.source.url,
+  //           crossOrigin: addedLayer.source.crossOrigin,
+  //           projection: addedLayer.projections[0],
+  //           attributions: addedLayer.source.attributions,
+  //           params: {
+  //             LAYERS: addedLayer.source.params.layers,
+  //             VERSION: addedLayer.source.params.version,
+  //             FORMAT: addedLayer.source.params.format,
+  //             STYLES: addedLayer.source.params.styles,
+  //             NUMCOLORBANDS: addedLayer.source.params.numcolorbands,
+  //             time: addedLayer.source.params.time,
+  //             wrapDateLine: addedLayer.source.params.wrapDateLine,
+  //           },
+  //         });
+  //         break;
+  //       case 'wmts':
+  //         console.error('WMTS not yet supported (TODO)');
+  //         break;
+  //     }
 
-      let layerData;
-      for (let serverLayer of CCI5DAY.server.Layers) {
-        if (serverLayer.Name === addedLayer.id) {
-          layerData = serverLayer;
-        }
-      }
+  //     let layerData;
+  //     for (let serverLayer of CCI5DAY.server.Layers) {
+  //       if (serverLayer.Name === addedLayer.id) {
+  //         layerData = serverLayer;
+  //       }
+  //     }
 
-      this.availableLayers_[addedLayer.id] = new ol.layer.Tile({
-        id: addedLayer.id,
-        title: addedLayer.title,
-        description: addedLayer.description,
-        projections: addedLayer.projections,
-        source: source,
-        viewSettings: addedLayer.viewSettings,
-        layerData: layerData,
-      });
-    }
-  }
+  //     this.activeLayers_[addedLayer.id] = new ol.layer.Tile({
+  //       name: addedLayer.name,
+  //       title: addedLayer.title,
+  //       abstract: addedLayer.abstract,
+  //       projections: addedLayer.projections,
+  //       source: source,
+  //       viewSettings: addedLayer.viewSettings,
+  //       layerData: layerData,
+  //     });
+  //   }
+  // }
 
   /**
    * Load the default basemaps, and any defined in the config.
