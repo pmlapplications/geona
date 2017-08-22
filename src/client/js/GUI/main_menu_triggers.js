@@ -9,9 +9,8 @@ export class MainMenuTriggers {
    * @param {*} parentDiv The div which contains the map.
    */
   constructor(passedEventManager, parentDiv) {
-    let eventManager = passedEventManager;
-    this.setMenuExploreTriggers(parentDiv);
-    this.setMenuLayersTriggers(parentDiv);
+    this.setMenuExploreTriggers(passedEventManager, parentDiv);
+    this.setMenuLayersTriggers(passedEventManager, parentDiv);
   }
 
   setMenuExploreTriggers(eventManager, parentDiv) {

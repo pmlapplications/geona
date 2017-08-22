@@ -1,16 +1,12 @@
 export class TermsAndConditionsBindings {
-  constructor(passedEventManager, parentDiv) {
-    let eventManager = passedEventManager;
-    let menu = mainMenu;
+  constructor(passedEventManager, termsAndConditionsInstance) {
+    this.setTermsAndConditionsAcceptBinding(passedEventManager, termsAndConditionsInstance);
   }
 
-  setMenuExploreBindings(eventManager, menu) {
-
-  }
-
-  setMenuLayersBindings(eventManager, menu) {
-    eventManager.bind('appendLayersMenu', () => {
-      menu.appendLayersMenu();
+  setTermsAndConditionsAcceptBinding(eventManager, termsAndConditionsInstance) {
+    console.log(termsAndConditionsInstance);
+    eventManager.bind('acceptTermsAndConditions', () => {
+      termsAndConditionsInstance.acceptTermsAndConditions();
     });
   }
 }

@@ -9,7 +9,7 @@ export class TermsAndConditionsTriggers {
    * @param {*} parentDiv The div which contains the map.
    */
   constructor(passedEventManager, parentDiv) {
-    let eventManager = passedEventManager;
+    this.setAcceptTrigger(passedEventManager, parentDiv);
   }
 
   /**

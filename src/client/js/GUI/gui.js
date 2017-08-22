@@ -6,9 +6,10 @@
  * - T&C
  */
 
-import * as TermsAndConditions from './terms_and_conditions';
-import * as Overlay from './overlay';
-import * as MainMenu from './main_menu';
+import {TermsAndConditions} from './terms_and_conditions';
+import {Overlay} from './overlay';
+import {MainMenu} from './main_menu';
+import {EventManager} from '../../../common/event_manager';
 
 import $ from 'jquery';
 import handlebars from 'handlebars/runtime';
@@ -29,10 +30,9 @@ export class Gui {
    * @param {*} parentDiv The element into which a map instance is placed.
    */
   constructor(configOptions, parentDiv) {
-    this.configOptions = configOptions;
-    this.parentDiv = parentDiv;
-    if (this.config.termsAndConditions.require) {
-      this.loadTermsAndConditions(configOptions, parentDiv, this);
+    this.eventManager = new EventManager();
+    if (configOptions.get('intro.termsAndConditions.require')) {
+      this.loadTermsAndConditionsScreen(configOptions, parentDiv, this);
     } else {
       this.loadMainScreen(configOptions, parentDiv, this);
     }
@@ -41,21 +41,21 @@ export class Gui {
   /**
    * Loads the terms and conditions template, and not the map, into the parent div.
    */
-  loadTermsAndConditionsScreen() {
-    let termsAndConditionsConfigOptions = this.configOptions.intro.termsAndConditions;
-    this.termsAndConditions = new TermsAndConditions(termsAndConditionsConfigOptions, this.parentDiv, this);
+  loadTermsAndConditionsScreen(configOptions, parentDiv, gui) {
+    let termsAndConditionsConfigOptions = configOptions.get('intro.termsAndConditions');
+    let termsAndConditions = new TermsAndConditions(termsAndConditionsConfigOptions, parentDiv, gui);
   }
 
   /**
    * Loads the required GUI elements for the map into the parent div.
    */
-  loadMainScreen() {
+  loadMainScreen(configOptions, parentDiv, gui) {
     let overlayConfigOptions = Object.assign({},
-      this.configOptions.intro.splashScreen
+      configOptions.get('intro.splashScreen')
     );
-    let menuConfigOptions = this.configOptions.intro.menu;
+    let menuConfigOptions = configOptions.get('intro.menu');
 
-    this.overlay = new Overlay(overlayConfigOptions, this.parentDiv);
-    this.mainMenu = new MainMenu(menuConfigOptions, this.parentDiv);
+    this.overlay = new Overlay(overlayConfigOptions, parentDiv);
+    this.mainMenu = new MainMenu(menuConfigOptions, parentDiv);
   }
 }
