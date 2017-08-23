@@ -3,46 +3,58 @@ import i18next from 'i18next';
 import xhr from 'i18next-xhr-backend';
 import lngDetector from 'i18next-browser-languagedetector';
 
-let initPromise = new Promise((resolve) => {
-  i18next
-    .use(xhr)
-    .use(lngDetector)
-    .init({
-      debug: false,
+let initPromise;
 
-      // All namespaces used by the client must be defined here
-      ns: ['common', 'intro'],
+/**
+ * Initialize i18next. Returns a promise.
+ * @param  {String}  geonaServer URL of the geona server to download translations from
+ * @return {Promise}             A promise that resolves when i18next is ready
+ */
+export function initI18n(geonaServer) {
+  if (!initPromise) {
+    // If the promise hasn't been created yet
+    initPromise = new Promise((resolve) => {
+      i18next
+        .use(xhr)
+        .use(lngDetector)
+        .init({
+          debug: false,
 
-      fallbackLng: 'en',
-      defaultNS: 'common',
+          // All namespaces used by the client must be defined here
+          ns: ['common', 'intro'],
 
-      backend: {
-        loadPath: 'locales/resources.json?lng={{lng}}&ns={{ns}}',
-        allowMultiLoading: true,
-      },
+          fallbackLng: 'en',
+          defaultNS: 'common',
 
-      detection: {
-        // order and from where user language should be detected
-        order: ['cookie'],
+          backend: {
+            loadPath: geonaServer + '/locales/resources.json?lng={{lng}}&ns={{ns}}',
+            allowMultiLoading: true,
+          },
 
-        // keys or params to lookup language from
-        lookupCookie: 'geona-i18n',
+          detection: {
+            // order and from where user language should be detected
+            order: ['cookie'],
 
-        // cache user language on
-        caches: ['cookie'],
+            // keys or params to lookup language from
+            lookupCookie: 'geona-i18n',
 
-        // optional expire and domain for set cookie
-        cookieMinutes: 525600, // One year
-        // cookieDomain: 'myDomain',
-      },
-    }, () => {
-      resolve();
+            // cache user language on
+            caches: ['cookie'],
+
+            // optional expire and domain for set cookie
+            cookieMinutes: 525600, // One year
+            // cookieDomain: 'myDomain',
+          },
+        }, () => {
+          // Resolve the promise when i18next is ready
+          resolve();
+        });
     });
-});
+  }
 
-export function initI18n() {
   return initPromise;
 }
+
 
 /*
  * Handlebars helper for i18n translation.

@@ -1,16 +1,13 @@
 import $ from 'jquery';
 import 'jquery-ui/ui/widgets/sortable';
-import handlebars from 'handlebars/runtime';
+
 import * as templates from '../templates/compiled';
 import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
-import {registerHelpers} from '../../common/hbs_helpers';
 import {initI18n} from './i18n';
 import {GeonaLayer} from './layer';
-import {Gui} from './GUI/gui';
-
-registerHelpers(handlebars);
+import {Gui} from './gui/gui';
 
 // TODO These are for testing only
 window.templates = templates;
@@ -28,11 +25,8 @@ export class Geona {
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
     this.layerNames = [];
-    initI18n().then(() => {
-      let parentDiv = $(this.config.get('divId'));
-      console.log(this.config);
-      parentDiv.toggleClass('geona-container', true);
-      this.gui = new Gui(this.config, parentDiv, this);
+    initI18n(this.config.get('geonaServer')).then(() => {
+      this.gui = new Gui(this);
     });
   }
 
@@ -40,11 +34,7 @@ export class Geona {
    * Finds the correct div to put the map in, then constructs the map.
    * @private
    */
-  initialiseMapDiv_(parentDiv) {
-    parentDiv.html(templates.geona());
-    // Get the HTMLElement div to put the map in
-    let mapDiv = $(this.config.get('divId') + ' .geona-map')[0];
-
+  loadMap(mapDiv) {
     // TODO this should perhaps go a in seperate init method that returns a callback or promise
     switch (this.config.get('map.library')) {
       case 'openlayers':

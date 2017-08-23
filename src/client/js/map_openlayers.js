@@ -72,7 +72,7 @@ export class OlMap extends GeonaMap {
         }),
 
         new ol.control.Attribution({
-          collapsible: false,
+          collapsible: true,
           collapsed: false,
         }),
 
