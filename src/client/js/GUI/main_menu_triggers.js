@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import 'jquery';
 
 /**
  * Sets event triggers for main menu elements.
@@ -8,9 +8,9 @@ export class MainMenuTriggers {
    *
    * @param {*} parentDiv The div which contains the map.
    */
-  constructor(passedEventManager, parentDiv) {
-    this.setMenuExploreTriggers(passedEventManager, parentDiv);
-    this.setMenuLayersTriggers(passedEventManager, parentDiv);
+  constructor(eventManager, parentDiv) {
+    this.setMenuExploreTriggers(eventManager, parentDiv);
+    this.setMenuLayersTriggers(eventManager, parentDiv);
   }
 
   setMenuExploreTriggers(eventManager, parentDiv) {

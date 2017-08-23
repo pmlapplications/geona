@@ -1,7 +1,7 @@
 export class MainMenuBindings {
-  constructor(passedEventManager, mainMenu) {
-    this.setMenuExploreBindings(passedEventManager, mainMenu);
-    this.setMenuLayersBindings(passedEventManager, mainMenu);
+  constructor(eventManager, mainMenu) {
+    this.setMenuExploreBindings(eventManager, mainMenu);
+    this.setMenuLayersBindings(eventManager, mainMenu);
   }
 
   setMenuExploreBindings(eventManager, menu) {
