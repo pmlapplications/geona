@@ -26,8 +26,6 @@ registerHelpers(handlebars);
 export class Gui {
   /**
    * Initialises all the elements of the GUI.
-   * @param {Object} config GUI-related settings from the config.
-   * @param {*} parentDiv The element into which a map instance is placed.
    * @param {Geona} geona The geona instance for this GUI.
    */
   constructor(geona) {
@@ -38,7 +36,7 @@ export class Gui {
     this.parentDiv = $(this.geona.config.get('divId'));
     this.parentDiv.toggleClass('geona-container', true);
 
-    if (geona.config.get('intro.termsAndConditions.require')) {
+    if (this.geona.config.get('intro.termsAndConditions.require')) {
       this.loadTermsAndConditionsScreen();
     } else {
       this.loadMainScreen();
@@ -60,8 +58,9 @@ export class Gui {
     this.parentDiv.html(templates.geona());
 
     // Get the HTMLElement div to put the map in
-    let mapDiv = $(this.geona.config.get('divId') + ' .geona-map')[0];
+    let mapDiv = this.parentDiv.find('.geona-map')[0];
 
+    // Load the map into the div
     this.geona.loadMap(mapDiv);
 
     let splashScreenConfig = this.geona.config.get('intro.splashScreen');
@@ -70,6 +69,7 @@ export class Gui {
     }
 
     let menuConfig = this.geona.config.get('intro.menu');
+    // TODO change to pass (this, menuConfig)
     this.mainMenu = new MainMenu(menuConfig, this.parentDiv, this);
   }
 }

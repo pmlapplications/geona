@@ -31,8 +31,8 @@ export class Geona {
   }
 
   /**
-   * Finds the correct div to put the map in, then constructs the map.
-   * @private
+   * Load the map into the provided div.
+   * @param  {HTMLElement} mapDiv The HTML element to put the map in
    */
   loadMap(mapDiv) {
     // TODO this should perhaps go a in seperate init method that returns a callback or promise

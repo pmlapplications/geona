@@ -6,11 +6,11 @@ export class TermsAndConditions {
   constructor(gui, config) {
     this.gui = gui;
 
-    gui.parentDiv.html(templates.terms_and_conditions());
-    gui.parentDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + config.backgroundImage + ')');
+    this.gui.parentDiv.html(templates.terms_and_conditions());
+    this.gui.parentDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(gui.eventManager, gui.parentDiv);
-    registerBindings(gui.eventManager, this);
+    registerTriggers(this.gui.eventManager, this.gui.parentDiv);
+    registerBindings(this.gui.eventManager, this);
   }
 
   accept() {
