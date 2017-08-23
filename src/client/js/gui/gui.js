@@ -35,6 +35,10 @@ export class Gui {
     // Get the parent div and add the 'geona-container' class to it
     this.parentDiv = $(this.geona.config.get('divId'));
     this.parentDiv.toggleClass('geona-container', true);
+  }
+
+  init(onReadyCallback) {
+    this.onReadyCallback_ = onReadyCallback;
 
     if (this.geona.config.get('intro.termsAndConditions.require')) {
       this.loadTermsAndConditionsScreen();
@@ -60,8 +64,8 @@ export class Gui {
     // Get the HTMLElement div to put the map in
     let mapDiv = this.parentDiv.find('.geona-map')[0];
 
-    // Load the map into the div
-    this.geona.loadMap(mapDiv);
+    // Load the map
+    let mapPromise = this.geona.loadMap(mapDiv);
 
     let splashScreenConfig = this.geona.config.get('intro.splashScreen');
     if (splashScreenConfig.display) {
@@ -71,5 +75,8 @@ export class Gui {
     let menuConfig = this.geona.config.get('intro.menu');
     // TODO change to pass (this, menuConfig)
     this.mainMenu = new MainMenu(menuConfig, this.parentDiv, this);
+
+    // When the map is ready, call the onReadyCallback
+    mapPromise.then(this.onReadyCallback_);
   }
 }

@@ -25,29 +25,46 @@ export class Geona {
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
     this.layerNames = [];
-    initI18n(this.config.get('geonaServer')).then(() => {
-      this.gui = new Gui(this);
+    this.gui = new Gui(this);
+
+    // Initialize i18n and then the GUI
+    initI18n(this.config.get('geonaServer')).then(() =>{
+      this.gui.init(() => {
+        if (this.config.get('onReadyCallback')) {
+          // If a onReadyCallback is defined in the config, try to call it
+          try {
+            window[this.config.get('onReadyCallback')](this);
+          } catch (e) {
+            console.error('Failed to call onReadyCallback: ' + e);
+          }
+        }
+      });
     });
   }
 
   /**
    * Load the map into the provided div.
    * @param  {HTMLElement} mapDiv The HTML element to put the map in
+   * @return {Promise}     Promise that resolves when the map has been loaded
    */
   loadMap(mapDiv) {
     // TODO this should perhaps go a in seperate init method that returns a callback or promise
-    switch (this.config.get('map.library')) {
-      case 'openlayers':
-        ol.init(() => {
-          this.map = new ol.OlMap(this.config.get('map'), mapDiv);
-        });
-        break;
-      case 'leaflet':
-        leaflet.init(() => {
-          this.map = new leaflet.LMap(this.config.get('map'), mapDiv);
-        });
-        break;
-    }
+    return new Promise((resolve) => {
+      switch (this.config.get('map.library')) {
+        case 'openlayers':
+          ol.init(() => {
+            this.map = new ol.OlMap(this.config.get('map'), mapDiv);
+            resolve();
+          });
+          break;
+        case 'leaflet':
+          leaflet.init(() => {
+            this.map = new leaflet.LMap(this.config.get('map'), mapDiv);
+            resolve();
+          });
+          break;
+      }
+    });
   }
 }
 

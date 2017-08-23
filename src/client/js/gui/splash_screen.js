@@ -25,6 +25,6 @@ export class SplashScreen {
    */
   loadPreviousMap() {
     // TODO get previous map
-    alert('Need to save maps first. This alert is located in overlay.js');
+    alert('Need to save maps first. This alert is located in splash_screen.js');
   }
 }

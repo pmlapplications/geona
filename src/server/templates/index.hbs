@@ -11,7 +11,12 @@
   <!--This script defines a particular config,
       then instantiates a new loader-->
   <script>
+    function geonaOnReady(geona) {
+      console.log('Geona is ready.');
+    }
     var config1 = {
+      geonaVariable: 'geonaOl',
+      onReadyCallback: 'geonaOnReady',
       divId: 'ol',
       map: {
         graticule: true,
@@ -22,6 +27,7 @@
       }
     };
     var config2 = {
+      geonaVariable: 'geonaL',
       divId: 'leaflet',
       map: {
         library: 'leaflet',
