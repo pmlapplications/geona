@@ -26,8 +26,6 @@ registerHelpers(handlebars);
 export class Gui {
   /**
    * Initialises all the elements of the GUI.
-   * @param {Object} config GUI-related settings from the config.
-   * @param {*} parentDiv The element into which a map instance is placed.
    * @param {Geona} geona The geona instance for this GUI.
    */
   constructor(geona) {
@@ -70,6 +68,6 @@ export class Gui {
     }
 
     let menuConfig = this.geona.config.get('intro.menu');
-    this.mainMenu = new MainMenu(menuConfig, this.parentDiv, this);
+    this.mainMenu = new MainMenu(this.geona, menuConfig, this.parentDiv);
   }
 }

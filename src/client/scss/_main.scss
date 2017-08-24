@@ -37,17 +37,53 @@
 }
 
 /*------------------------------------*\
-    Menu Sidebar
+    Menu
 \*------------------------------------*/
 
-.geona-sidebar{
+.geona-menu-bar{
   position: absolute;
-  max-width: 110px;
-  width: 11%;
+  max-width: 80px;
+  width: 10%;
   height: auto;
-  top: 6%;
+  top: 25px;
+  left: 15px;
+}
+
+.geona-menu-toggle{
+  width:100%;
+  height: 35px;
+  background-color: #fafafa;
+  box-shadow: 0px 0px 11px -2px black;
+  padding: 9px 0;
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+
+  :hover{
+    background-color: #888;
+  }
+}
+
+.geona-menu{
+  width: 100%;
+  height: auto;
   background-color: rgba(230,230,230,0.7);
   border: 3px, #000;
+  box-shadow: 0px 0px 11px -2px black;
+}
+
+.geona-menu__ul{
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.geona-menu__tab{
+  width: 100%;
+  padding-top:100%;
+  border-right: 2px solid #000;
+  border-bottom: 2px solid #000;
+  cursor: pointer;
 
   :hover{
     background-color: rgba(255,255,255,1);
@@ -57,28 +93,11 @@
   }
 }
 
-.geona-sidebar__ul{
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.geona-sidebar__block{
-  width: 100%;
-  padding-top: 100%;
-  border-right: 2px solid #000;
-  border-bottom: 2px solid #000;
-
-  // :hover{
-  //   background-color: rgba(255,255,255,1);
-  // }
-}
-
-.geona-sidebar__explore{
+.geona-menu__explore{
   border-top: 2px solid #000;
 }
 
-.geona-panel-container{
+.geona-panel{
   position: absolute;
   left: 100%;
   width: 350%;
@@ -90,7 +109,7 @@
 }
 
 /*------------------------------------*\
-    Layer Panels
+    Layer Panel
 \*------------------------------------*/
 
 .geona-layers-list{
