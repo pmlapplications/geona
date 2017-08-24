@@ -7,9 +7,8 @@ let vendorJsLoaded = false;
 let bundleJsLoaded = false;
 
 /**
- * [loadGeonaCore description]
- * @param  {[type]} geonaServer [description]
- * @return {[type]}             [description]
+ * Load the core dependencies for Geona and create any queued Geona instances when ready.
+ * @param  {String} geonaServer The server URl to download dependencies from. If undefined, relative paths are used
  */
 function loadGeonaCore(geonaServer) {
   geonaCoreLoading = true;
@@ -69,6 +68,10 @@ function createInstances() {
     let config = queuedConfigs.pop();
 
     // TODO Set to variable specified in config? Or create and then call init? Or handle a callback? Or all of these?
-    let thingy = new geona.Geona(config);
+    let geonaInstance = new geona.Geona(config);
+
+    if (config.geonaVariable) {
+      window[config.geonaVariable] = geonaInstance;
+    }
   }
 }

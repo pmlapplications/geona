@@ -11,24 +11,24 @@
   <!--This script defines a particular config,
       then instantiates a new loader-->
   <script>
+    function geonaOnReady(geona) {
+      console.log('Geona is ready.');
+    }
     var config1 = {
+      geonaVariable: 'geonaOl',
+      onReadyCallback: 'geonaOnReady',
       divId: 'ol',
       map: {
         graticule: true,
         bingMapsApiKey: 'AgNtBFpBNF81T-ODIf_9WzE8UF_epbsfiSu9RYMbLfq_wXU_bBVAoyBw8VzfSjkd',
-        viewSettings: {
-          fitExtent: [0,0,10,10],
-        }
       }
     };
     var config2 = {
+      geonaVariable: 'geonaL',
       divId: 'leaflet',
       map: {
         library: 'leaflet',
         graticule: true,
-        viewSettings: {
-          fitExtent: [0,0,10,10],
-        }
       }
     };
     // instantiates new loader for map

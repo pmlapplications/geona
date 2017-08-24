@@ -27,6 +27,16 @@ export let client = {
     format: String,
     default: '#geona',
   },
+  geonaVariable: {
+    doc: 'The string name of a global (window) variable to store the geona instance in as soon as it is created (before it\'s finished initializing).',
+    format: String,
+    default: '',
+  },
+  onReadyCallback: {
+    doc: 'The string name of a global (window) function to call when geona has finished initializing. The geona instance is provided as the only parameter.',
+    format: String,
+    default: '',
+  },
   intro: {
     termsAndConditions: {
       require: {
@@ -195,7 +205,7 @@ export let client = {
       maxExtent: {
         doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
         format: Array,
-        default: [-90, -200, 90, 200],
+        default: [-100, Number.NEGATIVE_INFINITY, 100, Number.POSITIVE_INFINITY],
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',

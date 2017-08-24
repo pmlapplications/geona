@@ -17,11 +17,6 @@ export class OlMap extends GeonaMap {
    */
   constructor(config, mapDiv) {
     super();
-
-    // TODO this is only for testing
-    window.olmap = this;
-    window.ol = ol;
-
     /** @type {Object} The map config */
     this.config = config;
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
@@ -69,6 +64,7 @@ export class OlMap extends GeonaMap {
         new ol.control.FullScreen({
           label: $('<span class="icon-scale-spread-2"><span>').appendTo('body')[0],
           labelActive: $('<span class="icon-scale-reduce-1"><span>').appendTo('body')[0],
+          source: mapDiv.parentElement,
         }),
 
         new ol.control.Attribution({

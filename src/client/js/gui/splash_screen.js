@@ -6,10 +6,10 @@ export class SplashScreen {
   constructor(gui, config) {
     this.gui = gui;
 
-    gui.parentDiv.append(templates.splash_screen({splashMessage: config.content}));
-    gui.parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + config.backgroundImage + ')');
+    this.gui.parentDiv.append(templates.splash_screen({splashMessage: config.content}));
+    this.gui.parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(this.gui.eventManager, gui.parentDiv);
+    registerTriggers(this.gui.eventManager, this.gui.parentDiv);
     registerBindings(this.gui.eventManager, this);
   }
 
@@ -25,6 +25,6 @@ export class SplashScreen {
    */
   loadPreviousMap() {
     // TODO get previous map
-    alert('Need to save maps first. This alert is located in overlay.js');
+    alert('Need to save maps first. This alert is located in splash_screen.js');
   }
 }

@@ -17,11 +17,6 @@ export class LMap extends GeonaMap {
    */
   constructor(config, mapDiv) {
     super();
-
-    // TODO this is only for testing
-    window.lmap = this;
-    window.L = L;
-
     /** @type {Object} The map config */
     this.config = config;
     /** @private @type {Object} The available basemaps */
