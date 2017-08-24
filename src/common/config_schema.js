@@ -205,7 +205,7 @@ export let client = {
       maxExtent: {
         doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
         format: Array,
-        default: [-90, -200, 90, 200],
+        default: [-100, Number.NEGATIVE_INFINITY, 100, Number.POSITIVE_INFINITY],
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',
