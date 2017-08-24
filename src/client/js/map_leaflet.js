@@ -431,7 +431,7 @@ function deLeafletizeProjection(projection) {
  * Load the Leaflet library and any Leaflet plugins
  * @param  {Function} next
  */
-export function init(next) {
+export function init(geonaServer, next) {
   if (L) {
     // If leaflet has already been loaded
     next();
@@ -452,7 +452,7 @@ export function init(next) {
           next();
         });
     };
-    mapJs.src = 'js/vendor_leaflet.js';
+    mapJs.src = geonaServer + '/js/vendor_leaflet.js';
     head.appendChild(mapJs);
   }
 }

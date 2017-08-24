@@ -28,7 +28,8 @@
   padding: 0 7px;
 }
 
-.ol-control {
+.ol-control,
+.ol-touch .ol-control {
   button,
   button:hover,
   button:focus {
@@ -43,6 +44,7 @@
     color: #000;
     display: inline-block;
     line-height: normal;
+    outline: none;
   }
 }
 

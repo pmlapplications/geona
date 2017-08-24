@@ -59,9 +59,16 @@ i18next
 let app = express();
 app.set('view engine', 'hbs');
 app.set('views', __dirname + '/templates');
+
+app.use(function(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
 app.use(i18nextMiddleware.handle(i18next, {}));
 app.get('/locales/resources.json', i18nextMiddleware.getResourcesHandler(i18next)); // i18next multiload backend route
-
 
 /*
  * Setup swagger for api docs
@@ -97,7 +104,13 @@ app.get('/swagger.json', function(req, res) {
  */
 
 // Setup the static path for the static folder
-app.use(express.static(path.join(__dirname, '../../static')));
+app.use(express.static(path.join(__dirname, '../../static'), {
+  setHeaders: function(res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  },
+}));
 
 // Add the main router
 app.use(mainRouter);
