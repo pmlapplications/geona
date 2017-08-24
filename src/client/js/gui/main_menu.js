@@ -32,9 +32,10 @@ export class MainMenu {
     if (this.config.collapsible) {
       this.parentDiv.find('.js-geona-menu-bar').prepend(templates.menu_toggle());
       if (this.config.opened) {
-        this.parentDiv.find('.js-geona-menu-toggle')
-          .removeClass('icon-arrow-down-1')
-          .addClass('icon-arrow-up-1');
+        this.parentDiv.find('.js-geona-menu-toggle__icon')
+          .removeClass('icon-arrow-65')
+          .addClass('icon-arrow-66');
+        this.parentDiv.find('.js-geona-menu-toggle__text').html('Close<br>Menu');
       }
     }
 
@@ -48,9 +49,10 @@ export class MainMenu {
    */
   openMenu() {
     this.parentDiv.find('.js-geona-menu').removeClass('hidden');
-    this.parentDiv.find('.js-geona-menu-toggle')
-      .removeClass('icon-arrow-down-1')
-      .addClass('icon-arrow-up-1');
+    this.parentDiv.find('.js-geona-menu-toggle__icon')
+      .removeClass('icon-arrow-65')
+      .addClass('icon-arrow-66');
+    this.parentDiv.find('.js-geona-menu-toggle__text').html('Close<br>Menu');
   }
 
   /**
@@ -58,9 +60,10 @@ export class MainMenu {
    */
   closeMenu() {
     this.parentDiv.find('.js-geona-menu').addClass('hidden');
-    this.parentDiv.find('.js-geona-menu-toggle')
-      .removeClass('icon-arrow-up-1')
-      .addClass('icon-arrow-down-1');
+    this.parentDiv.find('.js-geona-menu-toggle__icon')
+      .removeClass('icon-arrow-66')
+      .addClass('icon-arrow-65');
+    this.parentDiv.find('.js-geona-menu-toggle__text').html('Open<br>Menu');
   }
 
   /**

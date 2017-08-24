@@ -42,8 +42,7 @@
 
 .geona-menu-bar{
   position: absolute;
-  max-width: 80px;
-  width: 10%;
+  width: 70px;
   height: auto;
   top: 25px;
   left: 15px;
@@ -54,14 +53,24 @@
   height: 35px;
   background-color: #fafafa;
   box-shadow: 0px 0px 11px -2px black;
-  padding: 9px 0;
-  font-size: 16px;
-  text-align: center;
   cursor: pointer;
+  padding: 0 5px;
 
-  :hover{
-    background-color: #888;
+  &:hover{
+    background-color: #999;
   }
+}
+
+.geona-menu-toggle__icon{
+  font-size: 18px;
+  display: inline-block;
+  padding-top: 9px;
+}
+
+.geona-menu-toggle__text{
+  font-size: 11px;
+  float: right;
+  padding-top: 3px;
 }
 
 .geona-menu{
@@ -80,15 +89,18 @@
 
 .geona-menu__tab{
   width: 100%;
-  padding-top:100%;
-  border-right: 2px solid #000;
+  height: 70px;
   border-bottom: 2px solid #000;
   cursor: pointer;
+  font-size: 42px;
+  text-align: center;
+  padding-top: 15px;
 
-  :hover{
+
+  &:hover{
     background-color: rgba(255,255,255,1);
   }
-  :target{
+  &:target{
     background-color: #444;
   }
 }
@@ -100,10 +112,12 @@
 .geona-panel{
   position: absolute;
   left: 100%;
-  width: 350%;
+  max-width: 377px;
+  width: 450%;
+  min-width: 272px;
   height: 130%;
   top: 0;
-  border: 1px solid #000;
+  
   background-color: rgba(255,255,255,1);
   padding: 3px;
 }
