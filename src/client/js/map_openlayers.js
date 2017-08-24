@@ -64,6 +64,7 @@ export class OlMap extends GeonaMap {
         new ol.control.FullScreen({
           label: $('<span class="icon-scale-spread-2"><span>').appendTo('body')[0],
           labelActive: $('<span class="icon-scale-reduce-1"><span>').appendTo('body')[0],
+          source: mapDiv.parentElement,
         }),
 
         new ol.control.Attribution({
