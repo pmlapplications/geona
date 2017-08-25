@@ -44,8 +44,8 @@ export class MainMenuTriggers {
    * Checks to see if the layers information should be closed or opened.
    * - if opened, gives event to populate panel.
    * - if closed, gived event to close panel.
-   * @param {*} eventManager 
-   * @param {*} parentDiv 
+   * @param {*} eventManager
+   * @param {*} parentDiv
    */
   setMenuLayersTriggers(eventManager, parentDiv) {
     // Open/close panel

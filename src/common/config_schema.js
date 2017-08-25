@@ -42,7 +42,7 @@ export let client = {
       require: {
         doc: 'Whether we will display and require accepting the terms and conditions on page load.',
         format: Boolean,
-        default: true,
+        default: false,
       },
       backgroundImage: {
         doc: 'The image to use as the background on the terms and conditions screen.',
@@ -54,7 +54,7 @@ export let client = {
       display: {
         doc: 'Whether we will display the splash screen on page load.',
         format: Boolean,
-        default: true,
+        default: false,
       },
       content: {
         doc: 'The HTML (or a translation key) that will be displayed on the splash screen.',

@@ -24,21 +24,24 @@ export class MainMenu {
     this.parentDiv = parentDiv;
     this.gui = geona.gui;
 
-    if (this.config.opened) {
-      this.parentDiv.find('.js-geona-controls').append(templates.menu());
-      this.parentDiv.find('.js-geona-menu').append(templates.panel());
-      this.parentDiv.find('.js-geona-panel').addClass('hidden');
-    }
+    // Sets up menu toggle control
     if (this.config.collapsible) {
-      this.parentDiv.find('.js-geona-menu-bar').prepend(templates.menu_toggle());
-      if (this.config.opened) {
-        this.parentDiv.find('.js-geona-menu-toggle__icon')
-          .removeClass('icon-arrow-65')
-          .addClass('icon-arrow-66');
-        this.parentDiv.find('.js-geona-menu-toggle__text').html('Close<br>Menu');
-      }
+      this.parentDiv.find('.js-geona-menu-bar').append(templates.menu_toggle());
     }
 
+    // Sets up menu
+    this.parentDiv.find('.js-geona-menu-bar').append(templates.menu());
+    this.parentDiv.find('.js-geona-menu').addClass('hidden');
+    this.parentDiv.find('.js-geona-menu').append(templates.panel());
+    this.parentDiv.find('.js-geona-panel').addClass('hidden');
+    if (this.config.opened) {
+      this.parentDiv.find('.js-geona-menu').removeClass('hidden');
+      this.parentDiv.find('.js-geona-menu-toggle__icon')
+        .removeClass('icon-arrow-65')
+        .addClass('icon-arrow-66');
+      this.parentDiv.find('.js-geona-menu-toggle__text-open').addClass('hidden');
+      this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('hidden');
+    }
 
     this.triggers = new MainMenuTriggers(this.gui.eventManager, this.parentDiv);
     this.bindings = new MainMenuBindings(this.gui.eventManager, this);
@@ -52,7 +55,8 @@ export class MainMenu {
     this.parentDiv.find('.js-geona-menu-toggle__icon')
       .removeClass('icon-arrow-65')
       .addClass('icon-arrow-66');
-    this.parentDiv.find('.js-geona-menu-toggle__text').html('Close<br>Menu');
+    this.parentDiv.find('.js-geona-menu-toggle__text-open').addClass('hidden');
+    this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('hidden');
   }
 
   /**
@@ -63,13 +67,15 @@ export class MainMenu {
     this.parentDiv.find('.js-geona-menu-toggle__icon')
       .removeClass('icon-arrow-66')
       .addClass('icon-arrow-65');
-    this.parentDiv.find('.js-geona-menu-toggle__text').html('Open<br>Menu');
+    this.parentDiv.find('.js-geona-menu-toggle__text-close').addClass('hidden');
+    this.parentDiv.find('.js-geona-menu-toggle__text-open').removeClass('hidden');
   }
 
   /**
    * Removes panel element from the GUI, but not from the DOM.
    */
   closePanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-panel').addClass('hidden');
   }
 
@@ -77,6 +83,9 @@ export class MainMenu {
    *
    */
   displayExplorePanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__explore').addClass('geona-menu__tab--active');
+
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
@@ -92,6 +101,9 @@ export class MainMenu {
    * required for changing the map anyway.
    */
   displayLayersPanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__layers').addClass('geona-menu__tab--active');
+
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
@@ -105,6 +117,9 @@ export class MainMenu {
    *
    */
   displayAnalysisPanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__analysis').addClass('geona-menu__tab--active');
+
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
@@ -116,6 +131,9 @@ export class MainMenu {
    *
    */
   displayLoginPanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__login').addClass('geona-menu__tab--active');
+
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
@@ -127,6 +145,9 @@ export class MainMenu {
    *
    */
   displayHelpPanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__help').addClass('geona-menu__tab--active');
+
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
@@ -138,6 +159,9 @@ export class MainMenu {
    *
    */
   displaySharePanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__share').addClass('geona-menu__tab--active');
+
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
