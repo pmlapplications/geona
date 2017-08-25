@@ -2,5 +2,8 @@
   "toggle": {
     "open": "Open<br>Menu",
     "close": "Close<br>Menu"
+  },
+  "help": {
+    "termsConditions": "View Terms and Conditions"
   }
 }

@@ -318,9 +318,9 @@ export class OlMap extends GeonaMap {
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
-   * @param {Array}   options.center     The centre as [lat, lon]
-   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
-   * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Object}  options.center     The centre as {lat: _, lon: _}
+   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as {minLat: _, minLon: _, maxLat: _, maxLon: _}
+   * @param {Array}   options.maxExtent  Extent to restrict the view to, {minLat: _, minLon: _, maxLat: _, maxLon: _}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
    * @param {String}  options.projection The projection, such as 'EPSG:4326'
@@ -344,14 +344,14 @@ export class OlMap extends GeonaMap {
     this.config.viewSettings.zoom = zoom;
 
     // Converts the min and max coordinates from LatLon to current projection
-    maxExtent = ol.proj.fromLonLat([maxExtent[1], maxExtent[0]], projection)
-      .concat(ol.proj.fromLonLat([maxExtent[3], maxExtent[2]], projection));
+    maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
+      .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
 
     if (fitExtent) {
-      fitExtent = ol.proj.fromLonLat([fitExtent[1], fitExtent[0]], projection)
-        .concat(ol.proj.fromLonLat([fitExtent[3], fitExtent[2]], projection));
+      fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
+        .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
     }
-    center = ol.proj.fromLonLat(center.reverse(), projection);
+    center = ol.proj.fromLonLat([center.lon, center.lat], projection);
 
     // Ensure that the center is within the maxExtent
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {

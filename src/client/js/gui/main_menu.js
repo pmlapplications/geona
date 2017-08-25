@@ -31,8 +31,9 @@ export class MainMenu {
 
     // Sets up menu
     this.parentDiv.find('.js-geona-menu-bar').append(templates.menu());
-    this.parentDiv.find('.js-geona-menu').addClass('hidden');
-    this.parentDiv.find('.js-geona-menu').append(templates.panel());
+    this.parentDiv.find('.js-geona-menu')
+      .addClass('hidden')
+      .append(templates.panel());
     this.parentDiv.find('.js-geona-panel').addClass('hidden');
     if (this.config.opened) {
       this.parentDiv.find('.js-geona-menu').removeClass('hidden');
