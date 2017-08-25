@@ -29,6 +29,7 @@ export function initI18n(geonaServer) {
           backend: {
             loadPath: geonaServer + '/locales/resources.json?lng={{lng}}&ns={{ns}}',
             allowMultiLoading: true,
+            crossDomain: true,
           },
 
           detection: {

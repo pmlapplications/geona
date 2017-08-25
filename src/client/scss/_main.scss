@@ -6,6 +6,15 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
   }
+
+  input, select, textarea, button{
+    font-family:inherit;
+  }
+}
+
+.geona-container:-webkit-full-screen {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .geona-map{

@@ -57,13 +57,13 @@ export class OlMap extends GeonaMap {
       target: mapDiv,
       controls: [
         new ol.control.Zoom({
-          zoomInLabel: $('<span class="icon-zoom-in"></span>').appendTo('body')[0],
-          zoomOutLabel: $('<span class="icon-zoom-out"></span>').appendTo('body')[0],
+          zoomInLabel: $('<span class="icon-zoom-in"></span>')[0],
+          zoomOutLabel: $('<span class="icon-zoom-out"></span>')[0],
         }),
 
         new ol.control.FullScreen({
-          label: $('<span class="icon-scale-spread-2"><span>').appendTo('body')[0],
-          labelActive: $('<span class="icon-scale-reduce-1"><span>').appendTo('body')[0],
+          label: $('<span class="icon-scale-spread-2"><span>')[0],
+          labelActive: $('<span class="icon-scale-reduce-1"><span>')[0],
           source: mapDiv.parentElement,
         }),
 
@@ -509,7 +509,7 @@ export class OlMap extends GeonaMap {
  * Load the openlayers js library and dynamically import it.
  * @param {Function} next
  */
-export function init(next) {
+export function init(geonaServer, next) {
   if (ol) {
     // If ol has already been loaded
     next();
@@ -524,7 +524,7 @@ export function init(next) {
         });
     };
 
-    mapJs.src = 'js/vendor_openlayers.js';
+    mapJs.src = geonaServer + '/js/vendor_openlayers.js';
     head.appendChild(mapJs);
   }
 }

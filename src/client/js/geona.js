@@ -26,9 +26,10 @@ export class Geona {
     this.config = new Config(clientConfig);
     this.layerNames = [];
     this.gui = new Gui(this);
+    this.geonaServer = this.config.get('geonaServer');
 
     // Initialize i18n and then the GUI
-    initI18n(this.config.get('geonaServer')).then(() =>{
+    initI18n(this.geonaServer).then(() =>{
       this.gui.init(() => {
         if (this.config.get('onReadyCallback')) {
           // If a onReadyCallback is defined in the config, try to call it
@@ -52,13 +53,13 @@ export class Geona {
     return new Promise((resolve) => {
       switch (this.config.get('map.library')) {
         case 'openlayers':
-          ol.init(() => {
+          ol.init(this.geonaServer, () => {
             this.map = new ol.OlMap(this.config.get('map'), mapDiv);
             resolve();
           });
           break;
         case 'leaflet':
-          leaflet.init(() => {
+          leaflet.init(this.geonaServer, () => {
             this.map = new leaflet.LMap(this.config.get('map'), mapDiv);
             resolve();
           });
