@@ -47,8 +47,11 @@ export class OlMap extends GeonaMap {
     this.map_ = new ol.Map({
       view: new ol.View(
         {
-          center: this.config.viewSettings.center,
-          extent: this.config.viewSettings.maxExtent,
+          center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
+          extent: [
+            this.config.viewSettings.maxExtent.minLat, this.config.viewSettings.maxExtent.minLon,
+            this.config.viewSettings.maxExtent.maxLat, this.config.viewSettings.maxExtent.maxLon,
+          ],
           maxZoom: this.config.viewSettings.maxZoom,
           minZoom: this.config.viewSettings.minZoom,
           projection: this.config.projection,
@@ -174,7 +177,6 @@ export class OlMap extends GeonaMap {
    */
   addLayer(geonaLayer, index) {
     if (geonaLayer.crs.includes(this.map_.getView().getProjection().getCode())) {
-      console.log(geonaLayer);
       let source;
       switch (geonaLayer.serviceType) {
         case 'wms':
@@ -344,24 +346,14 @@ export class OlMap extends GeonaMap {
     this.config.viewSettings.zoom = zoom;
 
     // Converts the min and max coordinates from LatLon to current projection
-    // maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
-    //   .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
-
-    // if (fitExtent) {
-    //   fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
-    //     .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
-    // }
-    // center = ol.proj.fromLonLat([center.lon, center.lat], projection);
-
-    maxExtent = ol.proj.fromLonLat([maxExtent[1], maxExtent[0]], projection)
-      .concat(ol.proj.fromLonLat([maxExtent[3], maxExtent[2]], projection));
+    maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
+      .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
 
     if (fitExtent) {
-      fitExtent = ol.proj.fromLonLat([fitExtent[1], fitExtent[0]], projection)
-        .concat(ol.proj.fromLonLat([fitExtent[3], fitExtent[2]], projection));
+      fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
+        .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
     }
-
-    center = ol.proj.fromLonLat(center.reverse(), projection);
+    center = ol.proj.fromLonLat(center, projection);
 
     // Ensure that the center is within the maxExtent
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {

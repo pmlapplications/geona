@@ -194,18 +194,18 @@ export let client = {
 
       center: {
         doc: 'The map center.',
-        format: Array,
-        default: [0, 0],
+        format: Object,
+        default: {lat: 0, lon: 0},
       },
       fitExtent: {
         doc: 'Extent to fit the view to. Will override zoom. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Array,
-        default: [-90, -180, 90, 180],
+        format: Object,
+        default: {minLat: -90, minLon: -180, maxLat: 90, maxLon: 180},
       },
       maxExtent: {
         doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Array,
-        default: [-100, Number.NEGATIVE_INFINITY, 100, Number.POSITIVE_INFINITY],
+        format: Object,
+        default: {minLat: -100, minLon: Number.NEGATIVE_INFINITY, maxLat: 100, maxLon: Number.POSITIVE_INFINITY},
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',
