@@ -114,7 +114,7 @@ module.exports = {
     // Specify all we want (to be clear)
     'no-delete-var': 2, // eslint:recommended
     'no-label-var': 2,
-    'no-shadow': [1, {'builtinGlobals': false}],
+    'no-shadow': [1, {'builtinGlobals': true, 'allow': ['done', 'err']}],
     'no-shadow-restricted-names': 2,
     'no-undef': 2, // eslint:recommended
     'no-undef-init': 2,
