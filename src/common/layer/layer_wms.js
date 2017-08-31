@@ -1,9 +1,10 @@
 import VisibleLayer from './visible_layer';
 
-export class LayerWmts extends VisibleLayer {
+export default class LayerWms extends VisibleLayer {
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
-    this.name = layerConfig.wmts.name;
+    this.PROTOCOL = 'wms';
+    this.name = layerConfig.wms.name;
     this.styles = {};
   }
 }
