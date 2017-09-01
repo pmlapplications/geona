@@ -1,6 +1,7 @@
 import express from 'express';
 
 import settingsRouter from './settings';
+import utilsRouter from './utils';
 
 import * as mainController from '../controllers/main';
 
@@ -11,3 +12,4 @@ export default router;
 router.get('/', mainController.index);
 
 router.use('/settings', settingsRouter);
+router.use('/utils', utilsRouter);
