@@ -8,3 +8,4 @@ export default router;
 router.get('/wcs/getLayers/:url', utils.wcsGetLayers);
 router.get('/wms/getLayers/:url', utils.wmsGetLayers);
 router.get('/wmts/getLayers/:url', utils.wmtsGetLayers);
+router.get('/test/getLayers/:url', utils.testGetLayers);
