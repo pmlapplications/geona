@@ -3,7 +3,7 @@ import request from 'request';
 import Layer from '../../common/layer/layer';
 import LayerServer from '../../common/layer/layer_server';
 import LayerWms from '../../common/layer/layer_wms';
-import {wmsContext, wmtsContext, wcsContext} from '../utils/jsonix';
+import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, TEST_CONTEXT} from '../utils/jsonix';
 
 /**
  * Get the available data layers and server details from a wcs server.
@@ -28,8 +28,8 @@ export function wmsGetLayers(req, res) {
     res.json(jsonCapabilities);
 
     let capabilities = jsonCapabilities.value;
-    let service = jsonCapabilities.service;
-    let capability = jsonCapabilities.capability;
+    let service = capabilities.service;
+    let capability = capabilities.capability;
 
     let serverConfig = {
       protocol: 'wms',
@@ -38,20 +38,13 @@ export function wmsGetLayers(req, res) {
 
       service: {
         title: service.title,
-        abstract: service._abstract || '',
+        abstract: service._abstract || service.abstract || '',
         keywords: [],
         onlineResource: service.onlineResource.href,
         contactInformation: {},
       },
 
-      capability: {
-        getMap: {
-          formats: capabilities.capability.getMap.format,
-        },
-        getFeatureInfo: {
-          formats: capabilities.capability.getFeatureInfoo.format,
-        },
-      },
+      capability: {},
     };
 
     if (service.keywordList) {
@@ -62,16 +55,44 @@ export function wmsGetLayers(req, res) {
 
     if (service.contactInformation) {
       let contactInfo = service.contactInformation;
-      serverConfig.service.contactInformation = {
-        person: contactInfo.contactPersonPrimary ? contactInfo.contactPersonPrimary.contactPerson : undefined,
-        organization: contactInfo.contactPersonPrimary ? contactInfo.contactPersonPrimary.contactOrganisation :
-          undefined,
-        phone: contactInfo.contactVoiceTelephone,
-        email: contactInfo.contactElectronicMailAddress,
-      };
+      let serverConfigContactInfo = serverConfig.service.contactInformation;
+
+      if (contactInfo.contactPersonPrimary) {
+        serverConfigContactInfo.person = contactInfo.contactPersonPrimary.contactPerson;
+        serverConfigContactInfo.organization = contactInfo.contactPersonPrimary.contactOrganisation;
+      }
+
+      serverConfigContactInfo.position = contactInfo.contactPosition;
+      serverConfigContactInfo.address = contactInfo.contactAddress;
+      serverConfigContactInfo.phone = contactInfo.contactVoiceTelephone;
+      serverConfigContactInfo.email = contactInfo.contactElectronicMailAddress;
     }
 
-    console.log(serverConfig);
+    if (capability.request) {
+      if (capability.request.getMap) {
+        serverConfig.capability.getMap = {
+          formats: capability.request.getMap.format,
+        };
+      }
+      if (capability.request.getFeatureInfo) {
+        serverConfig.capability.getFeatureInfo = {
+          formats: capability.request.getFeatureInfo.format,
+        };
+      }
+      if (capability.request.extendedOperation) {
+        for (let operation of capability.request.extendedOperation) {
+          switch (operation.name.localPart) {
+            case 'GetLegendGraphic':
+              serverConfig.capability.getLegendGraphic = {
+                formats: operation.value.format,
+              };
+              break;
+          }
+        }
+      }
+    }
+
+    console.log(JSON.stringify(serverConfig));
 
     // let layerServer = new LayerServer();
   }).catch((err) => {
@@ -93,6 +114,17 @@ export function wmtsGetLayers(req, res) {
   });
 }
 
+export function testGetLayers(req, res) {
+  getCapabilities('test', req.params.url).then((jsonCapabilities) => {
+    // res.json(jsonCapabilities);
+    console.log(jsonCapabilities);
+    res.send();
+  }).catch((err) => {
+    console.log(err);
+    res.status(500).json({error: 'Error processing XML: ' + err.message});
+  });
+}
+
 /**
  * Download GetCapabilities and covert it to JSON from the provided url and protocol.
  * @param  {String} protocol The OGC protocol/service
@@ -107,16 +139,18 @@ function getCapabilities(protocol, url) {
     switch (protocol) {
       case 'wms':
         cleanUrl += '?service=WMS&request=GetCapabilities';
-        unmarshaller = wmsContext.createUnmarshaller();
+        unmarshaller = WMS_CONTEXT.createUnmarshaller();
         break;
       case 'wmts':
         cleanUrl += '?service=WMTS&request=GetCapabilities';
-        unmarshaller = wmtsContext.createUnmarshaller();
+        unmarshaller = WMTS_CONTEXT.createUnmarshaller();
         break;
       case 'wcs':
         cleanUrl += '?service=WCS&request=GetCapabilities';
-        unmarshaller = wcsContext.createUnmarshaller();
+        unmarshaller = WCS_CONTEXT.createUnmarshaller();
         break;
+      case 'test':
+        unmarshaller = TEST_CONTEXT.createUnmarshaller();
     }
 
     request(cleanUrl, (err, response, body) => {
