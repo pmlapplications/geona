@@ -105,17 +105,32 @@ export function wmsGetLayers(req, res) {
   });
 }
 
-function digForWmsLayers(layer, parentLayer) {
+function digForWmsLayers(layer, parentLayer = {}) {
   let layers = [];
 
+  // Create thisLayer with the basic non-inheritable properties
   let thisLayer = {
-    PROTOCOL: 'wms',
     name: layer.name,
     title: layer.title,
     abstract: layer._abstract,
-    projections: layer.crs,
   };
 
+  // Load the projections with 'add' inheritance
+  if (layer.crs) {
+    thisLayer.projections = layer.crs;
+
+    if (parentLayer.projections) {
+      // Add any projections from the parent layer
+      thisLayer.projections = thisLayer.projections.concat(parentLayer.projections);
+      // Remove any duplicates
+      thisLayer.projections = Array.from(new Set(thisLayer.projections));
+    }
+  } else if (parentLayer.projections) {
+    // If this layer has no crs defined, but the parent layer has projections, use those
+    thisLayer.projections = parentLayer.projections;
+  }
+
+  // Load the keywords
   if (layer.keywordList) {
     thisLayer.keywords = [];
     for (let keyword of layer.keywordList.keyword) {
@@ -123,6 +138,7 @@ function digForWmsLayers(layer, parentLayer) {
     }
   }
 
+  // Load the bounding box with 'replace' inheritance
   if (layer.exGeographicBoundingBox) {
     thisLayer.boundingBox = {
       minLat: layer.exGeographicBoundingBox.southBoundLatitude,
@@ -130,8 +146,11 @@ function digForWmsLayers(layer, parentLayer) {
       maxLat: layer.exGeographicBoundingBox.northBoundLatitude,
       maxLon: layer.exGeographicBoundingBox.eastBoundLongitude,
     };
+  } else if (parentLayer.projections) {
+    thisLayer.boundingBox = parentLayer.boundingBox;
   }
 
+  // Load the attribution with 'replace' inheritance
   if (layer.attribution) {
     thisLayer.attribution = {
       title: layer.attribution.title,
@@ -152,10 +171,13 @@ function digForWmsLayers(layer, parentLayer) {
         thisLayer.attribution.logo.onlineResource = layer.attribution.logoURL.onlineResource.href;
       }
     }
+  } else if (parentLayer.attribution) {
+    thisLayer.attribution = parentLayer.attribution;
   }
 
+  // Load the authorities with 'replace' inheritance
   if (layer.authorityURL) {
-    thisLayer.authority = [];
+    thisLayer.authorities = [];
     for (let authority of layer.authorityURL) {
       let thisAuthority = {
         name: authority.name,
@@ -163,14 +185,41 @@ function digForWmsLayers(layer, parentLayer) {
       if (authority.onlineResource) {
         thisAuthority.onlineResource = authority.onlineResource.href;
       }
-      thisLayer.authority.push(thisAuthority);
+      thisLayer.authorities.push(thisAuthority);
     }
+
+    if (parentLayer.authorities) {
+      // Add any authorities from the parent layer
+      thisLayer.authorities = thisLayer.authorities.concat(parentLayer.authorities);
+      // Remove duplicates with ES6 magic
+      thisLayer.authorities = thisLayer.authorities.filter((authority, index, thisArray) =>
+        thisArray.findIndex((otherAuthority) => {
+          return otherAuthority.name === authority.name;
+        }) === index);
+    }
+  } else if (parentLayer.authorities) {
+    thisLayer.authorities = parentLayer.authorities;
   }
 
+  // Load dimensions with 'replace' inheritance
+  if (layer.dimension) {
+    thisLayer.dimensions = {};
+    for (let dimension of layer.dimension) {
+      thisLayer.dimensions[dimension.name] = {
+        
+      };
+
+    }
+  } else if (parentLayer.dimensions) {
+    thisLayer.dimensions = parentLayer.dimensions;
+  }
+
+  // If this layer has a name, and therefore supports getMap, add it to the array of layers
   if (layer.name) {
     layers.push(thisLayer);
   }
 
+  // If this layer has sub-layers, load them and add them to the array of layers
   if (layer.layer) {
     for (let subLayer of layer.layer) {
       layers = layers.concat(digForWmsLayers(subLayer, thisLayer));
