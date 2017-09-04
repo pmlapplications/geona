@@ -14,15 +14,15 @@ registerHelpers(handlebars);
 export class MainMenu {
   /**
    *
+   * @param {Geona} gui The parent Gui of this MainMenu.
    * @param {Object} menuConfigOptions The config settings relating to the main menu.
    * @param {JQuery} parentDiv The div containing the map.
-   * @param {Gui} gui The parent Gui of this MainMenu.
    */
-  constructor(geona, menuConfigOptions, parentDiv) {
-    this.geona = geona;
+  constructor(gui, menuConfigOptions) {
+    this.gui = gui;
+    this.geona = gui.geona;
     this.config = menuConfigOptions;
-    this.parentDiv = parentDiv;
-    this.gui = geona.gui;
+    this.parentDiv = gui.parentDiv;
 
     // Sets up menu toggle control
     if (this.config.collapsible) {

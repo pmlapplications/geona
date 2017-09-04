@@ -15,6 +15,7 @@ import * as templates from '../../templates/compiled';
 import {MainMenu} from './main_menu';
 import {SplashScreen} from './splash_screen';
 import {TermsAndConditions} from './terms_and_conditions';
+import {Timeline} from './timeline';
 
 registerHelpers(handlebars);
 
@@ -72,9 +73,12 @@ export class Gui {
       this.splashScreen = new SplashScreen(this, splashScreenConfig);
     }
 
-    let menuConfig = this.geona.config.get('intro.menu');
-    // TODO change to pass (this, menuConfig)
-    this.mainMenu = new MainMenu(this.geona, menuConfig, this.parentDiv);
+    let menuConfig = this.geona.config.get('controls.menu');
+    this.mainMenu = new MainMenu(this, menuConfig);
+
+    // TODO add timeline.js and triggers and bindings then create here and test register helpers
+    let timelineConfig = this.geona.config.get('controls.timeline');
+    this.timeline = new Timeline(this, timelineConfig);
 
     // When the map is ready, call the onReadyCallback
     mapPromise.then(this.onReadyCallback_);

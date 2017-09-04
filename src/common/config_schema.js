@@ -67,6 +67,8 @@ export let client = {
         default: 'http://www.hdwallpaperspulse.com/wp-content/uploads/2016/08/24/colorful-background-hd.jpg',
       },
     },
+  },
+  controls: {
     menu: {
       opened: {
         doc: 'Whether the full menu is displayed on load.',
@@ -75,6 +77,23 @@ export let client = {
       },
       collapsible: {
         doc: 'Whether the controls to show and hide the menu are shown.',
+        format: Boolean,
+        default: true,
+      },
+    },
+    timeline: {
+      opened: {
+        doc: 'Whether the timeline is displayed on load.',
+        format: Boolean,
+        default: true,
+      },
+      collapsible: {
+        doc: 'Whether the controls to show and hide the timeline are shown.',
+        format: Boolean,
+        default: true,
+      },
+      openOnLayerLoad: {
+        doc: 'Whether the timeline should be opened when a layer is added to the map.',
         format: Boolean,
         default: true,
       },
