@@ -92,6 +92,10 @@ export function wmsGetLayers(req, res) {
       }
     }
 
+    if (capability.layer) {
+      serverConfig.layers = digForWmsLayers(capability.layer);
+    }
+
     console.log(JSON.stringify(serverConfig));
 
     // let layerServer = new LayerServer();
@@ -99,6 +103,81 @@ export function wmsGetLayers(req, res) {
     console.log(err);
     res.status(500).json({error: 'Error processing XML: ' + err.message});
   });
+}
+
+function digForWmsLayers(layer, parentLayer) {
+  let layers = [];
+
+  let thisLayer = {
+    PROTOCOL: 'wms',
+    name: layer.name,
+    title: layer.title,
+    abstract: layer._abstract,
+    projections: layer.crs,
+  };
+
+  if (layer.keywordList) {
+    thisLayer.keywords = [];
+    for (let keyword of layer.keywordList.keyword) {
+      thisLayer.keywords.push(keyword.value);
+    }
+  }
+
+  if (layer.exGeographicBoundingBox) {
+    thisLayer.boundingBox = {
+      minLat: layer.exGeographicBoundingBox.southBoundLatitude,
+      minLon: layer.exGeographicBoundingBox.westBoundLongitude,
+      maxLat: layer.exGeographicBoundingBox.northBoundLatitude,
+      maxLon: layer.exGeographicBoundingBox.eastBoundLongitude,
+    };
+  }
+
+  if (layer.attribution) {
+    thisLayer.attribution = {
+      title: layer.attribution.title,
+    };
+
+    if (layer.attribution.onlineResource) {
+      thisLayer.attribution.onlineResource = layer.attribution.onlineResource.href;
+    }
+
+    if (layer.attribution.logoURL) {
+      thisLayer.attribution.logo = {
+        width: layer.attribution.logoURL.width,
+        height: layer.attribution.logoURL.height,
+        format: layer.attribution.logoURL.format,
+      };
+
+      if (layer.attribution.logoURL.onlineResource) {
+        thisLayer.attribution.logo.onlineResource = layer.attribution.logoURL.onlineResource.href;
+      }
+    }
+  }
+
+  if (layer.authorityURL) {
+    thisLayer.authority = [];
+    for (let authority of layer.authorityURL) {
+      let thisAuthority = {
+        name: authority.name,
+      };
+      if (authority.onlineResource) {
+        thisAuthority.onlineResource = authority.onlineResource.href;
+      }
+      thisLayer.authority.push(thisAuthority);
+    }
+  }
+
+  if (layer.name) {
+    layers.push(thisLayer);
+  }
+
+  if (layer.layer) {
+    for (let subLayer of layer.layer) {
+      layers = layers.concat(digForWmsLayers(subLayer, thisLayer));
+    }
+  }
+
+  return layers;
 }
 
 /**
