@@ -44,14 +44,7 @@ export function wmsGetLayers(req, res) {
         contactInformation: {},
       },
 
-      capability: {
-        getMap: {
-          formats: capabilities.capability.getMap.format,
-        },
-        getFeatureInfo: {
-          formats: capabilities.capability.getFeatureInfoo.format,
-        },
-      },
+      capability: {},
     };
 
     if (service.keywordList) {
@@ -62,20 +55,44 @@ export function wmsGetLayers(req, res) {
 
     if (service.contactInformation) {
       let contactInfo = service.contactInformation;
-      serverConfig.service.contactInformation = {
-        person: contactInfo.contactPersonPrimary ? contactInfo.contactPersonPrimary.contactPerson : undefined,
-        organization: contactInfo.contactPersonPrimary ? contactInfo.contactPersonPrimary.contactOrganisation :
-          undefined,
-        position: contactInfo.contactPosition,
-        address: contactInfo.contactAddress,
-        phone: contactInfo.contactVoiceTelephone,
-        email: contactInfo.contactElectronicMailAddress,
-      };
+      let serverConfigContactInfo = serverConfig.service.contactInformation;
+
+      if (contactInfo.contactPersonPrimary) {
+        serverConfigContactInfo.person = contactInfo.contactPersonPrimary.contactPerson;
+        serverConfigContactInfo.organization = contactInfo.contactPersonPrimary.contactOrganisation;
+      }
+
+      serverConfigContactInfo.position = contactInfo.contactPosition;
+      serverConfigContactInfo.address = contactInfo.contactAddress;
+      serverConfigContactInfo.phone = contactInfo.contactVoiceTelephone;
+      serverConfigContactInfo.email = contactInfo.contactElectronicMailAddress;
     }
 
-    if (capability.request)
+    if (capability.request) {
+      if (capability.request.getMap) {
+        serverConfig.capability.getMap = {
+          formats: capability.request.getMap.format,
+        };
+      }
+      if (capability.request.getFeatureInfo) {
+        serverConfig.capability.getFeatureInfo = {
+          formats: capability.request.getFeatureInfo.format,
+        };
+      }
+      if (capability.request.extendedOperation) {
+        for (let operation of capability.request.extendedOperation) {
+          switch (operation.name.localPart) {
+            case 'GetLegendGraphic':
+              serverConfig.capability.getLegendGraphic = {
+                formats: operation.value.format,
+              };
+              break;
+          }
+        }
+      }
+    }
 
-    console.log(serverConfig);
+    console.log(JSON.stringify(serverConfig));
 
     // let layerServer = new LayerServer();
   }).catch((err) => {
