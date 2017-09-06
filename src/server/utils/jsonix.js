@@ -1,3 +1,7 @@
+/**
+ * @fileOverview Defines mappings for jsonix and exports jsonix contexts for xml to json parsing
+ */
+
 import {Jsonix as jsonix} from 'jsonix';
 import {XLink_1_0 as xLink} from 'w3c-schemas';
 import * as ogcSchemas from 'ogc-schemas';
