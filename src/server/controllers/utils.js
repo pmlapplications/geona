@@ -28,7 +28,6 @@ export function wmsGetLayers(req, res) {
     res.json(jsonCapabilities);
 
     let capabilities = jsonCapabilities.value;
-    console.log(JSON.stringify(jsonCapabilities.value));
     let service = capabilities.service;
     let capability = capabilities.capability;
 
@@ -108,6 +107,7 @@ export function wmsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wmtsGetLayers(req, res) {
+  // Add parsing for Layers
   getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
     res.json(jsonCapabilities);
 
@@ -190,6 +190,11 @@ export function wmtsGetLayers(req, res) {
       },
 
       capability: {},
+
+      layer: {
+        styles: {},
+        layerData: capabilities.contents.datasetDescriptionSummary,
+      },
     };
 
     if (serviceId.keywords && serviceId.keywords !== []) {
@@ -234,6 +239,7 @@ export function wmtsGetLayers(req, res) {
         }
       }
     }
+
     console.log(JSON.stringify(serverConfig));
   }).catch((err) => {
     res.status(500).json({error: 'Error processing XML: ' + err.message});

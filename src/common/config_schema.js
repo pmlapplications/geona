@@ -210,7 +210,7 @@ export let client = {
     },
     viewSettings: {
       // Settings for the view.  Basemap specific options may override these.
-
+      // TODO change styling for these
       center: {
         doc: 'The map center.',
         format: Object,

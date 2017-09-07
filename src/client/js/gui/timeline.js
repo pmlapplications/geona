@@ -24,4 +24,18 @@ export class Timeline {
       }
     }
   }
+
+  /**
+   * Removes the timeline from view, but not from the DOM
+   */
+  hideTimeline() {
+    this.parentDiv.find('.js-geona-timeline').addClass('hidden');
+  }
+
+  /**
+   * Shows the timeline on the GUI
+   */
+  showTimeline() {
+    this.parentDiv.find('.js-geona-timeline').removeClass('hidden');
+  }
 }
