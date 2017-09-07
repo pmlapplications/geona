@@ -39,6 +39,7 @@ module.exports = function(grunt) {
     'src/**/*.js',
     '!src/client/vendor/**',
     '!src/client/templates/**',
+    '!src/server/vendor/**',
   ];
 
   grunt.initConfig({
