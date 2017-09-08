@@ -37,9 +37,9 @@ function parseCommon(url, capabilities) {
     url: url.replace(/\?.*/g, ''),
 
     service: {
-      title: service.title,
-      abstract: service._abstract || service.abstract || '',
-      keywords: [],
+      title: {und: service.title},
+      abstract: {und: service._abstract} || {und: service.abstract} || {},
+      keywords: {und: []},
       onlineResource: service.onlineResource.href,
       contactInformation: {},
     },
@@ -49,7 +49,7 @@ function parseCommon(url, capabilities) {
 
   if (service.keywordList) {
     for (let keyword of service.keywordList.keyword) {
-      serverConfig.service.keywords.push(keyword.value);
+      serverConfig.service.keywords.und.push(keyword.value);
     }
   }
 
@@ -63,9 +63,9 @@ function parseCommon(url, capabilities) {
     }
 
     serverConfigContactInfo.position = contactInfo.contactPosition;
-    serverConfigContactInfo.address = contactInfo.contactAddress;
-    serverConfigContactInfo.phone = contactInfo.contactVoiceTelephone;
-    serverConfigContactInfo.email = contactInfo.contactElectronicMailAddress;
+    serverConfigContactInfo.addressLines = [contactInfo.contactAddress];
+    serverConfigContactInfo.phone = [contactInfo.contactVoiceTelephone];
+    serverConfigContactInfo.email = [contactInfo.contactElectronicMailAddress];
   }
 
   if (capability.layer) {
