@@ -8,7 +8,7 @@ let expect = chai.expect;
 registerHelpers(hbs);
 let helpers = hbs.handlebars.helpers;
 
-describe('common hbs_helpers', () => {
+describe('common/hbs_helpers', () => {
   describe('General logic helpers', () => {
     describe('eq', () => {
       it('should correctly check equality', () => {

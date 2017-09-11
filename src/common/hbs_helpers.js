@@ -66,7 +66,7 @@ export function registerHelpers(hbs) {
    *     {{/case}}
    *   {{/switch}}
    */
-  hbs.registerHelper('switch', (value, options) => {
+  hbs.registerHelper('switch', function(value, options) {
     this._switch_value_ = value;
     let html = options.fn(this); // Process the body of the switch block
     delete this._switch_value_;
@@ -79,7 +79,7 @@ export function registerHelpers(hbs) {
    * Multiple values can be passed to a case and will be used as OR values:
    *   {{#case 'value2' 'value3'}}
    */
-  hbs.registerHelper('case', (...args) => {
+  hbs.registerHelper('case', function(...args) {
     let options = args.pop();
     let caseValues = args;
 
