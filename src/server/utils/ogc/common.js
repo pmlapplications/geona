@@ -15,7 +15,7 @@ export function getCapabilities(protocol, url) {
 
     switch (protocol) {
       case 'wms':
-        cleanUrl += '?service=WMS&request=GetCapabilities&version=1.1.1';
+        cleanUrl += '?service=WMS&request=GetCapabilities';
         unmarshaller = WMS_CONTEXT.createUnmarshaller();
         break;
       case 'wmts':

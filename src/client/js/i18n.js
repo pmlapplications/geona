@@ -21,7 +21,7 @@ export function initI18n(geonaServer) {
           debug: false,
 
           // All namespaces used by the client must be defined here
-          ns: ['common', 'intro'],
+          ns: ['common', 'intro', 'menu'],
 
           fallbackLng: 'en',
           defaultNS: 'common',

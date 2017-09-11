@@ -57,8 +57,11 @@ export class LMap extends GeonaMap {
     /** @private @type {L.map} The Leaflet map */
     this.map_ = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
-      center: this.config.viewSettings.center,
-      maxBounds: [this.config.viewSettings.maxExtent.slice(0, 2), this.config.viewSettings.maxExtent.slice(2, 4)],
+      center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
+      maxBounds: [
+        [this.config.viewSettings.maxExtent.minLat, this.config.viewSettings.maxExtent.minLon],
+        [this.config.viewSettings.maxExtent.maxLat, this.config.viewSettings.maxExtent.maxLon],
+      ],
       maxZoom: leafletizeZoom(this.config.viewSettings.maxZoom, leafletizeProjection(this.config.projection)),
       minZoom: leafletizeZoom(this.config.viewSettings.minZoom, leafletizeProjection(this.config.projection)),
       zoom: leafletizeZoom(this.config.viewSettings.zoom, leafletizeProjection(this.config.projection)),
@@ -215,12 +218,18 @@ export class LMap extends GeonaMap {
     }
 
     if (options.maxExtent) {
-      this.map_.setMaxBounds([options.maxExtent.slice(0, 2), options.maxExtent.slice(2, 4)]);
+      this.map_.setMaxBounds([
+        [options.maxExtent.minLat, options.maxExtent.minLon],
+        [options.maxExtent.maxLat, options.maxExtent.maxLon],
+      ]);
+      // this.map_.setMaxBounds([options.maxExtent.slice(0, 2), options.maxExtent.slice(2, 4)]);
       this.config.viewSettings.maxExtent = options.maxExtent;
     }
 
+    console.log(options);
     if (options.center) {
-      this.map_.panTo(options.center);
+      this.map_.panTo([options.center.lat, options.center.lon]);
+      // this.map_.panTo(options.center);
       this.config.viewSettings.center = options.center;
     }
 
@@ -242,7 +251,11 @@ export class LMap extends GeonaMap {
     }
 
     if (options.fitExtent) {
-      this.map_.fitBounds([options.fitExtent.slice(0, 2), options.fitExtent.slice(2, 4)]);
+      this.map_.setMaxBounds([
+        [options.fitExtent.minLat, options.fitExtent.minLon],
+        [options.fitExtent.maxLat, options.fitExtent.maxLon],
+      ]);
+      // this.map_.fitBounds([options.fitExtent.slice(0, 2), options.fitExtent.slice(2, 4)]);
       this.config.viewSettings.fitExtent = options.fitExtent;
     }
   }

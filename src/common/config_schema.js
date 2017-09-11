@@ -42,7 +42,7 @@ export let client = {
       require: {
         doc: 'Whether we will display and require accepting the terms and conditions on page load.',
         format: Boolean,
-        default: true,
+        default: false,
       },
       backgroundImage: {
         doc: 'The image to use as the background on the terms and conditions screen.',
@@ -54,7 +54,7 @@ export let client = {
       display: {
         doc: 'Whether we will display the splash screen on page load.',
         format: Boolean,
-        default: true,
+        default: false,
       },
       content: {
         doc: 'The HTML (or a translation key) that will be displayed on the splash screen.',
@@ -67,6 +67,8 @@ export let client = {
         default: 'http://www.hdwallpaperspulse.com/wp-content/uploads/2016/08/24/colorful-background-hd.jpg',
       },
     },
+  },
+  controls: {
     menu: {
       opened: {
         doc: 'Whether the full menu is displayed on load.',
@@ -75,6 +77,23 @@ export let client = {
       },
       collapsible: {
         doc: 'Whether the controls to show and hide the menu are shown.',
+        format: Boolean,
+        default: true,
+      },
+    },
+    timeline: {
+      opened: {
+        doc: 'Whether the timeline is displayed on load.',
+        format: Boolean,
+        default: true,
+      },
+      collapsible: {
+        doc: 'Whether the controls to show and hide the timeline are shown.',
+        format: Boolean,
+        default: true,
+      },
+      openOnLayerLoad: {
+        doc: 'Whether the timeline should be opened when a layer is added to the map.',
         format: Boolean,
         default: true,
       },
@@ -191,21 +210,21 @@ export let client = {
     },
     viewSettings: {
       // Settings for the view.  Basemap specific options may override these.
-
+      // TODO change styling for these
       center: {
         doc: 'The map center.',
-        format: Array,
-        default: [0, 0],
+        format: Object,
+        default: {lat: 0, lon: 0},
       },
       fitExtent: {
         doc: 'Extent to fit the view to. Will override zoom. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Array,
-        default: [-90, -180, 90, 180],
+        format: Object,
+        default: {minLat: -90, minLon: -180, maxLat: 90, maxLon: 180},
       },
       maxExtent: {
         doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Array,
-        default: [-100, Number.NEGATIVE_INFINITY, 100, Number.POSITIVE_INFINITY],
+        format: Object,
+        default: {minLat: -100, minLon: Number.NEGATIVE_INFINITY, maxLat: 100, maxLon: Number.POSITIVE_INFINITY},
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',
