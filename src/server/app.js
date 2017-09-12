@@ -58,7 +58,7 @@ i18next
 
 let app = express();
 app.set('view engine', 'hbs');
-app.set('views', __dirname + '/templates');
+app.set('views', [__dirname + '/templates', __dirname + '/admin/templates']);
 
 app.use(function(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');

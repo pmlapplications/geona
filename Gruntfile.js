@@ -167,6 +167,14 @@ module.exports = function(grunt) {
             dest: 'lib/server/templates',
           },
         ],
+        admin_files: [
+          {
+            expand: true,
+            cwd: 'src/server/admin/templates',
+            src: ['*'],
+            dest: 'lib/server/admin/templates',
+          },
+        ],
       },
     },
 
