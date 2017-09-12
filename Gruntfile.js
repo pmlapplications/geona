@@ -215,7 +215,7 @@ module.exports = function(grunt) {
 
     jsdoc: {
       combined: {
-        src: ['README.md'],
+        src: ['src/documentation.js', 'README_documentation.md'],
         dest: 'static/documentation',
       },
       client: {
