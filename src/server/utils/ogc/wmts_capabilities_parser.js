@@ -1,18 +1,14 @@
 /* eslint camelcase: 0 */
 
-import {getCapabilities} from './common';
+import {getCapabilities, jsonifyCapabilities} from './common';
 
-export function parseWmtsCapabilities(url) {
+export function parseOnlineWmtsCapabilities(url) {
   return new Promise((resolve, reject) => {
-    console.log('parseWmtsCapabilities');
-    getCapabilities('wmts', url).then((jsonCapabilities) => {
-      console.log('getCapabilities done');
-      let capabilities = jsonCapabilities.value;
-
-      switch (capabilities.version) {
-        case '1.0.0':
-          resolve(parse1_0(url, capabilities));
-          break;
+    getCapabilities('wmts', url).then((xml) => {
+      try {
+        resolve(parseLocalWmtsCapabilities(xml, url));
+      } catch (err) {
+        reject(err);
       }
     }).catch((err) => {
       reject(err);
@@ -20,7 +16,25 @@ export function parseWmtsCapabilities(url) {
   });
 }
 
+export function parseLocalWmtsCapabilities(xml, url) {
+  let jsonCapabilities = jsonifyCapabilities('wmts', xml);
+  if (jsonCapabilities.err) {
+    throw jsonCapabilities.err;
+  }
+  let capabilities = jsonCapabilities.json.value;
 
+  switch (capabilities.version) {
+    case '1.0.0':
+      return (parse1_0(url, capabilities));
+  }
+}
+
+/**
+ * Parses the converted WMTS 1.0.0 XML file returned from a GetCapabilities request into a Geona Layer format.
+ * @param {*} url
+ * @param {*} capabilities
+ * @return {Object}        Geona server config options.
+ */
 function parse1_0(url, capabilities) {
   let serviceId = capabilities.serviceIdentification;
   let servicePr = capabilities.serviceProvider;
@@ -34,7 +48,7 @@ function parse1_0(url, capabilities) {
   let serverConfig = {
     protocol: 'wmts',
     version: capabilities.version,
-    url: url.replace(/\?.*/g, ''),
+    url: undefined,
 
     service: {
       title: title || {},
@@ -46,6 +60,10 @@ function parse1_0(url, capabilities) {
       fees: serviceId.fees,
     },
   };
+
+  if (url) {
+    serverConfig.url = url.replace(/\?.*/g, '');
+  }
 
   if (serviceId.keywords && serviceId.keywords !== []) {
     serverConfig.service.keywords = parseKeywords(serviceId.keywords);
@@ -193,7 +211,6 @@ function parse1_0(url, capabilities) {
       }
 
       // TileMatrixSetLink is a mandatory property
-      // TODO Is the projection an appropriate name for a property?
       layerData.tileMatrixSetLink = {};
       let tileMatrixSetLimitsObject = {};
       for (let matrixData of dataset.value.tileMatrixSetLink) {
@@ -227,7 +244,6 @@ function parse1_0(url, capabilities) {
     let matrixSets = serverConfig.tileMatrixSets;
     for (let matrixSet of layerMatrix) {
       matrixSets[matrixSet.identifier.value] = {};
-      // TODO should this be the converted crs, or stored in strange form (probably converted)?
       matrixSets[matrixSet.identifier.value].crs = matrixSet.supportedCRS.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
       matrixSets[matrixSet.identifier.value].tileMatrices = {};
       for (let tile of matrixSet.tileMatrix) {
@@ -241,7 +257,6 @@ function parse1_0(url, capabilities) {
       }
     }
   }
-
   return serverConfig;
 }
 

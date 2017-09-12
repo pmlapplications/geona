@@ -11,23 +11,17 @@ import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, TEST_CONTEXT} from '../jsonix';
 export function getCapabilities(protocol, url) {
   return new Promise((resolve, reject) => {
     let cleanUrl = url.replace(/\?.*/g, '');
-    let unmarshaller;
 
     switch (protocol) {
       case 'wms':
         cleanUrl += '?service=WMS&request=GetCapabilities';
-        unmarshaller = WMS_CONTEXT.createUnmarshaller();
         break;
       case 'wmts':
         cleanUrl += '?service=WMTS&request=GetCapabilities';
-        unmarshaller = WMTS_CONTEXT.createUnmarshaller();
         break;
       case 'wcs':
         cleanUrl += '?service=WCS&request=GetCapabilities';
-        unmarshaller = WCS_CONTEXT.createUnmarshaller();
         break;
-      case 'test':
-        unmarshaller = TEST_CONTEXT.createUnmarshaller();
     }
 
     request(cleanUrl, (err, response, body) => {
@@ -35,12 +29,33 @@ export function getCapabilities(protocol, url) {
         reject(err);
         return;
       }
-
-      try {
-        resolve(unmarshaller.unmarshalString(body));
-      } catch (err) {
-        reject(err);
-      }
+      resolve(body);
     });
   });
+}
+
+export function jsonifyCapabilities(protocol, xml) {
+  let unmarshaller;
+
+  switch (protocol) {
+    case 'wms':
+      unmarshaller = WMS_CONTEXT.createUnmarshaller();
+      break;
+    case 'wmts':
+      unmarshaller = WMTS_CONTEXT.createUnmarshaller();
+      break;
+    case 'wcs':
+      unmarshaller = WCS_CONTEXT.createUnmarshaller();
+      break;
+    case 'test':
+      unmarshaller = TEST_CONTEXT.createUnmarshaller();
+  }
+
+  let jsonCapabilities;
+  try {
+    jsonCapabilities = {json: unmarshaller.unmarshalString(xml)};
+  } catch (err) {
+    jsonCapabilities = {err: err};
+  }
+  return jsonCapabilities;
 }
