@@ -213,6 +213,25 @@ module.exports = function(grunt) {
       },
     },
 
+    jsdoc: {
+      combined: {
+        src: ['README.md'],
+        dest: 'static/documentation',
+      },
+      client: {
+        src: ['src/client/**/*.js', 'src/common/**/*.js', 'src/client/README.md'],
+        dest: 'static/documentation/client',
+      },
+      client_loader: {
+        src: ['src/client_loader/**/*.js', 'src/client_loader/README.md'],
+        dest: 'static/documentation/client_loader',
+      },
+      server: {
+        src: ['src/server/**/*.js', 'src/common/**/*.js', 'src/server/README.md'],
+        dest: 'static/documentation/server',
+      },
+    },
+
     sass: {
       development: {
         options: {
@@ -249,7 +268,7 @@ module.exports = function(grunt) {
   // Build all
   grunt.registerTask('default', ['server', 'client']);
   // Build the server
-  grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server']);
+  grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server', 'jsdoc']);
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
     'browserifyOther', 'env:babili', 'babel:babili']);
