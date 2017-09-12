@@ -103,7 +103,9 @@ function parseCommon(url, capabilities) {
     }
 
     serverConfigContactInfo.position = contactInfo.contactPosition;
-    serverConfigContactInfo.addressLines = [contactInfo.contactAddress];
+    if (contactInfo.contactAddress) {
+      serverConfigContactInfo.address = contactInfo.contactAddress;
+    }
     serverConfigContactInfo.phone = [contactInfo.contactVoiceTelephone];
     serverConfigContactInfo.email = [contactInfo.contactElectronicMailAddress];
   }
@@ -130,11 +132,13 @@ function parse1_1(url, capabilities) {
     if (capability.request.getMap) {
       serverConfig.capability.getMap = {
         formats: getFormats(capability.request.getMap.format),
+        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
       };
     }
     if (capability.request.getFeatureInfo) {
       serverConfig.capability.getFeatureInfo = {
         formats: getFormats(capability.request.getFeatureInfo.format),
+        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
       };
     }
   }
@@ -170,19 +174,23 @@ function parse1_3(url, capabilities) {
     if (capability.request.getMap) {
       serverConfig.capability.getMap = {
         formats: capability.request.getMap.format,
+        get: [capability.request.getMap.dcpType[0].http.get.onlineResource.href],
       };
     }
     if (capability.request.getFeatureInfo) {
       serverConfig.capability.getFeatureInfo = {
         formats: capability.request.getFeatureInfo.format,
+        get: [capability.request.getFeatureInfo.dcpType[0].http.get.onlineResource.href],
       };
     }
     if (capability.request.extendedOperation) {
       for (let operation of capability.request.extendedOperation) {
         switch (operation.name.localPart) {
+          // TODO add any other extended operations we are interested in
           case 'GetLegendGraphic':
             serverConfig.capability.getLegendGraphic = {
               formats: operation.value.format,
+              get: [operation.value.dcpType[0].http.get.onlineResource.href],
             };
             break;
         }
@@ -240,15 +248,15 @@ function parseLayerCommon(layer, parentLayer = {}) {
   // Create thisLayer with the basic non-inheritable properties
   let thisLayer = {
     name: layer.name,
-    title: layer.title,
-    abstract: layer._abstract,
+    title: {und: layer.title},
+    abstract: {und: layer._abstract},
   };
 
   // Load the keywords
   if (layer.keywordList) {
-    thisLayer.keywords = [];
+    thisLayer.keywords = {und: []};
     for (let keyword of layer.keywordList.keyword) {
-      thisLayer.keywords.push(keyword.value);
+      thisLayer.keywords.und.push(keyword.value);
     }
   }
 
