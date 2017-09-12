@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
 
 let ol;
 
@@ -162,7 +162,6 @@ export class OlMap extends GeonaMap {
       if (this.basemaps_[basemapId].get('projections').includes(projection)) {
         this.setView({projection: projection});
       } else {
-        // TODO replace with notification
         alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     }
@@ -321,7 +320,8 @@ export class OlMap extends GeonaMap {
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Object}  options.center     The centre as {lat: _, lon: _}
-   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as {minLat: _, minLon: _, maxLat: _, maxLon: _}
+   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as
+   *                                     {minLat: _, minLon: _, maxLat: _, maxLon: _}
    * @param {Array}   options.maxExtent  Extent to restrict the view to, {minLat: _, minLon: _, maxLat: _, maxLon: _}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
@@ -507,8 +507,10 @@ export class OlMap extends GeonaMap {
   }
 }
 
+// TODO Nick M please fill in the next parameter definition
 /**
  * Load the openlayers js library and dynamically import it.
+ * @param {String}   geonaServer URL of the server Geona is running on.
  * @param {Function} next
  */
 export function init(geonaServer, next) {

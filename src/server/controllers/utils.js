@@ -1,8 +1,3 @@
-import request from 'request';
-
-import Layer from '../../common/layer/layer';
-import LayerServer from '../../common/layer/layer_server';
-import LayerWms from '../../common/layer/layer_wms';
 import {getCapabilities} from '../utils/ogc/common';
 import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
 import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';

@@ -23,22 +23,22 @@ export default class Config {
   }
 
   /**
-   * Returns the current value of the name property. name can use dot notation to reference nested values.
-   * @param  {String} name The config key to get
+   * Returns the current value of the key property. key can use dot notation to reference nested values.
+   * @param  {String} key The config key to get
    * @return {*}           The config value for the provided key.
    */
-  get(name) {
-    return this.config_.get(name);
+  get(key) {
+    return this.config_.get(key);
   }
 
   /**
-   * Sets the value of name to value. name can use dot notation to reference nested values, e.g. "database.port".
+   * Sets the value of key to value. key can use dot notation to reference nested values, e.g. "database.port".
    * If objects in the chain don't yet exist, they will be initialized to empty objects.
-   * @param {String} name  The config key to set
+   * @param {String} key  The config key to set
    * @param {*}      value The config value to set
    */
-  set(name, value) {
-    this.config_.set(name, value);
+  set(key, value) {
+    this.config_.set(key, value);
   }
 
   /**

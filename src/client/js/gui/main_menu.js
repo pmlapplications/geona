@@ -3,8 +3,8 @@ import 'jquery-ui/ui/widgets/sortable';
 import handlebars from 'handlebars/runtime';
 import * as templates from '../../templates/compiled';
 import {registerHelpers} from '../../../common/hbs_helpers';
-import {MainMenuTriggers} from './main_menu_triggers';
-import {MainMenuBindings} from './main_menu_bindings';
+import {mainMenuTriggers} from './main_menu_triggers';
+import {mainMenuBindings} from './main_menu_bindings';
 
 registerHelpers(handlebars);
 
@@ -44,8 +44,9 @@ export class MainMenu {
       this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('hidden');
     }
 
-    this.triggers = new MainMenuTriggers(this.gui.eventManager, this.parentDiv);
-    this.bindings = new MainMenuBindings(this.gui.eventManager, this);
+    // Sets the triggers and bindings for this Menu.
+    mainMenuTriggers(this.gui.eventManager, this.parentDiv);
+    mainMenuBindings(this.gui.eventManager, this);
   }
 
   /**

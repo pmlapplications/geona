@@ -39,15 +39,8 @@ export function parseLocalWmtsCapabilities(xml, url) {
   }
 
   let capabilities = jsonCapabilities.value;
-
-  let result;
-
-  switch (capabilities.version) {
-    case '1.0.0':
-      result = parse1_0(url, capabilities);
-  }
-
-  return result;
+  // WMTS 1.0.0 is currently the only official version
+  return (parse1_0(url, capabilities));
 }
 
 /**
@@ -62,7 +55,6 @@ function parse1_0(url, capabilities) {
 
   let title = parseTitles(serviceId.title);
 
-  // TODO Discussion on using || based on http://www.codereadability.com/javascript-default-parameters-with-or-operator/
   let abstractArray = serviceId._abstract || serviceId.abstract;
   let abstract = parseAbstracts(abstractArray);
 
@@ -95,27 +87,28 @@ function parse1_0(url, capabilities) {
     serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
     if (servicePr.serviceContact.contactInfo) {
       if (servicePr.serviceContact.contactInfo.address) {
+        let provAddress = servicePr.serviceContact.contactInfo.address;
         // If email isn't the only property in address
-        if (!(Object.keys(servicePr.serviceContact.contactInfo.address).length === 2 && servicePr.serviceContact.contactInfo.address.electronicMailAddress)) {
+        if (!(Object.keys(provAddress).length === 2 && provAddress.electronicMailAddress)) {
           serverConfig.service.contactInformation.address = {};
-          if (servicePr.serviceContact.contactInfo.address.deliveryPoint) {
-            serverConfig.service.contactInformation.address.addressLines = servicePr.serviceContact.contactInfo.address.deliveryPoint;
+          if (provAddress.deliveryPoint) {
+            serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
           }
-          if (servicePr.serviceContact.contactInfo.address.city) {
-            serverConfig.service.contactInformation.address.city = servicePr.serviceContact.contactInfo.address.city;
+          if (provAddress.city) {
+            serverConfig.service.contactInformation.address.city = provAddress.city;
           }
-          if (servicePr.serviceContact.contactInfo.address.administrativeArea) {
-            serverConfig.service.contactInformation.address.stateOrProvince = servicePr.serviceContact.contactInfo.address.administrativeArea;
+          if (provAddress.administrativeArea) {
+            serverConfig.service.contactInformation.address.stateOrProvince = provAddress.administrativeArea;
           }
-          if (servicePr.serviceContact.contactInfo.address.postalCode) {
-            serverConfig.service.contactInformation.address.postCode = servicePr.serviceContact.contactInfo.address.postalCode;
+          if (provAddress.postalCode) {
+            serverConfig.service.contactInformation.address.postCode = provAddress.postalCode;
           }
-          if (servicePr.serviceContact.contactInfo.address.country) {
-            serverConfig.service.contactInformation.address.country = servicePr.serviceContact.contactInfo.address.country;
+          if (provAddress.country) {
+            serverConfig.service.contactInformation.address.country = provAddress.country;
           }
         }
-        if (servicePr.serviceContact.contactInfo.address.electronicMailAddress) {
-          serverConfig.service.contactInformation.email = servicePr.serviceContact.contactInfo.address.electronicMailAddress;
+        if (provAddress.electronicMailAddress) {
+          serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
         }
       }
       if (servicePr.serviceContact.contactInfo.phone) {
@@ -265,11 +258,15 @@ function parse1_0(url, capabilities) {
     let matrixSets = serverConfig.tileMatrixSets;
     for (let matrixSet of layerMatrix) {
       matrixSets[matrixSet.identifier.value] = {};
-      matrixSets[matrixSet.identifier.value].crs = matrixSet.supportedCRS.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+      matrixSets[matrixSet.identifier.value].crs = matrixSet.supportedCRS
+        .replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+
       matrixSets[matrixSet.identifier.value].tileMatrices = {};
       for (let tile of matrixSet.tileMatrix) {
         matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value] = {};
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].scaleDenominator = tile.scaleDenominator;
+        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].scaleDenominator = tile
+          .scaleDenominator;
+
         matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].topLeftCorner = tile.topLeftCorner;
         matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].tileWidth = tile.tileWidth;
         matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].tileHeight = tile.tileHeight;
@@ -387,17 +384,17 @@ function parseKeywords(keywords) {
   return keywordObject;
 }
 
-/**
- *
- * @param {Array} dimensions
- * @return {Object}
- */
-function parseDimensions(dimensions) {
-  let dimensionsObject = {};
-  if (dimensions !== undefined) {
-    if (dimensions !== []) {
-      //
-    }
-  }
-  return dimensionsObject;
-}
+// /**
+//  *
+//  * @param {Array} dimensions
+//  * @return {Object}
+//  */
+// function parseDimensions(dimensions) {
+//   let dimensionsObject = {};
+//   if (dimensions !== undefined) {
+//     if (dimensions !== []) {
+//       //
+//     }
+//   }
+//   return dimensionsObject;
+// }
