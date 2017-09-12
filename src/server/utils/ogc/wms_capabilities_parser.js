@@ -1,25 +1,19 @@
 /* eslint camelcase: 0 */
 
-import {getCapabilities} from './common';
+import {getCapabilities, jsonifyCapabilities} from './common';
 
+/**
+ * Parse a WMS capabilities from a url.
+ * @param  {String}  url The url of the service
+ * @return {Promise}     A Promise that will resolve with a LayerServer config Object
+ */
 export function parseWmsCapabilities(url) {
   return new Promise((resolve, reject) => {
-    console.log('parseWmsCapabilities');
-    getCapabilities('wms', url).then((jsonCapabilities) => {
-      console.log('getCapabilities done');
-      let capabilities = jsonCapabilities.value;
-
-      switch (capabilities.version) {
-        case '1.0.0':
-          reject(new Error('No support for WMS 1.0.0 currently'));
-          break;
-        case '1.1.0':
-        case '1.1.1':
-          resolve(parse1_1(url, capabilities));
-          break;
-        case '1.3.0':
-          resolve(parse1_3(url, capabilities));
-          break;
+    getCapabilities('wms', url).then((xml) => {
+      try {
+        resolve(parseLocalWmsCapabilities(xml, url));
+      } catch (err) {
+        reject(err);
       }
     }).catch((err) => {
       reject(err);
@@ -27,6 +21,48 @@ export function parseWmsCapabilities(url) {
   });
 }
 
+/**
+ * Parse an XML WMTS capabilitise document.
+ * @param  {String} xml The XML document as a string
+ * @param  {String} url (optional) The url of the service
+ * @return {Object}     A LayerServer config Object
+ *
+ * @throws Throws any error thrown by jsonifyCapabilities, and an error if the WMS version is unsupported.
+ */
+export function parseLocalWmsCapabilities(xml, url) {
+  let jsonCapabilities;
+
+  try {
+    jsonCapabilities = jsonifyCapabilities('wms', xml);
+  } catch (err) {
+    throw err;
+  }
+
+  let capabilities = jsonCapabilities.value;
+
+  let result;
+
+  switch (capabilities.version) {
+    case '1.0.0':
+      throw new Error('No support for WMS 1.0.0 currently');
+    case '1.1.0':
+    case '1.1.1':
+      result = parse1_1(url, capabilities);
+      break;
+    case '1.3.0':
+      result = parse1_3(url, capabilities);
+      break;
+  }
+
+  return result;
+}
+
+/**
+ * Parses the parts that are common between all WMS versions
+ * @param  {String} url          The service url
+ * @param  {Object} capabilities The capabilities object
+ * @return {Object}              The server config
+ */
 function parseCommon(url, capabilities) {
   let service = capabilities.service;
   let capability = capabilities.capability;
@@ -34,7 +70,7 @@ function parseCommon(url, capabilities) {
   let serverConfig = {
     protocol: 'wms',
     version: capabilities.version,
-    url: url.replace(/\?.*/g, ''),
+    url: undefined,
 
     service: {
       title: {und: service.title},
@@ -46,6 +82,10 @@ function parseCommon(url, capabilities) {
 
     capability: {},
   };
+
+  if (url) {
+    serverConfig.url = url.replace(/\?.*/g, '');
+  }
 
   if (service.keywordList) {
     for (let keyword of service.keywordList.keyword) {
@@ -75,6 +115,12 @@ function parseCommon(url, capabilities) {
   return serverConfig;
 }
 
+/**
+ * Parser for WMS version 1.1.0 or 1.1.1
+ * @param  {String} url          The service url
+ * @param  {Object} capabilities The capabilites object
+ * @return {Object}              The server config
+ */
 function parse1_1(url, capabilities) {
   let capability = capabilities.capability;
 
@@ -93,6 +139,11 @@ function parse1_1(url, capabilities) {
     }
   }
 
+  /**
+   * Extracts the supported formats from the formatArray
+   * @param  {Array} formatArray The array of formats from the capabilities JSON
+   * @return {Array}             The formats
+   */
   function getFormats(formatArray) {
     let formats = [];
     for (let format of formatArray) {
@@ -104,6 +155,12 @@ function parse1_1(url, capabilities) {
   return serverConfig;
 }
 
+/**
+ * Parser for WMS version 1.3.0
+ * @param  {String} url          The service url
+ * @param  {Object} capabilities The capabilities object
+ * @return {Object}              The server config
+ */
 function parse1_3(url, capabilities) {
   let capability = capabilities.capability;
 
@@ -136,6 +193,13 @@ function parse1_3(url, capabilities) {
   return serverConfig;
 }
 
+/**
+ * Digs for all layers nested under the provided layer
+ * @param  {String} wmsVersion  The WMS version
+ * @param  {Object} layer       The layer to search under
+ * @param  {Object} parentLayer (optional) The parent layer of the layer
+ * @return {Array}              An array of all renderable layers found
+ */
 function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
   let layers = [];
 
@@ -166,6 +230,12 @@ function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
   return layers;
 }
 
+/**
+ * Parser for layer properties that are common between WMS versions
+ * @param  {Object} layer       The layer
+ * @param  {Object} parentLayer (optional) The parent layer of the layer
+ * @return {Object}             The parsed layer
+ */
 function parseLayerCommon(layer, parentLayer = {}) {
   // Create thisLayer with the basic non-inheritable properties
   let thisLayer = {
@@ -236,6 +306,12 @@ function parseLayerCommon(layer, parentLayer = {}) {
   return thisLayer;
 }
 
+/**
+ * Parser for a WMS 1.1.0 or 1.1.1 layer
+ * @param  {Object} layer       The layer
+ * @param  {Object} parentLayer The parent layer of the layer
+ * @return {Object}             The parsed layer
+ */
 function parseLayer1_1(layer, parentLayer = {}) {
   let thisLayer = parseLayerCommon(layer, parentLayer);
 
@@ -318,6 +394,12 @@ function parseLayer1_1(layer, parentLayer = {}) {
   return thisLayer;
 }
 
+/**
+ * Parser for a WMS 1.3.0 layer
+ * @param  {Object} layer       The layer
+ * @param  {Object} parentLayer The parent layer of the layer
+ * @return {Object}             The parsed layer
+ */
 function parseLayer1_3(layer, parentLayer = {}) {
   let thisLayer = parseLayerCommon(layer, parentLayer);
 

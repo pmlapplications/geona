@@ -2,7 +2,12 @@
 
 import {getCapabilities, jsonifyCapabilities} from './common';
 
-export function parseOnlineWmtsCapabilities(url) {
+/**
+ * Parse a WMTS capabilities from a url.
+ * @param  {String}  url The url of the service
+ * @return {Promise}     A Promise that will resolve with a LayerServer config Object
+ */
+export function parseWmtsCapabilities(url) {
   return new Promise((resolve, reject) => {
     getCapabilities('wmts', url).then((xml) => {
       try {
@@ -16,17 +21,33 @@ export function parseOnlineWmtsCapabilities(url) {
   });
 }
 
+/**
+ * Parse an XML WMTS capabilitise document.
+ * @param  {String} xml The XML document as a string
+ * @param  {String} url (optional) The url of the service
+ * @return {Object}     A LayerServer config Object
+ *
+ * @throws Throws any error thrown by jsonifyCapabilities.
+ */
 export function parseLocalWmtsCapabilities(xml, url) {
-  let jsonCapabilities = jsonifyCapabilities('wmts', xml);
-  if (jsonCapabilities.err) {
-    throw jsonCapabilities.err;
+  let jsonCapabilities;
+
+  try {
+    jsonifyCapabilities('wmts', xml);
+  } catch (err) {
+    throw err;
   }
-  let capabilities = jsonCapabilities.json.value;
+
+  let capabilities = jsonCapabilities.value;
+
+  let result;
 
   switch (capabilities.version) {
     case '1.0.0':
-      return (parse1_0(url, capabilities));
+      result = parse1_0(url, capabilities);
   }
+
+  return result;
 }
 
 /**

@@ -3,10 +3,10 @@ import request from 'request';
 import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, TEST_CONTEXT} from '../jsonix';
 
 /**
- * Download GetCapabilities and covert it to JSON from the provided url and protocol.
- * @param  {String} protocol The OGC protocol/service
- * @param  {String} url      The URL of the service
- * @return {Object}          The GetCapabilities response as a JSON object
+ * Download the GetCapabilities XML for the provided protocol from the provided url.
+ * @param  {String}  protocol The OGC protocol/service type
+ * @param  {String}  url      The URL of the service
+ * @return {Promise}          A promise that resolves with the GetCapabilities XML
  */
 export function getCapabilities(protocol, url) {
   return new Promise((resolve, reject) => {
@@ -34,6 +34,14 @@ export function getCapabilities(protocol, url) {
   });
 }
 
+/**
+ * Convert a GetCapabilities XML into a JSON object.
+ * @param  {String} protocol The OGC protocol/service type
+ * @param  {String} xml      The XML document as a String
+ * @return {Object}          The capabilities as a JSON object
+ *
+ * @throws Throws any error thrown by unmarshaller.unmarshalString
+ */
 export function jsonifyCapabilities(protocol, xml) {
   let unmarshaller;
 
@@ -53,9 +61,9 @@ export function jsonifyCapabilities(protocol, xml) {
 
   let jsonCapabilities;
   try {
-    jsonCapabilities = {json: unmarshaller.unmarshalString(xml)};
+    jsonCapabilities = unmarshaller.unmarshalString(xml);
   } catch (err) {
-    jsonCapabilities = {err: err};
+    throw err;
   }
   return jsonCapabilities;
 }
