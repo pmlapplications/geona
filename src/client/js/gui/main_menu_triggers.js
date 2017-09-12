@@ -5,7 +5,7 @@ import 'jquery';
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery} parentDiv The div which contains the current map.
  */
-export function mainMenuTriggers(eventManager, parentDiv) {
+export function registerTriggers(eventManager, parentDiv) {
   let lastTabClicked = '';
 
   // Open/close menu
