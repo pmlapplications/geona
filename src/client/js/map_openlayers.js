@@ -507,7 +507,6 @@ export class OlMap extends GeonaMap {
   }
 }
 
-// TODO Nick M please fill in the next parameter definition
 /**
  * Load the openlayers js library and dynamically import it.
  * @param {String}   geonaServer URL of the server Geona is running on.

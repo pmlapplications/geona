@@ -376,7 +376,7 @@ function parseLayer1_1(layer, parentLayer = {}) {
       dimension.values = extent.value;
 
       if (dimension.values) {
-        dimension.values = dimension.values.replace(/\r\n\s*/g, '').split(',');
+        dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
       }
 
       for (let value of dimension.values) {
@@ -456,7 +456,8 @@ function parseLayer1_3(layer, parentLayer = {}) {
       };
 
       if (thisLayer.dimensions[dimension.name].values) {
-        thisLayer.dimensions[dimension.name].values = thisLayer.dimensions[dimension.name].values.replace(/\r\n\s*/g, '').split(',');
+        thisLayer.dimensions[dimension.name].values = thisLayer.dimensions[dimension.name].values
+          .replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
       }
 
       for (let value of thisLayer.dimensions[dimension.name].values) {

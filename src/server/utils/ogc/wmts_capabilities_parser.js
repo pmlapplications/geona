@@ -33,7 +33,7 @@ export function parseLocalWmtsCapabilities(xml, url) {
   let jsonCapabilities;
 
   try {
-    jsonifyCapabilities('wmts', xml);
+    jsonCapabilities = jsonifyCapabilities('wmts', xml);
   } catch (err) {
     throw err;
   }

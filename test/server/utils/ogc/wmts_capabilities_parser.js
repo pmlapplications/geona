@@ -9,7 +9,7 @@ import {parseLocalWmtsCapabilities} from '../../../../src/server/utils/ogc/wmts_
 chai.use(chaiHttp);
 let expect = chai.expect;
 
-describe('server/utils/pgc/wmts_capabilities_parser', () => {
+describe('server/utils/ogc/wmts_capabilities_parser', () => {
   describe('parse converted JSON with parseTitles', () => {
     it('should return a correctly-constructed Object', () => {
       let xml = fs.readFileSync(path.join(global.test.resPath, 'server/utils/ogc/WMTSCapabilitiesNGI.xml'), 'utf8');

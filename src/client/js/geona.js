@@ -49,7 +49,6 @@ export class Geona {
    * @return {Promise}     Promise that resolves when the map has been loaded
    */
   loadMap(mapDiv) {
-    // TODO this should perhaps go a in seperate init method that returns a callback or promise
     return new Promise((resolve) => {
       switch (this.config.get('map.library')) {
         case 'openlayers':
