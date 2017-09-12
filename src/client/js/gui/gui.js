@@ -38,6 +38,11 @@ export class Gui {
     this.parentDiv.toggleClass('geona-container', true);
   }
 
+  // TODO finish this jsdoc
+  /**
+   * 
+   * @param {*} onReadyCallback 
+   */
   init(onReadyCallback) {
     this.onReadyCallback_ = onReadyCallback;
 

@@ -34,6 +34,12 @@ export function getCapabilities(protocol, url) {
   });
 }
 
+/**
+ * Unmarshalles (converts from XML to JSON) the XML defining the layer.
+ * @param {String} protocol The layer definition type being used.
+ * @param {Xml} xml         The XML containing the layer definition.
+ * @return {Object}         The layer capabilities in JSON format.
+ */
 export function jsonifyCapabilities(protocol, xml) {
   let unmarshaller;
 
