@@ -3,8 +3,8 @@ import 'jquery-ui/ui/widgets/sortable';
 import handlebars from 'handlebars/runtime';
 import * as templates from '../../templates/compiled';
 import {registerHelpers} from '../../../common/hbs_helpers';
-import {mainMenuTriggers} from './main_menu_triggers';
-import {mainMenuBindings} from './main_menu_bindings';
+import {registerTriggers} from './main_menu_triggers';
+import {registerBindings} from './main_menu_bindings';
 
 registerHelpers(handlebars);
 
@@ -13,10 +13,9 @@ registerHelpers(handlebars);
  */
 export class MainMenu {
   /**
-   *
-   * @param {Geona} gui The parent Gui of this MainMenu.
+   * Creates an instance of a MainMenu element to put on the GUI.
+   * @param {Gui} gui                The parent Gui of this MainMenu.
    * @param {Object} menuConfigOptions The config settings relating to the main menu.
-   * @param {JQuery} parentDiv The div containing the map.
    */
   constructor(gui, menuConfigOptions) {
     this.gui = gui;
@@ -45,8 +44,8 @@ export class MainMenu {
     }
 
     // Sets the triggers and bindings for this Menu.
-    mainMenuTriggers(this.gui.eventManager, this.parentDiv);
-    mainMenuBindings(this.gui.eventManager, this);
+    registerTriggers(this.gui.eventManager, this.parentDiv);
+    registerBindings(this.gui.eventManager, this);
   }
 
   /**
