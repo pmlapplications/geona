@@ -208,23 +208,69 @@ export let client = {
        *                                Defaults to 3.
        */
     },
+    // Settings for the view.  Basemap specific options may override these.
     viewSettings: {
-      // Settings for the view.  Basemap specific options may override these.
-      // TODO change styling for these
+      // The coordinate the map is intially centered on, in the form {lat, lon}
       center: {
-        doc: 'The map center.',
-        format: Object,
-        default: {lat: 0, lon: 0},
+        lat: {
+          doc: 'The latitude of the initial map centerpoint.',
+          format: Number,
+          default: 0,
+        },
+        lon: {
+          doc: 'The longitude of the initial map centerpoint.',
+          format: Number,
+          default: 0,
+        },
       },
+      // TODO does this override center?
+      // Soft extent to fit the view to (panning beyond the soft extent is allowed). Will override zoom.
+      // Object in the format {minLat, minLon, maxLat, maxLon}
       fitExtent: {
-        doc: 'Extent to fit the view to. Will override zoom. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Object,
-        default: {minLat: -90, minLon: -180, maxLat: 90, maxLon: 180},
+        minLat: {
+          doc: 'The west-most latitude of the initial map soft extent.',
+          format: Number,
+          default: -90,
+        },
+        minLon: {
+          doc: 'The south-most longitude of the initial map soft extent.',
+          format: Number,
+          default: -180,
+        },
+        maxLat: {
+          doc: 'The east-most latitude of the initial map soft extent.',
+          format: Number,
+          default: 90,
+        },
+        maxLon: {
+          doc: 'The north-most longitude of the initial map soft extent.',
+          format: Number,
+          default: 180,
+        },
       },
       maxExtent: {
-        doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Object,
-        default: {minLat: -100, minLon: Number.NEGATIVE_INFINITY, maxLat: 100, maxLon: Number.POSITIVE_INFINITY},
+        // Max extent to restrict the view to (panning beyond the max extent is not possible).
+        // Object in the format {minLat, minLon, maxLat, maxLon}
+        minLat: {
+          doc: 'The west-most latitude of the map max extent.',
+          format: Number,
+          default: -100,
+        },
+        minLon: {
+          doc: 'The south-most longitude of the map max extent.',
+          format: Number,
+          default: Number.NEGATIVE_INFINITY,
+        },
+        maxLat: {
+          doc: 'The east-most latitude of the map max extent.',
+          format: Number,
+          default: 100,
+        },
+        maxLon: {
+          doc: 'The north-most longitude of the map max extent.',
+          format: Number,
+          default: Number.POSITIVE_INFINITY,
+        },
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',
