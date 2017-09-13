@@ -1,9 +1,9 @@
 {
   "name": "geona",
   "version": "0.0.1",
-  "description": "",
-  "homepage": "",
-  "license": "",
+  "description": "Visualisation and analysis of geospatial data",
+  "homepage": "https://geona.io",
+  "license": "MIT License",
   "nyc": {
     "include": [
       "src/**/*.js"
