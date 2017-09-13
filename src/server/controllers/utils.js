@@ -1,6 +1,6 @@
 import {getCapabilities} from '../utils/ogc/common';
 import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
-import {parseOnlineWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
+import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
 
 /**
  * Get the available data layers and server details from a wcs server.
@@ -42,7 +42,7 @@ export function wmtsGetLayers(req, res) {
   // Add parsing for Layers
   getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
     console.log(JSON.stringify(jsonCapabilities));
-    return parseOnlineWmtsCapabilities(req.params.url);
+    return parseWmtsCapabilities(req.params.url);
   }).then((layer) => {
     res.json(layer);
     // console.log(JSON.stringify(layer));

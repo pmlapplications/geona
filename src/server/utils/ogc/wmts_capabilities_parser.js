@@ -2,13 +2,12 @@
 
 import {getCapabilities, jsonifyCapabilities} from './common';
 
-// TODO jsdoc comment
 /**
- * Takes a URL and starts the process of converting to JSON.
- * @param {String} url The URL to the XML layer definition.
- * @return {Promise}   The
+ * Parse a WMTS capabilities from a url.
+ * @param  {String}  url The url of the service
+ * @return {Promise}     A Promise that will resolve with a LayerServer config Object
  */
-export function parseOnlineWmtsCapabilities(url) {
+export function parseWmtsCapabilities(url) {
   return new Promise((resolve, reject) => {
     getCapabilities('wmts', url).then((xml) => {
       try {
@@ -22,20 +21,24 @@ export function parseOnlineWmtsCapabilities(url) {
   });
 }
 
-// TODO jsdoc comment
 /**
- * 
- * @param {*} xml 
- * @param {*} url 
- * @return {Object}
+ * Parse an XML WMTS capabilitise document.
+ * @param  {String} xml The XML document as a string
+ * @param  {String} url (optional) The url of the service
+ * @return {Object}     A LayerServer config Object
+ *
+ * @throws Throws any error thrown by jsonifyCapabilities.
  */
 export function parseLocalWmtsCapabilities(xml, url) {
-  let jsonCapabilities = jsonifyCapabilities('wmts', xml);
-  if (jsonCapabilities.err) {
-    throw jsonCapabilities.err;
-  }
-  let capabilities = jsonCapabilities.json.value;
+  let jsonCapabilities;
 
+  try {
+    jsonCapabilities = jsonifyCapabilities('wmts', xml);
+  } catch (err) {
+    throw err;
+  }
+
+  let capabilities = jsonCapabilities.value;
   // WMTS 1.0.0 is currently the only official version
   return (parse1_0(url, capabilities));
 }

@@ -68,6 +68,3 @@ handlebars.registerHelper('t', function(key, options) {
   let result = i18next.t(key, options.hash);
   return new handlebars.SafeString(result);
 });
-
-// TODO for testing only
-window.i18n = i18next;
