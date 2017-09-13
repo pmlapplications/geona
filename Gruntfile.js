@@ -33,6 +33,7 @@ module.exports = function(grunt) {
 
   let cssFiles = {
     'static/css/main.css': 'src/client/scss/main.scss',
+    'static/admin_static/css/main.css': 'src/client_admin/scss/main.scss',
   };
 
   let eslintFiles = [
@@ -167,7 +168,9 @@ module.exports = function(grunt) {
             dest: 'lib/server/templates',
           },
         ],
-        admin_files: [
+      },
+      server_admin: {
+        files: [
           {
             expand: true,
             cwd: 'src/server/admin/templates',
@@ -276,7 +279,7 @@ module.exports = function(grunt) {
   // Build all
   grunt.registerTask('default', ['server', 'client']);
   // Build the server
-  grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server', 'jsdoc']);
+  grunt.registerTask('server', ['clean:server', 'copy:server', 'copy:server_admin', 'env:server', 'babel:server', 'jsdoc']);
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
     'browserifyOther', 'env:babili', 'babel:babili']);
