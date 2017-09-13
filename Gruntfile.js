@@ -5,6 +5,10 @@ module.exports = function(grunt) {
     'static/js/bundle.js': 'src/client/js/geona.js',
   };
 
+  let clientAdminBundle = {
+    'static/admin_static/js/bundle.js': 'src/client_admin/js/main.js',
+  };
+
   let loaderBundle = {
     'static/js/loader.js': 'src/client_loader/loader.js',
   };
@@ -93,6 +97,14 @@ module.exports = function(grunt) {
       // Make client bundle
       client: {
         files: clientBundle,
+        options: {
+          watch: true,
+        },
+      },
+
+      // Make client admin bundle
+      clientAdmin: {
+        files: clientAdminBundle,
         options: {
           watch: true,
         },
@@ -279,10 +291,10 @@ module.exports = function(grunt) {
   // Build all
   grunt.registerTask('default', ['server', 'client']);
   // Build the server
-  grunt.registerTask('server', ['clean:server', 'copy:server', 'copy:server_admin', 'env:server', 'babel:server', 'jsdoc']);
+  grunt.registerTask('server', ['clean:server', 'copy:server', 'copy:server_admin', 'env:server', 'babel:server']);
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
-    'browserifyOther', 'env:babili', 'babel:babili']);
+    'browserify:clientAdmin', 'browserifyOther', 'env:babili', 'babel:babili', 'jsdoc']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
     'browserify:client', 'browserifyOther', 'watch']);
