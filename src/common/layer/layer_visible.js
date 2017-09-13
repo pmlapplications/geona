@@ -1,19 +1,17 @@
-import LayerVisible from './layer_visible';
+import Layer from './layer';
 
 /**
- * Class for a WMTS layer.
+ * Base class for a visible layer.
  */
-export default class LayerWmts extends LayerVisible {
+export default class LayerVisible extends Layer {
   /**
-   * Instantiate a new LayerWmts
+   * Instantiate a new LayerVisible
    * @param  {Object}      layerConfig The config for the layer
    * @param  {LayerServer} layerServer (optional) The server that provides this layer.
    *                                              Not all layer types require a server
    */
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
-    this.name = layerConfig.wmts.name;
-    this.styles = {};
-    this.styleMatrixSets = layerConfig.styleMatrixSets;
+    this.viewSettings = layerConfig.viewSettings;
   }
 }

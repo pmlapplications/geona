@@ -1,4 +1,11 @@
+/**
+ * Class for a layer server
+ */
 export default class LayerServer {
+  /**
+   * Instantiate a new LayerServer
+   * @param  {Object} serverConfig The config to instantiate the server with. See class diagram for possible options
+   */
   constructor(serverConfig) {
     this.layers = [];
 
