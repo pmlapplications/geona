@@ -1,12 +1,8 @@
 import 'jquery';
 import 'jquery-ui/ui/widgets/sortable';
-import handlebars from 'handlebars/runtime';
 import * as templates from '../../templates/compiled';
-import {registerHelpers} from '../../../common/hbs_helpers';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
-
-registerHelpers(handlebars);
 
 /**
  * Loads the templates and defines the functions relating to the main menu.

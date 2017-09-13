@@ -40,8 +40,8 @@ export class Gui {
 
   // TODO finish this jsdoc
   /**
-   * 
-   * @param {*} onReadyCallback 
+   * Initialises the map by calling either the terms and conditions screen, or the main map screen.
+   * @param {*} onReadyCallback
    */
   init(onReadyCallback) {
     this.onReadyCallback_ = onReadyCallback;
@@ -81,7 +81,6 @@ export class Gui {
     let menuConfig = this.geona.config.get('controls.menu');
     this.mainMenu = new MainMenu(this, menuConfig);
 
-    // TODO add timeline.js and triggers and bindings then create here and test register helpers
     let timelineConfig = this.geona.config.get('controls.timeline');
     this.timeline = new Timeline(this, timelineConfig);
 

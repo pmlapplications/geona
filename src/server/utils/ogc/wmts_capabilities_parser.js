@@ -45,46 +45,49 @@ export function parseLocalWmtsCapabilities(xml, url) {
 
 /**
  * Parses the converted WMTS 1.0.0 XML file returned from a GetCapabilities request into a Geona Layer format.
- * @param {*} url
- * @param {*} capabilities
- * @return {Object}        Geona server config options.
+ * @param {String} url          The URL that has been used for the GetCapabilities request.
+ * @param {Object} capabilities XML that has been unmarshalled to JSON.
+ * @return {Object}             Geona server config options.
  */
 function parse1_0(url, capabilities) {
   let serviceId = capabilities.serviceIdentification;
   let servicePr = capabilities.serviceProvider;
-
-  let title = parseTitles(serviceId.title);
-
-  let abstractArray = serviceId._abstract || serviceId.abstract;
-  let abstract = parseAbstracts(abstractArray);
 
   let serverConfig = {
     protocol: 'wmts',
     version: capabilities.version,
     url: undefined,
 
-    service: {
-      title: title || {},
-      abstract: abstract || {},
-      keywords: {},
-      accessConstraints: serviceId.accessConstraints || [],
-      onlineResource: servicePr.providerSite.href,
-      contactInformation: {},
-      fees: serviceId.fees,
-    },
+    service: {},
   };
 
   if (url) {
     serverConfig.url = url.replace(/\?.*/g, '');
   }
-
-  if (serviceId.keywords && serviceId.keywords !== []) {
+  if (serviceId.title) {
+    serverConfig.service.title = parseTitles(serviceId.title);
+  }
+  if (serviceId._abstract) {
+    serverConfig.service.abstract = parseAbstracts(serviceId._abstract);
+  }
+  if (serviceId.keywords) {
     serverConfig.service.keywords = parseKeywords(serviceId.keywords);
+  }
+  if (serviceId.accessConstraints) {
+    serverConfig.service.accessConstraints = serviceId.accessConstraints;
+  }
+  if (servicePr.providerSite.href) {
+    serverConfig.service.onlineResource = servicePr.providerSite.href;
   }
 
   if (servicePr.serviceContact) {
-    serverConfig.service.contactInformation.person = servicePr.serviceContact.individualName;
-    serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
+    serverConfig.service.contactInformation = {};
+    if (servicePr.serviceContact.individualName) {
+      serverConfig.service.contactInformation.person = servicePr.serviceContact.individualName;
+    }
+    if (servicePr.serviceContact.positionName) {
+      serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
+    }
     if (servicePr.serviceContact.contactInfo) {
       if (servicePr.serviceContact.contactInfo.address) {
         let provAddress = servicePr.serviceContact.contactInfo.address;
@@ -92,7 +95,9 @@ function parse1_0(url, capabilities) {
         if (!(Object.keys(provAddress).length === 2 && provAddress.electronicMailAddress)) {
           serverConfig.service.contactInformation.address = {};
           if (provAddress.deliveryPoint) {
-            serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
+            if (provAddress.deliveryPoint[0] !== '') {
+              serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
+            }
           }
           if (provAddress.city) {
             serverConfig.service.contactInformation.address.city = provAddress.city;
@@ -107,8 +112,16 @@ function parse1_0(url, capabilities) {
             serverConfig.service.contactInformation.address.country = provAddress.country;
           }
         }
+        // Due to the way unmarshalling works, some undefined values do not return as falsy. If we have reached this
+        // point and the address in our serverConfig is still an empty object, we remove it.
+        // FIXME get this to remove address
+        if (serverConfig.service.contactInformation.address === {}) {
+          serverConfig.service.contactInformation.address = undefined;
+        }
         if (provAddress.electronicMailAddress) {
-          serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
+          if (provAddress.electronicMailAddress[0] !== '') {
+            serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
+          }
         }
       }
       if (servicePr.serviceContact.contactInfo.phone) {
@@ -119,6 +132,10 @@ function parse1_0(url, capabilities) {
         }
       }
     }
+  }
+  // TODO if serverConfig's contactInformation is empty, remove contactInformation
+  if (serviceId.fees) {
+    serverConfig.service.fees = serviceId.fees;
   }
 
   let opsMetadata = capabilities.operationsMetadata;
@@ -155,9 +172,8 @@ function parse1_0(url, capabilities) {
       if (dataset.value.title) {
         layerData.title = parseTitles(dataset.value.title);
       }
-      if (dataset.value._abstract || dataset.value.abstract) {
-        let datasetAbstractArray = dataset.value._abstract || dataset.value.abstract;
-        layerData.abstract = parseAbstracts(datasetAbstractArray);
+      if (dataset.value._abstract) {
+        layerData.abstract = parseAbstracts(dataset.value._abstract);
       }
       if (dataset.value.keywords) {
         layerData.keywords = parseKeywords(dataset.value.keywords);
@@ -187,9 +203,8 @@ function parse1_0(url, capabilities) {
           layerData.style[style.identifier.value].title = parseTitles(style.title);
         }
 
-        if (style.abstract) {
-          let abstractsArray = style._abstract || style.abstract;
-          layerData.style[style.identifier.value].abstract = parseAbstracts(abstractsArray);
+        if (style._abstract) {
+          layerData.style[style.identifier.value].abstract = parseAbstracts(style._abstract);
         }
 
         if (style.keywords) {
@@ -205,7 +220,6 @@ function parse1_0(url, capabilities) {
         }
       }
 
-
       // Format is a mandatory property
       layerData.format = dataset.value.format;
 
@@ -215,13 +229,15 @@ function parse1_0(url, capabilities) {
       }
 
       if (dataset.value.dimension) {
-        // TODO finish when you can find a wmts dimension example
-        // layerData.dimension = parseDimensions(dataset.value.dimension);
-        layerData.dimension = 'TODO';
+        layerData.dimension = parseDimensions(dataset.value.dimension);
       }
 
       if (dataset.value.metadata) {
-        layerData.metadata = 'TODO';
+        // Real metadata examples did not match the schema, so we take everything and remove TYPE_NAME afterwards
+        layerData.metadata = dataset.value.metadata;
+        for (let data of layerData.metadata) {
+          data.TYPE_NAME = undefined;
+        }
       }
 
       // TileMatrixSetLink is a mandatory property
@@ -245,8 +261,13 @@ function parse1_0(url, capabilities) {
 
 
       if (dataset.value.resourceURL) {
-        // TODO fix if we need it
-        layerData.resourceUrl = {temp: dataset.value.resourceURL};
+        let resourceObject = {};
+        for (let resource of dataset.value.resourceURL) {
+          resourceObject.format = resource.format;
+          resourceObject.resourceType = resource.resourceType;
+          resourceObject.template = resource.template;
+        }
+        layerData.resourceUrl = resourceObject;
       }
     }
     serverConfig.layers.push(layerData);
@@ -384,17 +405,45 @@ function parseKeywords(keywords) {
   return keywordObject;
 }
 
-// /**
-//  *
-//  * @param {Array} dimensions
-//  * @return {Object}
-//  */
-// function parseDimensions(dimensions) {
-//   let dimensionsObject = {};
-//   if (dimensions !== undefined) {
-//     if (dimensions !== []) {
-//       //
-//     }
-//   }
-//   return dimensionsObject;
-// }
+/**
+ *
+ * @param {Array} dimensions
+ * @return {Object}
+ */
+function parseDimensions(dimensions) {
+  let dimensionsObject = {};
+  if (dimensions !== undefined) {
+    if (dimensions !== []) {
+      for (let dimension of dimensions) {
+        dimensionsObject[dimension.identifier.value] = {};
+        if (dimension.title) {
+          dimensionsObject[dimension.identifier.value].title = parseTitles(dimension.title);
+        }
+        if (dimension._abstract) {
+          dimensionsObject[dimension.identifier.value].abstract = parseAbstracts(dimension._abstract);
+        }
+        if (dimension.keywords) {
+          dimensionsObject[dimension.identifier.value].keywords = parseKeywords(dimension.keywords);
+        }
+        if (dimension.uom) {
+          dimensionsObject[dimension.identifier.value].uom = dimension.uom.value;
+        }
+        if (dimension.unitSymbol) {
+          dimensionsObject[dimension.identifier.value].unitSymbol = dimension.unitSymbol;
+        }
+
+        // Default is a mandatory property
+        let dimDefault = dimension._default || dimension.default;
+        dimensionsObject[dimension.identifier.value].default = dimDefault;
+
+        if (dimension.current) {
+          dimensionsObject[dimension.identifier.value].current = dimension.current;
+        }
+
+        // Value is a mandatory property
+        dimensionsObject[dimension.identifier.value].value = dimension.value;
+      }
+    }
+  }
+  return dimensionsObject;
+}
