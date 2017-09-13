@@ -1,4 +1,4 @@
-/** @module controllers/settings */
+/** @module routers/settings */
 
 import express from 'express';
 
