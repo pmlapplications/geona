@@ -1,3 +1,5 @@
+/** @module map_openlayers */
+
 import $ from 'jquery';
 import GeonaMap from './map';
 import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';

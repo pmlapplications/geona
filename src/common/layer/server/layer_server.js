@@ -1,3 +1,5 @@
+/** @module layer/server/layer_server */
+
 /**
  * Class for a layer server
  */

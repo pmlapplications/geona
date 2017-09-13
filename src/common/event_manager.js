@@ -1,3 +1,5 @@
+/** @module event_manager */
+
 import EventEmitter from 'eventemitter3';
 
 /**

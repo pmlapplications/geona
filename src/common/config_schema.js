@@ -1,3 +1,5 @@
+/** @module config_schema */
+
 export let server = {
   port: {
     doc: 'Port to run server on.',

@@ -1,3 +1,5 @@
+/** @module map_common */
+
 /**
  * Variables and functions common to all map types.
  */

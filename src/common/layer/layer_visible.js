@@ -1,3 +1,5 @@
+/** @module layer/layer_visible */
+
 import Layer from './layer';
 
 /**

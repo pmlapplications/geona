@@ -1,3 +1,5 @@
+/** @module utils/ogc/common */
+
 import request from 'request';
 
 import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, TEST_CONTEXT} from '../jsonix';

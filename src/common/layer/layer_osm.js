@@ -1,3 +1,5 @@
+/** @module layer/layer_osm */
+
 import LayerVisible from './layer_visible';
 
 /**

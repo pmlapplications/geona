@@ -1,3 +1,5 @@
+/** @module layer/layer_wms */
+
 import LayerVisible from './layer_visible';
 
 /**

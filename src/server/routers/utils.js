@@ -1,3 +1,5 @@
+/** @module controllers/utils */
+
 import express from 'express';
 
 import * as utils from '../controllers/utils';

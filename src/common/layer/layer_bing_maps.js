@@ -1,3 +1,5 @@
+/** @module layer/layer_bing_maps */
+
 import LayerVisible from './layer_visible';
 
 /**

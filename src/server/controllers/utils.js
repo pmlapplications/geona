@@ -1,3 +1,5 @@
+/** @module controllers/utils */
+
 import {getCapabilities} from '../utils/ogc/common';
 import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
 import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
@@ -21,10 +23,11 @@ export function wcsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wmsGetLayers(req, res) {
-  getCapabilities('wms', req.params.url).then((jsonCapabilities) => {
-    // res.json(jsonCapabilities);
-    return parseWmsCapabilities(req.params.url);
-  }).then((layer) => {
+  // getCapabilities('wms', req.params.url).then((jsonCapabilities) => {
+  // res.json(jsonCapabilities);
+  // return parseWmsCapabilities(req.params.url);
+  // })
+  parseWmsCapabilities(req.params.url).then((layer) => {
     res.json(layer);
     // console.log(JSON.stringify(layer));
   }).catch((err) => {
@@ -47,17 +50,6 @@ export function wmtsGetLayers(req, res) {
     res.json(layer);
     // console.log(JSON.stringify(layer));
   }).catch((err) => {
-    res.status(500).json({error: 'Error processing XML: ' + err.message});
-  });
-}
-
-export function testGetLayers(req, res) {
-  getCapabilities('test', req.params.url).then((jsonCapabilities) => {
-    // res.json(jsonCapabilities);
-    console.log(jsonCapabilities);
-    res.send();
-  }).catch((err) => {
-    console.log(err);
     res.status(500).json({error: 'Error processing XML: ' + err.message});
   });
 }

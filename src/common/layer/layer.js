@@ -1,3 +1,5 @@
+/** @module layer/layer */
+
 /**
  * Base class for a layer. This is the base class for all layer types and shouldn't be instantiated directly.
  */

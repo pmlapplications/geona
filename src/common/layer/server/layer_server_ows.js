@@ -1,3 +1,5 @@
+/** @module layer/server/layer_server_ows */
+
 import LayerServer from './layer_server';
 
 /**

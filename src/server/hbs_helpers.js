@@ -1,3 +1,5 @@
+/** @module hbs_helpers */
+
 /* eslint no-invalid-this: 0 */
 
 import hbs from 'hbs';

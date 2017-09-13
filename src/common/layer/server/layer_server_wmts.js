@@ -1,3 +1,5 @@
+/** @module layer/server/layer_server_wmts */
+
 import LayerServerOws from './layer_server_ows';
 
 /**
