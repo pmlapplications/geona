@@ -1,3 +1,5 @@
+/** @module geona */
+
 import $ from 'jquery';
 import 'jquery-ui/ui/widgets/sortable';
 
@@ -6,7 +8,6 @@ import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
 import {initI18n} from './i18n';
-// import {GeonaLayer} from './layer';
 import {Gui} from './gui/gui';
 
 // TODO These are for testing only

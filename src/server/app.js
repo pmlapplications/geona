@@ -1,3 +1,5 @@
+/** @module app */
+
 import express from 'express';
 import * as http from 'http';
 import i18next from 'i18next';

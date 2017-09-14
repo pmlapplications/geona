@@ -1,3 +1,5 @@
+/** @module config */
+
 import convict from 'convict';
 import {client as schema} from '../../common/config_schema.js';
 

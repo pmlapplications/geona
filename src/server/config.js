@@ -1,3 +1,5 @@
+/** @module config */
+
 import chalk from 'chalk';
 import convict from 'convict';
 import * as path from 'path';

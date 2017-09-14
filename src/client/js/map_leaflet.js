@@ -1,3 +1,5 @@
+/** @module  map_leafet */
+
 import GeonaMap from './map';
 import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
 import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
@@ -190,15 +192,15 @@ export class LMap extends GeonaMap {
    * @param {String} layerId The id of the data layer being added.
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
-  addLayer(layerId, index) {
-    if (this.availableLayers_[layerId].get('projections').includes(this.map_.options.crs.code)) {
-      if (this.config.countryBorders !== 'none') {
-        // this.map_.getLayers().length
-      } else {
-        //
-      }
-    }
-  }
+  // addLayer(layerId, index) {
+  //   if (this.availableLayers_[layerId].get('projections').includes(this.map_.options.crs.code)) {
+  //     if (this.config.countryBorders !== 'none') {
+  //       // this.map_.getLayers().length
+  //     } else {
+  //       //
+  //     }
+  //   }
+  // }
 
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
@@ -308,7 +310,7 @@ export class LMap extends GeonaMap {
         }
       }
 
-      let tile;
+      // let tile;
       switch (addedLayer.source.type) {
         case 'wms':
           this.availableLayers_[addedLayer.id] = L.tileLayer.wms(addedLayer.source.url, {
@@ -442,7 +444,8 @@ function deLeafletizeProjection(projection) {
 
 /**
  * Load the Leaflet library and any Leaflet plugins
- * @param  {Function} next
+ * @param {String}   geonaServer The url of the Geona Server, or ""
+ * @param {Function} next
  */
 export function init(geonaServer, next) {
   if (L) {

@@ -1,3 +1,5 @@
+/** @module utils/ogc/wmts_capabilities_parser */
+
 /* eslint camelcase: 0 */
 
 import {getCapabilities, jsonifyCapabilities} from './common';

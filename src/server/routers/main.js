@@ -1,3 +1,5 @@
+/** @module routers/main */
+
 import express from 'express';
 
 import settingsRouter from './settings';

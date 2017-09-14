@@ -1,3 +1,5 @@
+/** @module gui */
+
 /**
  * Notepad for classes required for GUI
  * - Timeline

@@ -1,3 +1,5 @@
+/** @module i18n */
+
 import handlebars from 'handlebars/runtime';
 import i18next from 'i18next';
 import xhr from 'i18next-xhr-backend';

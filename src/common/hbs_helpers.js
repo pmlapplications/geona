@@ -1,5 +1,7 @@
 /* eslint no-invalid-this: 0 */
 
+/** @module hbs_helpers */
+
 /**
  * Register handlebars helpers.
  * @param  {Object} hbs The instance of handlebars to register helpers on
