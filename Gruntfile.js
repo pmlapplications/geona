@@ -13,7 +13,7 @@ module.exports = function(grunt) {
     'static/js/loader.js': 'src/client_loader/loader.js',
   };
 
-  let vendorLibs = [
+  let clientVendorLibs = [
     'babel-runtime/regenerator',
     'convict',
     'eventemitter3',
@@ -26,11 +26,23 @@ module.exports = function(grunt) {
     'lodash',
   ];
 
+  let adminVendorLibs = [
+    'babel-runtime/regenerator',
+    'convict',
+    'eventemitter3',
+    'handlebars/runtime',
+    'i18next',
+    'i18next-browser-languagedetector',
+    'i18next-xhr-backend',
+    'jquery',
+    'lodash',
+  ];
+
   let leafletPlugins = [
     './src/client/vendor/js/leaflet_latlng_graticule.js',
   ];
 
-  let clientExternalLibs = vendorLibs.concat(leafletPlugins).concat([
+  let clientExternalLibs = clientVendorLibs.concat(leafletPlugins).concat([
     'openlayers',
     'leaflet',
   ]);
@@ -45,6 +57,7 @@ module.exports = function(grunt) {
     '!src/client/vendor/**',
     '!src/client/templates/**',
     '!src/server/vendor/**',
+    '!src/client_admin/vendor/**',
   ];
 
   grunt.initConfig({
@@ -67,13 +80,20 @@ module.exports = function(grunt) {
           },
         ],
       },
-      babili: { // Minifying the browser bundle
+      babili: { // Minifying the browser bundle for client and admin apps
         files: [
           {
             expand: true,
             cwd: 'static/js/',
             src: ['*.js'],
             dest: 'static/js/',
+            ext: '.js',
+          },
+          {
+            expand: true,
+            cwd: 'static/admin_static/js/',
+            src: ['*.js'],
+            dest: 'static/admin_static/js/',
             ext: '.js',
           },
         ],
@@ -129,7 +149,18 @@ module.exports = function(grunt) {
         dest: 'static/js/vendor.js',
         options: {
           browserifyOptions: {},
-          alias: vendorLibs,
+          alias: clientVendorLibs,
+          external: null,
+        },
+      },
+
+      // Make the vendor bundle for the admin app with all the common libraries
+      admin_vendor: {
+        src: ['.'],
+        dest: 'static/admin_static/js/vendor.js',
+        options: {
+          browserifyOptions: {},
+          alias: adminVendorLibs,
           external: null,
         },
       },
@@ -188,6 +219,16 @@ module.exports = function(grunt) {
             cwd: 'src/server/admin/templates',
             src: ['*'],
             dest: 'lib/server/admin/templates',
+          },
+        ],
+      },
+      client_admin: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/client_admin/vendor',
+            src: ['*.js'],
+            dest: 'static/admin_static/js',
           },
         ],
       },
@@ -289,15 +330,55 @@ module.exports = function(grunt) {
   });
 
   // Build all
-  grunt.registerTask('default', ['server', 'client']);
-  // Build the server
-  grunt.registerTask('server', ['clean:server', 'copy:server', 'copy:server_admin', 'env:server', 'babel:server']);
-  // Build the client
-  grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
-    'browserify:clientAdmin', 'browserifyOther', 'env:babili', 'babel:babili', 'jsdoc']);
-  // Build the client and watch for changes
-  grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
-    'browserify:client', 'browserifyOther', 'watch']);
+  grunt.registerTask('default', [
+    'server',
+    'client',
+  ]);
 
-  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
+  // Build the server
+  grunt.registerTask('server', [
+    'clean:server',
+    'copy:server',
+    'copy:server_admin',
+    'env:server',
+    'babel:server',
+  ]);
+
+  // Build the client
+  grunt.registerTask('client', [
+    'clean:client',
+    'copy:client',
+    'copy:client_admin',
+    'sass:production',
+    'handlebars',
+    'env:babelify',
+    'browserify:client',
+    'browserifyOther',
+    'env:babili',
+    'babel:babili',
+    'jsdoc',
+  ]);
+
+  // Build the client and watch for changes
+  grunt.registerTask('clientDev', [
+    'eslint:fix',
+    'clean:client',
+    'copy:client',
+    'copy:client_admin',
+    'sass:development',
+    'handlebars',
+    'env:babelify',
+    'browserify:client',
+    'browserifyOther',
+    'watch',
+  ]);
+
+  grunt.registerTask('browserifyOther', [
+    'browserify:loader',
+    'browserify:vendor',
+    'browserify:clientAdmin',
+    'browserify:admin_vendor',
+    'browserify:openlayers',
+    'browserify:leaflet',
+  ]);
 };
