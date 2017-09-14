@@ -9,6 +9,11 @@ export let server = {
     format: Array,
     default: [],
   },
+  subFolderPath: {
+    doc: 'If you wish to run the application in a subfolder then specify the path here; sub-sub-folders are permitted',
+    format: String,
+    default: '',
+  },
 };
 
 export let client = {
