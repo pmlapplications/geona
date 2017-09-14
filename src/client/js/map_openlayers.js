@@ -1,6 +1,9 @@
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
+import {
+  basemaps as defaultBasemaps, borderLayers as defaultBorders,
+  latLonLabelFormatter, selectPropertyLanguage,
+} from './map_common';
 
 let ol;
 
@@ -90,6 +93,14 @@ export class OlMap extends GeonaMap {
 
     // this.addLayer('chlor_a');
     // this.addLayer('ph_hcmr');
+
+    // TODO remove these and write tests for map_common
+    console.log(selectPropertyLanguage({en: 'TitleEn', fr: 'TitleFr'})); // Want en
+    console.log(selectPropertyLanguage({en: 'TitleEn', ['en-GB']: 'TitleEnGB'})); // Want engb
+    console.log(selectPropertyLanguage({und: 'TitleUnd', en: 'TitleEn'})); // want en
+    console.log(selectPropertyLanguage({und: 'TitleUnd', fr: 'TitleFr'})); // want und
+    console.log(selectPropertyLanguage({nl: 'TitleNl', fr: 'TitleFr'})); // want nl
+    console.log(selectPropertyLanguage({nl: 'TitleNl'})); // want nl
   }
 
   /**
@@ -175,99 +186,50 @@ export class OlMap extends GeonaMap {
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   addLayer(geonaLayer, index) {
-    if (geonaLayer.crs.includes(this.map_.getView().getProjection().getCode())) {
+    if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
       let source;
-      switch (geonaLayer.serviceType) {
+      let title;
+      let time;
+      switch (geonaLayer.PROTOCOL) {
         case 'wms':
+          title = geonaLayer.title;
+          if (geonaLayer.isTemporal) {
+            time = geonaLayer.lastTime;
+          }
           source = new ol.source.TileWMS({
             url: geonaLayer.serviceUrl,
-            attributions: geonaLayer.attributions,
-            // TODO projection 
-            projection: this.map_.getView().getProjection().getCode() || geonaLayer.crs[0],
+            attributions: geonaLayer.attribution.title + geonaLayer.attribution.onlineResource,
+            projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
             crossOrigin: null,
             params: {
               LAYERS: geonaLayer.name,
               FORMAT: 'image/png', // TODO maybe change later
               // TODO STYLES:
               STYLES: 'boxfill/alg',
-              // TODO time
-              time: '2015-12-27T00:00:00.000Z',
-              // TODO wrapDateLine
+              time: time,
               wrapDateLine: true,
-              // TODO NUMCOLORBANDS
               NUMCOLORBANDS: 255,
               VERSION: '1.1.1',
             },
           });
           break;
         case 'wmts':
-        // TODO wmts
+          title = selectPropertyLanguage(geonaLayer.title);
+          break;
+        case 'osm':
+          source = new ol.source.OSM({
+            crossOrigin: null,
+          });
+          break;
       }
 
-      // TODO remove and fix where geona.js gets its layer data from
-      let layerData = {
-        name: geonaLayer.name,
-        title: geonaLayer.title,
-        abstract: geonaLayer.abstract,
-        firstDate: geonaLayer.firstDate,
-        lastDate: geonaLayer.lastDate,
-        boundingBox: geonaLayer.boundingBox,
-        serviceUrl: geonaLayer.serviceUrl,
-        serviceType: geonaLayer.serviceType,
-      };
-
+      // TODO language support
       this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
-        name: geonaLayer.name,
-        viewSettings: this.config.viewSettings,
-        projections: geonaLayer.crs,
+        name: title,
+        viewSettings: geonaLayer.viewSettings,
+        projections: geonaLayer.projections,
         source: source,
-        layerData: layerData,
       });
-
-      // for (let configLayer of this.config.layers) {
-      //   if (configLayer.name === geonaLayer.name) {
-      //     configLayer = addLayerDefaults(configLayer);
-      //     let source;
-      //     switch (configLayer.source.type) {
-      //       case 'wms':
-      //         source = new ol.source.TileWMS({
-      //           url: configLayer.source.url,
-      //           attributions: configLayer.source.attributions,
-      //           projection: geonaLayer.crs[0],
-      //           crossOrigin: null,
-      //           params: {
-      //             LAYERS: configLayer.source.params.layers,
-      //             FORMAT: configLayer.source.params.format,
-      //             STYLES: configLayer.source.params.styles,
-      //             time: configLayer.source.params.time,
-      //             wrapDateLine: configLayer.source.params.wrapDateLine,
-      //             NUMCOLORBANDS: geonaLayer.colorBands,
-      //             VERSION: '1.1.1',
-      //           },
-      //         });
-      //         break;
-      //       case 'wmts':
-      //         console.error('WMTS not yet supported (TODO)');
-      //         break;
-      //     }
-
-      //     let layerData;
-      //     for (let serverLayer of CCI5DAY.server.Layers) {
-      //       if (serverLayer.Name === configLayer.name) {
-      //         layerData = serverLayer;
-      //       }
-      //     }
-
-      //     this.activeLayers_[configLayer.name] = new ol.layer.Tile({
-      //       name: configLayer.name,
-      //       viewSettings: configLayer.viewSettings,
-      //       projections: geonaLayer.crs,
-      //       source: source,
-      //       layerData: layerData,
-      //     });
-      //   }
-      // }
-
 
       // If we are re-ordering we will have an index
       if (index) {

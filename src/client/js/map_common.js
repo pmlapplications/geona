@@ -1,6 +1,35 @@
+import i18next from 'i18next';
+
 /**
  * Variables and functions common to all map types.
  */
+
+/**
+  * Selects the appropriate language to use for a property from the available languages.
+  @param {Object} property                       A language-separated list of a property for a layer.
+  @return {(String|Array|Boolean|Number|Object)} The value stored in the language property selected.
+  */
+export function selectPropertyLanguage(property) {
+  if (Object.keys(property).length === 1) {
+    // If there is only one possible language, return the value for that.
+    let value = Object.keys(property)[0];
+    return property[value];
+  } else {
+    if (property[i18next.language]) {
+      return property[i18next.language];
+    } else if (property[i18next.language.slice(0, 2)]) {
+      // This slice operaion returns the general language code if a specific code is being used
+      // e.g. if i18next.language is 'en-GB', the slice will return 'en'
+      return property[i18next.language.slice(0, 2)];
+    } else if (property.und) {
+      return property.und;
+    } else {
+      // Else, just select the first possible language.
+      let firstLanguage = Object.keys(property)[0];
+      return property[firstLanguage];
+    }
+  }
+}
 
 /**
  * Add the default options to a layer definition.
