@@ -1,6 +1,7 @@
 /** @module controllers/utils */
 
-import {getCapabilities} from '../utils/ogc/common';
+// TODO remove jsonify
+import {getCapabilities, jsonifyCapabilities} from '../utils/ogc/common';
 import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
 import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
 
@@ -44,7 +45,8 @@ export function wmsGetLayers(req, res) {
 export function wmtsGetLayers(req, res) {
   // Add parsing for Layers
   getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
-    console.log(JSON.stringify(jsonCapabilities));
+    // res.json(jsonifyCapabilities('wmts', jsonCapabilities));
+    // console.log(JSON.stringify(jsonCapabilities));
     return parseWmtsCapabilities(req.params.url);
   }).then((layer) => {
     res.json(layer);
