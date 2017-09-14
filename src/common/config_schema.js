@@ -25,7 +25,7 @@ export let client = {
     default: '',
   },
   geonaServer: {
-    doc: 'The URL of the geona server to use, including "http://" or "https://", and without a trailing "/".',
+    doc: 'The URL of the geona server to use, including "http://" or "https://", and without a trailing "/". This value should be set if you intend to run Geona in a sub-directory',
     format: String,
     default: '',
   },
