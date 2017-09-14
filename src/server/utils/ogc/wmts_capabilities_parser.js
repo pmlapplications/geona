@@ -113,13 +113,13 @@ function parse1_0(url, capabilities) {
           if (provAddress.country) {
             serverConfig.service.contactInformation.address.country = provAddress.country;
           }
+          // Due to the way unmarshalling works, some undefined values do not return as falsy. 
+          if (Object.keys(serverConfig.service.contactInformation.address).length === 0) {
+            serverConfig.service.contactInformation.address = undefined;
+          }
         }
-        // Due to the way unmarshalling works, some undefined values do not return as falsy. If we have reached this
-        // point and the address in our serverConfig is still an empty object, we remove it.
-        // FIXME get this to remove address
-        if (serverConfig.service.contactInformation.address === {}) {
-          serverConfig.service.contactInformation.address = undefined;
-        }
+
+
         if (provAddress.electronicMailAddress) {
           if (provAddress.electronicMailAddress[0] !== '') {
             serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
@@ -135,7 +135,13 @@ function parse1_0(url, capabilities) {
       }
     }
   }
-  // TODO if serverConfig's contactInformation is empty, remove contactInformation
+  // If we have reached this point and the contact information in our serverConfig is
+  // only {address: undefined}, we remove contact information.
+  if (Object.keys(serverConfig.service.contactInformation).length === 1
+        && serverConfig.service.contactInformation.address === undefined) {
+    serverConfig.service.contactInformation = undefined;
+  }
+
   if (serviceId.fees) {
     serverConfig.service.fees = serviceId.fees;
   }

@@ -1,4 +1,5 @@
 /** @module layer/server/layer_server */
+import LayerWms from '../layer_wms';
 
 /**
  * Class for a layer server
@@ -20,5 +21,15 @@ export default class LayerServer {
     this.capability = serverConfig.capability;
 
     this.tags = serverConfig.tags;
+
+    for (let layer of serverConfig.layers) {
+      switch (serverConfig.protocol) {
+        case 'wms':
+          this.layers.push(new LayerWms(layer, this));
+      }
+    }
+
+    window.testingWmsLayer = this.layers[0];
+    window.testingSerCon = this;
   }
 }
