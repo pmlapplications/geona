@@ -111,7 +111,6 @@ module.exports = function(grunt) {
           'babelify',
           ['deamdify', {global: true}],
         ],
-        external: clientExternalLibs,
       },
 
       // Make client bundle
@@ -119,6 +118,7 @@ module.exports = function(grunt) {
         files: clientBundle,
         options: {
           watch: true,
+          external: clientExternalLibs,
         },
       },
 
@@ -127,6 +127,7 @@ module.exports = function(grunt) {
         files: clientAdminBundle,
         options: {
           watch: true,
+          external: adminVendorLibs,
         },
       },
 
