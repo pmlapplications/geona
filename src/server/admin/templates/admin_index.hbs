@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{{ ProductName }}</title>
+    <title>{{ package.name }}</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ sub_folder_name }}/admin_static/css/main.css">
+    <link rel="stylesheet" href="{{ subFolderPath }}/admin_static/css/main.css">
   </head>
   <body>
         <!-- Navigation -->
@@ -63,7 +63,11 @@
           <hr>
 
           <!-- Preview Image -->
-          <img class="img-fluid rounded" src="http://placehold.it/900x300" alt="">
+          <p>AppName: {{ package.name }}<br />
+          Version: {{ package.version }}<br />
+          subFolderPath: {{ subFolderPath }}<br />
+          port: {{ port }}<br />
+          plugins: {{ plugins }}<br />
 
           <hr>
 
@@ -212,8 +216,8 @@
       <!-- /.container -->
     </footer>
 
-    <script src="/admin_static/js/bundle.js" crossorigin="anonymous"></script>
-    <script src="/admin_static/js/vendor.js" crossorigin="anonymous"></script>
-    <script src="/admin_static/js/bootstrap.js" crossorigin="anonymous"></script>
+    <script src="{{ subFolderPath }}/admin_static/js/bundle.js" crossorigin="anonymous"></script>
+    <script src="{{ subFolderPath }}/admin_static/js/vendor.js" crossorigin="anonymous"></script>
+    <script src="{{ subFolderPath }}/admin_static/js/bootstrap.js" crossorigin="anonymous"></script>
   </body>
 </html>
