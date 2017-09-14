@@ -106,7 +106,7 @@ app.get('/swagger.json', function(req, res) {
  */
 
 // Setup the static path for the static folder
-app.use(express.static(path.join(__dirname, '../../static'), {
+app.use(configServer.get('subFolderPath'), express.static(path.join(__dirname, '../../static'), {
   setHeaders: function(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
