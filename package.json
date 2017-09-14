@@ -8,11 +8,20 @@
     "include": [
       "src/**/*.js"
     ],
+    "exclude": [
+      "**/node_modules/**",
+      "src/client/vendor/**",
+      "src/client/templates/**",
+      "src/server/vendor/**",
+      "static/**",
+      "test_dependencies/**"
+    ],
     "require": [
       "babel-register"
     ],
     "sourceMap": false,
     "instrument": false,
+    "cache": true,
     "all": true
   },
   "scripts": {
@@ -55,7 +64,7 @@
     "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
     "npm-check": "^5.4.4",
-    "nyc": "^11.1.0"
+    "nyc": "^11.2.1"
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",

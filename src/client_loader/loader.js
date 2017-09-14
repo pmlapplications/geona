@@ -1,3 +1,5 @@
+/** @module loader */
+
 /* global geona */
 
 let head = document.getElementsByTagName('head')[0];
@@ -67,7 +69,6 @@ function createInstances() {
   while (queuedConfigs.length) {
     let config = queuedConfigs.pop();
 
-    // TODO Set to variable specified in config? Or create and then call init? Or handle a callback? Or all of these?
     let geonaInstance = new geona.Geona(config);
 
     if (config.geonaVariable) {

@@ -1,3 +1,5 @@
+/** @module utils/jsonix */
+
 /**
  * @fileOverview Defines mappings for jsonix and exports jsonix contexts for xml to json parsing
  */

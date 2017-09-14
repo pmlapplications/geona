@@ -1,0 +1,33 @@
+<li class="js-geona-layers-list__item geona-layers-list__item" value="{{layerName}}">
+  <table>
+    <tr>
+      <td>Title</td>
+      <td>{{data.Title}}</td>
+    </tr>
+    <tr>
+      <td>Indicators</td>
+      <td>{{data.tags.indicator_type}}</td>
+    </tr>
+    <tr>
+      <td>Provider</td>
+      <td>{{data.tags.data_provider}}</td>
+    </tr>
+    <tr>
+      <td>Abstract</td>
+      <td>{{data.Abstract}}</td>
+    </tr>
+    <tr>
+      <td>Date range</td>
+      <td>{{data.FirstDate}} - {{data.LastDate}}</td>
+    </tr>
+    <tr>
+      <td>Bounding box</td>
+      <td>
+        {{data.EX_GeographicBoundingBox.NorthBoundLatitude}} N,
+        {{data.EX_GeographicBoundingBox.EastBoundLongitude}} E,
+        {{data.EX_GeographicBoundingBox.SouthBoundLatitude}} S,
+        {{data.EX_GeographicBoundingBox.WestBoundLongitude}} W
+      </td>
+    </tr>
+  </table>
+</li>

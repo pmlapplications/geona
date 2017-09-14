@@ -1,3 +1,5 @@
+/** @module config_schema */
+
 export let server = {
   port: {
     doc: 'Port to run server on.',
@@ -47,7 +49,7 @@ export let client = {
       require: {
         doc: 'Whether we will display and require accepting the terms and conditions on page load.',
         format: Boolean,
-        default: true,
+        default: false,
       },
       backgroundImage: {
         doc: 'The image to use as the background on the terms and conditions screen.',
@@ -59,7 +61,7 @@ export let client = {
       display: {
         doc: 'Whether we will display the splash screen on page load.',
         format: Boolean,
-        default: true,
+        default: false,
       },
       content: {
         doc: 'The HTML (or a translation key) that will be displayed on the splash screen.',
@@ -72,6 +74,8 @@ export let client = {
         default: 'http://www.hdwallpaperspulse.com/wp-content/uploads/2016/08/24/colorful-background-hd.jpg',
       },
     },
+  },
+  controls: {
     menu: {
       opened: {
         doc: 'Whether the full menu is displayed on load.',
@@ -80,6 +84,23 @@ export let client = {
       },
       collapsible: {
         doc: 'Whether the controls to show and hide the menu are shown.',
+        format: Boolean,
+        default: true,
+      },
+    },
+    timeline: {
+      opened: {
+        doc: 'Whether the timeline is displayed on load.',
+        format: Boolean,
+        default: true,
+      },
+      collapsible: {
+        doc: 'Whether the controls to show and hide the timeline are shown.',
+        format: Boolean,
+        default: true,
+      },
+      openOnLayerLoad: {
+        doc: 'Whether the timeline should be opened when a layer is added to the map.',
         format: Boolean,
         default: true,
       },
@@ -194,23 +215,69 @@ export let client = {
        *                                Defaults to 3.
        */
     },
+    // Settings for the view.  Basemap specific options may override these.
     viewSettings: {
-      // Settings for the view.  Basemap specific options may override these.
-
+      // The coordinate the map is intially centered on, in the form {lat, lon}
       center: {
-        doc: 'The map center.',
-        format: Array,
-        default: [0, 0],
+        lat: {
+          doc: 'The latitude of the initial map centerpoint.',
+          format: Number,
+          default: 0,
+        },
+        lon: {
+          doc: 'The longitude of the initial map centerpoint.',
+          format: Number,
+          default: 0,
+        },
       },
+      // TODO does this override center?
+      // Soft extent to fit the view to (panning beyond the soft extent is allowed). Will override zoom.
+      // Object in the format {minLat, minLon, maxLat, maxLon}
       fitExtent: {
-        doc: 'Extent to fit the view to. Will override zoom. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Array,
-        default: [-90, -180, 90, 180],
+        minLat: {
+          doc: 'The west-most latitude of the initial map soft extent.',
+          format: Number,
+          default: -90,
+        },
+        minLon: {
+          doc: 'The south-most longitude of the initial map soft extent.',
+          format: Number,
+          default: -180,
+        },
+        maxLat: {
+          doc: 'The east-most latitude of the initial map soft extent.',
+          format: Number,
+          default: 90,
+        },
+        maxLon: {
+          doc: 'The north-most longitude of the initial map soft extent.',
+          format: Number,
+          default: 180,
+        },
       },
       maxExtent: {
-        doc: 'Extent to restrict the view to. Array in the format [minLat, minLon, maxLat, maxLon]',
-        format: Array,
-        default: [-100, Number.NEGATIVE_INFINITY, 100, Number.POSITIVE_INFINITY],
+        // Max extent to restrict the view to (panning beyond the max extent is not possible).
+        // Object in the format {minLat, minLon, maxLat, maxLon}
+        minLat: {
+          doc: 'The west-most latitude of the map max extent.',
+          format: Number,
+          default: -100,
+        },
+        minLon: {
+          doc: 'The south-most longitude of the map max extent.',
+          format: Number,
+          default: Number.NEGATIVE_INFINITY,
+        },
+        maxLat: {
+          doc: 'The east-most latitude of the map max extent.',
+          format: Number,
+          default: 100,
+        },
+        maxLon: {
+          doc: 'The north-most longitude of the map max extent.',
+          format: Number,
+          default: Number.POSITIVE_INFINITY,
+        },
       },
       maxZoom: {
         doc: 'The maximum (closest) allowed zoom.',

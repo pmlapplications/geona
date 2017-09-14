@@ -1,3 +1,5 @@
+/** @module i18n */
+
 import handlebars from 'handlebars/runtime';
 import i18next from 'i18next';
 import xhr from 'i18next-xhr-backend';
@@ -21,7 +23,7 @@ export function initI18n(geonaServer) {
           debug: false,
 
           // All namespaces used by the client must be defined here
-          ns: ['common', 'intro'],
+          ns: ['common', 'intro', 'menu'],
 
           fallbackLng: 'en',
           defaultNS: 'common',
@@ -68,6 +70,3 @@ handlebars.registerHelper('t', function(key, options) {
   let result = i18next.t(key, options.hash);
   return new handlebars.SafeString(result);
 });
-
-// TODO for testing only
-window.i18n = i18next;

@@ -1,25 +1,21 @@
+/** @module utils/ogc/wms_capabilities_parser */
+
 /* eslint camelcase: 0 */
 
-import {getCapabilities} from './common';
+import {getCapabilities, jsonifyCapabilities} from './common';
 
+/**
+ * Parse a WMS capabilities from a url.
+ * @param  {String}  url The url of the service
+ * @return {Promise}     A Promise that will resolve with a LayerServer config Object
+ */
 export function parseWmsCapabilities(url) {
   return new Promise((resolve, reject) => {
-    console.log('parseWmsCapabilities');
-    getCapabilities('wms', url).then((jsonCapabilities) => {
-      console.log('getCapabilities done');
-      let capabilities = jsonCapabilities.value;
-
-      switch (capabilities.version) {
-        case '1.0.0':
-          reject(new Error('No support for WMS 1.0.0 currently'));
-          break;
-        case '1.1.0':
-        case '1.1.1':
-          resolve(parse1_1(url, capabilities));
-          break;
-        case '1.3.0':
-          resolve(parse1_3(url, capabilities));
-          break;
+    getCapabilities('wms', url).then((xml) => {
+      try {
+        resolve(parseLocalWmsCapabilities(xml, url));
+      } catch (err) {
+        reject(err);
       }
     }).catch((err) => {
       reject(err);
@@ -27,6 +23,48 @@ export function parseWmsCapabilities(url) {
   });
 }
 
+/**
+ * Parse an XML WMTS capabilitise document.
+ * @param  {String} xml The XML document as a string
+ * @param  {String} url (optional) The url of the service
+ * @return {Object}     A LayerServer config Object
+ *
+ * @throws Throws any error thrown by jsonifyCapabilities, and an error if the WMS version is unsupported.
+ */
+export function parseLocalWmsCapabilities(xml, url) {
+  let jsonCapabilities;
+
+  try {
+    jsonCapabilities = jsonifyCapabilities('wms', xml);
+  } catch (err) {
+    throw err;
+  }
+
+  let capabilities = jsonCapabilities.value;
+
+  let result;
+
+  switch (capabilities.version) {
+    case '1.0.0':
+      throw new Error('No support for WMS 1.0.0 currently');
+    case '1.1.0':
+    case '1.1.1':
+      result = parse1_1(url, capabilities);
+      break;
+    case '1.3.0':
+      result = parse1_3(url, capabilities);
+      break;
+  }
+
+  return result;
+}
+
+/**
+ * Parses the parts that are common between all WMS versions
+ * @param  {String} url          The service url
+ * @param  {Object} capabilities The capabilities object
+ * @return {Object}              The server config
+ */
 function parseCommon(url, capabilities) {
   let service = capabilities.service;
   let capability = capabilities.capability;
@@ -34,12 +72,12 @@ function parseCommon(url, capabilities) {
   let serverConfig = {
     protocol: 'wms',
     version: capabilities.version,
-    url: url.replace(/\?.*/g, ''),
+    url: undefined,
 
     service: {
-      title: service.title,
-      abstract: service._abstract || service.abstract || '',
-      keywords: [],
+      title: {und: service.title},
+      abstract: {und: service._abstract} || {und: service.abstract} || {},
+      keywords: {und: []},
       onlineResource: service.onlineResource.href,
       contactInformation: {},
     },
@@ -47,9 +85,13 @@ function parseCommon(url, capabilities) {
     capability: {},
   };
 
+  if (url) {
+    serverConfig.url = url.replace(/\?.*/g, '');
+  }
+
   if (service.keywordList) {
     for (let keyword of service.keywordList.keyword) {
-      serverConfig.service.keywords.push(keyword.value);
+      serverConfig.service.keywords.und.push(keyword.value);
     }
   }
 
@@ -63,9 +105,11 @@ function parseCommon(url, capabilities) {
     }
 
     serverConfigContactInfo.position = contactInfo.contactPosition;
-    serverConfigContactInfo.address = contactInfo.contactAddress;
-    serverConfigContactInfo.phone = contactInfo.contactVoiceTelephone;
-    serverConfigContactInfo.email = contactInfo.contactElectronicMailAddress;
+    if (contactInfo.contactAddress) {
+      serverConfigContactInfo.address = contactInfo.contactAddress;
+    }
+    serverConfigContactInfo.phone = [contactInfo.contactVoiceTelephone];
+    serverConfigContactInfo.email = [contactInfo.contactElectronicMailAddress];
   }
 
   if (capability.layer) {
@@ -75,6 +119,12 @@ function parseCommon(url, capabilities) {
   return serverConfig;
 }
 
+/**
+ * Parser for WMS version 1.1.0 or 1.1.1
+ * @param  {String} url          The service url
+ * @param  {Object} capabilities The capabilites object
+ * @return {Object}              The server config
+ */
 function parse1_1(url, capabilities) {
   let capability = capabilities.capability;
 
@@ -84,15 +134,22 @@ function parse1_1(url, capabilities) {
     if (capability.request.getMap) {
       serverConfig.capability.getMap = {
         formats: getFormats(capability.request.getMap.format),
+        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
       };
     }
     if (capability.request.getFeatureInfo) {
       serverConfig.capability.getFeatureInfo = {
         formats: getFormats(capability.request.getFeatureInfo.format),
+        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
       };
     }
   }
 
+  /**
+   * Extracts the supported formats from the formatArray
+   * @param  {Array} formatArray The array of formats from the capabilities JSON
+   * @return {Array}             The formats
+   */
   function getFormats(formatArray) {
     let formats = [];
     for (let format of formatArray) {
@@ -104,6 +161,12 @@ function parse1_1(url, capabilities) {
   return serverConfig;
 }
 
+/**
+ * Parser for WMS version 1.3.0
+ * @param  {String} url          The service url
+ * @param  {Object} capabilities The capabilities object
+ * @return {Object}              The server config
+ */
 function parse1_3(url, capabilities) {
   let capability = capabilities.capability;
 
@@ -113,19 +176,23 @@ function parse1_3(url, capabilities) {
     if (capability.request.getMap) {
       serverConfig.capability.getMap = {
         formats: capability.request.getMap.format,
+        get: [capability.request.getMap.dcpType[0].http.get.onlineResource.href],
       };
     }
     if (capability.request.getFeatureInfo) {
       serverConfig.capability.getFeatureInfo = {
         formats: capability.request.getFeatureInfo.format,
+        get: [capability.request.getFeatureInfo.dcpType[0].http.get.onlineResource.href],
       };
     }
     if (capability.request.extendedOperation) {
       for (let operation of capability.request.extendedOperation) {
         switch (operation.name.localPart) {
+          // TODO add any other extended operations we are interested in
           case 'GetLegendGraphic':
             serverConfig.capability.getLegendGraphic = {
               formats: operation.value.format,
+              get: [operation.value.dcpType[0].http.get.onlineResource.href],
             };
             break;
         }
@@ -136,6 +203,13 @@ function parse1_3(url, capabilities) {
   return serverConfig;
 }
 
+/**
+ * Digs for all layers nested under the provided layer
+ * @param  {String} wmsVersion  The WMS version
+ * @param  {Object} layer       The layer to search under
+ * @param  {Object} parentLayer (optional) The parent layer of the layer
+ * @return {Array}              An array of all renderable layers found
+ */
 function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
   let layers = [];
 
@@ -166,19 +240,25 @@ function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
   return layers;
 }
 
+/**
+ * Parser for layer properties that are common between WMS versions
+ * @param  {Object} layer       The layer
+ * @param  {Object} parentLayer (optional) The parent layer of the layer
+ * @return {Object}             The parsed layer
+ */
 function parseLayerCommon(layer, parentLayer = {}) {
   // Create thisLayer with the basic non-inheritable properties
   let thisLayer = {
     name: layer.name,
-    title: layer.title,
-    abstract: layer._abstract,
+    title: {und: layer.title},
+    abstract: {und: layer._abstract},
   };
 
   // Load the keywords
   if (layer.keywordList) {
-    thisLayer.keywords = [];
+    thisLayer.keywords = {und: []};
     for (let keyword of layer.keywordList.keyword) {
-      thisLayer.keywords.push(keyword.value);
+      thisLayer.keywords.und.push(keyword.value);
     }
   }
 
@@ -236,6 +316,12 @@ function parseLayerCommon(layer, parentLayer = {}) {
   return thisLayer;
 }
 
+/**
+ * Parser for a WMS 1.1.0 or 1.1.1 layer
+ * @param  {Object} layer       The layer
+ * @param  {Object} parentLayer The parent layer of the layer
+ * @return {Object}             The parsed layer
+ */
 function parseLayer1_1(layer, parentLayer = {}) {
   let thisLayer = parseLayerCommon(layer, parentLayer);
 
@@ -292,7 +378,7 @@ function parseLayer1_1(layer, parentLayer = {}) {
       dimension.values = extent.value;
 
       if (dimension.values) {
-        dimension.values = dimension.values.replace(/\r\n\s*/g, '').split(',');
+        dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
       }
 
       for (let value of dimension.values) {
@@ -318,6 +404,12 @@ function parseLayer1_1(layer, parentLayer = {}) {
   return thisLayer;
 }
 
+/**
+ * Parser for a WMS 1.3.0 layer
+ * @param  {Object} layer       The layer
+ * @param  {Object} parentLayer The parent layer of the layer
+ * @return {Object}             The parsed layer
+ */
 function parseLayer1_3(layer, parentLayer = {}) {
   let thisLayer = parseLayerCommon(layer, parentLayer);
 
@@ -366,7 +458,8 @@ function parseLayer1_3(layer, parentLayer = {}) {
       };
 
       if (thisLayer.dimensions[dimension.name].values) {
-        thisLayer.dimensions[dimension.name].values = thisLayer.dimensions[dimension.name].values.replace(/\r\n\s*/g, '').split(',');
+        thisLayer.dimensions[dimension.name].values = thisLayer.dimensions[dimension.name].values
+          .replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
       }
 
       for (let value of thisLayer.dimensions[dimension.name].values) {

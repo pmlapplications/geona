@@ -1,3 +1,5 @@
+/** @module routers/main */
+
 import express from 'express';
 
 import adminRouter from '../admin/routers/main';

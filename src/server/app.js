@@ -1,3 +1,5 @@
+/** @module app */
+
 import express from 'express';
 import * as http from 'http';
 import i18next from 'i18next';
@@ -23,7 +25,7 @@ i18next
     // All languages must be defined here
     preload: ['en', 'fr'],
     // All namespaces must be defined here
-    ns: ['common', 'intro'],
+    ns: ['common', 'intro', 'menu'],
 
     fallbackLng: 'en',
     defaultNS: 'common',

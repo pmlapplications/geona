@@ -1,3 +1,5 @@
+/** @module map */
+
 /**
  * This file defines the base class and interface for a map.
  */
