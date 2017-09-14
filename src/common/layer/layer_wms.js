@@ -15,7 +15,7 @@ export default class LayerWms extends LayerVisible {
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
     this.PROTOCOL = 'wms';
-    this.name = layerConfig.wms.name;
+    this.name = layerConfig.name;
     this.styles = {};
   }
 }

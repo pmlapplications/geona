@@ -6,6 +6,9 @@ import {
   basemaps as defaultBasemaps, borderLayers as defaultBorders,
   latLonLabelFormatter, selectPropertyLanguage,
 } from './map_common';
+import wmsGetCapabilities from '../../server/utils/ogc/wms_capabilities_parser';
+import LayerServer from '../../common/layer/server/layer_server';
+import request from 'request';
 
 let ol;
 
@@ -103,6 +106,12 @@ export class OlMap extends GeonaMap {
     console.log(selectPropertyLanguage({und: 'TitleUnd', fr: 'TitleFr'})); // want und
     console.log(selectPropertyLanguage({nl: 'TitleNl', fr: 'TitleFr'})); // want nl
     console.log(selectPropertyLanguage({nl: 'TitleNl'})); // want nl
+
+
+    request('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities', (err, response, body) => {
+      let serverConfig = JSON.parse(body);
+      let ls = new LayerServer(serverConfig);
+    });
   }
 
   /**
@@ -211,7 +220,7 @@ export class OlMap extends GeonaMap {
               time: time,
               wrapDateLine: true,
               NUMCOLORBANDS: 255,
-              VERSION: '1.1.1',
+              VERSION: geonaLayer.version,
             },
           });
           break;
