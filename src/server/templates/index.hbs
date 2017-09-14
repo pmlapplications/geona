@@ -3,10 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>GP2</title>
+  <title>{{ package.name }}</title>
 
   <!--Includes the loader in the html-->
-  <script src="js/loader.js"></script>
+  <script src="{{ subFolderPath}}/js/loader.js"></script>
 
   <!--This script defines a particular config,
       then instantiates a new loader-->
@@ -17,6 +17,7 @@
     var config1 = {
       geonaVariable: 'geonaOl',
       onReadyCallback: 'geonaOnReady',
+      geonaServer: '/geona',
       divId: 'ol',
       map: {
         graticule: true,
@@ -25,6 +26,7 @@
     };
     var config2 = {
       geonaVariable: 'geonaL',
+      geonaServer: '/geona',
       divId: 'leaflet',
       map: {
         library: 'leaflet',
