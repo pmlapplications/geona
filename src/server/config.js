@@ -17,8 +17,8 @@ export let clients = combinedClientConfig();
  * @return {Object} Defined client configuration combined with elements from package.json
  */
 function combinedClientConfig() {
-  // let clientConfig = convict([schema.client]);  //convict can process an array of config files; will probably want to 
-  // implement this so leaving here for now
+  // let clientConfig = convict([schema.client]);  //convict can process an array of config files; will probably want 
+  // to implement this so leaving here for now
   let clientConfig = convict(schema.client);
   let packageContent = packageJson;
 
