@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "description": "Visualisation and analysis of geospatial data",
   "homepage": "https://geona.io",
-  "license": "MIT License",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pmlapplications/geona"
+  },
   "nyc": {
     "include": [
       "src/**/*.js"
