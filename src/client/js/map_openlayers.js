@@ -220,6 +220,7 @@ export class OlMap extends GeonaMap {
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   addLayer(geonaLayer, index) {
+    // TODO reinstate this if
     // if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
     let source;
     let title;
@@ -255,9 +256,7 @@ export class OlMap extends GeonaMap {
         }
         break;
       case 'wmts': {
-        let options = wmtsSourceOptionsFromLayer(geonaLayer);
-        source = new ol.source.WMTS(options);
-        console.log(options);
+        source = wmtsSourceFromLayer(geonaLayer);
         // let projection = ol.proj.get('EPSG:4326');
         // let projectionExtent = projection.getExtent();
         // let size = ol.extent.getWidth(projectionExtent) / 256;
@@ -566,7 +565,13 @@ export function init(geonaServer, next) {
   }
 }
 
-function wmtsSourceOptionsFromLayer(layer) {
+/**
+ * Create an openlayers WMTS source from a Geona Layer.
+ * Adapted from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L299
+ * @param  {Layer}          layer The Geona layer
+ * @return {ol.source.WMTS}       A new openlayers WMTS source
+ */
+function wmtsSourceFromLayer(layer) {
   let tileMatrixSetId;
 
   // TODO Replace with thing to search for TileMatrixSet that supports the current projection
@@ -576,10 +581,13 @@ function wmtsSourceOptionsFromLayer(layer) {
     }
   }
 
+  // Get the tileMatrixSet object from the layer server
   let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
 
+  // TODO choose the best format png > jpeg
   let format = layer.formats[0];
 
+  // TODO This should pick the default style, or one provided in a config
   let style;
   for (let key in layer.styles) {
     if (!Object.hasOwnProperty(key)) {
@@ -587,18 +595,21 @@ function wmtsSourceOptionsFromLayer(layer) {
     }
   }
 
-  let dimensions = {};
   // TODO dimensions
+  let dimensions = {};
 
   let projection = ol.proj.get(tileMatrixSet.projection);
 
+  // Get the extent in the right projection format from the layer bounding box
   let extent = ol.proj.transformExtent([layer.boundingBox.minLon, layer.boundingBox.minLat, layer.boundingBox.maxLon,
     layer.boundingBox.maxLat], 'EPSG:4326', projection);
 
-  // TODO wrapX
-  let wrapX = false;
+  // TODO Not sure if wrapX should always be true. It should be fine though
+  let wrapX = true;
+
   // TODO matrixLimits
 
+  // Get the tile grid
   let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent);
 
   let urls = [];
@@ -607,6 +618,7 @@ function wmtsSourceOptionsFromLayer(layer) {
   // TODO urls from operations metadata
 
   if (urls.length === 0) {
+    // If no tile urls were found in the operationsMetadata, get them from the layer resourceUrls
     requestEncoding = ol.source.WMTSRequestEncoding.REST;
     for (let resource of layer.resourceUrls) {
       if (resource.resourceType === 'tile') {
@@ -616,7 +628,7 @@ function wmtsSourceOptionsFromLayer(layer) {
     }
   }
 
-  return {
+  return new ol.source.WMTS({
     urls: urls,
     layer: layer.identifier,
     matrixSet: tileMatrixSetId,
@@ -628,9 +640,17 @@ function wmtsSourceOptionsFromLayer(layer) {
     dimensions: dimensions,
     wrapX: wrapX,
     crossOrigin: null,
-  };
+  });
 }
 
+/**
+ * Create an openlayers WMTS Tile Grid from a provided matrix set.
+ * Adapted from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/tilegrid/wmts.js#L71
+ * @param  {Object}           matrixSet    The matrix set from a LayerServerWmts
+ * @param  {ol.Extent}        extent       Extent for the tile grid
+ * @param  {Array}            matrixLimits The matrix limits
+ * @return {ol.tilegrid.WMTS}              An openlayers WMTS tile grid
+ */
 function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits = []) {
   /** @type {!Array.<number>} */
   let resolutions = [];
@@ -646,8 +666,11 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let projection = ol.proj.get(matrixSet.projection);
   let metersPerUnit = projection.getMetersPerUnit();
 
+  // If the projection has coordinates as (y, x)/(north, east) instead of (x, y)/(east, north),
+  // they will need to be switched
   let switchOriginXy = projection.getAxisOrientation().substr(0, 2) === 'ne';
 
+  // Sort the array of tileMatrices by their scaleDenominators
   matrixSet.tileMatrices.sort(function(a, b) {
     return b.scaleDenominator - a.scaleDenominator;
   });
@@ -656,11 +679,12 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     // TODO matrix limits
 
     matrixIds.push(matrix.identifier);
-    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit;
+    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit; // Magic
     let tileWidth = matrix.tileWidth;
     let tileHeight = matrix.tileHeight;
 
     if (switchOriginXy) {
+      // Swap the coordinaates for the top left corner if needs be
       origins.push(matrix.topLeftCorner.reverse());
     } else {
       origins.push(matrix.topLeftCorner);
