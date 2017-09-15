@@ -2,8 +2,10 @@
 
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders,
-  latLonLabelFormatter, selectPropertyLanguage} from './map_common';
+import {
+  basemaps as defaultBasemaps, borderLayers as defaultBorders,
+  latLonLabelFormatter, selectPropertyLanguage,
+} from './map_common';
 import LayerServer from '../../common/layer/server/layer_server';
 
 let ol;
@@ -103,11 +105,16 @@ export class OlMap extends GeonaMap {
     console.log(selectPropertyLanguage({nl: 'TitleNl', fr: 'TitleFr'})); // want nl
     console.log(selectPropertyLanguage({nl: 'TitleNl'})); // want nl
 
-
+    // wms
     $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
       .done((serverConfig) => {
         let keepingEslintHappy = new LayerServer(serverConfig);
       });
+    // wmts
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fmap1.vis.earthdata.nasa.gov%2Fwmts-geo%2F1.0.0%2FWMTSCapabilities.xml')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServer(serverConfig);
+    //   });
   }
 
   /**
@@ -199,12 +206,12 @@ export class OlMap extends GeonaMap {
       let time;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
-          title = geonaLayer.title;
-          if (geonaLayer.isTemporal) {
+          title = geonaLayer.title.und;
+          if (geonaLayer.isTemporal === true) {
             time = geonaLayer.lastTime;
           }
           source = new ol.source.TileWMS({
-            url: geonaLayer.serviceUrl,
+            url: geonaLayer.layerServer.url,
             projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
             crossOrigin: null,
             params: {
@@ -212,10 +219,11 @@ export class OlMap extends GeonaMap {
               FORMAT: 'image/png', // TODO maybe change later
               // TODO STYLES:
               STYLES: 'boxfill/alg',
-              time: time,
+              // TODO update once isTemporal, firstTime and lastTime are working
+              time: '2015-12-27T00:00:00.000Z',
               wrapDateLine: true,
               NUMCOLORBANDS: 255,
-              VERSION: geonaLayer.version,
+              VERSION: geonaLayer.layerServer.version,
             },
           });
           if (geonaLayer.attribution) {
@@ -226,9 +234,37 @@ export class OlMap extends GeonaMap {
             }
           }
           break;
-        case 'wmts':
+        case 'wmts': {
+          let projection = ol.proj.get('EPSG:4326');
+          let projectionExtent = projection.getExtent();
+          let size = ol.extent.getWidth(projectionExtent) / 256;
+          let resolutions = new Array(14);
+          for (let i = 0; i < 14; ++i) {
+            resolutions[i] = size / Math.pow(2, i);
+          }
           title = selectPropertyLanguage(geonaLayer.title);
+          source = new ol.source.WMTS({
+            url: geonaLayer.layerServer.url,
+            layer: '0',
+            matrixSet: 'EPSG:4326',
+            format: 'image/png',
+            projection: projection,
+            tileGrid: new ol.tilegrid.WMTS({
+              origin: projectionExtent,
+              resolutions: resolutions,
+              // matrixIds: Object.getOwnPropertyNames(),
+            }),
+
+          });
+          if (geonaLayer.attribution) {
+            if (geonaLayer.attribution.onlineResource) {
+              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+            } else {
+              source.attributions = geonaLayer.attribution.title;
+            }
+          }
           break;
+        }
         case 'osm':
           source = new ol.source.OSM({
             crossOrigin: null,

@@ -1,5 +1,6 @@
 /** @module layer/server/layer_server */
 import LayerWms from '../layer_wms';
+import LayerWmts from '../layer_wmts';
 
 /**
  * Class for a layer server
@@ -11,6 +12,7 @@ export default class LayerServer {
    */
   constructor(serverConfig) {
     this.layers = [];
+    // let layers = [];
 
     this.protocol = serverConfig.protocol;
     this.version = serverConfig.version;
@@ -26,10 +28,18 @@ export default class LayerServer {
       switch (serverConfig.protocol) {
         case 'wms':
           this.layers.push(new LayerWms(layer, this));
+          // layers.push(new LayerWms(layer, this));
+          break;
+        case 'wmts':
+          this.layers.push(new LayerWmts(layer, this));
+          // layers.push(new LayerWmts(layer, this));
+          break;
       }
     }
 
-    window.testingWmsLayer = this.layers[0];
+    console.log(serverConfig);
+
+    window.testingLayer = this.layers[0];
     window.testingSerCon = this;
   }
 }
