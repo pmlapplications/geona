@@ -17,7 +17,7 @@ export let clients = combinedClientConfig();
  * @return {Object} Defined client configuration combined with elements from package.json
  */
 function combinedClientConfig() {
-  //let clientConfig = convict([schema.client]);  //convict can process an array of config files; will probably want to 
+  // let clientConfig = convict([schema.client]);  //convict can process an array of config files; will probably want to 
   // implement this so leaving here for now
   let clientConfig = convict(schema.client);
   let packageContent = packageJson;
@@ -70,6 +70,6 @@ function combinedServerConfig() {
   serverConfig.set('package.name', packageContent.name);
   serverConfig.set('package.version', packageContent.version);
   serverConfig.set('package.description', packageContent.description);
-  
+
   return serverConfig;
 }
