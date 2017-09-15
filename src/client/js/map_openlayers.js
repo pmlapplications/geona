@@ -2,13 +2,9 @@
 
 import $ from 'jquery';
 import GeonaMap from './map';
-import {
-  basemaps as defaultBasemaps, borderLayers as defaultBorders,
-  latLonLabelFormatter, selectPropertyLanguage,
-} from './map_common';
-import wmsGetCapabilities from '../../server/utils/ogc/wms_capabilities_parser';
+import {basemaps as defaultBasemaps, borderLayers as defaultBorders,
+  latLonLabelFormatter, selectPropertyLanguage} from './map_common';
 import LayerServer from '../../common/layer/server/layer_server';
-import request from 'request';
 
 let ol;
 
@@ -101,17 +97,17 @@ export class OlMap extends GeonaMap {
 
     // TODO remove these and write tests for map_common
     console.log(selectPropertyLanguage({en: 'TitleEn', fr: 'TitleFr'})); // Want en
-    console.log(selectPropertyLanguage({en: 'TitleEn', ['en-GB']: 'TitleEnGB'})); // Want engb
+    console.log(selectPropertyLanguage({'en': 'TitleEn', 'en-GB': 'TitleEnGB'})); // Want engb
     console.log(selectPropertyLanguage({und: 'TitleUnd', en: 'TitleEn'})); // want en
     console.log(selectPropertyLanguage({und: 'TitleUnd', fr: 'TitleFr'})); // want und
     console.log(selectPropertyLanguage({nl: 'TitleNl', fr: 'TitleFr'})); // want nl
     console.log(selectPropertyLanguage({nl: 'TitleNl'})); // want nl
 
 
-    request('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities', (err, response, body) => {
-      let serverConfig = JSON.parse(body);
-      let ls = new LayerServer(serverConfig);
-    });
+    $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
+      .done((serverConfig) => {
+        let keepingEslintHappy = new LayerServer(serverConfig);
+      });
   }
 
   /**
@@ -193,7 +189,7 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {GeonaLayer} geonaLayer The GeonaLayer object to be created on the map.
+   * @param {Layer} geonaLayer The Layer object to be created on the map.
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   addLayer(geonaLayer, index) {
@@ -209,7 +205,6 @@ export class OlMap extends GeonaMap {
           }
           source = new ol.source.TileWMS({
             url: geonaLayer.serviceUrl,
-            attributions: geonaLayer.attribution.title + geonaLayer.attribution.onlineResource,
             projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
             crossOrigin: null,
             params: {
@@ -223,6 +218,13 @@ export class OlMap extends GeonaMap {
               VERSION: geonaLayer.version,
             },
           });
+          if (geonaLayer.attribution) {
+            if (geonaLayer.attribution.onlineResource) {
+              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+            } else {
+              source.attributions = geonaLayer.attribution.title;
+            }
+          }
           break;
         case 'wmts':
           title = selectPropertyLanguage(geonaLayer.title);

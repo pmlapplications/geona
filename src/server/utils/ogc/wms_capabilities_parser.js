@@ -11,15 +11,16 @@ import {getCapabilities, jsonifyCapabilities} from './common';
  */
 export function parseWmsCapabilities(url) {
   return new Promise((resolve, reject) => {
-    getCapabilities('wms', url).then((xml) => {
-      try {
-        resolve(parseLocalWmsCapabilities(xml, url));
-      } catch (err) {
+    getCapabilities('wms', url)
+      .then((xml) => {
+        try {
+          resolve(parseLocalWmsCapabilities(xml, url));
+        } catch (err) {
+          reject(err);
+        }
+      }).catch((err) => {
         reject(err);
-      }
-    }).catch((err) => {
-      reject(err);
-    });
+      });
   });
 }
 
