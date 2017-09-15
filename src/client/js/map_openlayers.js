@@ -10,8 +10,10 @@ import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 
 
-import openlayers from 'openlayers/dist/ol-debug';
-let ol = openlayers;
+// import openlayers from 'openlayers/dist/ol-debug';
+// let ol = openlayers;
+
+let ol;
 
 /**
  * Class for an OpenLayers map.
@@ -161,7 +163,6 @@ export class OlMap extends GeonaMap {
     }
 
     if (basemap !== 'none') {
-      this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
       if (this.basemaps_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
         this.setView(this.basemaps_[basemap].get('viewSettings'));
       } else {
@@ -169,6 +170,8 @@ export class OlMap extends GeonaMap {
         options.projection = this.basemaps_[basemap].get('projections')[0];
         this.setView(options);
       }
+      // Add the new basemap after updating the view
+      this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
     }
     this.config.basemap = basemap;
   }
@@ -221,105 +224,106 @@ export class OlMap extends GeonaMap {
    */
   addLayer(geonaLayer, index) {
     // TODO reinstate this if
-    // if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
-    let source;
-    let title;
-    let time;
-    switch (geonaLayer.PROTOCOL) {
-      case 'wms':
-        title = geonaLayer.title.und;
-        if (geonaLayer.isTemporal === true) {
-          time = geonaLayer.lastTime;
-        }
-        source = new ol.source.TileWMS({
-          url: geonaLayer.layerServer.url,
-          projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
-          crossOrigin: null,
-          params: {
-            LAYERS: geonaLayer.name,
-            FORMAT: 'image/png', // TODO maybe change later
-            // TODO STYLES:
-            STYLES: 'boxfill/alg',
-            // TODO update once isTemporal, firstTime and lastTime are working
-            time: '2015-12-27T00:00:00.000Z',
-            wrapDateLine: true,
-            NUMCOLORBANDS: 255,
-            VERSION: geonaLayer.layerServer.version,
-          },
-        });
-        if (geonaLayer.attribution) {
-          if (geonaLayer.attribution.onlineResource) {
-            source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-          } else {
-            source.attributions = geonaLayer.attribution.title;
+    if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
+      let source;
+      let title;
+      let time;
+      switch (geonaLayer.PROTOCOL) {
+        case 'wms':
+          title = geonaLayer.title.und;
+          if (geonaLayer.isTemporal === true) {
+            time = geonaLayer.lastTime;
           }
+          source = new ol.source.TileWMS({
+            url: geonaLayer.layerServer.url,
+            projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
+            crossOrigin: null,
+            params: {
+              LAYERS: geonaLayer.name,
+              FORMAT: 'image/png', // TODO maybe change later
+              // TODO STYLES:
+              STYLES: 'boxfill/alg',
+              // TODO update once isTemporal, firstTime and lastTime are working
+              time: '2015-12-27T00:00:00.000Z',
+              wrapDateLine: true,
+              NUMCOLORBANDS: 255,
+              VERSION: geonaLayer.layerServer.version,
+            },
+          });
+          if (geonaLayer.attribution) {
+            if (geonaLayer.attribution.onlineResource) {
+              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+            } else {
+              source.attributions = geonaLayer.attribution.title;
+            }
+          }
+          break;
+        case 'wmts': {
+          source = wmtsSourceFromLayer(geonaLayer);
+          // let projection = ol.proj.get('EPSG:4326');
+          // let projectionExtent = projection.getExtent();
+          // let size = ol.extent.getWidth(projectionExtent) / 256;
+          // let resolutions = new Array(14);
+          // for (let i = 0; i < 14; ++i) {
+          //   resolutions[i] = size / Math.pow(2, i);
+          // }
+          // title = selectPropertyLanguage(geonaLayer.title);
+          // source = new ol.source.WMTS({
+          //   url: geonaLayer.layerServer.url,
+          //   layer: '0',
+          //   matrixSet: 'EPSG:4326',
+          //   format: 'image/png',
+          //   projection: projection,
+          //   tileGrid: new ol.tilegrid.WMTS({
+          //     origin: projectionExtent,
+          //     resolutions: resolutions,
+          //     // matrixIds: Object.getOwnPropertyNames(),
+          //   }),
+
+          // });
+          // if (geonaLayer.attribution) {
+          //   if (geonaLayer.attribution.onlineResource) {
+          //     source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+          //   } else {
+          //     source.attributions = geonaLayer.attribution.title;
+          //   }
+          // }
+          break;
         }
-        break;
-      case 'wmts': {
-        source = wmtsSourceFromLayer(geonaLayer);
-        // let projection = ol.proj.get('EPSG:4326');
-        // let projectionExtent = projection.getExtent();
-        // let size = ol.extent.getWidth(projectionExtent) / 256;
-        // let resolutions = new Array(14);
-        // for (let i = 0; i < 14; ++i) {
-        //   resolutions[i] = size / Math.pow(2, i);
-        // }
-        // title = selectPropertyLanguage(geonaLayer.title);
-        // source = new ol.source.WMTS({
-        //   url: geonaLayer.layerServer.url,
-        //   layer: '0',
-        //   matrixSet: 'EPSG:4326',
-        //   format: 'image/png',
-        //   projection: projection,
-        //   tileGrid: new ol.tilegrid.WMTS({
-        //     origin: projectionExtent,
-        //     resolutions: resolutions,
-        //     // matrixIds: Object.getOwnPropertyNames(),
-        //   }),
-
-        // });
-        // if (geonaLayer.attribution) {
-        //   if (geonaLayer.attribution.onlineResource) {
-        //     source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-        //   } else {
-        //     source.attributions = geonaLayer.attribution.title;
-        //   }
-        // }
-        break;
+        case 'osm':
+          source = new ol.source.OSM({
+            crossOrigin: null,
+          });
+          break;
       }
-      case 'osm':
-        source = new ol.source.OSM({
-          crossOrigin: null,
-        });
-        break;
-    }
 
-    // TODO language support
-    this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
-      name: title,
-      viewSettings: geonaLayer.viewSettings,
-      projections: geonaLayer.projections,
-      source: source,
-    });
+      // TODO language support
+      this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
+        name: title,
+        viewSettings: geonaLayer.viewSettings,
+        projections: geonaLayer.projections,
+        source: source,
+      });
 
-    // If we are re-ordering we will have an index
-    if (index) {
-      if (this.config.basemap === 'none') {
-        this.map_.getLayers().insertAt(index + 1, this.activeLayers_[geonaLayer.name]);
-      } else {
-        this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
-      }
-    } else if (this.config.countryBorders !== 'none') {
+      // If we are re-ordering we will have an index
+      if (index) {
+        if (this.config.basemap === 'none') {
+          this.map_.getLayers().insertAt(index + 1, this.activeLayers_[geonaLayer.name]);
+        } else {
+          this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
+        }
+      } else if (this.config.countryBorders !== 'none') {
       // Insert below the top layer
-      this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
-    } else {
-      this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
-    }
+        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
+      } else {
+        this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
+      }
     // if the config doesn't already contain this geonaLayer.name, add it to the layers object
     // if(this.config.layers){}
-    // } else {
-    // alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
-    // }
+    } else {
+      alert('This layer cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+      // alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+    }
   }
 
   /**
@@ -352,18 +356,20 @@ export class OlMap extends GeonaMap {
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
-   * @param {Object}  options.center     The centre as {lat: _, lon: _}
-   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as
-   *                                     {minLat: _, minLon: _, maxLat: _, maxLon: _}
-   * @param {Array}   options.maxExtent  Extent to restrict the view to, {minLat: _, minLon: _, maxLat: _, maxLon: _}
+   * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
+   * @param {Object}  options.fitExtent  Extent to fit the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   * @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
    * @param {String}  options.projection The projection, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    let center = options.center ||
-      ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode()).reverse();
+    let currentCenterLatLon = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection()
+      .getCode()).reverse();
+    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this.map_.getView().getMaxZoom();
@@ -386,7 +392,7 @@ export class OlMap extends GeonaMap {
       fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
         .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
     }
-    center = ol.proj.fromLonLat(center, projection);
+    center = ol.proj.fromLonLat([center.lon, center.lat], projection);
 
     // Ensure that the center is within the maxExtent
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
@@ -576,7 +582,7 @@ function wmtsSourceFromLayer(layer) {
 
   // TODO Replace with thing to search for TileMatrixSet that supports the current projection
   for (let key in layer.tileMatrixSetLinks) {
-    if (!Object.hasOwnProperty(key)) {
+    if (layer.tileMatrixSetLinks.hasOwnProperty(key)) {
       tileMatrixSetId = key;
     }
   }
@@ -590,7 +596,7 @@ function wmtsSourceFromLayer(layer) {
   // TODO This should pick the default style, or one provided in a config
   let style;
   for (let key in layer.styles) {
-    if (!Object.hasOwnProperty(key)) {
+    if (layer.styles.hasOwnProperty(key)) {
       style = key;
     }
   }

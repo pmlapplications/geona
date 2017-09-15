@@ -25,7 +25,7 @@ export default class Layer {
     this.tags = layerConfig.tags;
 
     this.boundingBox = layerConfig.boundingBox;
-    this.projections = layerConfig.projections;
+    this.projections = layerConfig.projections || [];
 
     this.isTemporal = layerConfig.isTemporal;
     this.firstTime = layerConfig.firstTime;

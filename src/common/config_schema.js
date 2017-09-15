@@ -256,7 +256,7 @@ export let client = {
         minLat: {
           doc: 'The west-most latitude of the map max extent.',
           format: Number,
-          default: -100,
+          default: -90,
         },
         minLon: {
           doc: 'The south-most longitude of the map max extent.',
@@ -266,7 +266,7 @@ export let client = {
         maxLat: {
           doc: 'The east-most latitude of the map max extent.',
           format: Number,
-          default: 100,
+          default: 90,
         },
         maxLon: {
           doc: 'The north-most longitude of the map max extent.',
