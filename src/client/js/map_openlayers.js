@@ -7,8 +7,11 @@ import {
   latLonLabelFormatter, selectPropertyLanguage,
 } from './map_common';
 import LayerServer from '../../common/layer/server/layer_server';
+import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 
-let ol;
+
+import openlayers from 'openlayers/dist/ol-debug';
+let ol = openlayers;
 
 /**
  * Class for an OpenLayers map.
@@ -106,14 +109,31 @@ export class OlMap extends GeonaMap {
     console.log(selectPropertyLanguage({nl: 'TitleNl'})); // want nl
 
     // wms
-    $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
-      .done((serverConfig) => {
-        let keepingEslintHappy = new LayerServer(serverConfig);
-      });
+    // $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServer(serverConfig);
+    //   });
+
     // wmts
     // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fmap1.vis.earthdata.nasa.gov%2Fwmts-geo%2F1.0.0%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServer(serverConfig);
+    //   });
+
+    // wmts
+    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fopenlayers.org%2Fen%2Fv4.3.2%2Fexamples%2Fdata%2FWMTSCapabilities.xml')
+      .done((serverConfig) => {
+        let keepingEslintHappy = new LayerServerWmts(serverConfig);
+      });
+
+    // $.ajax('https://openlayers.org/en/v4.3.2/examples/data/WMTSCapabilities.xml')
+    //   .done((text) => {
+    //     let parser = new ol.format.WMTSCapabilities();
+    //     let result = parser.read(text);
+    //     let wmtsOptions = ol.source.WMTS.optionsFromCapabilities(result, {
+    //       layer: 'layer-7328',
+    //       matrixSet: 'EPSG:3857',
+    //     });
     //   });
   }
 
@@ -200,104 +220,107 @@ export class OlMap extends GeonaMap {
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   addLayer(geonaLayer, index) {
-    if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
-      let source;
-      let title;
-      let time;
-      switch (geonaLayer.PROTOCOL) {
-        case 'wms':
-          title = geonaLayer.title.und;
-          if (geonaLayer.isTemporal === true) {
-            time = geonaLayer.lastTime;
-          }
-          source = new ol.source.TileWMS({
-            url: geonaLayer.layerServer.url,
-            projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
-            crossOrigin: null,
-            params: {
-              LAYERS: geonaLayer.name,
-              FORMAT: 'image/png', // TODO maybe change later
-              // TODO STYLES:
-              STYLES: 'boxfill/alg',
-              // TODO update once isTemporal, firstTime and lastTime are working
-              time: '2015-12-27T00:00:00.000Z',
-              wrapDateLine: true,
-              NUMCOLORBANDS: 255,
-              VERSION: geonaLayer.layerServer.version,
-            },
-          });
-          if (geonaLayer.attribution) {
-            if (geonaLayer.attribution.onlineResource) {
-              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-            } else {
-              source.attributions = geonaLayer.attribution.title;
-            }
-          }
-          break;
-        case 'wmts': {
-          let projection = ol.proj.get('EPSG:4326');
-          let projectionExtent = projection.getExtent();
-          let size = ol.extent.getWidth(projectionExtent) / 256;
-          let resolutions = new Array(14);
-          for (let i = 0; i < 14; ++i) {
-            resolutions[i] = size / Math.pow(2, i);
-          }
-          title = selectPropertyLanguage(geonaLayer.title);
-          source = new ol.source.WMTS({
-            url: geonaLayer.layerServer.url,
-            layer: '0',
-            matrixSet: 'EPSG:4326',
-            format: 'image/png',
-            projection: projection,
-            tileGrid: new ol.tilegrid.WMTS({
-              origin: projectionExtent,
-              resolutions: resolutions,
-              // matrixIds: Object.getOwnPropertyNames(),
-            }),
-
-          });
-          if (geonaLayer.attribution) {
-            if (geonaLayer.attribution.onlineResource) {
-              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-            } else {
-              source.attributions = geonaLayer.attribution.title;
-            }
-          }
-          break;
+    // if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
+    let source;
+    let title;
+    let time;
+    switch (geonaLayer.PROTOCOL) {
+      case 'wms':
+        title = geonaLayer.title.und;
+        if (geonaLayer.isTemporal === true) {
+          time = geonaLayer.lastTime;
         }
-        case 'osm':
-          source = new ol.source.OSM({
-            crossOrigin: null,
-          });
-          break;
-      }
-
-      // TODO language support
-      this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
-        name: title,
-        viewSettings: geonaLayer.viewSettings,
-        projections: geonaLayer.projections,
-        source: source,
-      });
-
-      // If we are re-ordering we will have an index
-      if (index) {
-        if (this.config.basemap === 'none') {
-          this.map_.getLayers().insertAt(index + 1, this.activeLayers_[geonaLayer.name]);
-        } else {
-          this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
+        source = new ol.source.TileWMS({
+          url: geonaLayer.layerServer.url,
+          projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
+          crossOrigin: null,
+          params: {
+            LAYERS: geonaLayer.name,
+            FORMAT: 'image/png', // TODO maybe change later
+            // TODO STYLES:
+            STYLES: 'boxfill/alg',
+            // TODO update once isTemporal, firstTime and lastTime are working
+            time: '2015-12-27T00:00:00.000Z',
+            wrapDateLine: true,
+            NUMCOLORBANDS: 255,
+            VERSION: geonaLayer.layerServer.version,
+          },
+        });
+        if (geonaLayer.attribution) {
+          if (geonaLayer.attribution.onlineResource) {
+            source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+          } else {
+            source.attributions = geonaLayer.attribution.title;
+          }
         }
-      } else if (this.config.countryBorders !== 'none') {
-        // Insert below the top layer
-        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
-      } else {
-        this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
+        break;
+      case 'wmts': {
+        let options = wmtsSourceOptionsFromLayer(geonaLayer);
+        source = new ol.source.WMTS(options);
+        console.log(options);
+        // let projection = ol.proj.get('EPSG:4326');
+        // let projectionExtent = projection.getExtent();
+        // let size = ol.extent.getWidth(projectionExtent) / 256;
+        // let resolutions = new Array(14);
+        // for (let i = 0; i < 14; ++i) {
+        //   resolutions[i] = size / Math.pow(2, i);
+        // }
+        // title = selectPropertyLanguage(geonaLayer.title);
+        // source = new ol.source.WMTS({
+        //   url: geonaLayer.layerServer.url,
+        //   layer: '0',
+        //   matrixSet: 'EPSG:4326',
+        //   format: 'image/png',
+        //   projection: projection,
+        //   tileGrid: new ol.tilegrid.WMTS({
+        //     origin: projectionExtent,
+        //     resolutions: resolutions,
+        //     // matrixIds: Object.getOwnPropertyNames(),
+        //   }),
+
+        // });
+        // if (geonaLayer.attribution) {
+        //   if (geonaLayer.attribution.onlineResource) {
+        //     source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+        //   } else {
+        //     source.attributions = geonaLayer.attribution.title;
+        //   }
+        // }
+        break;
       }
-      // if the config doesn't already contain this geonaLayer.name, add it to the layers object
-      // if(this.config.layers){}
-    } else {
-      alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+      case 'osm':
+        source = new ol.source.OSM({
+          crossOrigin: null,
+        });
+        break;
     }
+
+    // TODO language support
+    this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
+      name: title,
+      viewSettings: geonaLayer.viewSettings,
+      projections: geonaLayer.projections,
+      source: source,
+    });
+
+    // If we are re-ordering we will have an index
+    if (index) {
+      if (this.config.basemap === 'none') {
+        this.map_.getLayers().insertAt(index + 1, this.activeLayers_[geonaLayer.name]);
+      } else {
+        this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
+      }
+    } else if (this.config.countryBorders !== 'none') {
+      // Insert below the top layer
+      this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
+    } else {
+      this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
+    }
+    // if the config doesn't already contain this geonaLayer.name, add it to the layers object
+    // if(this.config.layers){}
+    // } else {
+    // alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+    // }
   }
 
   /**
@@ -541,4 +564,126 @@ export function init(geonaServer, next) {
     mapJs.src = geonaServer + '/js/vendor_openlayers.js';
     head.appendChild(mapJs);
   }
+}
+
+function wmtsSourceOptionsFromLayer(layer) {
+  let tileMatrixSetId;
+
+  // TODO Replace with thing to search for TileMatrixSet that supports the current projection
+  for (let key in layer.tileMatrixSetLinks) {
+    if (!Object.hasOwnProperty(key)) {
+      tileMatrixSetId = key;
+    }
+  }
+
+  let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
+
+  let format = layer.formats[0];
+
+  let style;
+  for (let key in layer.styles) {
+    if (!Object.hasOwnProperty(key)) {
+      style = key;
+    }
+  }
+
+  let dimensions = {};
+  // TODO dimensions
+
+  let projection = ol.proj.get(tileMatrixSet.projection);
+
+  let extent = ol.proj.transformExtent([layer.boundingBox.minLon, layer.boundingBox.minLat, layer.boundingBox.maxLon,
+    layer.boundingBox.maxLat], 'EPSG:4326', projection);
+
+  // TODO wrapX
+  let wrapX = false;
+  // TODO matrixLimits
+
+  let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent);
+
+  let urls = [];
+  let requestEncoding = '';
+
+  // TODO urls from operations metadata
+
+  if (urls.length === 0) {
+    requestEncoding = ol.source.WMTSRequestEncoding.REST;
+    for (let resource of layer.resourceUrls) {
+      if (resource.resourceType === 'tile') {
+        format = resource.format;
+        urls.push(resource.template);
+      }
+    }
+  }
+
+  return {
+    urls: urls,
+    layer: layer.identifier,
+    matrixSet: tileMatrixSetId,
+    format: format,
+    projection: projection,
+    requestEncoding: requestEncoding,
+    tileGrid: tileGrid,
+    style: style,
+    dimensions: dimensions,
+    wrapX: wrapX,
+    crossOrigin: null,
+  };
+}
+
+function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits = []) {
+  /** @type {!Array.<number>} */
+  let resolutions = [];
+  /** @type {!Array.<string>} */
+  let matrixIds = [];
+  /** @type {!Array.<ol.Coordinate>} */
+  let origins = [];
+  /** @type {!Array.<ol.Size>} */
+  let tileSizes = [];
+  /** @type {!Array.<ol.Size>} */
+  let sizes = [];
+
+  let projection = ol.proj.get(matrixSet.projection);
+  let metersPerUnit = projection.getMetersPerUnit();
+
+  let switchOriginXy = projection.getAxisOrientation().substr(0, 2) === 'ne';
+
+  matrixSet.tileMatrices.sort(function(a, b) {
+    return b.scaleDenominator - a.scaleDenominator;
+  });
+
+  for (let matrix of matrixSet.tileMatrices) {
+    // TODO matrix limits
+
+    matrixIds.push(matrix.identifier);
+    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit;
+    let tileWidth = matrix.tileWidth;
+    let tileHeight = matrix.tileHeight;
+
+    if (switchOriginXy) {
+      origins.push(matrix.topLeftCorner.reverse());
+    } else {
+      origins.push(matrix.topLeftCorner);
+    }
+
+    resolutions.push(resolution);
+
+    if (tileWidth === tileHeight) {
+      tileSizes.push(tileWidth);
+    } else {
+      tileSizes.push([tileWidth, tileHeight]);
+    }
+
+    // top-left origin, so height is negative
+    sizes.push([matrix.matrixWidth, -matrix.matrixHeight]);
+  }
+
+  return new ol.tilegrid.WMTS({
+    extent: extent,
+    origins: origins,
+    resolutions: resolutions,
+    matrixIds: matrixIds,
+    tileSizes: tileSizes,
+    sizes: sizes,
+  });
 }

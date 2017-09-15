@@ -203,33 +203,33 @@ function parse1_0(url, capabilities) {
         }
       }
       // Style is a mandatory property
-      layerData.style = {};
+      layerData.styles = {};
       for (let style of dataset.value.style) {
-        layerData.style[style.identifier.value] = {};
+        layerData.styles[style.identifier.value] = {};
 
         if (style.title) {
-          layerData.style[style.identifier.value].title = parseTitles(style.title);
+          layerData.styles[style.identifier.value].title = parseTitles(style.title);
         }
 
         if (style._abstract) {
-          layerData.style[style.identifier.value].abstract = parseAbstracts(style._abstract);
+          layerData.styles[style.identifier.value].abstract = parseAbstracts(style._abstract);
         }
 
         if (style.keywords) {
-          layerData.style[style.identifier.value].keywords = parseKeywords(style.keywords);
+          layerData.styles[style.identifier.value].keywords = parseKeywords(style.keywords);
         }
 
         if (style.legendURL !== undefined) {
-          layerData.style[style.identifier.value].legendURL = style.legendURL;
+          layerData.styles[style.identifier.value].legendURL = style.legendURL;
         }
 
         if (style.isDefault !== undefined) {
-          layerData.style[style.identifier.value].isDefault = style.isDefault;
+          layerData.styles[style.identifier.value].isDefault = style.isDefault;
         }
       }
 
       // Format is a mandatory property
-      layerData.format = dataset.value.format;
+      layerData.formats = dataset.value.format;
 
 
       if (dataset.value.infoFormat) {
@@ -249,10 +249,10 @@ function parse1_0(url, capabilities) {
       }
 
       // TileMatrixSetLink is a mandatory property
-      layerData.tileMatrixSetLink = {};
+      layerData.tileMatrixSetLinks = {};
       let tileMatrixSetLimitsObject = {};
       for (let matrixData of dataset.value.tileMatrixSetLink) {
-        layerData.tileMatrixSetLink[matrixData.tileMatrixSet] = {};
+        layerData.tileMatrixSetLinks[matrixData.tileMatrixSet] = {};
         if (matrixData.tileMatrixSetLimits) {
           for (let currentMatrix of matrixData.tileMatrixSetLimits.tileMatrixLimits) {
             let currentMatrixLimits = {};
@@ -264,18 +264,19 @@ function parse1_0(url, capabilities) {
             Object.assign(tileMatrixSetLimitsObject, currentMatrixLimits);
           }
         }
-        layerData.tileMatrixSetLink[matrixData.tileMatrixSet].tileMatrixSetLimits = tileMatrixSetLimitsObject;
+        layerData.tileMatrixSetLinks[matrixData.tileMatrixSet].tileMatrixSetLimits = tileMatrixSetLimitsObject;
       }
 
 
       if (dataset.value.resourceURL) {
-        let resourceObject = {};
+        layerData.resourceUrls = [];
         for (let resource of dataset.value.resourceURL) {
-          resourceObject.format = resource.format;
-          resourceObject.resourceType = resource.resourceType;
-          resourceObject.template = resource.template;
+          let thisResource = {};
+          thisResource.format = resource.format;
+          thisResource.resourceType = resource.resourceType;
+          thisResource.template = resource.template;
+          layerData.resourceUrls.push(thisResource);
         }
-        layerData.resourceUrl = resourceObject;
       }
     }
     serverConfig.layers.push(layerData);
@@ -286,21 +287,22 @@ function parse1_0(url, capabilities) {
     serverConfig.tileMatrixSets = {};
     let matrixSets = serverConfig.tileMatrixSets;
     for (let matrixSet of layerMatrix) {
-      matrixSets[matrixSet.identifier.value] = {};
-      matrixSets[matrixSet.identifier.value].crs = matrixSet.supportedCRS
+      let thisMatrixSet = matrixSets[matrixSet.identifier.value] = {};
+      thisMatrixSet.projection = matrixSet.supportedCRS
         .replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
 
-      matrixSets[matrixSet.identifier.value].tileMatrices = {};
+      thisMatrixSet.tileMatrices = [];
       for (let tile of matrixSet.tileMatrix) {
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value] = {};
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].scaleDenominator = tile
-          .scaleDenominator;
+        let thisMatrix = {};
+        thisMatrix.identifier = tile.identifier.value;
+        thisMatrix.scaleDenominator = tile.scaleDenominator;
+        thisMatrix.topLeftCorner = tile.topLeftCorner;
+        thisMatrix.tileWidth = tile.tileWidth;
+        thisMatrix.tileHeight = tile.tileHeight;
+        thisMatrix.matrixWidth = tile.matrixWidth;
+        thisMatrix.matrixHeight = tile.matrixHeight;
 
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].topLeftCorner = tile.topLeftCorner;
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].tileWidth = tile.tileWidth;
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].tileHeight = tile.tileHeight;
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].matrixWidth = tile.matrixWidth;
-        matrixSets[matrixSet.identifier.value].tileMatrices[tile.identifier.value].matrixHeight = tile.matrixHeight;
+        thisMatrixSet.tileMatrices.push(thisMatrix);
       }
     }
   }
