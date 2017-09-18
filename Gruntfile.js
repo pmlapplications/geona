@@ -325,7 +325,7 @@ module.exports = function(grunt) {
         tasks: ['handlebars'],
       },
       sass: {
-        files: ['src/client/scss/**/*.scss'],
+        files: ['src/client/scss/**/*.scss', 'src/client_admin/scss/**/*.scss'],
         tasks: ['sass:development'],
       },
     },
