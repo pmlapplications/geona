@@ -36,7 +36,6 @@ module.exports = function(grunt) {
     'i18next-xhr-backend',
     'jquery',
     'lodash',
-    'bootstrap-sass',
   ];
 
   let leafletPlugins = [
