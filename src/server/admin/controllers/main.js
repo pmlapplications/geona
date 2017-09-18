@@ -14,5 +14,14 @@ import * as config from '../../config';
  * @param {*} res 
  */
 export function index(req, res) {
-  res.render('admin_index', config.server.getProperties());
+  let data = {
+    config: config.server.getProperties(),
+    template: 'temp2',
+    menu: {
+      home: 'path/to/home',
+    },
+    body: 'Something',
+  };
+
+  res.render('admin_template', data);
 }
