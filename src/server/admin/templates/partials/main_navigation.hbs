@@ -10,8 +10,23 @@
           <a class="navbar-brand" href="https://geona.io/">geona</a>
         </div>
         <div id="navbar" class="navbar-right navbar-collapse collapse">
-          <ul class="nav nav-pills navbar-nav">
-            <li class="active"><a href="{{ menu.home }}">Home</a></li>
+          <ul class="nav navbar-nav">
+            {{#each menu }}
+              
+                {{#if children }}
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle {{ class }}" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ title }} <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    {{#each children }}
+                      <li><a href="{{ ../config.subFolderPath }}{{ path }}">{{ title }}</a></li>
+                    {{/each}}
+                  </ul>
+                </li>
+                {{else }}
+                  <li><a href="{{ ../config.subFolderPath }}{{ path }}" class="{{ class }}">{{ title }}</a></li>
+                {{/if}}              
+            {{/each}}
+            {{!-- <li class="active"><a href="{{ menu.home }}">Home</a></li>
             <li><a href="about">About</a></li>
             <li><a href="{{ config.subFolderPath }}/documentation">Documentation</a></li>
             <li class="dropdown">
@@ -25,7 +40,7 @@
                 <li><a href="#">Separated link</a></li>
                 <li><a href="#">One more separated link</a></li>
               </ul>
-            </li>
+            </li> --}}
           </ul>
         </div><!--/.nav-collapse -->
       </div>

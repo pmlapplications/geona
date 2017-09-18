@@ -7,6 +7,7 @@
  * @param {any} res 
  */
 import * as config from '../../config';
+import * as menu from '../templates/menu';
 
 /**
  * Renders the main index page for the administration application
@@ -17,9 +18,7 @@ export function index(req, res) {
   let data = {
     config: config.server.getProperties(),
     template: 'temp2',
-    menu: {
-      home: 'path/to/home',
-    },
+    menu: menu.structure,
     body: 'Something',
   };
 
