@@ -204,7 +204,7 @@ module.exports = function(grunt) {
           {
             expand: true,
             cwd: 'src/server/templates',
-            src: ['*'],
+            src: ['**/*'],
             dest: 'lib/server/templates',
           },
         ],
@@ -214,7 +214,7 @@ module.exports = function(grunt) {
           {
             expand: true,
             cwd: 'src/server/admin/templates',
-            src: ['*'],
+            src: ['**/*'],
             dest: 'lib/server/admin/templates',
           },
         ],
