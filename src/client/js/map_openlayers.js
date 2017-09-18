@@ -9,6 +9,7 @@ import {
 import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 
+import proj4 from 'proj4';
 
 // import openlayers from 'openlayers/dist/ol-debug';
 // let ol = openlayers;
@@ -582,13 +583,21 @@ function wmtsSourceFromLayer(layer) {
   // Get the tileMatrixSet object from the layer server
   let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
 
-  // TODO choose the best format (png before jpeg)
-  let format = layer.formats[0];
+  let format;
+  if (layer.formats.includes('image/png')) {
+    format = 'image/png';
+  } else if (layer.formats.includes('image/jpeg')) {
+    format = 'image/jpeg';
+  } else {
+    // It might be wiser if the else here checked for an 'image/xyz' before just going for the first one.
+    format = layer.formats[0];
+  }
 
   // TODO This should pick the default style, or one provided in a config
   let style;
   for (let key in layer.styles) {
     if (layer.styles.hasOwnProperty(key)) {
+      console.log(key);
       style = key;
     }
   }
@@ -617,7 +626,7 @@ function wmtsSourceFromLayer(layer) {
 
   if (urls.length === 0) {
     // If no tile urls were found in the operationsMetadata, get them from the layer resourceUrls
-    requestEncoding = ol.source.WMTSRequestEncoding.REST;
+    requestEncoding = 'REST';
     for (let resource of layer.resourceUrls) {
       if (resource.resourceType === 'tile') {
         format = resource.format;
@@ -662,11 +671,16 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let sizes = [];
 
   let projection = ol.proj.get(matrixSet.projection);
+  console.log(matrixSet.projection);
+  let axisOrientation = proj4(matrixSet.projection).oProj.axis;
+  console.log(axisOrientation);
+  console.log(projection);
   let metersPerUnit = projection.getMetersPerUnit();
 
   // If the projection has coordinates as (y, x)/(north, east) instead of (x, y)/(east, north),
   // they will need to be switched
-  let switchOriginXy = projection.getAxisOrientation().substr(0, 2) === 'ne';
+
+  let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
 
   // Sort the array of tileMatrices by their scaleDenominators
   matrixSet.tileMatrices.sort(function(a, b) {
