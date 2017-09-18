@@ -1,16 +1,22 @@
 /** @module app */
 
+import blocked from 'blocked';
 import express from 'express';
 import * as http from 'http';
 import i18next from 'i18next';
-import i18nextBackend from 'i18next-node-fs-backend';
 import * as i18nextMiddleware from 'i18next-express-middleware';
+import i18nextBackend from 'i18next-node-fs-backend';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 
 import {server as configServer} from './config';
 import mainRouter from './routers/main';
 import './hbs_helpers';
+
+// Probably want to remove this after testing.
+blocked((ms) => {
+  console.log('Node thread blocked for ' + ms + ' ms!');
+});
 
 /*
  * Setup i18next

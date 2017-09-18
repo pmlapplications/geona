@@ -582,7 +582,7 @@ function wmtsSourceFromLayer(layer) {
   // Get the tileMatrixSet object from the layer server
   let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
 
-  // TODO choose the best format png > jpeg
+  // TODO choose the best format (png before jpeg)
   let format = layer.formats[0];
 
   // TODO This should pick the default style, or one provided in a config
@@ -593,7 +593,7 @@ function wmtsSourceFromLayer(layer) {
     }
   }
 
-  // TODO dimensions
+  // TODO dimensions - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L358
   let dimensions = {};
 
   let projection = ol.proj.get(tileMatrixSet.projection);
@@ -605,7 +605,7 @@ function wmtsSourceFromLayer(layer) {
   // TODO Not sure if wrapX should always be true. It should be fine though
   let wrapX = true;
 
-  // TODO matrixLimits
+  // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
 
   // Get the tile grid
   let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent);
@@ -613,7 +613,7 @@ function wmtsSourceFromLayer(layer) {
   let urls = [];
   let requestEncoding = '';
 
-  // TODO urls from operations metadata
+  // TODO urls from operations metadata - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L409
 
   if (urls.length === 0) {
     // If no tile urls were found in the operationsMetadata, get them from the layer resourceUrls
@@ -674,7 +674,7 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   });
 
   for (let matrix of matrixSet.tileMatrices) {
-    // TODO matrix limits
+    // TODO matrix limits - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/tilegrid/wmts.js#L109
 
     matrixIds.push(matrix.identifier);
     let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit; // Magic
