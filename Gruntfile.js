@@ -80,7 +80,7 @@ module.exports = function(grunt) {
           },
         ],
       },
-      babili: { // Minifying the browser bundle for client and admin apps
+      minify: { // Minifying the browser bundle for client and admin apps
         files: [
           {
             expand: true,
@@ -234,8 +234,8 @@ module.exports = function(grunt) {
       server: {
         BABEL_ENV: 'server',
       },
-      babili: {
-        BABEL_ENV: 'babili',
+      minify: {
+        BABEL_ENV: 'minify',
       },
       babelify: {
         BABEL_ENV: 'babelify',
@@ -350,8 +350,8 @@ module.exports = function(grunt) {
     'env:babelify',
     'browserify:client',
     'browserifyOther',
-    'env:babili',
-    'babel:babili',
+    'env:minify',
+    'babel:minify',
     'jsdoc',
   ]);
 
