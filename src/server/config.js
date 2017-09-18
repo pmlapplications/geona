@@ -32,6 +32,7 @@ function combinedClientConfig() {
   clientConfig.set('package.name', packageContent.name);
   clientConfig.set('package.version', packageContent.version);
   clientConfig.set('package.description', packageContent.description);
+  clientConfig.set('package.repositoryUrl', packageContent.repository.url);
 
   return clientConfig;
 }
@@ -70,6 +71,7 @@ function combinedServerConfig() {
   serverConfig.set('package.name', packageContent.name);
   serverConfig.set('package.version', packageContent.version);
   serverConfig.set('package.description', packageContent.description);
+  serverConfig.set('package.repositoryUrl', packageContent.repository.url);
 
   return serverConfig;
 }
