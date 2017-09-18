@@ -205,12 +205,14 @@ export class LMap extends GeonaMap {
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
-   * @param {Array}   options.center     The centre as [lat, lon]
-   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as [minLat, minLon, maxLat, maxLon]
-   * @param {Array}   options.maxExtent  Extent to restrict the view to, defined as [minLat, minLon, maxLat, maxLon]
+   * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
+   * @param {Object}  options.fitExtent  Extent to fit the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   * @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection
+   * @param {String}  options.projection The projection, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {

@@ -37,12 +37,7 @@
     "accessConstraints": [
       "http://www.ngi.be/cartoweb_info/cartoweb_gebruiksvoorwaarden.pdf - http://www.ngi.be/cartoweb_info/cartoweb_conditions.pdf"
     ],
-    "onlineResource": "http://www.ngi.be",
-    "contactInformation": {
-      "email": [
-        "cartoweb@ngi.be"
-      ]
-    }
+    "onlineResource": "http://www.ngi.be"
   },
   "layers": [
     {
@@ -85,7 +80,7 @@
         "maxLat": 51.51,
         "maxLon": 6.41
       },
-      "style": {
+      "styles": {
         "default": {
           "legendURL": [
             {
@@ -102,13 +97,13 @@
           "isDefault": true
         }
       },
-      "format": [
+      "formats": [
         "image/png"
       ],
       "infoFormat": [
         "text/plain"
       ],
-      "tileMatrixSetLink": {
+      "tileMatrixSetLinks": {
         "3812": {
           "tileMatrixSetLimits": {
             "7": {
@@ -130,16 +125,13 @@
           }
         }
       },
-      "resourceUrl": {
-        "temp": [
-          {
-            "TYPE_NAME": "WMTS_1_0.URLTemplateType",
-            "resourceType": "tile",
-            "template": "http://www.ngi.be/cartoweb/1.0.0/topo/{style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png",
-            "format": "image/png"
-          }
-        ]
-      }
+      "resourceUrls": [
+        {
+          "format": "image/png",
+          "resourceType": "tile",
+          "template": "http://www.ngi.be/cartoweb/1.0.0/topo/{style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png"
+        }
+      ]
     },
     {
       "identifier": "overlay",
@@ -181,7 +173,7 @@
         "maxLat": 51.5,
         "maxLon": 6.4
       },
-      "style": {
+      "styles": {
         "default": {
           "legendURL": [
             {
@@ -198,13 +190,13 @@
           "isDefault": true
         }
       },
-      "format": [
+      "formats": [
         "image/png"
       ],
       "infoFormat": [
         "text/plain"
       ],
-      "tileMatrixSetLink": {
+      "tileMatrixSetLinks": {
         "3812": {
           "tileMatrixSetLimits": {
             "7": {
@@ -226,23 +218,21 @@
           }
         }
       },
-      "resourceUrl": {
-        "temp": [
-          {
-            "TYPE_NAME": "WMTS_1_0.URLTemplateType",
-            "resourceType": "tile",
-            "template": "http://www.ngi.be/cartoweb/1.0.0/overlay/{style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png",
-            "format": "image/png"
-          }
-        ]
-      }
+      "resourceUrls": [
+        {
+          "format": "image/png",
+          "resourceType": "tile",
+          "template": "http://www.ngi.be/cartoweb/1.0.0/overlay/{style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png"
+        }
+      ]
     }
   ],
   "tileMatrixSets": {
     "3812": {
-      "crs": "EPSG:3812",
-      "tileMatrices": {
-        "0": {
+      "projection": "EPSG:3812",
+      "tileMatrices": [
+        {
+          "identifier": "0",
           "scaleDenominator": 3779761.90476,
           "topLeftCorner": [
             450000,
@@ -253,7 +243,8 @@
           "matrixWidth": 8,
           "matrixHeight": 8
         },
-        "1": {
+        {
+          "identifier": "1",
           "scaleDenominator": 1889880.95238,
           "topLeftCorner": [
             450000,
@@ -264,7 +255,8 @@
           "matrixWidth": 8,
           "matrixHeight": 8
         },
-        "2": {
+        {
+          "identifier": "2",
           "scaleDenominator": 755952.380952,
           "topLeftCorner": [
             450000,
@@ -275,7 +267,8 @@
           "matrixWidth": 8,
           "matrixHeight": 8
         },
-        "3": {
+        {
+          "identifier": "3",
           "scaleDenominator": 472470.238095,
           "topLeftCorner": [
             450000,
@@ -286,7 +279,8 @@
           "matrixWidth": 16,
           "matrixHeight": 16
         },
-        "4": {
+        {
+          "identifier": "4",
           "scaleDenominator": 236235.119048,
           "topLeftCorner": [
             450000,
@@ -297,7 +291,8 @@
           "matrixWidth": 32,
           "matrixHeight": 32
         },
-        "5": {
+        {
+          "identifier": "5",
           "scaleDenominator": 94494.047619,
           "topLeftCorner": [
             450000,
@@ -308,7 +303,8 @@
           "matrixWidth": 64,
           "matrixHeight": 64
         },
-        "6": {
+        {
+          "identifier": "6",
           "scaleDenominator": 47247.0238095,
           "topLeftCorner": [
             450000,
@@ -319,7 +315,8 @@
           "matrixWidth": 128,
           "matrixHeight": 128
         },
-        "7": {
+        {
+          "identifier": "7",
           "scaleDenominator": 23623.5119048,
           "topLeftCorner": [
             450000,
@@ -330,7 +327,8 @@
           "matrixWidth": 256,
           "matrixHeight": 256
         },
-        "8": {
+        {
+          "identifier": "8",
           "scaleDenominator": 9449.4047619,
           "topLeftCorner": [
             450000,
@@ -341,7 +339,8 @@
           "matrixWidth": 512,
           "matrixHeight": 512
         },
-        "9": {
+        {
+          "identifier": "9",
           "scaleDenominator": 4724.70238095,
           "topLeftCorner": [
             450000,
@@ -352,7 +351,8 @@
           "matrixWidth": 1024,
           "matrixHeight": 1024
         },
-        "10": {
+        {
+          "identifier": "10",
           "scaleDenominator": 2362.35119048,
           "topLeftCorner": [
             450000,
@@ -363,12 +363,13 @@
           "matrixWidth": 2048,
           "matrixHeight": 2048
         }
-      }
+      ]
     },
     "3857": {
-      "crs": "EPSG:3857",
-      "tileMatrices": {
-        "7": {
+      "projection": "EPSG:3857",
+      "tileMatrices": [
+        {
+          "identifier": "7",
           "scaleDenominator": 4367830.189732144,
           "topLeftCorner": [
             -20037508.342787,
@@ -379,7 +380,8 @@
           "matrixWidth": 67,
           "matrixHeight": 44
         },
-        "8": {
+        {
+          "identifier": "8",
           "scaleDenominator": 2183915.094866072,
           "topLeftCorner": [
             -20037508.342787,
@@ -390,7 +392,8 @@
           "matrixWidth": 133,
           "matrixHeight": 88
         },
-        "9": {
+        {
+          "identifier": "9",
           "scaleDenominator": 1091957.547433036,
           "topLeftCorner": [
             -20037508.342787,
@@ -401,7 +404,8 @@
           "matrixWidth": 266,
           "matrixHeight": 175
         },
-        "10": {
+        {
+          "identifier": "10",
           "scaleDenominator": 545978.773716518,
           "topLeftCorner": [
             -20037508.342787,
@@ -412,7 +416,8 @@
           "matrixWidth": 531,
           "matrixHeight": 350
         },
-        "11": {
+        {
+          "identifier": "11",
           "scaleDenominator": 272989.386858259,
           "topLeftCorner": [
             -20037508.342787,
@@ -423,7 +428,8 @@
           "matrixWidth": 1061,
           "matrixHeight": 700
         },
-        "12": {
+        {
+          "identifier": "12",
           "scaleDenominator": 136494.6934291295,
           "topLeftCorner": [
             -20037508.342787,
@@ -434,7 +440,8 @@
           "matrixWidth": 2122,
           "matrixHeight": 1400
         },
-        "13": {
+        {
+          "identifier": "13",
           "scaleDenominator": 68247.34671456474,
           "topLeftCorner": [
             -20037508.342787,
@@ -445,7 +452,8 @@
           "matrixWidth": 4243,
           "matrixHeight": 2799
         },
-        "14": {
+        {
+          "identifier": "14",
           "scaleDenominator": 34123.67335728237,
           "topLeftCorner": [
             -20037508.342787,
@@ -456,7 +464,8 @@
           "matrixWidth": 8486,
           "matrixHeight": 5597
         },
-        "15": {
+        {
+          "identifier": "15",
           "scaleDenominator": 17061.836678641186,
           "topLeftCorner": [
             -20037508.342787,
@@ -467,7 +476,8 @@
           "matrixWidth": 16972,
           "matrixHeight": 11193
         },
-        "16": {
+        {
+          "identifier": "16",
           "scaleDenominator": 8530.918339320593,
           "topLeftCorner": [
             -20037508.342787,
@@ -478,7 +488,8 @@
           "matrixWidth": 33944,
           "matrixHeight": 22386
         },
-        "17": {
+        {
+          "identifier": "17",
           "scaleDenominator": 4265.4591696602965,
           "topLeftCorner": [
             -20037508.342787,
@@ -489,7 +500,7 @@
           "matrixWidth": 67888,
           "matrixHeight": 44771
         }
-      }
+      ]
     }
   }
 }

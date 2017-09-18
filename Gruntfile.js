@@ -104,10 +104,6 @@ module.exports = function(grunt) {
     browserify: {
       // Default browserify options
       options: {
-        browserifyOptions: {
-          standalone: 'geona',
-          debug: true,
-        },
         transform: [
           'babelify',
           ['deamdify', {global: true}],
@@ -118,6 +114,10 @@ module.exports = function(grunt) {
       client: {
         files: clientBundle,
         options: {
+          browserifyOptions: {
+            standalone: 'geona',
+            debug: true,
+          },
           watch: true,
           external: clientExternalLibs,
         },
@@ -137,10 +137,9 @@ module.exports = function(grunt) {
         files: loaderBundle,
         options: {
           browserifyOptions: {
-            standalone: 'gp2Loader',
+            standalone: 'geonaLoader',
             debug: true,
           },
-          external: null,
           watch: true,
         },
       },
@@ -172,18 +171,14 @@ module.exports = function(grunt) {
         src: ['.'],
         dest: 'static/js/vendor_openlayers.js',
         options: {
-          browserifyOptions: {},
           alias: ['openlayers'],
-          external: null,
         },
       },
       leaflet: {
         src: ['.'],
         dest: 'static/js/vendor_leaflet.js',
         options: {
-          browserifyOptions: {},
           alias: ['leaflet'].concat(leafletPlugins),
-          external: null,
         },
       },
     },

@@ -1,8 +1,43 @@
 /** @module map_common */
 
+import i18next from 'i18next';
+
 /**
  * Variables and functions common to all map types.
  */
+
+/**
+  * Selects the appropriate language to use for a property from the available languages.
+  @param {Object} property A language-separated list of a property for a layer.
+  @return {*}              The value stored in the language property selected.
+  */
+export function selectPropertyLanguage(property) {
+  // The current user language
+  let language = i18next.language;
+  // The base language for the current language, such as 'en' for 'en-GB'
+  let baseLanguage = language.split('-')[0];
+
+  if (Object.keys(property).length === 1) {
+    // If there is only one possible language, return the value for that.
+    let value = Object.keys(property)[0];
+    return property[value];
+  } else {
+    if (property[language]) {
+      // If there's an item for the current language
+      return property[language];
+    } else if (property[baseLanguage]) {
+      // If there's an item for the current base language
+      return property[baseLanguage];
+    } else if (property.und) {
+      // If there's an item for undetermined
+      return property.und;
+    } else {
+      // Else, just select the first possible language.
+      let firstLanguage = Object.keys(property)[0];
+      return property[firstLanguage];
+    }
+  }
+}
 
 /**
  * Add the default options to a layer definition.

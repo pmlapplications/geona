@@ -10,11 +10,14 @@ import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
  * @param  {Object} res Express response
  */
 export function wcsGetLayers(req, res) {
-  getCapabilities('wcs', req.params.url).then((jsonCapabilities) => {
-    res.json(jsonCapabilities);
-  }).catch((err) => {
-    res.status(500).json({error: 'Error processing XML: ' + err.message});
-  });
+  // TODO This is only for testing the jsonix conversion. The WCS parser hasn't been written yet.
+  // It will probably be quite similar to the WMS parser.
+  getCapabilities('wcs', req.params.url)
+    .then((jsonCapabilities) => {
+      res.json(jsonCapabilities);
+    }).catch((err) => {
+      res.status(500).json({error: 'Error processing XML: ' + err.message});
+    });
 }
 
 /**
@@ -23,17 +26,14 @@ export function wcsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wmsGetLayers(req, res) {
-  // getCapabilities('wms', req.params.url).then((jsonCapabilities) => {
-  // res.json(jsonCapabilities);
-  // return parseWmsCapabilities(req.params.url);
-  // })
-  parseWmsCapabilities(req.params.url).then((layer) => {
-    res.json(layer);
-    // console.log(JSON.stringify(layer));
-  }).catch((err) => {
-    console.log(err);
-    res.status(500).json({error: 'Error processing XML: ' + err.message});
-  });
+  parseWmsCapabilities(req.params.url)
+    .then((layer) => {
+      res.json(layer);
+      // console.log(JSON.stringify(layer));
+    }).catch((err) => {
+      console.log(err);
+      res.status(500).json({error: 'Error processing XML: ' + err.message});
+    });
 }
 
 /**
@@ -42,14 +42,16 @@ export function wmsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wmtsGetLayers(req, res) {
-  // Add parsing for Layers
-  getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
-    console.log(JSON.stringify(jsonCapabilities));
-    return parseWmtsCapabilities(req.params.url);
-  }).then((layer) => {
-    res.json(layer);
-    // console.log(JSON.stringify(layer));
-  }).catch((err) => {
-    res.status(500).json({error: 'Error processing XML: ' + err.message});
-  });
+  // getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
+  //   res.json(jsonifyCapabilities('wmts', jsonCapabilities));
+  //   console.log(JSON.stringify(jsonCapabilities));
+  // });
+
+  parseWmtsCapabilities(req.params.url)
+    .then((layer) => {
+      res.json(layer);
+      // console.log(JSON.stringify(layer));
+    }).catch((err) => {
+      res.status(500).json({error: 'Error processing XML: ' + err.message});
+    });
 }

@@ -14,8 +14,11 @@ export default class LayerWmts extends LayerVisible {
    */
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
-    this.name = layerConfig.wmts.name;
-    this.styles = {};
-    this.styleMatrixSets = layerConfig.styleMatrixSets;
+    this.PROTOCOL = 'wmts';
+    this.identifier = layerConfig.identifier;
+    this.styles = layerConfig.styles;
+    this.formats = layerConfig.formats;
+    this.resourceUrls = layerConfig.resourceUrls;
+    this.tileMatrixSetLinks = layerConfig.tileMatrixSetLinks;
   }
 }

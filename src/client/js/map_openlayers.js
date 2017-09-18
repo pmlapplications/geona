@@ -2,7 +2,17 @@
 
 import $ from 'jquery';
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter} from './map_common';
+import {
+  basemaps as defaultBasemaps, borderLayers as defaultBorders,
+  latLonLabelFormatter, selectPropertyLanguage,
+} from './map_common';
+import LayerServer from '../../common/layer/server/layer_server';
+import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
+
+import proj4 from 'proj4';
+
+// import openlayers from 'openlayers/dist/ol-debug';
+// let ol = openlayers;
 
 let ol;
 
@@ -92,6 +102,34 @@ export class OlMap extends GeonaMap {
 
     // this.addLayer('chlor_a');
     // this.addLayer('ph_hcmr');
+
+    // wms
+    // $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServer(serverConfig);
+    //   });
+
+    // wmts
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fmap1.vis.earthdata.nasa.gov%2Fwmts-geo%2F1.0.0%2FWMTSCapabilities.xml')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServer(serverConfig);
+    //   });
+
+    // wmts
+    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fopenlayers.org%2Fen%2Fv4.3.2%2Fexamples%2Fdata%2FWMTSCapabilities.xml')
+      .done((serverConfig) => {
+        let keepingEslintHappy = new LayerServerWmts(serverConfig);
+      });
+
+    // $.ajax('https://openlayers.org/en/v4.3.2/examples/data/WMTSCapabilities.xml')
+    //   .done((text) => {
+    //     let parser = new ol.format.WMTSCapabilities();
+    //     let result = parser.read(text);
+    //     let wmtsOptions = ol.source.WMTS.optionsFromCapabilities(result, {
+    //       layer: 'layer-7328',
+    //       matrixSet: 'EPSG:3857',
+    //     });
+    //   });
   }
 
   /**
@@ -118,7 +156,6 @@ export class OlMap extends GeonaMap {
     }
 
     if (basemap !== 'none') {
-      this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
       if (this.basemaps_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
         this.setView(this.basemaps_[basemap].get('viewSettings'));
       } else {
@@ -126,6 +163,8 @@ export class OlMap extends GeonaMap {
         options.projection = this.basemaps_[basemap].get('projections')[0];
         this.setView(options);
       }
+      // Add the new basemap after updating the view
+      this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
     }
     this.config.basemap = basemap;
   }
@@ -173,103 +212,91 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {GeonaLayer} geonaLayer The GeonaLayer object to be created on the map.
+   * @param {Layer} geonaLayer The Layer object to be created on the map.
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   addLayer(geonaLayer, index) {
-    if (geonaLayer.crs.includes(this.map_.getView().getProjection().getCode())) {
+    // TODO reinstate this if
+    if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
       let source;
-      switch (geonaLayer.serviceType) {
+      let title;
+      let time;
+      switch (geonaLayer.PROTOCOL) {
         case 'wms':
+          title = geonaLayer.title.und;
+          if (geonaLayer.isTemporal === true) {
+            time = geonaLayer.lastTime;
+          }
           source = new ol.source.TileWMS({
-            url: geonaLayer.serviceUrl,
-            attributions: geonaLayer.attributions,
-            // TODO projection 
-            projection: this.map_.getView().getProjection().getCode() || geonaLayer.crs[0],
+            url: geonaLayer.layerServer.url,
+            projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
             crossOrigin: null,
             params: {
               LAYERS: geonaLayer.name,
               FORMAT: 'image/png', // TODO maybe change later
               // TODO STYLES:
               STYLES: 'boxfill/alg',
-              // TODO time
+              // TODO update once isTemporal, firstTime and lastTime are working
               time: '2015-12-27T00:00:00.000Z',
-              // TODO wrapDateLine
               wrapDateLine: true,
-              // TODO NUMCOLORBANDS
               NUMCOLORBANDS: 255,
-              VERSION: '1.1.1',
+              VERSION: geonaLayer.layerServer.version,
             },
           });
+          if (geonaLayer.attribution) {
+            if (geonaLayer.attribution.onlineResource) {
+              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+            } else {
+              source.attributions = geonaLayer.attribution.title;
+            }
+          }
           break;
-        case 'wmts':
-        // TODO wmts
+        case 'wmts': {
+          source = wmtsSourceFromLayer(geonaLayer);
+          // let projection = ol.proj.get('EPSG:4326');
+          // let projectionExtent = projection.getExtent();
+          // let size = ol.extent.getWidth(projectionExtent) / 256;
+          // let resolutions = new Array(14);
+          // for (let i = 0; i < 14; ++i) {
+          //   resolutions[i] = size / Math.pow(2, i);
+          // }
+          // title = selectPropertyLanguage(geonaLayer.title);
+          // source = new ol.source.WMTS({
+          //   url: geonaLayer.layerServer.url,
+          //   layer: '0',
+          //   matrixSet: 'EPSG:4326',
+          //   format: 'image/png',
+          //   projection: projection,
+          //   tileGrid: new ol.tilegrid.WMTS({
+          //     origin: projectionExtent,
+          //     resolutions: resolutions,
+          //     // matrixIds: Object.getOwnPropertyNames(),
+          //   }),
+
+          // });
+          // if (geonaLayer.attribution) {
+          //   if (geonaLayer.attribution.onlineResource) {
+          //     source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+          //   } else {
+          //     source.attributions = geonaLayer.attribution.title;
+          //   }
+          // }
+          break;
+        }
+        case 'osm':
+          source = new ol.source.OSM({
+            crossOrigin: null,
+          });
+          break;
       }
 
-      // TODO remove and fix where geona.js gets its layer data from
-      let layerData = {
-        name: geonaLayer.name,
-        title: geonaLayer.title,
-        abstract: geonaLayer.abstract,
-        firstDate: geonaLayer.firstDate,
-        lastDate: geonaLayer.lastDate,
-        boundingBox: geonaLayer.boundingBox,
-        serviceUrl: geonaLayer.serviceUrl,
-        serviceType: geonaLayer.serviceType,
-      };
-
+      // TODO language support
       this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
-        name: geonaLayer.name,
-        viewSettings: this.config.viewSettings,
-        projections: geonaLayer.crs,
+        name: title,
+        viewSettings: geonaLayer.viewSettings,
+        projections: geonaLayer.projections,
         source: source,
-        layerData: layerData,
       });
-
-      // for (let configLayer of this.config.layers) {
-      //   if (configLayer.name === geonaLayer.name) {
-      //     configLayer = addLayerDefaults(configLayer);
-      //     let source;
-      //     switch (configLayer.source.type) {
-      //       case 'wms':
-      //         source = new ol.source.TileWMS({
-      //           url: configLayer.source.url,
-      //           attributions: configLayer.source.attributions,
-      //           projection: geonaLayer.crs[0],
-      //           crossOrigin: null,
-      //           params: {
-      //             LAYERS: configLayer.source.params.layers,
-      //             FORMAT: configLayer.source.params.format,
-      //             STYLES: configLayer.source.params.styles,
-      //             time: configLayer.source.params.time,
-      //             wrapDateLine: configLayer.source.params.wrapDateLine,
-      //             NUMCOLORBANDS: geonaLayer.colorBands,
-      //             VERSION: '1.1.1',
-      //           },
-      //         });
-      //         break;
-      //       case 'wmts':
-      //         console.error('WMTS not yet supported (TODO)');
-      //         break;
-      //     }
-
-      //     let layerData;
-      //     for (let serverLayer of CCI5DAY.server.Layers) {
-      //       if (serverLayer.Name === configLayer.name) {
-      //         layerData = serverLayer;
-      //       }
-      //     }
-
-      //     this.activeLayers_[configLayer.name] = new ol.layer.Tile({
-      //       name: configLayer.name,
-      //       viewSettings: configLayer.viewSettings,
-      //       projections: geonaLayer.crs,
-      //       source: source,
-      //       layerData: layerData,
-      //     });
-      //   }
-      // }
-
 
       // If we are re-ordering we will have an index
       if (index) {
@@ -279,15 +306,16 @@ export class OlMap extends GeonaMap {
           this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
         }
       } else if (this.config.countryBorders !== 'none') {
-        // Insert below the top layer
+      // Insert below the top layer
         this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
       } else {
         this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
       }
-      // if the config doesn't already contain this geonaLayer.name, add it to the layers object
-      // if(this.config.layers){}
+    // if the config doesn't already contain this geonaLayer.name, add it to the layers object
+    // if(this.config.layers){}
     } else {
-      alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+      alert('This layer cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+      // alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
     }
   }
 
@@ -321,18 +349,20 @@ export class OlMap extends GeonaMap {
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
    * @param {Object}  options            View options. All are optional
-   * @param {Object}  options.center     The centre as {lat: _, lon: _}
-   * @param {Array}   options.fitExtent  Extent to fit the view to, defined as
-   *                                     {minLat: _, minLon: _, maxLat: _, maxLon: _}
-   * @param {Array}   options.maxExtent  Extent to restrict the view to, {minLat: _, minLon: _, maxLat: _, maxLon: _}
+   * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
+   * @param {Object}  options.fitExtent  Extent to fit the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   * @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
    * @param {String}  options.projection The projection, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    let center = options.center ||
-      ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection().getCode()).reverse();
+    let currentCenterLatLon = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection()
+      .getCode()).reverse();
+    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this.map_.getView().getMaxZoom();
@@ -355,7 +385,7 @@ export class OlMap extends GeonaMap {
       fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
         .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
     }
-    center = ol.proj.fromLonLat(center, projection);
+    center = ol.proj.fromLonLat([center.lon, center.lat], projection);
 
     // Ensure that the center is within the maxExtent
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
@@ -532,4 +562,164 @@ export function init(geonaServer, next) {
     mapJs.src = geonaServer + '/js/vendor_openlayers.js';
     head.appendChild(mapJs);
   }
+}
+
+/**
+ * Create an openlayers WMTS source from a Geona Layer.
+ * Adapted from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L299
+ * @param  {Layer}          layer The Geona layer
+ * @return {ol.source.WMTS}       A new openlayers WMTS source
+ */
+function wmtsSourceFromLayer(layer) {
+  let tileMatrixSetId;
+
+  // TODO Replace with thing to search for TileMatrixSet that supports the current projection
+  for (let key in layer.tileMatrixSetLinks) {
+    if (layer.tileMatrixSetLinks.hasOwnProperty(key)) {
+      tileMatrixSetId = key;
+    }
+  }
+
+  // Get the tileMatrixSet object from the layer server
+  let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
+
+  let format;
+  if (layer.formats.includes('image/png')) {
+    format = 'image/png';
+  } else if (layer.formats.includes('image/jpeg')) {
+    format = 'image/jpeg';
+  } else {
+    // It might be wiser if the else here checked for an 'image/xyz' before just going for the first one.
+    format = layer.formats[0];
+  }
+
+  // TODO This should pick the default style, or one provided in a config
+  let style;
+  for (let key in layer.styles) {
+    if (layer.styles.hasOwnProperty(key)) {
+      console.log(key);
+      style = key;
+    }
+  }
+
+  // TODO dimensions - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L358
+  let dimensions = {};
+
+  let projection = ol.proj.get(tileMatrixSet.projection);
+
+  // Get the extent in the right projection format from the layer bounding box
+  let extent = ol.proj.transformExtent([layer.boundingBox.minLon, layer.boundingBox.minLat, layer.boundingBox.maxLon,
+    layer.boundingBox.maxLat], 'EPSG:4326', projection);
+
+  // TODO Not sure if wrapX should always be true. It should be fine though
+  let wrapX = true;
+
+  // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
+
+  // Get the tile grid
+  let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent);
+
+  let urls = [];
+  let requestEncoding = '';
+
+  // TODO urls from operations metadata - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L409
+
+  if (urls.length === 0) {
+    // If no tile urls were found in the operationsMetadata, get them from the layer resourceUrls
+    requestEncoding = 'REST';
+    for (let resource of layer.resourceUrls) {
+      if (resource.resourceType === 'tile') {
+        format = resource.format;
+        urls.push(resource.template);
+      }
+    }
+  }
+
+  return new ol.source.WMTS({
+    urls: urls,
+    layer: layer.identifier,
+    matrixSet: tileMatrixSetId,
+    format: format,
+    projection: projection,
+    requestEncoding: requestEncoding,
+    tileGrid: tileGrid,
+    style: style,
+    dimensions: dimensions,
+    wrapX: wrapX,
+    crossOrigin: null,
+  });
+}
+
+/**
+ * Create an openlayers WMTS Tile Grid from a provided matrix set.
+ * Adapted from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/tilegrid/wmts.js#L71
+ * @param  {Object}           matrixSet    The matrix set from a LayerServerWmts
+ * @param  {ol.Extent}        extent       Extent for the tile grid
+ * @param  {Array}            matrixLimits The matrix limits
+ * @return {ol.tilegrid.WMTS}              An openlayers WMTS tile grid
+ */
+function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits = []) {
+  /** @type {!Array.<number>} */
+  let resolutions = [];
+  /** @type {!Array.<string>} */
+  let matrixIds = [];
+  /** @type {!Array.<ol.Coordinate>} */
+  let origins = [];
+  /** @type {!Array.<ol.Size>} */
+  let tileSizes = [];
+  /** @type {!Array.<ol.Size>} */
+  let sizes = [];
+
+  let projection = ol.proj.get(matrixSet.projection);
+  console.log(matrixSet.projection);
+  let axisOrientation = proj4(matrixSet.projection).oProj.axis;
+  console.log(axisOrientation);
+  console.log(projection);
+  let metersPerUnit = projection.getMetersPerUnit();
+
+  // If the projection has coordinates as (y, x)/(north, east) instead of (x, y)/(east, north),
+  // they will need to be switched
+
+  let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
+
+  // Sort the array of tileMatrices by their scaleDenominators
+  matrixSet.tileMatrices.sort(function(a, b) {
+    return b.scaleDenominator - a.scaleDenominator;
+  });
+
+  for (let matrix of matrixSet.tileMatrices) {
+    // TODO matrix limits - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/tilegrid/wmts.js#L109
+
+    matrixIds.push(matrix.identifier);
+    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit; // Magic
+    let tileWidth = matrix.tileWidth;
+    let tileHeight = matrix.tileHeight;
+
+    if (switchOriginXy) {
+      // Swap the coordinaates for the top left corner if needs be
+      origins.push(matrix.topLeftCorner.reverse());
+    } else {
+      origins.push(matrix.topLeftCorner);
+    }
+
+    resolutions.push(resolution);
+
+    if (tileWidth === tileHeight) {
+      tileSizes.push(tileWidth);
+    } else {
+      tileSizes.push([tileWidth, tileHeight]);
+    }
+
+    // top-left origin, so height is negative
+    sizes.push([matrix.matrixWidth, -matrix.matrixHeight]);
+  }
+
+  return new ol.tilegrid.WMTS({
+    extent: extent,
+    origins: origins,
+    resolutions: resolutions,
+    matrixIds: matrixIds,
+    tileSizes: tileSizes,
+    sizes: sizes,
+  });
 }
