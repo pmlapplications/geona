@@ -19,3 +19,5 @@ hbs.registerHelper('t', function(key, options) {
   let result = this.t(key, options.hash);
   return new hbs.SafeString(result);
 });
+
+hbs.registerPartials(__dirname + '/admin/templates/partials');
