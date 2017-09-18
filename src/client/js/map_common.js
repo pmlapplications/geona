@@ -8,8 +8,8 @@ import i18next from 'i18next';
 
 /**
   * Selects the appropriate language to use for a property from the available languages.
-  @param {Object} property                       A language-separated list of a property for a layer.
-  @return {*} The value stored in the language property selected.
+  @param {Object} property A language-separated list of a property for a layer.
+  @return {*}              The value stored in the language property selected.
   */
 export function selectPropertyLanguage(property) {
   // The current user language

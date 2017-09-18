@@ -40,7 +40,6 @@ export class Gui {
     this.parentDiv.toggleClass('geona-container', true);
   }
 
-  // TODO finish this jsdoc
   /**
    * Initialises the map by calling either the terms and conditions screen, or the main map screen.
    * @param {*} onReadyCallback

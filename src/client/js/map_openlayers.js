@@ -102,14 +102,6 @@ export class OlMap extends GeonaMap {
     // this.addLayer('chlor_a');
     // this.addLayer('ph_hcmr');
 
-    // TODO remove these and write tests for map_common
-    console.log(selectPropertyLanguage({en: 'TitleEn', fr: 'TitleFr'})); // Want en
-    console.log(selectPropertyLanguage({'en': 'TitleEn', 'en-GB': 'TitleEnGB'})); // Want engb
-    console.log(selectPropertyLanguage({und: 'TitleUnd', en: 'TitleEn'})); // want en
-    console.log(selectPropertyLanguage({und: 'TitleUnd', fr: 'TitleFr'})); // want und
-    console.log(selectPropertyLanguage({nl: 'TitleNl', fr: 'TitleFr'})); // want nl
-    console.log(selectPropertyLanguage({nl: 'TitleNl'})); // want nl
-
     // wms
     // $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
     //   .done((serverConfig) => {
