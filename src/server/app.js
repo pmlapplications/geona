@@ -32,7 +32,7 @@ i18next
     // All languages must be defined here
     preload: ['en', 'fr'],
     // All namespaces must be defined here
-    ns: ['common', 'intro', 'menu'],
+    ns: ['admin', 'common', 'intro', 'menu'],
 
     fallbackLng: 'en',
     defaultNS: 'common',
