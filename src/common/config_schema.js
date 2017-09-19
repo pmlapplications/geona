@@ -16,6 +16,11 @@ export let server = {
     format: String,
     default: '',
   },
+  OAuth: {
+    doc: 'Array of OAuth provider configurations',
+    format: Array,
+    default: [],
+  },
 };
 
 export let client = {
