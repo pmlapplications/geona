@@ -18,7 +18,7 @@ export function index(req, res) {
   let data = {
     config: config.server.getProperties(),
     template: 'temp2',
-    menu: menu.structure,
+    menu: menu.getMenu('/admin'),
     body: 'Something',
   };
 

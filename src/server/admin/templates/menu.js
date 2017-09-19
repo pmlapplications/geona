@@ -1,8 +1,9 @@
 /**
  * @fileoverview Defines the administrative menu structure
  */
+import _ from 'lodash';
 
-export let structure = [
+let _structure = [
   {
     title: 'Home',
     path: '/',
@@ -36,6 +37,21 @@ export let structure = [
     title: 'Contact',
     path: '/contact',
   },
-  
 ];
 
+/**
+ * 
+ * 
+ * @export
+ * @param {String} path - path of the current route excluding any sub folder that the application may be running in
+ */
+export function getMenu(path) {
+  let menu = _structure;
+
+  _.forEach(menu, function(menuItem) {
+    if (menuItem.path === path) {
+      menuItem.active = true;
+    }
+  });
+  return menu;
+}
