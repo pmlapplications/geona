@@ -1,0 +1,48 @@
+<h2>{{t 'admin:setup.pageHeading'}}</h2>
+<p>{{t 'admin:setup.introText'}}</p>
+
+<div class="form-group row">
+  <div class="col-md-4 text-right">
+    <label for="provider">{{t 'admin:setup.selectOauthProvider' }}</label>
+  </div>
+  <div class="col-md-8">
+    <select name="provider" id="provider" class="form-control">
+      <option value=""></option>
+      <option value="google">Google</option>
+      <option value="facebook">Facebook</option>
+      <option value="github">GitHub</option>
+    </select>
+  </div>
+</div>
+
+
+<div id="add_google_oauth" style="display: none;">
+  <h3>Google OAuth</h3>
+  <p>{{t 'admin:setup.googleIntro' }}</p>
+  <dl>
+    <dt>Authorized JavaScript origins</dt>
+    <dd>{{ authorizedOrigin }}</dd>    
+  </dl>
+  <dl>
+    <dt>Authorized redirect URIs</dt>
+    <dd>{{ authorizedRedirectURI }}</dd>    
+  </dl>
+  <form>
+    <div class="form-group row">
+      <div class="col-md-4 text-right">
+        <label for="google_clientId" class="form-label">{{t 'admin:setup.clientId' }}</label>
+      </div>
+      <div class="col-md-8">
+        <input type="url" class="form-control" id="google_clientId" aria-placeholder="Client ID" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-4 text-right">
+        <label for="google_secret" class="form-label">{{t 'admin:setup.secret' }}</label>
+      </div>
+      <div class="col-md-8">
+        <input type="url" class="form-control" id="google_clientId" aria-placeholder="Client ID" />
+      </div>
+    </div>
+  </form>
+</div>

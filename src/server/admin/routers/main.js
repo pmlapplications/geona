@@ -6,3 +6,5 @@ const router = express.Router();
 export default router;
 
 router.get('/', adminController.index);
+router.get('/setup', adminController.setup);
+router.get('/login', adminController.login);

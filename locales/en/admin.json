@@ -1,0 +1,15 @@
+{
+  "login": {
+    "pageHeading": "Authentication",
+    "introText": "To continue, please login with one of the providers below"
+  },
+  "setup": {
+    "pageHeading": "Geona Setup",
+    "introText": "To login to Geona and use the administration tools you first need to configure an OAuth provider. Please complete the form below with the required details:",
+    "forbidden": "OAuth provider details have already been set in <code>config_server.json</code>. Please contact the server administrator to make changes",
+    "clientId": "Client ID",
+    "secret": "Secret",
+    "selectOauthProvider": "Select OAuth Provider",
+    "googleIntro": "For information on how to obtain OAuth credentials from Google please read <a href=\"https://developers.google.com/identity/protocols/OAuth2\" target=\"_blank\">Using OAuth 2.0 to Access Google APIs</a>. During this process you will be asked for two key pieces of information these are:"
+  }
+}

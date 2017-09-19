@@ -40,7 +40,7 @@ let _structure = [
 ];
 
 /**
- * 
+ * Returns a JSON object that contains the administration menu structure with the `path` set to use an `active` class
  * 
  * @export
  * @param {String} path - path of the current route excluding any sub folder that the application may be running in
