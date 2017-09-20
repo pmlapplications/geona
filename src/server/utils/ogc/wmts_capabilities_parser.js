@@ -52,6 +52,7 @@ export function parseLocalWmtsCapabilities(xml, url) {
  * @return {Object}             Geona server config options.
  */
 function parse1_0(url, capabilities) {
+  // TODO comment this whole method for readability
   let serviceId = capabilities.serviceIdentification;
   let servicePr = capabilities.serviceProvider;
 
@@ -78,68 +79,71 @@ function parse1_0(url, capabilities) {
   if (serviceId.accessConstraints) {
     serverConfig.service.accessConstraints = serviceId.accessConstraints;
   }
-  if (servicePr.providerSite.href) {
-    serverConfig.service.onlineResource = servicePr.providerSite.href;
-  }
+  if (servicePr) {
+    if (servicePr.providerSite.href) {
+      serverConfig.service.onlineResource = servicePr.providerSite.href;
+    }
 
-  if (servicePr.serviceContact) {
-    serverConfig.service.contactInformation = {};
-    if (servicePr.serviceContact.individualName) {
-      serverConfig.service.contactInformation.person = servicePr.serviceContact.individualName;
-    }
-    if (servicePr.serviceContact.positionName) {
-      serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
-    }
-    if (servicePr.serviceContact.contactInfo) {
-      if (servicePr.serviceContact.contactInfo.address) {
-        let provAddress = servicePr.serviceContact.contactInfo.address;
-        // If email isn't the only property in address
-        if (!(Object.keys(provAddress).length === 2 && provAddress.electronicMailAddress)) {
-          serverConfig.service.contactInformation.address = {};
-          if (provAddress.deliveryPoint) {
-            if (provAddress.deliveryPoint[0] !== '') {
-              serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
+    if (servicePr.serviceContact) {
+      serverConfig.service.contactInformation = {};
+      if (servicePr.serviceContact.individualName) {
+        serverConfig.service.contactInformation.person = servicePr.serviceContact.individualName;
+      }
+      if (servicePr.serviceContact.positionName) {
+        serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
+      }
+      if (servicePr.serviceContact.contactInfo) {
+        if (servicePr.serviceContact.contactInfo.address) {
+          let provAddress = servicePr.serviceContact.contactInfo.address;
+          // If email isn't the only property in address
+          if (!(Object.keys(provAddress).length === 2 && provAddress.electronicMailAddress)) {
+            serverConfig.service.contactInformation.address = {};
+            if (provAddress.deliveryPoint) {
+              if (provAddress.deliveryPoint[0] !== '') {
+                serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
+              }
+            }
+            if (provAddress.city) {
+              serverConfig.service.contactInformation.address.city = provAddress.city;
+            }
+            if (provAddress.administrativeArea) {
+              serverConfig.service.contactInformation.address.stateOrProvince = provAddress.administrativeArea;
+            }
+            if (provAddress.postalCode) {
+              serverConfig.service.contactInformation.address.postCode = provAddress.postalCode;
+            }
+            if (provAddress.country) {
+              serverConfig.service.contactInformation.address.country = provAddress.country;
+            }
+            // Due to the way unmarshalling works, some undefined values do not return as falsy. 
+            if (Object.keys(serverConfig.service.contactInformation.address).length === 0) {
+              serverConfig.service.contactInformation.address = undefined;
             }
           }
-          if (provAddress.city) {
-            serverConfig.service.contactInformation.address.city = provAddress.city;
-          }
-          if (provAddress.administrativeArea) {
-            serverConfig.service.contactInformation.address.stateOrProvince = provAddress.administrativeArea;
-          }
-          if (provAddress.postalCode) {
-            serverConfig.service.contactInformation.address.postCode = provAddress.postalCode;
-          }
-          if (provAddress.country) {
-            serverConfig.service.contactInformation.address.country = provAddress.country;
-          }
-          // Due to the way unmarshalling works, some undefined values do not return as falsy. 
-          if (Object.keys(serverConfig.service.contactInformation.address).length === 0) {
-            serverConfig.service.contactInformation.address = undefined;
-          }
-        }
 
 
-        if (provAddress.electronicMailAddress) {
-          if (provAddress.electronicMailAddress[0] !== '') {
-            serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
+          if (provAddress.electronicMailAddress) {
+            if (provAddress.electronicMailAddress[0] !== '') {
+              serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
+            }
           }
         }
-      }
-      if (servicePr.serviceContact.contactInfo.phone) {
-        if (servicePr.serviceContact.contactInfo.phone.voice) {
-          if (servicePr.serviceContact.contactInfo.phone.voice[0]) {
-            serverConfig.service.contactInformation.phone = servicePr.serviceContact.contactInfo.phone.voice;
+        if (servicePr.serviceContact.contactInfo.phone) {
+          if (servicePr.serviceContact.contactInfo.phone.voice) {
+            if (servicePr.serviceContact.contactInfo.phone.voice[0]) {
+              serverConfig.service.contactInformation.phone = servicePr.serviceContact.contactInfo.phone.voice;
+            }
           }
         }
       }
     }
-  }
-  // If we have reached this point and the contact information in our serverConfig is
-  // only {address: undefined}, we remove contact information.
-  if (Object.keys(serverConfig.service.contactInformation).length === 1
+
+    // If we have reached this point and the contact information in our serverConfig is
+    // only {address: undefined}, we remove contact information.
+    if (Object.keys(serverConfig.service.contactInformation).length === 1
         && serverConfig.service.contactInformation.address === undefined) {
-    serverConfig.service.contactInformation = undefined;
+      serverConfig.service.contactInformation = undefined;
+    }
   }
 
   if (serviceId.fees) {
@@ -157,12 +161,32 @@ function parse1_0(url, capabilities) {
           if (serverConfig.operationsMetadata[operation.name].get === undefined) {
             serverConfig.operationsMetadata[operation.name].get = [];
           }
-          serverConfig.operationsMetadata[operation.name].get.push(getOrPost.value.href);
+          let requestMethod = {};
+          requestMethod.url = getOrPost.value.href;
+          requestMethod.encoding = [];
+          for (let constraint of getOrPost.value.constraint) {
+            if (constraint.name === 'GetEncoding') {
+              for (let value of constraint.allowedValues.valueOrRange) {
+                requestMethod.encoding.push(value.value);
+              }
+            }
+          }
+          serverConfig.operationsMetadata[operation.name].get.push(requestMethod);
         } else {
           if (serverConfig.operationsMetadata[operation.name].post === undefined) {
             serverConfig.operationsMetadata[operation.name].post = [];
           }
-          serverConfig.operationsMetadata[operation.name].post.push(getOrPost.value.href);
+          let requestMethod = {};
+          requestMethod.url = getOrPost.value.href;
+          requestMethod.encoding = [];
+          for (let constraint of getOrPost.value.constraint) {
+            if (constraint.name === 'PostEncoding') {
+              for (let value of constraint.allowedValues.valueOrRange) {
+                requestMethod.encoding.push(value.value);
+              }
+            }
+          }
+          serverConfig.operationsMetadata[operation.name].post.push(requestMethod);
         }
       }
     }

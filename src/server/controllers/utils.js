@@ -16,7 +16,7 @@ export function wcsGetLayers(req, res) {
     .then((jsonCapabilities) => {
       res.json(jsonCapabilities);
     }).catch((err) => {
-      res.status(500).json({error: 'Error processing XML: ' + err.message});
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }
 
@@ -32,7 +32,7 @@ export function wmsGetLayers(req, res) {
       // console.log(JSON.stringify(layer));
     }).catch((err) => {
       console.log(err);
-      res.status(500).json({error: 'Error processing XML: ' + err.message});
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }
 
@@ -43,7 +43,7 @@ export function wmsGetLayers(req, res) {
  */
 export function wmtsGetLayers(req, res) {
   // getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
-  //   res.json(jsonifyCapabilities('wmts', jsonCapabilities));
+  // res.json(jsonifyCapabilities('wmts', jsonCapabilities));
   //   console.log(JSON.stringify(jsonCapabilities));
   // });
 
@@ -52,6 +52,6 @@ export function wmtsGetLayers(req, res) {
       res.json(layer);
       // console.log(JSON.stringify(layer));
     }).catch((err) => {
-      res.status(500).json({error: 'Error processing XML: ' + err.message});
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }

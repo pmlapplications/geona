@@ -116,7 +116,7 @@ export class OlMap extends GeonaMap {
     //   });
 
     // wmts
-    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fopenlayers.org%2Fen%2Fv4.3.2%2Fexamples%2Fdata%2FWMTSCapabilities.xml')
+    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
       .done((serverConfig) => {
         let keepingEslintHappy = new LayerServerWmts(serverConfig);
       });
@@ -306,13 +306,13 @@ export class OlMap extends GeonaMap {
           this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
         }
       } else if (this.config.countryBorders !== 'none') {
-      // Insert below the top layer
+        // Insert below the top layer
         this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
       } else {
         this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
       }
-    // if the config doesn't already contain this geonaLayer.name, add it to the layers object
-    // if(this.config.layers){}
+      // if the config doesn't already contain this geonaLayer.name, add it to the layers object
+      // if(this.config.layers){}
     } else {
       alert('This layer cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
       // alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
@@ -589,7 +589,6 @@ function wmtsSourceFromLayer(layer) {
   } else if (layer.formats.includes('image/jpeg')) {
     format = 'image/jpeg';
   } else {
-    // It might be wiser if the else here checked for an 'image/xyz' before just going for the first one.
     format = layer.formats[0];
   }
 
@@ -603,7 +602,7 @@ function wmtsSourceFromLayer(layer) {
   }
 
   // TODO dimensions - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L358
-  let dimensions = {};
+  let dimensions;
 
   let projection = ol.proj.get(tileMatrixSet.projection);
 
@@ -620,12 +619,47 @@ function wmtsSourceFromLayer(layer) {
   let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent);
 
   let urls = [];
+  // requestEncoding is used to track which encoding we will use to request tiles.
   let requestEncoding = '';
 
   // TODO urls from operations metadata - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L409
 
+  // Even though operationsMetadata can contain REST encodings alongside URLs, these URLs are not the
+  // templated form required for REST requests, so we only take KVP information from here. REST information
+  // is taken from the resourceUrls section.
+  if (layer.layerServer.operationsMetadata) {
+    if (layer.layerServer.operationsMetadata.GetTile) {
+      // If we can use a GET operation we use it instead of a POST.
+      if (layer.layerServer.operationsMetadata.GetTile.get !== undefined) {
+        let getTile = layer.layerServer.operationsMetadata.GetTile.get;
+        requestEncoding = 'KVP';
+        for (let tile of getTile) {
+          for (let encoding of tile.encoding) {
+            if (encoding === requestEncoding) {
+              urls.push(tile.url);
+            }
+          }
+        }
+      } else {
+        let postTile = layer.layerServer.operationsMetadata.GetTile.post;
+        requestEncoding = 'KVP';
+        for (let tile of postTile) {
+          for (let encoding of tile.encoding) {
+            if (encoding === requestEncoding) {
+              urls.push(tile.url);
+            }
+          }
+        }
+      }
+    }
+  }
+  // OGC seems not to specify one way of defining REST encoding, so we have to standardise for OpenLayers.
+  if (requestEncoding === 'RESTful') {
+    requestEncoding = 'REST';
+  }
+
+  // If no tile urls were found in the operationsMetadata, get them from the layer resourceUrls.
   if (urls.length === 0) {
-    // If no tile urls were found in the operationsMetadata, get them from the layer resourceUrls
     requestEncoding = 'REST';
     for (let resource of layer.resourceUrls) {
       if (resource.resourceType === 'tile') {
@@ -634,6 +668,17 @@ function wmtsSourceFromLayer(layer) {
       }
     }
   }
+
+  console.log(urls);
+  console.log(layer.identifier);
+  console.log(tileMatrixSetId);
+  console.log(format);
+  console.log(projection);
+  console.log(requestEncoding);
+  console.log(tileGrid);
+  console.log(style);
+  console.log(dimensions);
+  console.log(wrapX);
 
   return new ol.source.WMTS({
     urls: urls,
