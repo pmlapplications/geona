@@ -141,7 +141,7 @@ function parse1_0(url, capabilities) {
     // If we have reached this point and the contact information in our serverConfig is
     // only {address: undefined}, we remove contact information.
     if (Object.keys(serverConfig.service.contactInformation).length === 1
-        && serverConfig.service.contactInformation.address === undefined) {
+      && serverConfig.service.contactInformation.address === undefined) {
       serverConfig.service.contactInformation = undefined;
     }
   }
@@ -273,10 +273,12 @@ function parse1_0(url, capabilities) {
       }
 
       // TileMatrixSetLink is a mandatory property
-      layerData.tileMatrixSetLinks = {};
-      let tileMatrixSetLimitsObject = {};
+      layerData.tileMatrixSetLinks = [];
       for (let matrixData of dataset.value.tileMatrixSetLink) {
-        layerData.tileMatrixSetLinks[matrixData.tileMatrixSet] = {};
+        let setLinksObject = {};
+        setLinksObject.tileMatrixSet = matrixData.tileMatrixSet;
+
+        let tileMatrixLimitsObject = {};
         if (matrixData.tileMatrixSetLimits) {
           for (let currentMatrix of matrixData.tileMatrixSetLimits.tileMatrixLimits) {
             let currentMatrixLimits = {};
@@ -285,12 +287,17 @@ function parse1_0(url, capabilities) {
             currentMatrixLimits[currentMatrix.tileMatrix].maxTileRow = currentMatrix.maxTileRow;
             currentMatrixLimits[currentMatrix.tileMatrix].minTileCol = currentMatrix.minTileCol;
             currentMatrixLimits[currentMatrix.tileMatrix].maxTileCol = currentMatrix.maxTileCol;
-            Object.assign(tileMatrixSetLimitsObject, currentMatrixLimits);
+            Object.assign(tileMatrixLimitsObject, currentMatrixLimits);
           }
         }
-        layerData.tileMatrixSetLinks[matrixData.tileMatrixSet].tileMatrixSetLimits = tileMatrixSetLimitsObject;
+        let limitsLength = Object.values(tileMatrixLimitsObject).length;
+        if (limitsLength === 0) {
+          setLinksObject.tileMatrixLimits = undefined;
+        } else {
+          setLinksObject.tileMatrixLimits = tileMatrixLimitsObject;
+        }
+        layerData.tileMatrixSetLinks.push(setLinksObject);
       }
-
 
       if (dataset.value.resourceURL) {
         layerData.resourceUrls = [];
@@ -314,6 +321,10 @@ function parse1_0(url, capabilities) {
       let thisMatrixSet = matrixSets[matrixSet.identifier.value] = {};
       thisMatrixSet.projection = matrixSet.supportedCRS
         .replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+      console.log(thisMatrixSet.projection);
+      if (thisMatrixSet.projection === 'OGC:CRS84') {
+        thisMatrixSet.projection = 'EPSG:4326';
+      }
 
       thisMatrixSet.tileMatrices = [];
       for (let tile of matrixSet.tileMatrix) {

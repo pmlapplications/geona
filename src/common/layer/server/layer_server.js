@@ -37,8 +37,6 @@ export default class LayerServer {
       }
     }
 
-    console.log(serverConfig);
-
     window.testingLayer = this.layers[0];
     window.testingSerCon = this;
   }

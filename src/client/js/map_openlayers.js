@@ -109,17 +109,35 @@ export class OlMap extends GeonaMap {
     //     let keepingEslintHappy = new LayerServer(serverConfig);
     //   });
 
-    // wmts
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fmap1.vis.earthdata.nasa.gov%2Fwmts-geo%2F1.0.0%2FWMTSCapabilities.xml')
+    // // wmts 3857 - success
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fwww.ngi.be%2Fcartoweb%2F1.0.0%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
-    //     let keepingEslintHappy = new LayerServer(serverConfig);
+    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
-    // wmts
+    // // wmts 4326 - error
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Ftiles.maps.eox.at%2Fwmts%2F%3FSERVICE%3DWMTS%26REQUEST%3DGetCapabilities')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
+    //   });
+
+    // wmts 3857 - success
     $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
       .done((serverConfig) => {
         let keepingEslintHappy = new LayerServerWmts(serverConfig);
       });
+
+    // // wmts 3857 - success
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
+    //   });
+
+    // // wmts 4326 - success
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fgibs.earthdata.nasa.gov%2Fwmts%2Fepsg4326%2Fbest%2Fwmts.cgi%3FVERSION%3D1.0.0%26Request%3DGetCapabilities%26Service%3DWMTS')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
+    //   });
 
     // $.ajax('https://openlayers.org/en/v4.3.2/examples/data/WMTSCapabilities.xml')
     //   .done((text) => {
@@ -216,7 +234,6 @@ export class OlMap extends GeonaMap {
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   addLayer(geonaLayer, index) {
-    // TODO reinstate this if
     if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
       let source;
       let title;
@@ -252,35 +269,8 @@ export class OlMap extends GeonaMap {
           }
           break;
         case 'wmts': {
+          title = selectPropertyLanguage(geonaLayer.title);
           source = wmtsSourceFromLayer(geonaLayer);
-          // let projection = ol.proj.get('EPSG:4326');
-          // let projectionExtent = projection.getExtent();
-          // let size = ol.extent.getWidth(projectionExtent) / 256;
-          // let resolutions = new Array(14);
-          // for (let i = 0; i < 14; ++i) {
-          //   resolutions[i] = size / Math.pow(2, i);
-          // }
-          // title = selectPropertyLanguage(geonaLayer.title);
-          // source = new ol.source.WMTS({
-          //   url: geonaLayer.layerServer.url,
-          //   layer: '0',
-          //   matrixSet: 'EPSG:4326',
-          //   format: 'image/png',
-          //   projection: projection,
-          //   tileGrid: new ol.tilegrid.WMTS({
-          //     origin: projectionExtent,
-          //     resolutions: resolutions,
-          //     // matrixIds: Object.getOwnPropertyNames(),
-          //   }),
-
-          // });
-          // if (geonaLayer.attribution) {
-          //   if (geonaLayer.attribution.onlineResource) {
-          //     source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-          //   } else {
-          //     source.attributions = geonaLayer.attribution.title;
-          //   }
-          // }
           break;
         }
         case 'osm':
@@ -290,7 +280,6 @@ export class OlMap extends GeonaMap {
           break;
       }
 
-      // TODO language support
       this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
         name: title,
         viewSettings: geonaLayer.viewSettings,
@@ -574,13 +563,15 @@ function wmtsSourceFromLayer(layer) {
   let tileMatrixSetId;
 
   // TODO Replace with thing to search for TileMatrixSet that supports the current projection
-  for (let key in layer.tileMatrixSetLinks) {
-    if (layer.tileMatrixSetLinks.hasOwnProperty(key)) {
-      tileMatrixSetId = key;
-    }
+  console.log(layer.tileMatrixSetLinks);
+  for (let key of layer.tileMatrixSetLinks) {
+    tileMatrixSetId = key.tileMatrixSet;
   }
 
   // Get the tileMatrixSet object from the layer server
+  console.log('layer.layerserver.tileMatrixSets + tileMatrixSetId');
+  console.log(layer.layerServer.tileMatrixSets);
+  console.log(tileMatrixSetId);
   let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
 
   let format;
@@ -592,18 +583,26 @@ function wmtsSourceFromLayer(layer) {
     format = layer.formats[0];
   }
 
-  // TODO This should pick the default style, or one provided in a config
+  // TODO This should pick the style provided in a config
   let style;
+  let defaultStyle;
   for (let key in layer.styles) {
     if (layer.styles.hasOwnProperty(key)) {
-      console.log(key);
+      if (key.isDefault) {
+        defaultStyle = key;
+      }
       style = key;
     }
+  }
+  if (defaultStyle !== undefined) {
+    style = defaultStyle;
   }
 
   // TODO dimensions - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L358
   let dimensions;
 
+  console.log('tileMatrixSet:');
+  console.log(tileMatrixSet);
   let projection = ol.proj.get(tileMatrixSet.projection);
 
   // Get the extent in the right projection format from the layer bounding box
@@ -614,15 +613,15 @@ function wmtsSourceFromLayer(layer) {
   let wrapX = true;
 
   // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
+  // let matrixLimits =
 
   // Get the tile grid
+  console.log(tileMatrixSet);
   let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent);
 
   let urls = [];
   // requestEncoding is used to track which encoding we will use to request tiles.
   let requestEncoding = '';
-
-  // TODO urls from operations metadata - https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L409
 
   // Even though operationsMetadata can contain REST encodings alongside URLs, these URLs are not the
   // templated form required for REST requests, so we only take KVP information from here. REST information
@@ -653,7 +652,7 @@ function wmtsSourceFromLayer(layer) {
       }
     }
   }
-  // OGC seems not to specify one way of defining REST encoding, so we have to standardise for OpenLayers.
+  // OGC seems not to specify one way of defining REST encoding, but we have to standardise for OpenLayers.
   if (requestEncoding === 'RESTful') {
     requestEncoding = 'REST';
   }
@@ -671,14 +670,13 @@ function wmtsSourceFromLayer(layer) {
 
   console.log(urls);
   console.log(layer.identifier);
-  console.log(tileMatrixSetId);
+  console.log(tileMatrixSet);
   console.log(format);
   console.log(projection);
   console.log(requestEncoding);
   console.log(tileGrid);
   console.log(style);
   console.log(dimensions);
-  console.log(wrapX);
 
   return new ol.source.WMTS({
     urls: urls,
@@ -716,16 +714,14 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let sizes = [];
 
   let projection = ol.proj.get(matrixSet.projection);
-  console.log(matrixSet.projection);
   let axisOrientation = proj4(matrixSet.projection).oProj.axis;
-  console.log(axisOrientation);
-  console.log(projection);
   let metersPerUnit = projection.getMetersPerUnit();
 
   // If the projection has coordinates as (y, x)/(north, east) instead of (x, y)/(east, north),
   // they will need to be switched
 
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
+  console.log(axisOrientation);
 
   // Sort the array of tileMatrices by their scaleDenominators
   matrixSet.tileMatrices.sort(function(a, b) {
@@ -741,10 +737,13 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     let tileHeight = matrix.tileHeight;
 
     if (switchOriginXy) {
-      // Swap the coordinaates for the top left corner if needs be
+      console.log('--- Coordinates swapped');
+      // Swap the coordinates for the top left corner if needs be
       origins.push(matrix.topLeftCorner.reverse());
     } else {
-      origins.push(matrix.topLeftCorner);
+      console.log('--- Coordinates kept same');
+      // console.log(matrix.topLeftCorner.reverse());
+      origins.push(matrix.topLeftCorner.reverse());
     }
 
     resolutions.push(resolution);
