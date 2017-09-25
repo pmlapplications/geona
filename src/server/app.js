@@ -8,6 +8,7 @@ import * as i18nextMiddleware from 'i18next-express-middleware';
 import i18nextBackend from 'i18next-node-fs-backend';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
+import * as bodyParser from 'body-parser';
 
 import {server as configServer} from './config';
 import mainRouter from './routers/main';
@@ -121,8 +122,15 @@ app.use(subFolderPath, express.static(path.join(__dirname, '../../static'), {
   },
 }));
 
+// use body-parser to get the content of post requests
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true,
+}));
+
 // Add the main router
 app.use(mainRouter);
+
 
 
 /*
