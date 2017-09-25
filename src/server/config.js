@@ -7,16 +7,16 @@ import * as packageJson from '../../package.json';
 
 import * as schema from '../common/config_schema.js';
 
-export let server = combinedServerConfig();
+export let server = _combinedServerConfig();
 
-export let clients = combinedClientConfig();
+export let clients = _combinedClientConfig();
 
 /**
  * Combines the defined client configuration with elements from package.json
  * 
  * @return {Object} Defined client configuration combined with elements from package.json
  */
-function combinedClientConfig() {
+function _combinedClientConfig() {
   // let clientConfig = convict([schema.client]);  //convict can process an array of config files; will probably want 
   // to implement this so leaving here for now
   let clientConfig = convict(schema.client);
@@ -43,7 +43,7 @@ function combinedClientConfig() {
  * @return {Object} Defined server config values combined with default values from the schema, plus
  * name, version and description from package.json
  */
-function combinedServerConfig() {
+function _combinedServerConfig() {
   let serverConfig = convict(schema.server);
   let packageContent = packageJson;
 
