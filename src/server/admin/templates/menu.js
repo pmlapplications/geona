@@ -44,6 +44,7 @@ let _structure = [
  * 
  * @export
  * @param {String} path - path of the current route excluding any sub folder that the application may be running in
+ * @returns {Object} JSON object containing menu structure
  */
 export function getMenu(path) {
   let menu = _structure;
