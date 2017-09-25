@@ -1,48 +1,117 @@
-<h2>{{t 'admin:setup.pageHeading'}}</h2>
-<p>{{t 'admin:setup.introText'}}</p>
+<div class="js-geona-admin__setup">
+  <h2>{{t 'admin:setup.pageHeading'}}</h2>
+  <p>{{t 'admin:setup.introText'}}</p>
 
-<div class="form-group row">
-  <div class="col-md-4 text-right">
-    <label for="provider">{{t 'admin:setup.selectOauthProvider' }}</label>
-  </div>
-  <div class="col-md-8">
-    <select name="provider" id="provider" class="form-control">
-      <option value=""></option>
-      <option value="google">Google</option>
-      <option value="facebook">Facebook</option>
-      <option value="github">GitHub</option>
-    </select>
-  </div>
-</div>
+  <div id="feedback" class="has-error"></div>
 
-
-<div id="add_google_oauth" style="display: none;">
-  <h3>Google OAuth</h3>
-  <p>{{t 'admin:setup.googleIntro' }}</p>
-  <dl>
-    <dt>Authorized JavaScript origins</dt>
-    <dd>{{ authorizedOrigin }}</dd>    
-  </dl>
-  <dl>
-    <dt>Authorized redirect URIs</dt>
-    <dd>{{ authorizedRedirectURI }}</dd>    
-  </dl>
-  <form>
-    <div class="form-group row">
-      <div class="col-md-4 text-right">
-        <label for="google_clientId" class="form-label">{{t 'admin:setup.clientId' }}</label>
+  <form id="oauth_setup" method="post">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <label class="form-label">
+          <input type="checkbox" name="provider" id="google" class="js-geona-admin__setup-provider" />
+          Google
+        </label>
       </div>
-      <div class="col-md-8">
-        <input type="url" class="form-control" id="google_clientId" aria-placeholder="Client ID" />
+
+      <div class="panel-body hidden" id="add_google_oauth">
+        <h3>Google OAuth</h3>
+        <p>{{t 'admin:setup.googleIntro' }}</p>
+        
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label class="form-label">{{t 'admin:setup.authorizedJavascriptOrigins' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ data.authorizedOrigin }}" />
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label class="form-label">{{t 'admin:setup.authorizedRedirectUris' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ data.authorizedRedirectURI }}" />
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label for="google_clientId" class="form-label">{{t 'admin:setup.clientId' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" name="google_clientId" group="google" required="" />
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label for="google_secret" class="form-label">{{t 'admin:setup.secret' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" name="google_secret" group="google" required="" />
+          </div>
+        </div>
+        
       </div>
     </div>
-    <div class="form-group row">
-      <div class="col-md-4 text-right">
-        <label for="google_secret" class="form-label">{{t 'admin:setup.secret' }}</label>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <label class="form-label">
+          <input type="checkbox" name="provider" id="github" class="js-geona-admin__setup-provider" />
+          GitHub
+        </label>
       </div>
-      <div class="col-md-8">
-        <input type="url" class="form-control" id="google_clientId" aria-placeholder="Client ID" />
+
+      <div class="panel-body hidden" id="add_google_oauth">
+        <h3>GitHub OAuth</h3>
+        <p>{{t 'admin:setup.GutHubIntro' }}</p>
+        
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label class="form-label">{{t 'admin:setup.GitHubHomepageUrl' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ data.authorizedOrigin }}" />
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label class="form-label">{{t 'admin:setup.GitHubCallbackUrl' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ data.GitHubCallbackUrl }}" />
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label for="google_clientId" class="form-label">{{t 'admin:setup.clientId' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" name="github_clientId" group="github" required="" />
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-md-4">
+            <label for="google_secret" class="form-label">{{t 'admin:setup.secret' }}</label>
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" name="github_secret" group="github" required="" />
+          </div>
+        </div>
+        
       </div>
     </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <button type="submit" name="btn-submit" class="btn btn-primary pull-right">Save</button>
+      </div>
+    </div>
+
   </form>
 </div>
