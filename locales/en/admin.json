@@ -10,6 +10,11 @@
     "clientId": "Client ID",
     "secret": "Secret",
     "selectOauthProvider": "Select OAuth Provider",
-    "googleIntro": "For information on how to obtain OAuth credentials from Google please read <a href=\"https://developers.google.com/identity/protocols/OAuth2\" target=\"_blank\">Using OAuth 2.0 to Access Google APIs</a>. During this process you will be asked for two key pieces of information these are:"
+    "googleIntro": "For information on how to obtain OAuth credentials from Google please read <a href=\"https://developers.google.com/identity/protocols/OAuth2\" target=\"_blank\">Using OAuth 2.0 to Access Google APIs</a>. During this process you will be asked for two key pieces of information these are:",
+    "authorizedJavascriptOrigins": "Authorized JavaScript origins",
+    "authorizedRedirectUris": "Authorized redirect URIs",
+    "GutHubIntro": "To add GitHub OAuth please visit the <a href=\"https://github.com/settings/applications/new\" target=\"_blank\">Register a new OAuth application</a> page on the GiHub website",
+    "GitHubHomepageUrl": "Homepage URL",
+    "GitHubCallbackUrl": "Authorization callback URL"
   }
 }
