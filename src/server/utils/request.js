@@ -52,3 +52,24 @@ export function getAppBasePath(req) {
   let basePath = getProtocol(req) + '://' + getHostname(req) + subFolderPath;
   return basePath;
 }
+
+/**
+ * Accepts an error object from a try/catch and shows in a friendly way
+ * 
+ * @export
+ * @param {Object} e - An error object
+ * @param {Object} res - Express response object
+ * @return {Boolean}
+ */
+export function displayFriendlyError(e, res) {
+  e.stack = e.stack.replace(/[\r\n]/g, '<br />');
+  e.stack = e.stack.replace(/\s\s\s\s/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+  let responseData = {
+    config: config.server.getProperties(),
+    template: 'error',
+    content: e,
+  };
+  res.status(500).render('admin_template', responseData);
+  return false;
+}
