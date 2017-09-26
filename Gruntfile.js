@@ -229,6 +229,16 @@ module.exports = function(grunt) {
           },
         ],
       },
+      images: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/client/images',
+            src: ['*'],
+            dest: 'static/images',
+          },
+        ],
+      },
     },
 
     env: { // Setting the BABEL_ENV environment variable to use the correct .babelrc config
@@ -346,6 +356,7 @@ module.exports = function(grunt) {
     'clean:client',
     'copy:client',
     'copy:client_admin',
+    'copy:images',
     'sass:production',
     'handlebars',
     'env:babelify',
@@ -362,6 +373,7 @@ module.exports = function(grunt) {
     'clean:client',
     'copy:client',
     'copy:client_admin',
+    'copy:images',
     'sass:development',
     'handlebars',
     'env:babelify',
