@@ -20,7 +20,7 @@
     "administrators": "Administrators"
   },
   "messages": {
-    "administrators": "Enter at least one administrator email address",
+    "administrators": "Enter at least one administrator email address; multiple addresses should be comma separated",
     "provider": "Please select at least one OAuth provider and complete the details for the selected provider(s)",
     "google_clientId": "The Client ID for Google OAuth is required",
     "google_secret": "The Secret for Google OAuth is required",
