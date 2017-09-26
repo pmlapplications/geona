@@ -1,6 +1,9 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 
+import * as config from '../../src/server/config';
+let subFolderPath = config.server.get('subFolderPath');
+
 import app from '../../src/server/app';
 
 chai.use(chaiHttp);
@@ -10,7 +13,7 @@ describe('server/app', function() {
   describe('GET /swagger.json', function() {
     it('should return the swagger json', function(done) {
       chai.request(app)
-        .get('/swagger.json')
+        .get(subFolderPath + '/swagger.json')
         .end(function(err, res) {
           expect(res).to.have.status(200);
           expect(res).to.be.json;
@@ -21,7 +24,7 @@ describe('server/app', function() {
   describe('GET /index.html', function() {
     it('should return the index page', function(done) {
       chai.request(app)
-        .get('/')
+        .get(subFolderPath + '/')
         .end(function(err, res) {
           expect(res).to.have.status(200);
           expect(res).to.be.html;
@@ -32,7 +35,7 @@ describe('server/app', function() {
   describe('GET /js/bundle.js', function() {
     it('should return the js bundle', function(done) {
       chai.request(app)
-        .get('/')
+        .get(subFolderPath + '/js/bundle.js')
         .end(function(err, res) {
           expect(res).to.have.status(200);
           done();
