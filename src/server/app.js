@@ -131,8 +131,6 @@ app.use(bodyParser.urlencoded({
 // Add the main router
 app.use(mainRouter);
 
-
-
 /*
  * Create the server and start it
  */
