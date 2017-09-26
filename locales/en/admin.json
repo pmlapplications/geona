@@ -15,6 +15,16 @@
     "authorizedRedirectUris": "Authorized redirect URIs",
     "GutHubIntro": "To add GitHub OAuth please visit the <a href=\"https://github.com/settings/applications/new\" target=\"_blank\">Register a new OAuth application</a> page on the GiHub website",
     "GitHubHomepageUrl": "Homepage URL",
-    "GitHubCallbackUrl": "Authorization callback URL"
+    "GitHubCallbackUrl": "Authorization callback URL",
+    "administratorsExplanation": "Please enter the email address of administrators. You must enter at least one addresss that is registered with the OAuth provider(s) that you select; multiple addresses should be separated with a comma",
+    "administrators": "Administrators"
+  },
+  "messages": {
+    "administrators": "Enter at least one administrator email address",
+    "provider": "Please select at least one OAuth provider and complete the details for the selected provider(s)",
+    "google_clientId": "The Client ID for Google OAuth is required",
+    "google_secret": "The Secret for Google OAuth is required",
+    "github_clientId": "The Client ID for GitHub OAuth is required",
+    "github_secret": "The Secret for GitHub OAuth is required"
   }
 }
