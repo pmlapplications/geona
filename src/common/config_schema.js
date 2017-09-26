@@ -21,6 +21,11 @@ export let server = {
     format: Array,
     default: [],
   },
+  administrators: {
+    doc: 'Array of email addresses for users who have administrative privileges',
+    format: Array,
+    default: [],
+  },
 };
 
 export let client = {
