@@ -1,3 +1,4 @@
+/** @module controllers/user */
 /**
  * @fileoverview User related controllers. All authentication controllers are dealt with in user_auth
  */

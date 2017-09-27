@@ -1,5 +1,5 @@
+/** @module controllers/user_auth */
 /**
- * @module user_auth
  * @fileoverview Authtentication controllers for passport
  */
 import passport from 'passport';

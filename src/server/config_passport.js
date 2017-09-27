@@ -1,5 +1,5 @@
+/** @module config_passport */
 /**
- * @module config_passport
  * @fileoverview Loads the OAuth strategies for the various providers
  */
 import passport from 'passport';

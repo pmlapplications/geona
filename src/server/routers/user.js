@@ -1,3 +1,7 @@
+/**
+ * @module routers/user
+ * @fileoverview Sets up routes for user login and authentication via OAuth 
+ */
 import express from 'express';
 
 import * as userController from '../controllers/user';

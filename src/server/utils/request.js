@@ -1,3 +1,4 @@
+/** @module utils/request */
 /**
  * @fileoverview A suite of utility functions that are commonly used throughout the server application to handle or 
  * identify elements of a request
