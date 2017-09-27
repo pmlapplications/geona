@@ -29,15 +29,34 @@ export class OlMap extends GeonaMap {
    */
   constructor(config, mapDiv) {
     super();
-    /** @type {Object} The map config */
+    /**
+     * The map config 
+     * @type {Object}  
+     */
     this.config = config;
-    /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
+    /** 
+     * The available basemaps, as OpenLayers Tile layers 
+     * @type {Object} 
+     * @private
+     */
     this.basemaps_ = {};
-    /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
+    /** 
+     * The available country border layers, as OpenLayers Tile layers 
+     * @type {Object} 
+     * @private
+     */
     this.countryBorderLayers_ = {};
-    /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
+    /** 
+     * The available data layers, as OpenLayers Tile layers 
+     * @type {Object} 
+     * @private
+     */
     this.activeLayers_ = {};
-    /** @private @type {ol.Graticule} The map graticule */
+    /** 
+     * The map graticule 
+     * @type {ol.Graticule} 
+     * @private
+     */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
       strokeStyle: new ol.style.Stroke({
@@ -52,10 +71,18 @@ export class OlMap extends GeonaMap {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
-    /** @private @type {Boolean} Tracks whether the map has been initialized */
+    /** 
+     * Tracks whether the map has been initialized 
+     * @type {Boolean} 
+     * @private
+     */
     this.initialized_ = false;
 
-    /** @private @type {ol.Map} The OpenLayers map */
+    /** 
+     * The OpenLayers map 
+     * @type {ol.Map} 
+     * @private
+     */
     this.map_ = new ol.Map({
       view: new ol.View(
         {

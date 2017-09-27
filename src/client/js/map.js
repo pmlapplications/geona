@@ -98,8 +98,8 @@ export default class GeonaMap {
 
 // Fields
 /**
- * @type {Object} The config for the map. Also used to hold the current state of the map.
- *                It may be read from outside the class to read/save the map state, but must never be modified by
- *                anything outside the class.
+ * The config for the map. Also used to hold the current state of the map. It may be read from outside the class to 
+ * read/save the map state, but must never be modified by anything outside the class.
+ * @type {Object} 
  */
 GeonaMap.prototype.config;
