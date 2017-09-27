@@ -4,7 +4,7 @@
 {{#each config.OAuth }}
   {{#each this }}
     <div class="oauth-login-button">
-      <a href="{{ ../../config.subFolderPath }}/user/auth/{{ @key }}" class="js-geona-admin__login-{{ @key }}">
+      <a href="{{ ../../config.subFolderPath }}/user/auth/{{ @key }}?r={{ ../../content.redirectUrl }}" class="js-geona-admin__login-{{ @key }}">
         <img src="{{ ../../config.subFolderPath }}/images/sign-in-{{ @key }}.png" border="0" />
       </a>
     </div>
