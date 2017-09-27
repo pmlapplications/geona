@@ -19,17 +19,40 @@ export class LMap extends GeonaMap {
    */
   constructor(config, mapDiv) {
     super();
-    /** @type {Object} The map config */
+    /** 
+     * The map config 
+     * @type {Object}  
+     */
     this.config = config;
-    /** @private @type {Object} The available basemaps */
+    /** 
+     * The available basemaps
+     * @type {Object} 
+     * @private
+     */
     this.basemaps_ = {};
-    /** @private @type {Object} The available country border layers */
+    /** 
+     * The available country border layers
+     * @type {Object}
+     * @private 
+     */
     this.countryBorderLayers_ = {};
-    /** @private @type {Object} The available data layers */
+    /**  
+     * The available data layers 
+     * @type {Object} 
+     * @private 
+     */
     this.availableLayers_ = {};
-    /** @private @type {L.featureGroup} The layers on the map */
+    /** 
+     * The layers on the map 
+     * @type {L.featureGroup} 
+     * @private 
+     */
     this.mapLayers_ = undefined;
-    /** @private @type {L.latlngGraticule} The map graticule */
+    /** 
+     * The map graticule 
+     * @type {L.latlngGraticule} 
+     * @private 
+     */
     this.graticule_ = L.latlngGraticule({
       showLabel: true,
       color: '#ccc',
@@ -56,7 +79,11 @@ export class LMap extends GeonaMap {
       },
     });
 
-    /** @private @type {L.map} The Leaflet map */
+    /** 
+     * The Leaflet map
+     * @type {L.map}  
+     * @private 
+     */
     this.map_ = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
       center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
