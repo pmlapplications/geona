@@ -3,7 +3,7 @@
  */
 import * as config from '../../config';
 import * as requestUtils from '../../utils/request';
-import * as menu from '../templates/menu';
+import * as menu from '../../templates/menu';
 import convict from 'convict';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -36,31 +36,6 @@ export function index(req, res) {
     template: 'temp2',
     menu: menu.getMenu('/admin'),
     content: 'Something',
-  };
-
-  res.render('admin_template', data);
-  return false;
-}
-
-/**
- * Return the login page for non-authenticated user to login
- * 
- * @export
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @return {Boolean}
- */
-export function login(req, res) {
-  // if there are no OAuth providers configured send the user to the setup page
-  if (config.server.get('OAuth').length === 0) {
-    res.redirect('setup');
-    return false;
-  }
-
-  let data = {
-    config: config.server.getProperties(),
-    template: 'login',
-    menu: menu.getMenu('/admin'),
   };
 
   res.render('admin_template', data);
