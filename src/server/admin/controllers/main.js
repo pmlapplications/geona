@@ -25,8 +25,8 @@ export function index(req, res) {
   }
 
   // if the user is not currently logged in send them to the login page
-  if (typeof(req.session) === 'undefined') {
-    res.redirect('admin/login');
+  if (typeof(req.session.passport) === 'undefined') {
+    res.redirect('user/login?r=/admin');
     return false;
   }
 
