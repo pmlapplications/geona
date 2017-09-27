@@ -11,7 +11,6 @@ import i18nextBackend from 'i18next-node-fs-backend';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
 
 import {server as configServer} from './config';
 import mainRouter from './routers/main';
@@ -125,9 +124,6 @@ app.use(subFolderPath, express.static(path.join(__dirname, '../../static'), {
   },
 }));
 
-// setup cookie parser (required for passport)
-app.use(cookieParser());
-
 // use body-parser to get the content of post requests (also required for passport)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -135,7 +131,12 @@ app.use(bodyParser.urlencoded({
 }));
 
 // enable express sessions & tell passport to use them
-app.use(expressSession({secret: 'do not tell'}));
+app.use(expressSession({
+  secret: 'do not tell',
+  resave: true,
+  saveUninitialized: true,
+  name: 'Geona',
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
