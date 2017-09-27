@@ -1,3 +1,4 @@
+/** @module admin/controller/main */
 /**
  * @fileoverview Controllers for the Administration application
  */
@@ -33,7 +34,7 @@ export function index(req, res) {
   // if they are logged in show the goodies...
   let data = {
     config: config.server.getProperties(),
-    template: 'temp2',
+    template: 'admin_home',
     menu: menu.getMenu('/admin'),
     content: 'Something',
   };
