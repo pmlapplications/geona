@@ -20,4 +20,5 @@ hbs.registerHelper('t', function(key, options) {
   return new hbs.SafeString(result);
 });
 
+hbs.registerPartials(__dirname + '/templates/partials');
 hbs.registerPartials(__dirname + '/admin/templates/partials');
