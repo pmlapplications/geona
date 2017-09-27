@@ -36,6 +36,9 @@ export function login(req, res) {
     config: config.server.getProperties(),
     template: 'login',
     menu: menu.getMenu('/admin'),
+    content: {
+      redirectUrl: req.query.r,
+    }
   };
 
   res.render('admin_template', data);
