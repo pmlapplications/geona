@@ -79,6 +79,7 @@
     "convict": "^4.0.0",
     "eventemitter3": "^2.0.3",
     "express": "^4.15.2",
+    "express-session": "^1.15.6",
     "grunt-handlebars-compiler": "^0.3.1",
     "hbs": "^4.0.1",
     "i18next": "^8.4.3",
