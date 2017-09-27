@@ -1,0 +1,12 @@
+<h2>{{t 'admin:login.pageHeading' }}</h2>
+<p>{{t 'admin:login.introText' }}</p>
+
+{{#each config.OAuth }}
+  {{#each this }}
+    <div class="oauth-login-button">
+      <a href="javascript:void(0);" class="js-geona-admin__login-{{ @key }}">
+        <img src="{{ ../../config.subFolderPath }}/images/sign-in-{{ @key }}.png" border="0" />
+      </a>
+    </div>
+  {{/each }}  
+{{/each }}
