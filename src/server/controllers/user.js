@@ -28,7 +28,7 @@ export function index(req, res, next) {
 export function login(req, res) {
   // if there are no OAuth providers configured send the user to the setup page
   if (config.server.get('OAuth').length === 0) {
-    res.redirect('setup');
+    res.redirect('../admin/setup');
     return false;
   }
 
