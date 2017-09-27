@@ -1,8 +1,21 @@
 /**
- * @fileoverview User/authentication related controllers
+ * @fileoverview User related controllers. All authentication controllers are dealt with in user_auth
  */
 import * as config from '../config';
 import * as menu from '../templates/menu';
+
+/**
+ * Main user home page; details everything related to the currently logged in user
+ * 
+ * @export
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Callback function 
+ * @return {Boolean}
+ */
+export function index(req, res, next) {
+  return next();
+}
 
 /**
  * Return the login page for non-authenticated user to login

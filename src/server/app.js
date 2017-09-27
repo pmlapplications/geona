@@ -2,13 +2,16 @@
 
 import blocked from 'blocked';
 import express from 'express';
+import expressSession from 'express-session';
+import passport from 'passport';
 import * as http from 'http';
 import i18next from 'i18next';
 import * as i18nextMiddleware from 'i18next-express-middleware';
 import i18nextBackend from 'i18next-node-fs-backend';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
-import * as bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 
 import {server as configServer} from './config';
 import mainRouter from './routers/main';
@@ -122,11 +125,19 @@ app.use(subFolderPath, express.static(path.join(__dirname, '../../static'), {
   },
 }));
 
-// use body-parser to get the content of post requests
+// setup cookie parser (required for passport)
+app.use(cookieParser());
+
+// use body-parser to get the content of post requests (also required for passport)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
+
+// enable express sessions & tell passport to use them
+app.use(expressSession({secret: 'do not tell'}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Add the main router
 app.use(mainRouter);
