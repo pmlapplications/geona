@@ -25,7 +25,7 @@
     ],
     "sourceMap": false,
     "instrument": false,
-    "cache": true,
+    "cache": false,
     "all": true
   },
   "scripts": {
