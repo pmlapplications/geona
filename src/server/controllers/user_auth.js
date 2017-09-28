@@ -23,7 +23,7 @@ export function authGoogle(req, res, next) {
   } else {
     req.session.redirectAfterLogin = config.server.get('subFolderPath') + '/user';
   }
-  passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] })(req, res, next);
+  passport.authenticate('google', {scope: ['https://www.googleapis.com/auth/plus.login']})(req, res, next);
 }
 
 /**
@@ -55,7 +55,7 @@ export function authGitHub(req, res, next) {
   } else {
     req.session.redirectAfterLogin = config.server.get('subFolderPath') + '/user';
   }
-  passport.authenticate('github', { scope: ['https://www.googleapis.com/auth/plus.login'] })(req, res, next);
+  passport.authenticate('github', {scope: ['https://www.googleapis.com/auth/plus.login']})(req, res, next);
 }
 
 /**
