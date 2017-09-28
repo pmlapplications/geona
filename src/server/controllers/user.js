@@ -11,11 +11,22 @@ import * as menu from '../templates/menu';
  * @export
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Callback function 
  * @return {Boolean}
  */
-export function index(req, res, next) {
-  return next();
+export function index(req, res) {
+  if (typeof(req.session.passport) === 'undefined') {
+    res.redirect('user/login?r=/user');
+    return false;
+  }
+  let data = {
+    config: config.server.getProperties(),
+    template: 'user_home',
+    menu: menu.getMenu(),
+    content: {},
+  };
+
+  res.render('admin_template', data);
+  return false;
 }
 
 /**
@@ -36,10 +47,10 @@ export function login(req, res) {
   let data = {
     config: config.server.getProperties(),
     template: 'login',
-    menu: menu.getMenu('/admin'),
+    menu: menu.getMenu(),
     content: {
       redirectUrl: req.query.r,
-    }
+    },
   };
 
   res.render('admin_template', data);
