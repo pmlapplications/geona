@@ -26,5 +26,9 @@
     "google_secret": "The Secret for Google OAuth is required",
     "github_clientId": "The Client ID for GitHub OAuth is required",
     "github_secret": "The Secret for GitHub OAuth is required"
+  },
+  "user": {
+    "pageHeading": "Welcome",
+    "introText": "Something warm and welcoming should go here"
   }
 }
