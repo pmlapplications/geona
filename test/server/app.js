@@ -21,6 +21,7 @@ describe('server/app', function() {
         });
     });
   });
+
   describe('GET /index.html', function() {
     it('should return the index page', function(done) {
       chai.request(app)
@@ -32,6 +33,7 @@ describe('server/app', function() {
         });
     });
   });
+
   describe('GET /js/bundle.js', function() {
     it('should return the js bundle', function(done) {
       chai.request(app)
@@ -42,4 +44,38 @@ describe('server/app', function() {
         });
     });
   });
+
+  describe('GET /js/vendor.js', function() {
+    it('should return the vendor js ', function(done) {
+      chai.request(app)
+        .get(subFolderPath + '/js/vendor.js')
+        .end(function(err, res) {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+  });
+
+  describe('GET /js/loader.js', function() {
+    it('should return the js loader bundle', function(done) {
+      chai.request(app)
+        .get(subFolderPath + '/js/loader.js')
+        .end(function(err, res) {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+  });
+
+  describe('GET /css/main.js', function() {
+    it('should return the main css', function(done) {
+      chai.request(app)
+        .get(subFolderPath + '/css/main.css')
+        .end(function(err, res) {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+  });
+
 });
