@@ -4,28 +4,39 @@
     "introText": "To continue, please login with one of the providers below"
   },
   "setup": {
-    "pageHeading": "Geona Setup",
-    "introText": "To login to Geona and use the administration tools you first need to configure an OAuth provider. Please complete the form below with the required details:",
-    "forbidden": "OAuth provider details have already been set in <code>config_server.json</code>. Please contact the server administrator to make changes",
-    "clientId": "Client ID",
-    "secret": "Secret",
-    "selectOauthProvider": "Select OAuth Provider",
-    "googleIntro": "For information on how to obtain OAuth credentials from Google please read <a href=\"https://developers.google.com/identity/protocols/OAuth2\" target=\"_blank\">Using OAuth 2.0 to Access Google APIs</a>. During this process you will be asked for two key pieces of information these are:",
-    "authorizedJavascriptOrigins": "Authorized JavaScript origins",
-    "authorizedRedirectUris": "Authorized redirect URIs",
-    "GutHubIntro": "To add GitHub OAuth please visit the <a href=\"https://github.com/settings/applications/new\" target=\"_blank\">Register a new OAuth application</a> page on the GiHub website",
-    "GitHubHomepageUrl": "Homepage URL",
-    "GitHubCallbackUrl": "Authorization callback URL",
-    "administratorsExplanation": "Please enter the email address of administrators. You must enter at least one addresss that is registered with the OAuth provider(s) that you select; multiple addresses should be separated with a comma",
-    "administrators": "Administrators"
+    "oauth": {
+      "pageHeading": "Geona Setup - Authentication",
+      "introText": "To login to Geona and use the administration tools you first need to configure an OAuth provider. Please complete the form below with the required details:",
+      "forbidden": "OAuth provider details have already been set in <code>config_server.json</code>. Please contact the server administrator to make changes",
+      "clientId": "Client ID",
+      "secret": "Secret",
+      "selectOauthProvider": "Select OAuth Provider",
+      "googleIntro": "For information on how to obtain OAuth credentials from Google please read <a href=\"https://developers.google.com/identity/protocols/OAuth2\" target=\"_blank\">Using OAuth 2.0 to Access Google APIs</a>. During this process you will be asked for two key pieces of information these are:",
+      "authorizedJavascriptOrigins": "Authorized JavaScript origins",
+      "authorizedRedirectUris": "Authorized redirect URIs",
+      "GutHubIntro": "To add GitHub OAuth please visit the <a href=\"https://github.com/settings/applications/new\" target=\"_blank\">Register a new OAuth application</a> page on the GiHub website",
+      "GitHubHomepageUrl": "Homepage URL",
+      "GitHubCallbackUrl": "Authorization callback URL",
+      "administratorsExplanation": "Please enter the email address of administrators. You must enter at least one addresss that is registered with the OAuth provider(s) that you select; multiple addresses should be separated with a comma",
+      "administrators": "Administrators"
+    },
+    "database": {
+      "pageHeading": "Geona Setup - Database",
+      "introText": "Please select your preferred database configuration. The most simple is SQLite3 which uses a single file based database and requires very little configuration; Postgres offers more resilience and can handle a great number of users but requires more effort to configure"
+    }
   },
-  "messages": {
-    "administrators": "Enter at least one administrator email address; multiple addresses should be comma separated",
-    "provider": "Please select at least one OAuth provider and complete the details for the selected provider(s)",
-    "google_clientId": "The Client ID for Google OAuth is required",
-    "google_secret": "The Secret for Google OAuth is required",
-    "github_clientId": "The Client ID for GitHub OAuth is required",
-    "github_secret": "The Secret for GitHub OAuth is required"
+  "validation": {
+    "oauth": {
+      "administrators": "Enter at least one administrator email address; multiple addresses should be comma separated",
+      "provider": "Please select at least one OAuth provider and complete the details for the selected provider(s)",
+      "google_clientId": "The Client ID for Google OAuth is required",
+      "google_secret": "The Secret for Google OAuth is required",
+      "github_clientId": "The Client ID for GitHub OAuth is required",
+      "github_secret": "The Secret for GitHub OAuth is required"
+    },
+    "database": {
+
+    }
   },
   "user": {
     "pageHeading": "Welcome",

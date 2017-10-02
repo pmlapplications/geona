@@ -1,6 +1,6 @@
-<div class="js-geona-admin__setup">
-  <h2>{{t 'admin:setup.pageHeading'}}</h2>
-  <p>{{t 'admin:setup.introText'}}</p>
+<div class="js-geona-admin__setup-oauth">
+  <h2>{{t 'admin:setup.oauth.pageHeading'}}</h2>
+  <p>{{t 'admin:setup.oauth.introText'}}</p>
 
   <div id="feedback" class="panel panel-danger" style="display:none;"> 
     <div class="panel-heading"> 
@@ -11,12 +11,12 @@
 
   <form id="oauth_setup" method="post">
     <div class="panel panel-default">
-      <div class="panel-heading"><b>{{t 'admin:setup.administrators' }}</b></div>
+      <div class="panel-heading"><b>{{t 'admin:setup.oauth.administrators' }}</b></div>
 
       <div class="panel-body" id="add_google_oauth">
         <div class="form-group">
-          <p>{{t 'admin:setup.administratorsExplanation' }}</p>
-          <label class="control-label">{{t 'admin:setup.administrators' }}</label>
+          <p>{{t 'admin:setup.oauth.administratorsExplanation' }}</p>
+          <label class="control-label">{{t 'admin:setup.oauth.administrators' }}</label>
           <input type="text" class="form-control" name="administrators" required="" />
         </div>
       </div>
@@ -33,25 +33,25 @@
 
       <div class="panel-body hidden" id="add_google_oauth">
         <h3>Google OAuth</h3>
-        <p>{{t 'admin:setup.googleIntro' }}</p>
+        <p>{{t 'admin:setup.oauth.googleIntro' }}</p>
         
         <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.authorizedJavascriptOrigins' }}</label>
+            <label class="control-label">{{t 'admin:setup.oauth.authorizedJavascriptOrigins' }}</label>
             <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.authorizedOrigin }}" />
         </div>
         
         <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.authorizedRedirectUris' }}</label>
+            <label class="control-label">{{t 'admin:setup.oauth.authorizedRedirectUris' }}</label>
             <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.authorizedRedirectURI }}" />
         </div>
         
         <div class="form-group">
-            <label for="google_clientId" class="control-label">{{t 'admin:setup.clientId' }}</label>
+            <label for="google_clientId" class="control-label">{{t 'admin:setup.oauth.clientId' }}</label>
             <input type="text" class="form-control" name="google_clientId" group="google" required="" />
         </div>
 
         <div class="form-group">
-            <label for="google_secret" class="control-label">{{t 'admin:setup.secret' }}</label>
+            <label for="google_secret" class="control-label">{{t 'admin:setup.oauth.secret' }}</label>
             <input type="text" class="form-control" name="google_secret" group="google" required="" />
         </div>
         
@@ -68,25 +68,25 @@
 
       <div class="panel-body hidden" id="add_google_oauth">
         <h3>GitHub OAuth</h3>
-        <p>{{t 'admin:setup.GutHubIntro' }}</p>
+        <p>{{t 'admin:setup.oauth.GutHubIntro' }}</p>
         
         <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.GitHubHomepageUrl' }}</label>
+            <label class="control-label">{{t 'admin:setup.oauth.GitHubHomepageUrl' }}</label>
             <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.authorizedOrigin }}" />
         </div>
         
         <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.GitHubCallbackUrl' }}</label>
+            <label class="control-label">{{t 'admin:setup.oauth.GitHubCallbackUrl' }}</label>
             <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.GitHubCallbackUrl }}" />
         </div>
         
         <div class="form-group">
-            <label for="google_clientId" class="control-label">{{t 'admin:setup.clientId' }}</label>
+            <label for="google_clientId" class="control-label">{{t 'admin:setup.oauth.clientId' }}</label>
             <input type="text" class="form-control" name="github_clientId" group="github" required="" />
         </div>
 
         <div class="form-group">
-            <label for="google_secret" class="control-label">{{t 'admin:setup.secret' }}</label>
+            <label for="google_secret" class="control-label">{{t 'admin:setup.oauth.secret' }}</label>
             <input type="text" class="form-control" name="github_secret" group="github" required="" />
         </div>
         
@@ -116,12 +116,12 @@
       },
     },
     messages: {
-      administrators: "{{t 'admin:messages.administrators' }}",
-      provider: "{{t 'admin:messages.provider' }}",
-      google_clientId: "{{t 'admin:messages.google_clientId' }}",
-      google_secret: "{{t 'admin:messages.google_secret' }}",
-      github_clientId: "{{t 'admin:messages.github_clientId' }}",
-      github_secret: "{{t 'admin:messages.github_secret' }}",
+      administrators: "{{t 'admin:validation.oauth.administrators' }}",
+      provider: "{{t 'admin:validation.oauth.provider' }}",
+      google_clientId: "{{t 'admin:validation.oauth.google_clientId' }}",
+      google_secret: "{{t 'admin:validation.oauth.google_secret' }}",
+      github_clientId: "{{t 'admin:validation.oauth.github_clientId' }}",
+      github_secret: "{{t 'admin:validation.oauth.github_secret' }}",
     },
   };
 

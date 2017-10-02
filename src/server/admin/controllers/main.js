@@ -49,6 +49,24 @@ export function index(req, res) {
 }
 
 /**
+ * Returns the database setup page; should only be availabe to Administrators
+ * 
+ * @export
+ * @param {any} req 
+ * @param {any} res 
+ */
+export function setupDatabase(req, res) {
+  let data = {
+    content: {},
+    config: config.server.getProperties(),
+    template: 'setup_database',
+    menu: menu.getMenu(),
+  };
+
+  res.render('admin_template', data);
+}
+
+/**
  * Returns the setup page if there is currently no OAuth configuration setup
  * 
  * @export
