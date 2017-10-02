@@ -26,6 +26,28 @@ export let server = {
     format: Array,
     default: [],
   },
+  database: {
+    dbType: {
+      doc: 'The type of database to connect to; currently limited to SQLite3 or Postgres',
+      format: String,
+      default: 'SQLite3',
+    },
+    username: {
+      doc: 'Database username',
+      format: String,
+      default: '',
+    },
+    password: {
+      doc: 'Database password',
+      format: String,
+      default: '',
+    },
+    path: {
+      doc: 'Path or URL to the database',
+      format: String,
+      default: '',
+    },
+  },
 };
 
 export let client = {
