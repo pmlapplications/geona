@@ -3,13 +3,17 @@
 import chalk from 'chalk';
 import convict from 'convict';
 import * as path from 'path';
-import * as packageJson from '../../package.json';
+import * as fs from 'fs';
 
+import * as packageJson from '../../package.json';
 import * as schema from '../common/config_schema.js';
 
-export let server = _combinedServerConfig();
+const _clientConfigFilePath = path.join(__dirname, '../../config/config_clients.json');
+const _serverConfigFilePath = path.join(__dirname, '../../config/config_server.json');
 
+export let server = _combinedServerConfig();
 export let clients = _combinedClientConfig();
+
 
 /**
  * Combines the defined client configuration with elements from package.json
@@ -22,7 +26,7 @@ function _combinedClientConfig() {
   let clientConfig = convict(schema.client);
   let packageContent = packageJson;
 
-  clientConfig.loadFile(path.join(__dirname, '../../config/config_clients.json'));
+  clientConfig.loadFile(_clientConfigFilePath);
   try {
     clientConfig.validate();
   } catch (e) {
@@ -47,7 +51,7 @@ function _combinedServerConfig() {
   let serverConfig = convict(schema.server);
   let packageContent = packageJson;
 
-  serverConfig.loadFile(path.join(__dirname, '../../config/config_server.json'));
+  serverConfig.loadFile(_serverConfigFilePath);
   try {
     serverConfig.validate();
   } catch (e) {
@@ -55,17 +59,17 @@ function _combinedServerConfig() {
   }
 
   /** some checks/tweaks to make sure that the subfolder starts with a slash and does not end with a slash */
-  let value = serverConfig.get('subFolderPath');
+  let subFolderPath = serverConfig.get('subFolderPath');
 
   /** does the subfolder start with a slash, if not then add one */
-  if (value.indexOf('/', 0) !== 0) {
-    value = '/' + value;
-    serverConfig.set('subFolderPath', value);
+  if (subFolderPath.indexOf('/', 0) !== 0) {
+    subFolderPath = '/' + subFolderPath;
+    serverConfig.set('subFolderPath', subFolderPath);
   }
   /** is there a trailing slash, take if off if there is */
-  if (value.lastIndexOf('/') === (value.length - 1)) {
-    value = value.substr(0, value.length - 1);
-    serverConfig.set('subFolderPath', value);
+  if (subFolderPath.lastIndexOf('/') === (subFolderPath.length - 1)) {
+    subFolderPath = subFolderPath.substr(0, subFolderPath.length - 1);
+    serverConfig.set('subFolderPath', subFolderPath);
   }
 
   serverConfig.set('package.name', packageContent.name);
@@ -74,4 +78,32 @@ function _combinedServerConfig() {
   serverConfig.set('package.repositoryUrl', packageContent.repository.url);
 
   return serverConfig;
+}
+
+/**
+ * Can be used to update the server config without restarting the application
+ * 
+ * @export
+ * @param {Object} config - Convict server configuration object
+ * @return {Boolean|Error}
+ */
+export function updateServerConfig(config) {
+  // remove the `package` elements that `_combinedServerConfig` adds
+  let configProperties = config.getProperties();
+  delete configProperties.package;
+
+  let serverConfig = convict(schema.server);
+  serverConfig.load(configProperties);
+
+  // validate the confif and then save it back to file
+  try {
+    serverConfig.validate();
+    fs.writeFileSync(_serverConfigFilePath, serverConfig.toString());
+  } catch (e) {
+    return e;
+  }
+
+  // Update the global `server` variable with the new validated config
+  server = config;
+  return true;
 }
