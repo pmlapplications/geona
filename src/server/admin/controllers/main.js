@@ -21,7 +21,12 @@ import * as schema from '../../../common/config_schema.js';
 export function index(req, res) {
   // if there are no OAuth providers configured send the user to the setup page
   if (config.server.get('OAuth').length === 0) {
-    res.redirect('admin/setup');
+    res.redirect('admin/setup/oauth');
+    return false;
+  }
+  // if there are no database connection parameters configured send the user to the db setup page
+  if (config.server.get('database.path').length === 0) {
+    res.redirect('admin/setup/database');
     return false;
   }
 
@@ -50,7 +55,7 @@ export function index(req, res) {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export function setup(req, res) {
+export function setupOauth(req, res) {
   let data = {
     content: {
       authorizedOrigin: requestUtils.getAppBasePath(req),
@@ -58,7 +63,7 @@ export function setup(req, res) {
       GitHubCallbackUrl: requestUtils.getAppBasePath(req) + '/user/auth/github/callback',
     },
     config: config.server.getProperties(),
-    template: 'setup',
+    template: 'setup_oauth',
     menu: menu.getMenu('/admin'),
   };
 
@@ -79,7 +84,7 @@ export function setup(req, res) {
  * @param {Object} res - Express response object
  * @return {Boolean}
  */
-export function setupPost(req, res) {
+export function setupOauthHandler(req, res) {
   let data = req.body;
   let providers = [];
   let configFilePath = path.join(__dirname, '../../../../config/config_server.json');
