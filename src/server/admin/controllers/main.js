@@ -5,13 +5,9 @@
 import * as config from '../../config';
 import * as requestUtils from '../../utils/request';
 import * as menu from '../../templates/menu';
-import convict from 'convict';
-import * as path from 'path';
-import * as fs from 'fs';
 import _ from 'lodash';
 
-import * as schema from '../../../common/config_schema.js';
-
+let subFolderPath = config.server.get('subFolderPath');
 /**
  * Renders the main index page for the administration application
  * @param {Object} req - Express request object
@@ -21,18 +17,18 @@ import * as schema from '../../../common/config_schema.js';
 export function index(req, res) {
   // if there are no OAuth providers configured send the user to the setup page
   if (config.server.get('OAuth').length === 0) {
-    res.redirect('admin/setup/oauth');
+    res.redirect(subFolderPath + '/admin/setup/oauth');
     return false;
   }
   // if there are no database connection parameters configured send the user to the db setup page
   if (config.server.get('database.path').length === 0) {
-    res.redirect('admin/setup/database');
+    res.redirect(subFolderPath + '/admin/setup/database');
     return false;
   }
 
   // if the user is not currently logged in send them to the login page
   if (typeof(req.session.passport) === 'undefined') {
-    res.redirect('user/login?r=/admin');
+    res.redirect(subFolderPath + '/user/login?r=/admin');
     return false;
   }
 
@@ -105,10 +101,7 @@ export function setupOauth(req, res) {
 export function setupOauthHandler(req, res) {
   let data = req.body;
   let providers = [];
-  let configFilePath = path.join(__dirname, '../../../../config/config_server.json');
-
-  let serverConfig = convict(schema.server);
-  serverConfig.loadFile(configFilePath);
+  let serverConfig = config.server;
 
   // get the admin email address(es)
   let emails = data.administrators.split(/,|;/);
@@ -153,15 +146,12 @@ export function setupOauthHandler(req, res) {
     OAuth: providers,
   });
 
-  // validate the config before saving it
-  try {
-    serverConfig.validate();
-    fs.writeFileSync(configFilePath, serverConfig.toString());
-  } catch (e) {
-    requestUtils.displayFriendlyError(e, res);
-    return false;
+  let update = config.updateServerConfig(serverConfig);
+  if (typeof(update) === Error) {
+    requestUtils.displayFriendlyError(update, res);
+  } else {
+    res.redirect(subFolderPath + '/admin');
   }
 
-  res.redirect('../admin');
   return false;
 }
