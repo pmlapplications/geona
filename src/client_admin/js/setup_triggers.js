@@ -12,7 +12,7 @@ import * as validation from './validation';
  * @export
  */
 export function registerTriggers() {
-  $('.js-geona-admin__setup .panel-heading :checkbox').click(/* @this HTMLElement */ function() {
+  $('.js-geona-admin__setup-oauth .panel-heading :checkbox').click(/* @this HTMLElement */ function() {
     $(this.closest('.panel')).find('.panel-body').toggleClass('hidden', this.value);
   });
 
