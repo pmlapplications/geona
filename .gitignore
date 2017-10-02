@@ -4,6 +4,7 @@
 .sass-cache
 .tern-project
 .vscode/
+coverage
 lib
 node_modules
 npm-debug.log
