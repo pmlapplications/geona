@@ -3,6 +3,7 @@
 /* eslint camelcase: 0 */
 
 import {getCapabilities, jsonifyCapabilities} from './common';
+import proj4 from 'proj4';
 
 /**
  * Parse a WMTS capabilities from a url.
@@ -80,8 +81,10 @@ function parse1_0(url, capabilities) {
     serverConfig.service.accessConstraints = serviceId.accessConstraints;
   }
   if (servicePr) {
-    if (servicePr.providerSite.href) {
-      serverConfig.service.onlineResource = servicePr.providerSite.href;
+    if (servicePr.providerSite) {
+      if (servicePr.providerSite.href) {
+        serverConfig.service.onlineResource = servicePr.providerSite.href;
+      }
     }
 
     if (servicePr.serviceContact) {
@@ -214,100 +217,91 @@ function parse1_0(url, capabilities) {
         layerData.boundingBox = {};
         for (let box of dataset.value.boundingBox) {
           if (box.name && box.value) {
-            if (box.name.localPart === 'WGS84BoundingBox') {
-              layerData.boundingBox = {
-                minLat: box.value.lowerCorner[1],
-                minLon: box.value.lowerCorner[0],
-                maxLat: box.value.upperCorner[1],
-                maxLon: box.value.upperCorner[0],
-              };
-              layerData.boundingBox.OGC84dimensions = box.value.dimensions;
-            }
+            layerData.boundingBox = populateBoundingBox(box);
           }
         }
       }
-      // Style is a mandatory property
-      layerData.styles = {};
-      for (let style of dataset.value.style) {
-        layerData.styles[style.identifier.value] = {};
+    }
+    // Style is a mandatory property
+    layerData.styles = {};
+    for (let style of dataset.value.style) {
+      layerData.styles[style.identifier.value] = {};
 
-        if (style.title) {
-          layerData.styles[style.identifier.value].title = parseTitles(style.title);
-        }
-
-        if (style._abstract) {
-          layerData.styles[style.identifier.value].abstract = parseAbstracts(style._abstract);
-        }
-
-        if (style.keywords) {
-          layerData.styles[style.identifier.value].keywords = parseKeywords(style.keywords);
-        }
-
-        if (style.legendURL !== undefined) {
-          layerData.styles[style.identifier.value].legendURL = style.legendURL;
-        }
-
-        if (style.isDefault !== undefined) {
-          layerData.styles[style.identifier.value].isDefault = style.isDefault;
-        }
+      if (style.title) {
+        layerData.styles[style.identifier.value].title = parseTitles(style.title);
       }
 
-      // Format is a mandatory property
-      layerData.formats = dataset.value.format;
-
-
-      if (dataset.value.infoFormat) {
-        layerData.infoFormat = dataset.value.infoFormat;
+      if (style._abstract) {
+        layerData.styles[style.identifier.value].abstract = parseAbstracts(style._abstract);
       }
 
-      if (dataset.value.dimension) {
-        layerData.dimension = parseDimensions(dataset.value.dimension);
+      if (style.keywords) {
+        layerData.styles[style.identifier.value].keywords = parseKeywords(style.keywords);
       }
 
-      if (dataset.value.metadata) {
-        // Real metadata examples did not match the schema, so we take everything and remove TYPE_NAME afterwards
-        layerData.metadata = dataset.value.metadata;
-        for (let data of layerData.metadata) {
-          data.TYPE_NAME = undefined;
-        }
+      if (style.legendURL !== undefined) {
+        layerData.styles[style.identifier.value].legendURL = style.legendURL;
       }
 
-      // TileMatrixSetLink is a mandatory property
-      layerData.tileMatrixSetLinks = [];
-      for (let matrixData of dataset.value.tileMatrixSetLink) {
-        let setLinksObject = {};
-        setLinksObject.tileMatrixSet = matrixData.tileMatrixSet;
-
-        let tileMatrixLimitsObject = {};
-        if (matrixData.tileMatrixSetLimits) {
-          for (let currentMatrix of matrixData.tileMatrixSetLimits.tileMatrixLimits) {
-            let currentMatrixLimits = {};
-            currentMatrixLimits[currentMatrix.tileMatrix] = {};
-            currentMatrixLimits[currentMatrix.tileMatrix].minTileRow = currentMatrix.minTileRow;
-            currentMatrixLimits[currentMatrix.tileMatrix].maxTileRow = currentMatrix.maxTileRow;
-            currentMatrixLimits[currentMatrix.tileMatrix].minTileCol = currentMatrix.minTileCol;
-            currentMatrixLimits[currentMatrix.tileMatrix].maxTileCol = currentMatrix.maxTileCol;
-            Object.assign(tileMatrixLimitsObject, currentMatrixLimits);
-          }
-        }
-        let limitsLength = Object.values(tileMatrixLimitsObject).length;
-        if (limitsLength === 0) {
-          setLinksObject.tileMatrixLimits = undefined;
-        } else {
-          setLinksObject.tileMatrixLimits = tileMatrixLimitsObject;
-        }
-        layerData.tileMatrixSetLinks.push(setLinksObject);
+      if (style.isDefault !== undefined) {
+        layerData.styles[style.identifier.value].isDefault = style.isDefault;
       }
+    }
 
-      if (dataset.value.resourceURL) {
-        layerData.resourceUrls = [];
-        for (let resource of dataset.value.resourceURL) {
-          let thisResource = {};
-          thisResource.format = resource.format;
-          thisResource.resourceType = resource.resourceType;
-          thisResource.template = resource.template;
-          layerData.resourceUrls.push(thisResource);
+    // Format is a mandatory property
+    layerData.formats = dataset.value.format;
+
+
+    if (dataset.value.infoFormat) {
+      layerData.infoFormat = dataset.value.infoFormat;
+    }
+
+    if (dataset.value.dimension) {
+      layerData.dimensions = parseDimensions(dataset.value.dimension);
+    }
+
+    if (dataset.value.metadata) {
+      // Real metadata examples did not match the schema, so we take everything and remove TYPE_NAME afterwards
+      layerData.metadata = dataset.value.metadata;
+      for (let data of layerData.metadata) {
+        data.TYPE_NAME = undefined;
+      }
+    }
+
+    // TileMatrixSetLink is a mandatory property
+    layerData.tileMatrixSetLinks = [];
+    for (let matrixData of dataset.value.tileMatrixSetLink) {
+      let setLinksObject = {};
+      setLinksObject.tileMatrixSet = matrixData.tileMatrixSet;
+
+      let tileMatrixLimitsArray = [];
+      if (matrixData.tileMatrixSetLimits) {
+        for (let currentMatrix of matrixData.tileMatrixSetLimits.tileMatrixLimits) {
+          let currentMatrixLimits = {};
+          currentMatrixLimits.identifier = currentMatrix.tileMatrix;
+          currentMatrixLimits.minTileRow = currentMatrix.minTileRow;
+          currentMatrixLimits.maxTileRow = currentMatrix.maxTileRow;
+          currentMatrixLimits.minTileCol = currentMatrix.minTileCol;
+          currentMatrixLimits.maxTileCol = currentMatrix.maxTileCol;
+          tileMatrixLimitsArray.push(currentMatrixLimits);
         }
+      }
+      if (tileMatrixLimitsArray.length === 0) {
+        setLinksObject.tileMatrixLimits = undefined;
+      } else {
+        setLinksObject.tileMatrixLimits = tileMatrixLimitsArray;
+      }
+      layerData.tileMatrixSetLinks.push(setLinksObject);
+    }
+
+    if (dataset.value.resourceURL) {
+      layerData.resourceUrls = [];
+      for (let resource of dataset.value.resourceURL) {
+        let thisResource = {};
+        thisResource.format = resource.format;
+        thisResource.resourceType = resource.resourceType;
+        thisResource.template = resource.template;
+        layerData.resourceUrls.push(thisResource);
       }
     }
     serverConfig.layers.push(layerData);
@@ -315,12 +309,34 @@ function parse1_0(url, capabilities) {
 
   let layerMatrix = capabilities.contents.tileMatrixSet;
   if (layerMatrix) {
+    // Sometimes the bounding box data is stored in the TileMatrixSet, so we need to populate the bounding box 
+    // of the layers here instead 
+    if (!serverConfig.layers[0].boundingBox) {
+      for (let layer of serverConfig.layers) {
+        for (let tileMatrixSet of layer.tileMatrixSetLinks) {
+          // TODO If the layer has a link to the current tile matrix set AND there isn't already a bounding box, add the bounding box to the layer 
+          for (let tileMatrixSetId of layerMatrix) {
+            if (tileMatrixSet.tileMatrixSet === tileMatrixSetId.identifier.value) {
+              console.log('Match');
+              if (tileMatrixSetId.boundingBox) {
+                let currentTileMatrixBox = tileMatrixSetId.boundingBox;
+                console.log('boundingBox found, and is being added to:');
+                console.log(layer);
+                layer.boundingBox = {};
+                if (currentTileMatrixBox.name && currentTileMatrixBox.value) {
+                  layer.boundingBox = populateBoundingBox(currentTileMatrixBox);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     serverConfig.tileMatrixSets = {};
     let matrixSets = serverConfig.tileMatrixSets;
     for (let matrixSet of layerMatrix) {
       let thisMatrixSet = matrixSets[matrixSet.identifier.value] = {};
-      thisMatrixSet.projection = matrixSet.supportedCRS
-        .replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+      thisMatrixSet.projection = convertCrs(matrixSet.supportedCRS);
       console.log(thisMatrixSet.projection);
       if (thisMatrixSet.projection === 'OGC:CRS84') {
         thisMatrixSet.projection = 'EPSG:4326';
@@ -340,155 +356,219 @@ function parse1_0(url, capabilities) {
         thisMatrixSet.tileMatrices.push(thisMatrix);
       }
     }
+    return serverConfig;
   }
-  return serverConfig;
-}
 
-/**
- * Constructs an object containing titles separated by language code.
- * @param {Array} titles An array of titles with value and optional lang properties.
- * @return {Object}      Object with language separated titles.
- */
-function parseTitles(titles) {
-  let titleObject = {};
-  if (titles !== undefined) {
-    if (titles !== []) {
-      if (titles.length > 1) {
-        for (let currentTitle of titles) {
-          if (currentTitle.lang) {
-            Object.assign(titleObject, {
-              [currentTitle.lang]: currentTitle.value,
-            });
-          } else {
-            Object.assign(titleObject, {
-              'und': currentTitle.value,
-            });
-          }
-        }
-      } else {
-        if (titles[0].lang) {
-          titleObject = {
-            [titles[0].lang]: titles[0].value,
-          };
-        } else {
-          titleObject = {
-            'und': titles[0].value,
-          };
-        }
-      }
-    }
-  }
-  return titleObject;
-}
-
-/**
- * Constructs an object containing abstracts separated by language code.
- * @param {Array} abstracts An array of abstracts with value and optional lang properties.
- * @return {Object}         Object with language-separated abstracts.
- */
-function parseAbstracts(abstracts) {
-  let abstractObject = {};
-  if (abstracts !== undefined) {
-    if (abstracts !== []) {
-      if (abstracts.length > 1) {
-        for (let currentAbstract of abstracts) {
-          if (currentAbstract.lang) {
-            Object.assign(abstractObject, {
-              [currentAbstract.lang]: currentAbstract.value,
-            });
-          } else {
-            Object.assign(abstractObject, {
-              'und': currentAbstract.value,
-            });
-          }
-        }
-      } else if (abstracts !== []) {
-        if (abstracts[0].lang) {
-          abstractObject = {
-            [abstracts[0].lang]: abstracts[0].value,
-          };
-        } else {
-          abstractObject = {
-            'und': abstracts[0].value,
-          };
-        }
-      }
-    }
-  }
-  return abstractObject;
-}
-
-/**
- * Constructs an object containing arrays of keywords separated by language code.
- * @param {Array} keywords An array of keywords with value and optional lang properties.
- * @return {Object}        Object with language-separated keyword arrays.
- */
-function parseKeywords(keywords) {
-  let keywordObject = {};
-  if (keywords !== undefined) {
-    if (keywords !== []) {
-      for (let keywordList of keywords) {
-        if (keywordList.keyword !== []) {
-          for (let keyword of keywordList.keyword) {
-            // if undefined, we use the und language code
-            if (!keyword.lang) {
-              if (!keywordObject[keyword.lang]) {
-                keywordObject.und = [];
-              }
-              keywordObject.und.push(keyword.value);
+  /**
+   * Constructs an object containing titles separated by language code.
+   * @param {Array} titles An array of titles with value and optional lang properties.
+   * @return {Object}      Object with language separated titles.
+   */
+  function parseTitles(titles) {
+    let titleObject = {};
+    if (titles !== undefined) {
+      if (titles !== []) {
+        if (titles.length > 1) {
+          for (let currentTitle of titles) {
+            if (currentTitle.lang) {
+              Object.assign(titleObject, {
+                [currentTitle.lang]: currentTitle.value,
+              });
             } else {
-              if (!keywordObject[keyword.lang]) {
-                keywordObject[keyword.lang] = [];
+              Object.assign(titleObject, {
+                'und': currentTitle.value,
+              });
+            }
+          }
+        } else {
+          if (titles[0].lang) {
+            titleObject = {
+              [titles[0].lang]: titles[0].value,
+            };
+          } else {
+            titleObject = {
+              'und': titles[0].value,
+            };
+          }
+        }
+      }
+    }
+    return titleObject;
+  }
+
+  /**
+   * Constructs an object containing abstracts separated by language code.
+   * @param {Array} abstracts An array of abstracts with value and optional lang properties.
+   * @return {Object}         Object with language-separated abstracts.
+   */
+  function parseAbstracts(abstracts) {
+    let abstractObject = {};
+    if (abstracts !== undefined) {
+      if (abstracts !== []) {
+        if (abstracts.length > 1) {
+          for (let currentAbstract of abstracts) {
+            if (currentAbstract.lang) {
+              Object.assign(abstractObject, {
+                [currentAbstract.lang]: currentAbstract.value,
+              });
+            } else {
+              Object.assign(abstractObject, {
+                'und': currentAbstract.value,
+              });
+            }
+          }
+        } else if (abstracts !== []) {
+          if (abstracts[0].lang) {
+            abstractObject = {
+              [abstracts[0].lang]: abstracts[0].value,
+            };
+          } else {
+            abstractObject = {
+              'und': abstracts[0].value,
+            };
+          }
+        }
+      }
+    }
+    return abstractObject;
+  }
+
+  /**
+   * Constructs an object containing arrays of keywords separated by language code.
+   * @param {Array} keywords An array of keywords with value and optional lang properties.
+   * @return {Object}        Object with language-separated keyword arrays.
+   */
+  function parseKeywords(keywords) {
+    let keywordObject = {};
+    if (keywords !== undefined) {
+      if (keywords !== []) {
+        for (let keywordList of keywords) {
+          if (keywordList.keyword !== []) {
+            for (let keyword of keywordList.keyword) {
+              // if undefined, we use the und language code
+              if (!keyword.lang) {
+                if (!keywordObject[keyword.lang]) {
+                  keywordObject.und = [];
+                }
+                keywordObject.und.push(keyword.value);
+              } else {
+                if (!keywordObject[keyword.lang]) {
+                  keywordObject[keyword.lang] = [];
+                }
+                keywordObject[keyword.lang].push(keyword.value);
               }
-              keywordObject[keyword.lang].push(keyword.value);
             }
           }
         }
       }
     }
+    return keywordObject;
   }
-  return keywordObject;
-}
 
-/**
- *
- * @param {Array} dimensions
- * @return {Object}
- */
-function parseDimensions(dimensions) {
-  let dimensionsObject = {};
-  if (dimensions !== undefined) {
-    if (dimensions !== []) {
-      for (let dimension of dimensions) {
-        dimensionsObject[dimension.identifier.value] = {};
-        if (dimension.title) {
-          dimensionsObject[dimension.identifier.value].title = parseTitles(dimension.title);
-        }
-        if (dimension._abstract) {
-          dimensionsObject[dimension.identifier.value].abstract = parseAbstracts(dimension._abstract);
-        }
-        if (dimension.keywords) {
-          dimensionsObject[dimension.identifier.value].keywords = parseKeywords(dimension.keywords);
-        }
-        if (dimension.uom) {
-          dimensionsObject[dimension.identifier.value].uom = dimension.uom.value;
-        }
-        if (dimension.unitSymbol) {
-          dimensionsObject[dimension.identifier.value].unitSymbol = dimension.unitSymbol;
-        }
+  /**
+   *
+   * @param {Array} dimensions
+   * @return {Object}
+   */
+  function parseDimensions(dimensions) {
+    let dimensionsArray = [];
+    if (dimensions !== undefined) {
+      if (dimensions !== []) {
+        for (let dimension of dimensions) {
+          // Contains all the information for one dimension 
+          let dimensionObject = {identifier: dimension.identifier.value};
+          if (dimension.title) {
+            dimensionObject.title = parseTitles(dimension.title);
+          }
+          if (dimension._abstract) {
+            dimensionObject.abstract = parseAbstracts(dimension._abstract);
+          }
+          if (dimension.keywords) {
+            dimensionObject.keywords = parseKeywords(dimension.keywords);
+          }
+          if (dimension.uom) {
+            dimensionObject.uom = dimension.uom.value;
+          }
+          if (dimension.unitSymbol) {
+            dimensionObject.unitSymbol = dimension.unitSymbol;
+          }
 
-        // Default is a mandatory property
-        let dimDefault = dimension._default || dimension.default;
-        dimensionsObject[dimension.identifier.value].default = dimDefault;
+          // Default is a mandatory property 
+          let dimDefault = dimension._default || dimension.default;
+          dimensionObject.default = dimDefault;
 
-        if (dimension.current) {
-          dimensionsObject[dimension.identifier.value].current = dimension.current;
+          if (dimension.current) {
+            dimensionObject.current = dimension.current;
+          }
+
+          // Value is a mandatory property 
+          dimensionObject.value = dimension.value;
+
+          dimensionsArray.push(dimensionObject);
         }
-
-        // Value is a mandatory property
-        dimensionsObject[dimension.identifier.value].value = dimension.value;
       }
     }
+    return dimensionsArray;
   }
-  return dimensionsObject;
+
+  /**
+   * Converts the crs from the long OGC specification style into a normal crs string.
+   * @param {String}  crs The crs in OGC specification style, e.g. 'urn:ogc:def:crs:OGC:2:84'.
+   * @return {String}     The crs in normal style, e.g. 'OGC:84'.
+   */
+  function convertCrs(crs) {
+    return crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+  }
+
+  /**
+   * Populates and returns an Object containing bounding box data
+   * with the correct axis orientation, projection code and dimensions.
+   * @param {Object}  box The bounding box
+   * @return {Object}     The bounding box data as an Object
+   */
+  function populateBoundingBox(box) {
+    let boundingBox;
+    if (box.name.localPart === 'WGS84BoundingBox') {
+      boundingBox = {
+        minLat: box.value.lowerCorner[1],
+        minLon: box.value.lowerCorner[0],
+        maxLat: box.value.upperCorner[1],
+        maxLon: box.value.upperCorner[0],
+        style: 'wgs84BoundingBox',
+        dimensions: box.value.dimensions,
+      };
+      if (box.value.crs) {
+        boundingBox.projection = convertCrs(box.value.crs);
+      }
+    } else {
+      // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
+      let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
+      if (xyOrientation === 'en') {
+        boundingBox = {
+          minLat: box.value.lowerCorner[1],
+          minLon: box.value.lowerCorner[0],
+          maxLat: box.value.upperCorner[1],
+          maxLon: box.value.upperCorner[0],
+          style: 'boundingBox',
+          dimensions: box.value.dimensions,
+        };
+        if (box.value.crs) {
+          boundingBox.projection = convertCrs(box.value.crs);
+        }
+      } else {
+        boundingBox = {
+          minLat: box.value.lowerCorner[0],
+          minLon: box.value.lowerCorner[1],
+          maxLat: box.value.upperCorner[0],
+          maxLon: box.value.upperCorner[1],
+          style: 'boundingBox',
+          dimensions: box.value.dimensions,
+        };
+        if (box.value.crs) {
+          boundingBox.projection = convertCrs(box.value.crs);
+        }
+      }
+    }
+    return boundingBox;
+  }
 }
