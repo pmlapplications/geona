@@ -2,6 +2,8 @@
 
 /* global geona */
 
+import 'babel-polyfill';
+
 let head = document.getElementsByTagName('head')[0];
 
 let geonaCoreLoading = false;

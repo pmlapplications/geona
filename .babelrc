@@ -11,7 +11,8 @@
             "debug": false,
             "targets": {
               "node": 4
-            }
+            },
+            "useBuiltIns": true
           }
         ]
       ]
