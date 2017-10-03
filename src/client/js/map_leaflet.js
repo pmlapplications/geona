@@ -280,6 +280,7 @@ export class LMap extends GeonaMap {
    */
   setView_(options) {
     if (options.projection) {
+      // options.projection = leafletizeProjection(options.projection);
       options.projection = deLeafletizeProjection(options.projection);
     }
 
@@ -322,10 +323,12 @@ export class LMap extends GeonaMap {
           break;
         case 'wmts':
           title = selectPropertyLanguage(geonaLayer.title);
-          layer = createWmtsTileLayer(geonaLayer);
+          layer = createWmtsTileLayer(geonaLayer, deLeafletizeProjection(this.map_.options.crs));
           break;
       }
       this.map_.addLayer(layer);
+    } else {
+      alert('Cannot use this projection for this layer');
     }
     // var url = "http://wxs.ign.fr/" + ignKey + "/geoportail/wmts";
 
@@ -521,9 +524,11 @@ export function init(geonaServer, next) {
 
 /**
  * Generates a WMTS TileLayer for use on Leaflet maps.
- * @param {Layer} geonaLayer The Geona Layer object containing this layer data after parsing the GetCapabilities request
+ * @param {Layer}  geonaLayer    The Geona Layer object containing this layer data after parsing the GetCapabilities request
+ * @param {String} mapProjection
+ * @return {*}
  */
-function createWmtsTileLayer(geonaLayer) {
+function createWmtsTileLayer(geonaLayer, mapProjection) {
   // var url = "http://wxs.ign.fr/" + ignKey + "/geoportail/wmts";
 
   // var ign = new L.TileLayer.WMTS(url,
@@ -537,11 +542,24 @@ function createWmtsTileLayer(geonaLayer) {
   // );
   let layer;
 
-  // TODO Replace with thing to search for TileMatrixSet that supports the current projection
-  // And like also that searches for the specific TileMatrixSet maybe? Currently we just pick the last one.
   let tileMatrixSetId;
-  for (let key of geonaLayer.tileMatrixSetLinks) {
-    tileMatrixSetId = key.tileMatrixSet;
+
+  // TODO check correct - Replace with thing to search for TileMatrixSet that supports the current projection
+  // TODO change parser to make any objects with the id as the key changed to arrays with the id as a property :(
+
+  // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
+  let matrixLimits;
+  for (let tileMatrixSet of Object.keys(geonaLayer.layerServer.tileMatrixSets)) {
+    for (let tileMatrixSetLink of geonaLayer.tileMatrixSetLinks) {
+      // If the TileMatrixSet is one of the links for the current layer and the current map projection is
+      // supported, we can use this tileMatrixSet for the layer.
+      if (tileMatrixSet === tileMatrixSetLink.tileMatrixSet) {
+        matrixLimits = tileMatrixSetLink.tileMatrixLimits;
+        if (geonaLayer.layerServer.tileMatrixSets[tileMatrixSet].projection === mapProjection) {
+          tileMatrixSetId = tileMatrixSet;
+        }
+      }
+    }
   }
   let format;
   let url;
@@ -628,10 +646,15 @@ function createWmtsTileLayer(geonaLayer) {
       }
     );
   } else {
-    let RestUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS/tile/1.0.0/WorldTimeZones/WorldTimeZones/default028mm/{z}/{y}/{x}.png';
+    // let RestUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS/tile/1.0.0/WorldTimeZones/WorldTimeZones/default028mm/{z}/{y}/{x}.png';
     // `WorldTimeZones/WorldTimeZones/default028mm/3/3/3.png?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&Layer=` + geonaLayer.identifier + `&Format=` + format + `&TileMatrixSet=` + tileMatrixSetId + `&TileMatrix={z}&TileRow={y}&TileCol={x}`;
-
-    layer = new L.TileLayer(RestUrl);
+    console.log('url:' + url);
+    let restUrl = url.replace(/(?:^|\W)TileMatrix(?:$|\W)/, '{z}').replace('TileCol', 'y').replace('TileRow', 'x');
+    console.log('restUrl:' + restUrl);
+    layer = new L.TileLayer(restUrl, {
+      style: style,
+      TileMatrixSet: tileMatrixSetId,
+    });
   }
 
 
