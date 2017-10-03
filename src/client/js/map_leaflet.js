@@ -1,7 +1,10 @@
 /** @module  map_leafet */
 
 import GeonaMap from './map';
-import {basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter, addLayerDefaults} from './map_common';
+import {
+  basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter,
+  addLayerDefaults, selectPropertyLanguage,
+} from './map_common';
 import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 
 let L;
@@ -298,9 +301,49 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Load the data layers defined in the config
-   * @private
+   * Add the specified layer onto the map.
+   * @param {Layer} geonaLayer A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
+   * @param {Integer} [index]  The optional zero-based index to insert the layer at on the map.
    */
+  addLayer(geonaLayer, index) {
+    if (geonaLayer.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
+      let layer;
+      let title;
+      let time;
+      switch (geonaLayer.PROTOCOL) {
+        case 'wms':
+          title = geonaLayer.title.und;
+          if (geonaLayer.isTemporal === true) {
+            // Change to be the closest time previous to the current layers' times
+            // i.e. if (currently a temporal layer on the map) {...} else {set to lastTime}
+            time = geonaLayer.lastTime;
+          }
+          // TODO tile
+          break;
+        case 'wmts':
+          title = selectPropertyLanguage(geonaLayer.title);
+          layer = createWmtsTileLayer(geonaLayer);
+          break;
+      }
+      this.map_.addLayer(layer);
+    }
+    // var url = "http://wxs.ign.fr/" + ignKey + "/geoportail/wmts";
+
+    // var ign = new L.TileLayer.WMTS(url,
+    //   {
+    //     layer: layerIGNScanStd,
+    //     style: "normal",
+    //     tilematrixSet: "PM",
+    //     format: "image/jpeg",
+    //     attribution: "<a href='https://github.com/mylen/leaflet.TileLayer.WMTS'>GitHub</a>&copy; <a href='http://www.ign.fr'>IGN</a>"
+    //   }
+    // );
+  }
+
+  /**
+ * Load the data layers defined in the config
+ * @private
+ */
   loadLayers_() {
     for (let addedLayer of this.config.layers) {
       addedLayer = addLayerDefaults(addedLayer);
@@ -332,11 +375,11 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Load the default basemaps, and any defined in the config.
-   * @private
-   */
+ * Load the default basemaps, and any defined in the config.
+ * @private
+ */
   loadBasemaps_() {
-    // TODO load from config too
+  // TODO load from config too
     for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
@@ -353,11 +396,11 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Load the default border layers, and any defined in the config.
-   * @private
-   */
+ * Load the default border layers, and any defined in the config.
+ * @private
+ */
   loadCountryBorderLayers_() {
-    // TODO load from config too
+  // TODO load from config too
     for (let layer of defaultBorders) {
       switch (layer.source.type) {
         case 'wms':
@@ -464,6 +507,7 @@ export function init(geonaServer, next) {
           // Import Leaflet plugins
           return Promise.all([
             import('../vendor/js/leaflet_latlng_graticule'),
+            import('../vendor/js/leaflet_tilelayer_wmts'),
           ]);
         })
         .then(() => {
@@ -473,4 +517,125 @@ export function init(geonaServer, next) {
     mapJs.src = geonaServer + '/js/vendor_leaflet.js';
     head.appendChild(mapJs);
   }
+}
+
+/**
+ * Generates a WMTS TileLayer for use on Leaflet maps.
+ * @param {Layer} geonaLayer The Geona Layer object containing this layer data after parsing the GetCapabilities request
+ */
+function createWmtsTileLayer(geonaLayer) {
+  // var url = "http://wxs.ign.fr/" + ignKey + "/geoportail/wmts";
+
+  // var ign = new L.TileLayer.WMTS(url,
+  //   {
+  //     layer: layerIGNScanStd,
+  //     style: "normal",
+  //     tilematrixSet: "PM",
+  //     format: "image/jpeg",
+  //     attribution: "<a href='https://github.com/mylen/leaflet.TileLayer.WMTS'>GitHub</a>&copy; <a href='http://www.ign.fr'>IGN</a>"
+  //   }
+  // );
+  let layer;
+
+  // TODO Replace with thing to search for TileMatrixSet that supports the current projection
+  // And like also that searches for the specific TileMatrixSet maybe? Currently we just pick the last one.
+  let tileMatrixSetId;
+  for (let key of geonaLayer.tileMatrixSetLinks) {
+    tileMatrixSetId = key.tileMatrixSet;
+  }
+  let format;
+  let url;
+
+  // TODO This should pick the style provided in a config
+  let style;
+  let defaultStyle;
+  for (let key in geonaLayer.styles) {
+    if (geonaLayer.styles.hasOwnProperty(key)) {
+      if (key.isDefault) {
+        defaultStyle = key;
+      }
+      style = key;
+    }
+  }
+  if (defaultStyle !== undefined) {
+    style = defaultStyle;
+  }
+
+  let requestEncoding;
+
+  let attribution;
+  if (geonaLayer.attribution) {
+    if (geonaLayer.attribution.onlineResource) {
+      attribution = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+    } else {
+      attribution = geonaLayer.attribution.title;
+    }
+  }
+
+  // Even though operationsMetadata can contain REST encodings alongside URLs, these URLs are not the
+  // templated form required for REST requests, so we only take KVP information from here. REST information
+  // is taken from the resourceUrls section.
+  if (geonaLayer.layerServer.operationsMetadata) {
+    if (geonaLayer.layerServer.operationsMetadata.GetTile) {
+      // If we can use a GET operation we use it instead of a POST.
+      if (geonaLayer.layerServer.operationsMetadata.GetTile.get !== undefined) {
+        let getTile = geonaLayer.layerServer.operationsMetadata.GetTile.get;
+        requestEncoding = 'KVP';
+        for (let tile of getTile) {
+          for (let encoding of tile.encoding) {
+            if (encoding === requestEncoding) {
+              url = tile.url;
+            }
+          }
+        }
+      } else {
+        let postTile = geonaLayer.layerServer.operationsMetadata.GetTile.post;
+        requestEncoding = 'KVP';
+        for (let tile of postTile) {
+          for (let encoding of tile.encoding) {
+            if (encoding === requestEncoding) {
+              url = tile.url;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  console.log('if url undefined:');
+  console.log(url === undefined);
+  console.log('if geonaLayer.resourceUrls:');
+  console.log(geonaLayer.resourceUrls !== undefined);
+
+  if (url === undefined && geonaLayer.resourceUrls) {
+    requestEncoding = 'REST';
+    for (let resource of geonaLayer.resourceUrls) {
+      if (resource.resourceType === 'tile') {
+        format = resource.format;
+        url = resource.template;
+      }
+    }
+  }
+
+  if (requestEncoding === 'KVP') {
+    layer = new L.TileLayer.WMTS(url,
+      {
+        layer: geonaLayer.identifier,
+        style: style,
+        tilematrixSet: tileMatrixSetId,
+        format: format,
+        attribution: attribution,
+      }
+    );
+  } else {
+    let RestUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS/tile/1.0.0/WorldTimeZones/WorldTimeZones/default028mm/{z}/{y}/{x}.png';
+    // `WorldTimeZones/WorldTimeZones/default028mm/3/3/3.png?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&Layer=` + geonaLayer.identifier + `&Format=` + format + `&TileMatrixSet=` + tileMatrixSetId + `&TileMatrix={z}&TileRow={y}&TileCol={x}`;
+
+    layer = new L.TileLayer(RestUrl);
+  }
+
+
+  // KVP we need (maybe)
+  // custom URL in the form (url + '&height='+ tile height +'&width='+tile width+'&tilematrixset='+tile matrix set id+'&version='+ version OR '1.0.0' +'&style='+style+'&layer='+layer+'&SERVICE=WMTS&REQUEST=GetTile&format='+format+'&TileMatrix='+tile matrix+'&tileRow='+tile row+'&tileCol='+tile col
+  return layer;
 }

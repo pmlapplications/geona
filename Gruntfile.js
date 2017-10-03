@@ -24,6 +24,7 @@ module.exports = function(grunt) {
 
   let leafletPlugins = [
     './src/client/vendor/js/leaflet_latlng_graticule.js',
+    './src/client/vendor/js/leaflet_tilelayer_wmts.js',
   ];
 
   let clientExternalLibs = vendorLibs.concat(leafletPlugins).concat([
