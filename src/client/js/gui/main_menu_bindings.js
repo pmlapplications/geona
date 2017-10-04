@@ -17,12 +17,27 @@ export function registerBindings(eventManager, menu) {
     menu.closeMenu();
   });
 
+
   /*
    * Explore Panel
    */
+  // Display explore panel
   eventManager.bind('mainMenu.displayExplorePanel', () => {
     menu.displayExplorePanel();
   });
+  // Submit WMS URL
+  eventManager.bind('mainMenu.getLayersFromWMS', () => {
+    menu.getLayersFromWMS();
+  });
+  // Submit WMTS URL
+  eventManager.bind('mainMenu.getLayersFromWMTS', () => {
+    menu.getLayersFromWMTS();
+  });
+  // Add layer from URL to map
+  eventManager.bind('mainMenu.addUrlLayerToMap', () => {
+    menu.addUrlLayerToMap();
+  });
+
 
   /*
    * Layers Panel

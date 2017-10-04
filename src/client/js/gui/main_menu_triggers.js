@@ -3,7 +3,7 @@ import 'jquery';
 /**
  * Sets event triggers for main menu elements.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
- * @param {JQuery} parentDiv The div which contains the current map.
+ * @param {JQuery}       parentDiv    The div which contains the current map.
  */
 export function registerTriggers(eventManager, parentDiv) {
   let lastTabClicked = '';
@@ -29,7 +29,6 @@ export function registerTriggers(eventManager, parentDiv) {
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
-
 
   /* ------------------------------------*\
       Layers Panel
@@ -94,5 +93,32 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('mainMenu.displaySharePanel');
     }
     lastTabClicked = 'js-geona-menu__share';
+  });
+}
+
+/**
+ * Used in the mainMenu class to set triggers for panel elements once that panel has been loaded.
+ * @param {EventManager} eventManager The event manager for the current instance of Geona.
+ * @param {JQuery}       parentDiv    The div which contains the current map.
+ */
+export function registerExploreTriggers(eventManager, parentDiv) {
+  // Submit layer URL
+  parentDiv.find('.js-geona-explore-panel-content__add-url').click(() => {
+    // Check for service type
+    let service = parentDiv.find('.js-geona-explore-panel-content__service option:selected').text();
+    switch (service) {
+      case 'WMS':
+        eventManager.trigger('mainMenu.getLayersFromWMS');
+        break;
+      case 'WMTS':
+        eventManager.trigger('mainMenu.getLayersFromWMTS');
+        break;
+    }
+  });
+
+  // Add layer to map
+  parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
+    console.log('clicked');
+    eventManager.trigger('mainMenu.addUrlLayerToMap');
   });
 }

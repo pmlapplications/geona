@@ -1,8 +1,11 @@
-import 'jquery';
+import $ from 'jquery';
 import 'jquery-ui/ui/widgets/sortable';
 import * as templates from '../../templates/compiled';
-import {registerTriggers} from './main_menu_triggers';
+import {registerTriggers, registerExploreTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
+
+import LayerServer from '../../../common/layer/server/layer_server';
+import LayerServerWmts from '../../../common/layer/server/layer_server_wmts';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -18,6 +21,9 @@ export class MainMenu {
     this.geona = gui.geona;
     this.config = menuConfigOptions;
     this.parentDiv = gui.parentDiv;
+
+    // requestLayers holds the layers found for the most recent WMS/WMTS request
+    this.requestLayers = [];
 
     // Sets up menu toggle control
     if (this.config.collapsible) {
@@ -76,8 +82,12 @@ export class MainMenu {
     this.parentDiv.find('.js-geona-panel').addClass('hidden');
   }
 
+  /* ------------------------------------*\
+      Explore Panel
+  \* ------------------------------------*/
+
   /**
-   *
+   * Shows the explore panel.
    */
   displayExplorePanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
@@ -88,6 +98,59 @@ export class MainMenu {
       .removeClass('hidden');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.explore_panel());
+    registerExploreTriggers(this.gui.eventManager, this.parentDiv);
+  }
+
+  /**
+   * Requests layers from a WMS GetCapabilities request
+   */
+  getLayersFromWMS() {
+    let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
+    $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/' + encodeURIComponent(url))
+      .done((serverConfig) => {
+        let layers = new LayerServer(serverConfig);
+        this.parentDiv.find('.js-geona-explore-panel-content')
+          .append('<select name="layers" class="js-geona-explore-panel-content__layer-select"></select>')
+          .append('<button type="submit" class="geona-button js-geona-explore-panel-content__add-layer">Add Layer to Map</button>');
+        registerExploreTriggers(this.gui.eventManager, this.parentDiv);
+        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
+        for (let layer of layers.layers) {
+          dropdown.append('<option value="' + layer.name + '">' + layer.name + '</option>');
+          this.requestLayers.push(layer);
+        }
+      });
+  }
+
+  /**
+   * Requests layers from a WMTS GetCapabilities request
+   */
+  getLayersFromWMTS() {
+    let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
+    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url))
+      .done((serverConfig) => {
+        let layers = new LayerServerWmts(serverConfig);
+        this.parentDiv.find('.js-geona-explore-panel-content')
+          .append('<select name="layers" class="js-geona-explore-panel-content__layer-select"></select>')
+          .append('<button type="submit" class="geona-button js-geona-explore-panel-content__add-layer">Add Layer to Map</button>');
+        registerExploreTriggers(this.gui.eventManager, this.parentDiv);
+        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
+        for (let layer of layers.layers) {
+          dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
+        }
+      });
+  }
+
+  /**
+   * Adds the layer in the 'layer-select' input box to the map.
+   */
+  addUrlLayerToMap() {
+    let selectedLayer = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
+    for (let layer of this.requestLayers) {
+      if (layer.name === selectedLayer || layer.identifier === selectedLayer) {
+        console.log('matched');
+        this.geona.map.addLayer(layer);
+      }
+    }
   }
 
   /**

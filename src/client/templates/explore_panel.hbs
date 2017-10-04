@@ -1,4 +1,12 @@
-<div class="geona-explore-panel-content">
-  <div><button type="submit" class="geona-button js-geona-explore-panel-content__add-layer-from-URL">Add Layer from WMS URL</button></div>
+<div class="geona-explore-panel-content js-geona-explore-panel-content">
+  <div>
+      <label>You can add external layers here:</label>
+      <input type="text" class="js-geona-explore-panel-content__layer-url" placeholder="URL" spellcheck="false"></input>
+      <select name="service" class="js-geona-explore-panel-content__service">
+        <option value="WMS" selected>WMS</option>
+        <option value="WMTS">WMTS</option>
+      </select>
+      <button type="submit" class="geona-button js-geona-explore-panel-content__add-url">Find Layers from URL</button>
+  </div>
   Search for layers etc.
 </div>
