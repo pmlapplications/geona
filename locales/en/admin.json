@@ -22,7 +22,7 @@
     },
     "database": {
       "pageHeading": "Geona Setup - Database",
-      "introText": "Please select your preferred database configuration. The most simple is SQLite3 which uses a single file based database and requires very little configuration; Postgres offers more resilience and can handle a great number of users but requires more effort to configure"
+      "introText": "Please select your preferred database configuration. The most simple is SQLite3 which uses a single file based database and requires very little configuration; Postgres offers more resilience and can handle a great number of users but requires more effort to configure and maintain"
     }
   },
   "validation": {

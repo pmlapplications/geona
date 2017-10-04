@@ -11,11 +11,11 @@ import utilsRouter from './utils';
 
 import * as mainController from '../controllers/main';
 
+let subFolderPath = config.server.get('subFolderPath');
+
 // Setup and export main router
 const router = express.Router();
 export default router;
-
-let subFolderPath = config.server.get('subFolderPath');
 
 router.get(subFolderPath + '/', mainController.index);
 
