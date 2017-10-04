@@ -1,1 +1,2 @@
 CREATE TABLE dbConfig (version INTEGER NOT NULL DEFAULT 1);
+INSERT INTO dbConfig (version) VALUES (1);
