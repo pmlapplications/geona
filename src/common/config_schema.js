@@ -27,20 +27,10 @@ export let server = {
     default: [],
   },
   database: {
-    dbType: {
+    type: {
       doc: 'The type of database to connect to; currently limited to SQLite3 or Postgres',
       format: String,
-      default: 'SQLite3',
-    },
-    username: {
-      doc: 'Database username',
-      format: String,
-      default: '',
-    },
-    password: {
-      doc: 'Database password',
-      format: String,
-      default: '',
+      default: 'sqlite3',
     },
     path: {
       doc: 'Path or URL to the database',
