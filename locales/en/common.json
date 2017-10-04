@@ -1,5 +1,6 @@
 {
   "hello": "Hello World!",
   "error": "Error",
-  "warning": "Warning"
+  "warning": "Warning",
+  "isRequired": " is required" 
 }

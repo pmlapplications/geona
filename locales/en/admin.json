@@ -22,7 +22,14 @@
     },
     "database": {
       "pageHeading": "Geona Setup - Database",
-      "introText": "Please select your preferred database configuration. The most simple is SQLite3 which uses a single file based database and requires very little configuration; Postgres offers more resilience and can handle a great number of users but requires more effort to configure and maintain"
+      "introText": "Please select your preferred database configuration. The most simple is SQLite3 which uses a single file based database and requires very little configuration; Postgres offers more resilience and can handle a great number of users but requires more effort to configure and maintain",
+      "databaseOption": "Please select the type of database that you would like to choose. If you are unsure, select SQLite and you can migrate to Postgres in the future",
+      "sqlitePath": "Please specifiy the path for the SQLite database",
+      "postgresServer": "PostgreSQL server address",
+      "postgresPort": "PostgreSQL port",
+      "postgresUsername": "Username",
+      "postgresPassword": "Password",
+      "postgresDbName": "Database Name"
     }
   },
   "validation": {
@@ -35,7 +42,7 @@
       "github_secret": "The Secret for GitHub OAuth is required"
     },
     "database": {
-
+      "sqlitePath": "Please enter the full path for the SQLite database"
     }
   },
   "user": {
