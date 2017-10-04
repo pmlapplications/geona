@@ -8,8 +8,7 @@ import _ from 'lodash';
 import * as config from '../../config';
 import * as requestUtils from '../../utils/request';
 import * as menu from '../../templates/menu';
-
-import adapter from 'any-db';
+import DatabaseAdapter from '../../database';
 
 let subFolderPath = config.server.get('subFolderPath');
 
@@ -49,15 +48,17 @@ export function databaseHandler(req, res, next) {
   let database = {};
 
   if (data.databaseType === 'sqlite') {
-    database.dbType = 'SQLite3';
+    database.type = 'sqlite3';
     database.path = data.sqlitePath;
 
     // check that the path is valid by initialising an empty SQLite database
-    let conn = adapter.createConnection('sqlite3://' + database.path);
-    conn.query('CREATE TABLE configuration (domainName	TEXT NOT NULL UNIQUE, enabled	INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(domainName));', function(error, result) {
-      console.log(error);
-      console.log(result);
-    })
+    try {
+      let conn = new DatabaseAdapter(database.type, database.path);
+      let result = conn.initialiseDatabase();
+    } catch(e) {
+      requestUtils.displayFriendlyError(e);
+      return false;
+    }
   }
 }
 
