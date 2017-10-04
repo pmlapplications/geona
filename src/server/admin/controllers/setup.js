@@ -2,10 +2,14 @@
 /**
  * @fileoverview Controllers for the Administration application
  */
+import path from 'path';
+import _ from 'lodash';
+
 import * as config from '../../config';
 import * as requestUtils from '../../utils/request';
 import * as menu from '../../templates/menu';
-import _ from 'lodash';
+
+import adapter from 'any-db';
 
 let subFolderPath = config.server.get('subFolderPath');
 
@@ -18,10 +22,15 @@ let subFolderPath = config.server.get('subFolderPath');
  */
 export function database(req, res) {
   let data = {
-    content: {},
+    content: {
+      sqlitePath: path.join(__dirname, '../../../../database/geona.db'),
+      postgresServer: 'localhost',
+      postgresPort: '5432',
+      postgresDbName: 'geona'
+    },
     config: config.server.getProperties(),
     template: 'setup_database',
-    menu: menu.getMenu(),
+    menu: menu.getMenu('/admin'),
   };
 
   res.render('admin_template', data);
@@ -36,7 +45,20 @@ export function database(req, res) {
  * @param {any} next 
  */
 export function databaseHandler(req, res, next) {
-  next();
+  let data = req.body;
+  let database = {};
+
+  if (data.databaseType === 'sqlite') {
+    database.dbType = 'SQLite3';
+    database.path = data.sqlitePath;
+
+    // check that the path is valid by initialising an empty SQLite database
+    let conn = adapter.createConnection('sqlite3://' + database.path);
+    conn.query('CREATE TABLE configuration (domainName	TEXT NOT NULL UNIQUE, enabled	INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(domainName));', function(error, result) {
+      console.log(error);
+      console.log(result);
+    })
+  }
 }
 
 /**

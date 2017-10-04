@@ -5,7 +5,7 @@
 import * as config from '../../config';
 import * as menu from '../../templates/menu';
 
-let subFolderPath = config.subFolderPath;
+let subFolderPath = config.server.get('subFolderPath');
 /**
  * Renders the main index page for the administration application
  * @param {Object} req - Express request object

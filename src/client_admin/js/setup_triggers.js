@@ -12,6 +12,18 @@ import * as validation from './validation';
  * @export
  */
 export function registerTriggers() {
+  //* * Database Elements **//
+  $('.js-geona-admin__setup-database [name=databaseType]').click(/* @this HTMLElement */ function() {
+    if (this.value === 'sqlite') {
+      $('.js-geona-admin__setup-database .use_sqlite').toggleClass('hidden', false);
+      $('.js-geona-admin__setup-database .use_postgres').toggleClass('hidden', true);
+    } else {
+      $('.js-geona-admin__setup-database .use_sqlite').toggleClass('hidden', true);
+      $('.js-geona-admin__setup-database .use_postgres').toggleClass('hidden', false);
+    }
+  });
+
+  //* * OAuth Elements **//
   $('.js-geona-admin__setup-oauth .panel-heading :checkbox').click(/* @this HTMLElement */ function() {
     $(this.closest('.panel')).find('.panel-body').toggleClass('hidden', this.value);
   });
@@ -31,11 +43,13 @@ export function registerTriggers() {
     return true;
   });
 
+  // end OAuth //
+
   // form validation; `validationSettings` are defined in the template to allow for easy translation
   /* eslint no-undef: 0 */
   let mergedSettings = _.merge(validation.baseValidationSettings, validationSettings);
-
-  $('#oauth_setup').validate(mergedSettings);
+  $('form.validation-checks').validate(mergedSettings);
+  
 }
 
 

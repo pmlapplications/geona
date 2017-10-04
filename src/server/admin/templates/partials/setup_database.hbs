@@ -1,4 +1,4 @@
-<div class="js-geona-admin__setup-database">
+<div class="js-geona-admin__setup-database row">
   <h2>{{t 'admin:setup.database.pageHeading'}}</h2>
   <p>{{t 'admin:setup.database.introText'}}</p>
 
@@ -9,90 +9,60 @@
     <div class="panel-body"><ul id="feedback-text"></ul></div> 
   </div>
 
-  <form id="oauth_setup" method="post">
-    <div class="panel panel-default">
-      <div class="panel-heading"><b>{{t 'admin:setup.administrators' }}</b></div>
+  <form class="validation-checks" method="post">
+    <p>{{t 'admin:setup.database.databaseOption' }}</p>
+    <div class="radio">
+      <label>
+        <input type="radio" name="databaseType" value="sqlite" checked="checked" />
+        SQLite
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="databaseType" value="postgres" />
+        Postgres
+      </label>
+    </div>
 
-      <div class="panel-body" id="add_google_oauth">
-        <div class="form-group">
-          <p>{{t 'admin:setup.administratorsExplanation' }}</p>
-          <label class="control-label">{{t 'admin:setup.administrators' }}</label>
-          <input type="text" class="form-control" name="administrators" required="" />
-        </div>
+    <div class="use_sqlite">
+      <h3>SQLite</h3>
+            
+      <div class="form-group">
+          <label class="control-label">{{t 'admin:setup.database.sqlitePath' }}</label>
+          <input type="text" class="form-control" name="sqlitePath" value="{{ content.sqlitePath }}" required="" />
       </div>
     </div>
 
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <label class="control-label">
-          <input type="checkbox" name="provider" id="google" class="js-geona-admin__setup-provider" />
-          Google
-        </label>
+    <div class="hidden use_postgres">
+      <h3>PostgreSQL</h3>
+            
+      <div class="form-group">
+          <label class="control-label">{{t 'admin:setup.database.postgresServer' }}</label>
+          <input type="text" class="form-control" name="postgresServer" value="{{ content.postgresServer }}" required="" />
+      </div>
+      
+      <div class="form-group">
+          <label class="control-label">{{t 'admin:setup.database.postgresPort' }}</label>
+          <input type="text" class="form-control" name="postgresPort" value="{{ content.postgresPort }}" required="" />
+      </div>
+      
+      <div class="form-group">
+          <label class="control-label">{{t 'admin:setup.database.postgresDbName' }}</label>
+          <input type="text" class="form-control" name="postgresDbName" value="{{ content.postgresDbName }}" required="" />
+      </div>
+      
+      <div class="form-group">
+          <label for="google_clientId" class="control-label">{{t 'admin:setup.database.postgresUsername' }}</label>
+          <input type="text" class="form-control" name="postgresUsername" required="" />
       </div>
 
-      <div class="panel-body hidden" id="add_google_oauth">
-        <h3>Google OAuth</h3>
-        <p>{{t 'admin:setup.googleIntro' }}</p>
-        
-        <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.authorizedJavascriptOrigins' }}</label>
-            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.authorizedOrigin }}" />
-        </div>
-        
-        <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.authorizedRedirectUris' }}</label>
-            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.authorizedRedirectURI }}" />
-        </div>
-        
-        <div class="form-group">
-            <label for="google_clientId" class="control-label">{{t 'admin:setup.clientId' }}</label>
-            <input type="text" class="form-control" name="google_clientId" group="google" required="" />
-        </div>
-
-        <div class="form-group">
-            <label for="google_secret" class="control-label">{{t 'admin:setup.secret' }}</label>
-            <input type="text" class="form-control" name="google_secret" group="google" required="" />
-        </div>
-        
+      <div class="form-group">
+          <label for="google_secret" class="control-label">{{t 'admin:setup.database.postgresPassword' }}</label>
+          <input type="text" class="form-control" name="postgresPassword" required="" />
       </div>
+      
     </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <label class="control-label">
-          <input type="checkbox" name="provider" id="github" class="js-geona-admin__setup-provider" />
-          GitHub
-        </label>
-      </div>
-
-      <div class="panel-body hidden" id="add_google_oauth">
-        <h3>GitHub OAuth</h3>
-        <p>{{t 'admin:setup.GutHubIntro' }}</p>
-        
-        <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.GitHubHomepageUrl' }}</label>
-            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.authorizedOrigin }}" />
-        </div>
-        
-        <div class="form-group">
-            <label class="control-label">{{t 'admin:setup.GitHubCallbackUrl' }}</label>
-            <input type="text" class="form-control" readonly="readonly" onclick="this.focus();this.select()" value="{{ content.GitHubCallbackUrl }}" />
-        </div>
-        
-        <div class="form-group">
-            <label for="google_clientId" class="control-label">{{t 'admin:setup.clientId' }}</label>
-            <input type="text" class="form-control" name="github_clientId" group="github" required="" />
-        </div>
-
-        <div class="form-group">
-            <label for="google_secret" class="control-label">{{t 'admin:setup.secret' }}</label>
-            <input type="text" class="form-control" name="github_secret" group="github" required="" />
-        </div>
-        
-      </div>
-    </div>
-
+    
     <div class="row">
       <div class="col-md-12">
         <button type="submit" name="btn-submit" class="btn btn-primary pull-right">Save</button>
@@ -116,12 +86,12 @@
       },
     },
     messages: {
-      administrators: "{{t 'admin:messages.administrators' }}",
-      provider: "{{t 'admin:messages.provider' }}",
-      google_clientId: "{{t 'admin:messages.google_clientId' }}",
-      google_secret: "{{t 'admin:messages.google_secret' }}",
-      github_clientId: "{{t 'admin:messages.github_clientId' }}",
-      github_secret: "{{t 'admin:messages.github_secret' }}",
+      sqlitePath: "{{t 'admin:validation.database.sqlitePath' }}",
+      postgresServer: "{{t 'admin:setup.database.postgresServer' }} {{t 'common:isRequired' }}",
+      postgresPort: "{{t 'admin:setup.database.postgresPort' }} {{t 'common:isRequired' }}",
+      postgresDbName: "{{t 'admin:setup.database.postgresDbName' }} {{t 'common:isRequired' }}",
+      postgresUsername: "{{t 'admin:setup.database.postgresUsername' }} {{t 'common:isRequired' }}",
+      postgresPassword: "{{t 'admin:setup.database.postgresPassword' }} {{t 'common:isRequired' }}",
     },
   };
 
