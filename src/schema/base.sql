@@ -1,2 +1,3 @@
 CREATE TABLE dbConfig (version INTEGER NOT NULL DEFAULT 1);
-INSERT INTO dbConfig (version) VALUES (1);
+CREATE TABLE User (email TEXT NOT NULL);
+CREATE TABLE SiteConfig (email TEXT NOT NULL);

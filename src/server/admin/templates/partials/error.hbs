@@ -3,8 +3,12 @@
     <h3 class="panel-title">{{t 'common:error' }}</h3>
   </div>
   <div class="panel-body">
-    <p><b>{{ content.message }}</b></p>
-    <p>{{{ content.stack }}}</p>
+    <p><b>{{{ content.message }}}</b></p>
+    <div class="row">
+      <div class="col-sm-12 ">
+        <button class="btn btn-primary pull-right" name="back" onclick="javascript:history.back(-1)">Back</button>
+      </div>
+    </div>
   </div>
 </div>
 

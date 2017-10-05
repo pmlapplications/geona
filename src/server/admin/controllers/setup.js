@@ -4,6 +4,7 @@
  */
 import path from 'path';
 import _ from 'lodash';
+import fs from 'fs';
 
 import * as config from '../../config';
 import * as requestUtils from '../../utils/request';
@@ -50,6 +51,22 @@ export function databaseHandler(req, res, next) {
   if (data.databaseType === 'sqlite') {
     database.type = 'sqlite3';
     database.path = data.sqlitePath;
+
+    // check if there's already a file there; we don't want to squash it
+    if (fs.existsSync(database.path)) {
+      let error = new Error('The SQLite database file already exists; to use this file add the path to <code>' + path.join(__dirname, '../../../config/config_server.json') + '</code>')
+      requestUtils.displayFriendlyError(error, res);
+    }
+
+    // check if the directory is there, if not try and create it
+    let folder = database.path.substring(0, database.path.lastIndexOf('/'));
+    if (!fs.existsSync(folder)) {
+      try {
+        fs.mkdirSync(folder)
+      } catch (error) {
+        requestUtils.displayFriendlyError(error, res);
+      }
+    }
   } else {
     // must be Postgres
     database.type = 'postgres';
@@ -66,7 +83,6 @@ export function databaseHandler(req, res, next) {
       res.redirect(subFolderPath + '/admin');
     })
     .catch((error) => {
-      console.warn(error);
       requestUtils.displayFriendlyError(error, res);
     });
 }

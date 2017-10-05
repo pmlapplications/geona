@@ -38,17 +38,29 @@ export default class DatabaseAdapter {
   initialiseDatabase() {
     return new Promise((resolve, reject) => {
       let conn = this._connection((error) => {
-        reject(error);
+        if (error) {
+          reject(error);
+        }
       });
-      let schema = fs.readFileSync(path.join(__dirname, '../schema/base.sql'));
 
-      conn.query(schema.toString(), (error, result) => {
+      let schema = fs.readFileSync(path.join(__dirname, '../schema/base.sql'));
+      let populate_data = fs.readFileSync(path.join(__dirname, '../schema/populate_data.sql'));
+
+      conn.query(schema.toString().replace('\n', ' '), (error, result) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result);
+          conn.query(populate_data.toString().replace('\n', ' '), (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          });
         }
       });
+
+      
     });
   }
 
