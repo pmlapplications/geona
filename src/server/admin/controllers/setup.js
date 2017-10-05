@@ -25,7 +25,7 @@ export function database(req, res) {
       sqlitePath: path.join(__dirname, '../../../../database/geona.db'),
       postgresServer: 'localhost',
       postgresPort: '5432',
-      postgresDbName: 'geona'
+      postgresDbName: 'geona',
     },
     config: config.server.getProperties(),
     template: 'setup_database',
@@ -50,16 +50,25 @@ export function databaseHandler(req, res, next) {
   if (data.databaseType === 'sqlite') {
     database.type = 'sqlite3';
     database.path = data.sqlitePath;
-
-    // check that the path is valid by initialising an empty SQLite database
-    try {
-      let conn = new DatabaseAdapter(database.type, database.path);
-      let result = conn.initialiseDatabase();
-    } catch(e) {
-      requestUtils.displayFriendlyError(e);
-      return false;
-    }
+  } else {
+    // must be Postgres
+    database.type = 'postgres';
+    database.path = data.postgresUsername + ':' + data.postgresPassword + '@' + data.postgresServer + ':' + data.postgresPort + '/' + data.postgresDbName;
   }
+
+  let dbAdapter = new DatabaseAdapter(database.type, database.path);
+  dbAdapter.initialiseDatabase()
+    .then((result) => {
+      config.server.set('database.type', database.type);
+      config.server.set('database.path', database.path);
+      config.updateServerConfig(config.server);
+
+      res.redirect(subFolderPath + '/admin');
+    })
+    .catch((error) => {
+      console.warn(error);
+      requestUtils.displayFriendlyError(error, res);
+    });
 }
 
 /**

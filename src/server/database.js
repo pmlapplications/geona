@@ -1,5 +1,5 @@
 /**
- * @module database
+ * 
  */
 import adapter from 'any-db';
 import * as path from 'path';
@@ -23,23 +23,39 @@ export default class DatabaseAdapter {
 
   /**
    * Return a connection to the database
+   * 
+   * @return Connection object
    */
-  connection() {
-    return adapter.createConnection(this.type + '://' + this.path);
+  _connection(next) {
+    return adapter.createConnection(this.type + '://' + this.path, next);
   }
 
+  /**
+   * Creates the base schema within the selected database; this base schema is updated by {DatabaseAdapter._updateDatabaseSchema()}
+   * 
+   * @return {Promise}
+   */
   initialiseDatabase() {
-    let conn = this.connection();
-    let schema = fs.readFileSync(path.join(__dirname, '../schema/base.sql'));
+    return new Promise((resolve, reject) => {
+      let conn = this._connection((error) => {
+        reject(error);
+      });
+      let schema = fs.readFileSync(path.join(__dirname, '../schema/base.sql'));
 
-    conn.query(schema.toString(), function(error, result) {
-      console.log(error);
-      console.log(result);
+      conn.query(schema.toString(), (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
     });
-
   }
 
-  updateDatabaseSchema() {
-
+  /**
+   * Updates the schema of the database to the latest available using the updates in `src/schema/alterations`
+   */
+  _updateDatabaseSchema(next) {
+    console.log('update schema');
   }
 }

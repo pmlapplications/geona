@@ -95,7 +95,7 @@ export function updateServerConfig(config) {
   let serverConfig = convict(schema.server);
   serverConfig.load(configProperties);
 
-  // validate the confif and then save it back to file
+  // validate the config and then save it back to file
   try {
     serverConfig.validate();
     fs.writeFileSync(_serverConfigFilePath, serverConfig.toString());
