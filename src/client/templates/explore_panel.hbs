@@ -1,12 +1,15 @@
 <div class="geona-explore-panel-content js-geona-explore-panel-content">
   <div>
-      <label>You can add external layers here:</label>
-      <input type="text" class="js-geona-explore-panel-content__layer-url" placeholder="URL" spellcheck="false"></input>
-      <select name="service" class="js-geona-explore-panel-content__service">
+    <label>You can add external layers here:</label>
+    <input type="text" class="js-geona-explore-panel-content__layer-url" placeholder="URL" spellcheck="false" onClick="this.setSelectionRange(0, this.value.length)"></input>
+    <select name="service" class="js-geona-explore-panel-content__service">
         <option value="WMS" selected>WMS</option>
         <option value="WMTS">WMTS</option>
       </select>
-      <button type="submit" class="geona-button js-geona-explore-panel-content__add-url">Find Layers from URL</button>
+    <button type="submit" class="geona-button js-geona-explore-panel-content__add-url">Find Layers from URL</button>
+    <br>
+    <select name="layers" class="js-geona-explore-panel-content__layer-select hidden"></select>
+    <button type="submit" class="geona-button js-geona-explore-panel-content__add-layer hidden">Add Layer to Map</button>
   </div>
   Search for layers etc.
 </div>

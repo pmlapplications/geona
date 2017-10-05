@@ -1,4 +1,4 @@
-/** @module  map_leafet */
+/** @module  map_leaflet */
 
 import GeonaMap from './map';
 import {
@@ -24,16 +24,16 @@ export class LMap extends GeonaMap {
     super();
     /** @type {Object} The map config */
     this.config = config;
-    /** @private @type {Object} The available basemaps */
-    this.basemaps_ = {};
-    /** @private @type {Object} The available country border layers */
-    this.countryBorderLayers_ = {};
-    /** @private @type {Object} The available data layers */
-    this.availableLayers_ = {};
-    /** @private @type {L.featureGroup} The layers on the map */
-    this.mapLayers_ = undefined;
-    /** @private @type {L.latlngGraticule} The map graticule */
-    this.graticule_ = L.latlngGraticule({
+    /**  @type {Object} The available basemaps */
+    this._basemaps = {};
+    /**  @type {Object} The available country border layers */
+    this._countryBorderLayers = {};
+    /**  @type {Object} The available data layers */
+    this._availableLayers = {};
+    /**  @type {L.featureGroup} The layers on the map */
+    this._mapLayers = undefined;
+    /**  @type {L.latlngGraticule} The map graticule */
+    this._graticule = L.latlngGraticule({
       showLabel: true,
       color: '#ccc',
       fontColor: '#ccc',
@@ -59,8 +59,8 @@ export class LMap extends GeonaMap {
       },
     });
 
-    /** @private @type {L.map} The Leaflet map */
-    this.map_ = L.map(mapDiv, {
+    /**  @type {L.map} The Leaflet map */
+    this._map = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
       center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
       maxBounds: [
@@ -77,17 +77,17 @@ export class LMap extends GeonaMap {
       zoomInText: '<span class="icon-zoom-in"></span>',
       zoomOutText: '<span class="icon-zoom-out"></span>',
       position: 'topright',
-    }).addTo(this.map_);
+    }).addTo(this._map);
 
     L.control.scale({
       metric: true,
       imperial: false,
       position: 'topright',
-    }).addTo(this.map_);
+    }).addTo(this._map);
 
     // Load the default basemaps and borders layers, plus any custom ones defined in the config
-    this.loadBasemaps_();
-    this.loadCountryBorderLayers_();
+    this._loadBasemaps();
+    this._loadCountryBorderLayers();
 
     this.loadConfig_();
   }
@@ -98,9 +98,9 @@ export class LMap extends GeonaMap {
    */
   displayGraticule(display) {
     if (display) {
-      this.graticule_.addTo(this.map_);
+      this._graticule.addTo(this._map);
     } else {
-      this.graticule_.remove();
+      this._graticule.remove();
     }
   }
 
@@ -110,21 +110,21 @@ export class LMap extends GeonaMap {
    */
   setBasemap(basemap) {
     if (this.config.basemap !== 'none') {
-      this.basemaps_[this.config.basemap].remove();
+      this._basemaps[this.config.basemap].remove();
     }
 
     if (basemap !== 'none') {
       // TODO throw error if the provided basemap doesn't exist
-      let newBasemap = this.basemaps_[basemap];
+      let newBasemap = this._basemaps[basemap];
       let viewSettings = newBasemap.options.viewSettings;
 
-      if (!newBasemap.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
+      if (!newBasemap.options.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
         viewSettings.projection = newBasemap.options.projections[0];
       }
 
       this.setView(viewSettings);
 
-      newBasemap.addTo(this.map_).bringToBack();
+      newBasemap.addTo(this._map).bringToBack();
     }
 
     this.config.basemap = basemap;
@@ -136,16 +136,16 @@ export class LMap extends GeonaMap {
    */
   setCountryBorders(borders) {
     if (this.config.countryBorders !== 'none' && this.config.countryBorders !== borders) {
-      this.countryBorderLayers_[this.config.countryBorders].remove();
+      this._countryBorderLayers[this.config.countryBorders].remove();
     }
 
     if (borders !== 'none') {
       // TODO throw error if the provided borders don't exist
-      let newBorders = this.countryBorderLayers_[borders];
-      if (!newBorders.options.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
+      let newBorders = this._countryBorderLayers[borders];
+      if (!newBorders.options.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
         this.setProjection(newBorders.options.projections[0]);
       }
-      newBorders.addTo(this.map_).bringToFront();
+      newBorders.addTo(this._map).bringToFront();
     }
 
     this.config.countryBorders = borders;
@@ -160,12 +160,12 @@ export class LMap extends GeonaMap {
     // This is a bit of a hack and isn't officially supported by leaflet. Everything may fall over!
     let leafletProjection = leafletizeProjection(projection);
 
-    if (this.map_.options.crs !== leafletProjection) {
+    if (this._map.options.crs !== leafletProjection) {
       // If the map isn't already in the provided projection
-      let center = this.map_.getCenter();
-      let zoom = this.map_.getZoom();
-      let maxZoom = this.map_.getMaxZoom();
-      let minZoom = this.map_.getMinZoom();
+      let center = this._map.getCenter();
+      let zoom = this._map.getZoom();
+      let maxZoom = this._map.getMaxZoom();
+      let minZoom = this._map.getMinZoom();
 
       switch (projection) {
         case 'EPSG:3857':
@@ -180,11 +180,11 @@ export class LMap extends GeonaMap {
           break;
       }
 
-      this.map_.options.crs = leafletProjection;
-      this.map_._resetView(center, zoom);
+      this._map.options.crs = leafletProjection;
+      this._map._resetView(center, zoom);
 
-      this.map_.setMaxZoom(maxZoom);
-      this.map_.setMinZoom(minZoom);
+      this._map.setMaxZoom(maxZoom);
+      this._map.setMinZoom(minZoom);
 
       this.config.projection = projection;
     }
@@ -196,9 +196,9 @@ export class LMap extends GeonaMap {
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
   // addLayer(layerId, index) {
-  //   if (this.availableLayers_[layerId].get('projections').includes(this.map_.options.crs.code)) {
+  //   if (this._availableLayers[layerId].get('projections').includes(this._map.options.crs.code)) {
   //     if (this.config.countryBorders !== 'none') {
-  //       // this.map_.getLayers().length
+  //       // this._map.getLayers().length
   //     } else {
   //       //
   //     }
@@ -225,44 +225,44 @@ export class LMap extends GeonaMap {
     }
 
     if (options.maxExtent) {
-      this.map_.setMaxBounds([
+      this._map.setMaxBounds([
         [options.maxExtent.minLat, options.maxExtent.minLon],
         [options.maxExtent.maxLat, options.maxExtent.maxLon],
       ]);
-      // this.map_.setMaxBounds([options.maxExtent.slice(0, 2), options.maxExtent.slice(2, 4)]);
+      // this._map.setMaxBounds([options.maxExtent.slice(0, 2), options.maxExtent.slice(2, 4)]);
       this.config.viewSettings.maxExtent = options.maxExtent;
     }
 
     console.log(options);
     if (options.center) {
-      this.map_.panTo([options.center.lat, options.center.lon]);
-      // this.map_.panTo(options.center);
+      this._map.panTo([options.center.lat, options.center.lon]);
+      // this._map.panTo(options.center);
       this.config.viewSettings.center = options.center;
     }
 
     if (options.maxZoom || options.minZoom || options.zoom) {
-      let projection = leafletizeProjection(options.projection) || this.map_.options.crs;
+      let projection = leafletizeProjection(options.projection) || this._map.options.crs;
 
       if (options.maxZoom) {
-        this.map_.setMaxZoom(leafletizeZoom(options.maxZoom, projection));
+        this._map.setMaxZoom(leafletizeZoom(options.maxZoom, projection));
         this.config.viewSettings.maxZoom = options.maxZoom;
       }
       if (options.minZoom) {
-        this.map_.setMinZoom(leafletizeZoom(options.minZoom, projection));
+        this._map.setMinZoom(leafletizeZoom(options.minZoom, projection));
         this.config.viewSettings.minZoom = options.minZoom;
       }
       if (options.zoom) {
-        this.map_.setZoom(leafletizeZoom(options.zoom, projection));
+        this._map.setZoom(leafletizeZoom(options.zoom, projection));
         this.config.viewSettings.zoom = options.zoom;
       }
     }
 
     if (options.fitExtent) {
-      this.map_.setMaxBounds([
+      this._map.setMaxBounds([
         [options.fitExtent.minLat, options.fitExtent.minLon],
         [options.fitExtent.maxLat, options.fitExtent.maxLon],
       ]);
-      // this.map_.fitBounds([options.fitExtent.slice(0, 2), options.fitExtent.slice(2, 4)]);
+      // this._map.fitBounds([options.fitExtent.slice(0, 2), options.fitExtent.slice(2, 4)]);
       this.config.viewSettings.fitExtent = options.fitExtent;
     }
   }
@@ -278,14 +278,14 @@ export class LMap extends GeonaMap {
    * @param {L.CRS}   options.projection The projection
    * @param {Number}  options.zoom       The zoom
    */
-  setView_(options) {
+  _setView(options) {
     if (options.projection) {
       // options.projection = leafletizeProjection(options.projection);
       options.projection = deLeafletizeProjection(options.projection);
     }
 
     if (options.maxZoom || options.minZoom || options.zoom) {
-      let projection = options.projection || this.map_.options.crs;
+      let projection = options.projection || this._map.options.crs;
 
       if (options.maxZoom) {
         options.maxZoom = deLeafletizeZoom(options.maxZoom, projection);
@@ -307,7 +307,7 @@ export class LMap extends GeonaMap {
    * @param {Integer} [index]  The optional zero-based index to insert the layer at on the map.
    */
   addLayer(geonaLayer, index) {
-    if (geonaLayer.projections.includes(deLeafletizeProjection(this.map_.options.crs))) {
+    if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
       let layer;
       let title;
       let time;
@@ -319,14 +319,21 @@ export class LMap extends GeonaMap {
             // i.e. if (currently a temporal layer on the map) {...} else {set to lastTime}
             time = geonaLayer.lastTime;
           }
-          // TODO tile
+          // eslint-disable-next-line new-cap
+          layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
+            layers: geonaLayer.name,
+            format: 'image/png',
+            transparent: true,
+            attribution: geonaLayer.attribution,
+            version: geonaLayer.layerServer.version,
+          });
           break;
         case 'wmts':
           title = selectPropertyLanguage(geonaLayer.title);
-          layer = createWmtsTileLayer(geonaLayer, deLeafletizeProjection(this.map_.options.crs));
+          layer = createWmtsTileLayer(geonaLayer, deLeafletizeProjection(this._map.options.crs));
           break;
       }
-      this.map_.addLayer(layer);
+      this._map.addLayer(layer);
     } else {
       alert('Cannot use this projection for this layer');
     }
@@ -345,9 +352,8 @@ export class LMap extends GeonaMap {
 
   /**
  * Load the data layers defined in the config
- * @private
  */
-  loadLayers_() {
+  _loadLayers() {
     for (let addedLayer of this.config.layers) {
       addedLayer = addLayerDefaults(addedLayer);
 
@@ -361,7 +367,7 @@ export class LMap extends GeonaMap {
       // let tile;
       switch (addedLayer.source.type) {
         case 'wms':
-          this.availableLayers_[addedLayer.id] = L.tileLayer.wms(addedLayer.source.url, {
+          this._availableLayers[addedLayer.id] = L.tileLayer.wms(addedLayer.source.url, {
             layers: addedLayer.source.params.layers,
             version: addedLayer.source.params.version,
             attribution: addedLayer.source.attributions,
@@ -379,14 +385,13 @@ export class LMap extends GeonaMap {
 
   /**
  * Load the default basemaps, and any defined in the config.
- * @private
  */
-  loadBasemaps_() {
+  _loadBasemaps() {
   // TODO load from config too
     for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
-          this.basemaps_[layer.id] = L.tileLayer.wms(layer.source.url, {
+          this._basemaps[layer.id] = L.tileLayer.wms(layer.source.url, {
             layers: layer.source.params.layers,
             version: layer.source.params.version,
             attribution: layer.source.attributions,
@@ -400,14 +405,13 @@ export class LMap extends GeonaMap {
 
   /**
  * Load the default border layers, and any defined in the config.
- * @private
  */
-  loadCountryBorderLayers_() {
+  _loadCountryBorderLayers() {
   // TODO load from config too
     for (let layer of defaultBorders) {
       switch (layer.source.type) {
         case 'wms':
-          this.countryBorderLayers_[layer.id] = L.tileLayer.wms(layer.source.url, {
+          this._countryBorderLayers[layer.id] = L.tileLayer.wms(layer.source.url, {
             layers: layer.source.params.layers,
             version: layer.source.params.version,
             styles: layer.source.params.styles,

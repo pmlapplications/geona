@@ -124,17 +124,17 @@ export class OlMap extends GeonaMap {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
-    // // wmts 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
-    //   .done((serverConfig) => {
-    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
-    //   });
-
     // wmts 3857 - success
-    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
+    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
       .done((serverConfig) => {
         let keepingEslintHappy = new LayerServerWmts(serverConfig);
       });
+
+    // // wmts 3857 - success
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
+    //   });
 
     // // wmts 4326 - success
     // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fgibs.earthdata.nasa.gov%2Fwmts%2Fepsg4326%2Fbest%2Fwmts.cgi%3FVERSION%3D1.0.0%26Request%3DGetCapabilities%26Service%3DWMTS')
@@ -232,6 +232,8 @@ export class OlMap extends GeonaMap {
       } else {
         alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
+    } else {
+      this.setView({projection: projection});
     }
 
     this.config.projection = projection;

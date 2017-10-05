@@ -26,9 +26,11 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
+      registerExploreTriggers(eventManager, parentDiv);
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
+
 
   /* ------------------------------------*\
       Layers Panel
@@ -97,28 +99,31 @@ export function registerTriggers(eventManager, parentDiv) {
 }
 
 /**
- * Used in the mainMenu class to set triggers for panel elements once that panel has been loaded.
+ * Used by the main registerTriggers function to register triggers for
+ * Explore panel elements which are not loaded at startup.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery}       parentDiv    The div which contains the current map.
  */
-export function registerExploreTriggers(eventManager, parentDiv) {
+function registerExploreTriggers(eventManager, parentDiv) {
   // Submit layer URL
   parentDiv.find('.js-geona-explore-panel-content__add-url').click(() => {
     // Check for service type
     let service = parentDiv.find('.js-geona-explore-panel-content__service option:selected').text();
+    console.log('service: ' + service);
     switch (service) {
       case 'WMS':
         eventManager.trigger('mainMenu.getLayersFromWMS');
+        console.log('wms trigger');
         break;
       case 'WMTS':
         eventManager.trigger('mainMenu.getLayersFromWMTS');
+        console.log('wmts trigger');
         break;
     }
   });
 
   // Add layer to map
   parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
-    console.log('clicked');
     eventManager.trigger('mainMenu.addUrlLayerToMap');
   });
 }
