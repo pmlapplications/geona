@@ -46,19 +46,22 @@ export default class DatabaseAdapter {
       let schema = fs.readFileSync(path.join(__dirname, '../schema/base.sql'));
       let populate_data = fs.readFileSync(path.join(__dirname, '../schema/populate_data.sql'));
 
-      conn.query(schema.toString().replace('\n', ' '), (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          conn.query(populate_data.toString().replace('\n', ' '), (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          });
-        }
-      });
+      // The any-db apadter will only allow one statement at a time, so whilst this works in as much as it executes the
+      // first query and either rejects or returns the promise it will not create the whole schema
+      
+      // conn.query(schema.toString().replace('\n', ' '), (error, result) => {
+      //   if (error) {
+      //     reject(error);
+      //   } else {
+      //     conn.query(populate_data.toString().replace('\n', ' '), (error, result) => {
+      //       if (error) {
+      //         reject(error);
+      //       } else {
+      //         resolve(result);
+      //       }
+      //     });
+      //   }
+      // });
 
       
     });
