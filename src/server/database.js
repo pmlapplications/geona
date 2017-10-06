@@ -4,6 +4,7 @@
 import adapter from 'any-db';
 import * as path from 'path';
 import fs from 'fs';
+import exec from 'child_process';
 
 import * as config from './config';
 
@@ -33,38 +34,27 @@ export default class DatabaseAdapter {
   /**
    * Creates the base schema within the selected database; this base schema is updated by {DatabaseAdapter._updateDatabaseSchema()}
    * 
+   * We fire of a child process exec to create and populate the database here as the any-db abstraction layer prevents
+   * us from running multiple commands in a single execution step.
+   * 
    * @return {Promise}
    */
   initialiseDatabase() {
-    return new Promise((resolve, reject) => {
-      let conn = this._connection((error) => {
-        if (error) {
-          reject(error);
+    let schema = path.join(__dirname, '../schema/base.sql');
+    
+    if (this.type == 'sqlite3') {
+      let cmd = exec.execSync('sqlite3 ' + this.path + ' < ' + schema, (error, stdout, stderr) => {
+        if (error || stderr) {
+          return new Error(stderr);
+        } else {
+          return true;
         }
-      });
+      });   
+    }
 
-      let schema = fs.readFileSync(path.join(__dirname, '../schema/base.sql'));
-      let populate_data = fs.readFileSync(path.join(__dirname, '../schema/populate_data.sql'));
-
-      // The any-db apadter will only allow one statement at a time, so whilst this works in as much as it executes the
-      // first query and either rejects or returns the promise it will not create the whole schema
-      
-      // conn.query(schema.toString().replace('\n', ' '), (error, result) => {
-      //   if (error) {
-      //     reject(error);
-      //   } else {
-      //     conn.query(populate_data.toString().replace('\n', ' '), (error, result) => {
-      //       if (error) {
-      //         reject(error);
-      //       } else {
-      //         resolve(result);
-      //       }
-      //     });
-      //   }
-      // });
-
-      
-    });
+    if (this.type == 'postgres') {
+      // TODO: do the do for the pgsql command
+    }
   }
 
   /**

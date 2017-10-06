@@ -48,7 +48,7 @@ export function databaseHandler(req, res, next) {
   let data = req.body;
   let database = {};
 
-  if (data.databaseType === 'sqlite') {
+  if (data.databaseType === 'sqlite3') {
     database.type = 'sqlite3';
     database.path = data.sqlitePath;
 
@@ -74,17 +74,18 @@ export function databaseHandler(req, res, next) {
   }
 
   let dbAdapter = new DatabaseAdapter(database.type, database.path);
-  dbAdapter.initialiseDatabase()
-    .then((result) => {
-      config.server.set('database.type', database.type);
-      config.server.set('database.path', database.path);
-      config.updateServerConfig(config.server);
+  try {
+    dbAdapter.initialiseDatabase();
+  } catch (error) {
+    requestUtils.displayFriendlyError(error, res);
+    return false;
+  }
 
-      res.redirect(subFolderPath + '/admin');
-    })
-    .catch((error) => {
-      requestUtils.displayFriendlyError(error, res);
-    });
+  config.server.set('database.type', database.type);
+  config.server.set('database.path', database.path);
+  config.updateServerConfig(config.server);
+
+  res.redirect(subFolderPath + '/admin');
 }
 
 /**
