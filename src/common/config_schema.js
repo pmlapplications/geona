@@ -122,8 +122,8 @@ export let client = {
     },
     countryBorders: {
       doc: 'Which country borders to display, or \'none\'.',
-      format: ['white', 'black', 'blue', 'none'],
-      default: 'black',
+      format: ['line-white', 'line_black', 'line', 'none'],
+      default: 'line_black',
     },
     graticule: {
       doc: 'Display a graticule or not.',

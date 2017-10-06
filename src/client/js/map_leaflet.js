@@ -31,7 +31,9 @@ export class LMap extends GeonaMap {
     /**  @type {Object} The available data layers */
     this._availableLayers = {};
     /**  @type {L.featureGroup} The layers on the map */
-    this._mapLayers = undefined;
+    // TODO try putting '{attribution: 'Geona'} in the featureGroup initially
+    this._mapLayers = L.featureGroup();
+    this._geonaLayers = [];
     /**  @type {L.latlngGraticule} The map graticule */
     this._graticule = L.latlngGraticule({
       showLabel: true,
@@ -59,6 +61,12 @@ export class LMap extends GeonaMap {
       },
     });
 
+    // TODO sort these when finished
+    /** @type {Boolean} Whether the map currently has a basemap */
+    this._basemap = false;
+    /** @type {Boolean} Whether the map currently has country borders */
+    this._borders = false;
+
     /**  @type {L.map} The Leaflet map */
     this._map = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
@@ -85,11 +93,19 @@ export class LMap extends GeonaMap {
       position: 'topright',
     }).addTo(this._map);
 
+    this._mapLayers.addTo(this._map);
+
+
     // Load the default basemaps and borders layers, plus any custom ones defined in the config
     this._loadBasemaps();
     this._loadCountryBorderLayers();
 
     this.loadConfig_();
+
+    this._basemaps.gebco_08_grid.addTo(this._map);
+    this._mapLayers.addLayer(this._basemaps.gebco_08_grid);
+    this._countryBorderLayers.line_black.addTo(this._map);
+    this._mapLayers.addLayer(this._countryBorderLayers.line_black);
   }
 
   /**
@@ -105,50 +121,56 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Set the basemap, changing the projection if required.
-   * @param {String} basemap The id of the basemap to use, or 'none'
+   * Clears the basemap if it exists and changes the projection if required.
+   * @param {L.tileLayer.wms} layer The layer created in addLayer()
    */
-  setBasemap(basemap) {
-    if (this.config.basemap !== 'none') {
-      this._basemaps[this.config.basemap].remove();
+  _clearBasemap(layer) {
+    // if (this.config.basemap !== 'none') {
+    //   this._basemaps[this.config.basemap].remove();
+    // }
+
+    // if (basemap !== 'none') {
+    //   // TODO throw error if the provided basemap doesn't exist
+    //   let newBasemap = this._basemaps[basemap];
+    //   let viewSettings = newBasemap.options.viewSettings;
+    //   console.log('setBasemap');
+    //   console.log(viewSettings);
+    //   if (!newBasemap.options.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
+    //     viewSettings.projection = newBasemap.options.projections[0];
+    //   }
+    //   console.log(viewSettings);
+    //   this.setView(viewSettings);
+
+    //   newBasemap.addTo(this._map).bringToBack();
+    // }
+
+    // this.config.basemap = basemap;
+    // this._geonaLayers.push();
+    if (this._basemap === true) {
+      // Leaflet doesn't track the ordering of layers...?
+      console.log(this._mapLayers.getLayers());
+      this._mapLayers.eachLayer((currentLayer) => {
+        if (currentLayer.modifier === 'basemap') {
+          currentLayer.remove();
+        }
+      });
     }
-
-    if (basemap !== 'none') {
-      // TODO throw error if the provided basemap doesn't exist
-      let newBasemap = this._basemaps[basemap];
-      let viewSettings = newBasemap.options.viewSettings;
-
-      if (!newBasemap.options.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
-        viewSettings.projection = newBasemap.options.projections[0];
-      }
-
-      this.setView(viewSettings);
-
-      newBasemap.addTo(this._map).bringToBack();
+    if (this._map.options._crs !== layer.crs) {
+      this.setProjection(deLeafletizeProjection(layer.crs));
     }
-
-    this.config.basemap = basemap;
   }
 
   /**
-   * Set the country borders to display.
-   * @param {String} borders The borders to display, or 'none'
+   * Clears the country borders if active.
    */
-  setCountryBorders(borders) {
-    if (this.config.countryBorders !== 'none' && this.config.countryBorders !== borders) {
-      this._countryBorderLayers[this.config.countryBorders].remove();
+  _clearBorders() {
+    if (this._borders === true) {
+      this._mapLayers.eachLayer((currentLayer) => {
+        if (currentLayer.modifier === 'borders') {
+          currentLayer.remove();
+        }
+      });
     }
-
-    if (borders !== 'none') {
-      // TODO throw error if the provided borders don't exist
-      let newBorders = this._countryBorderLayers[borders];
-      if (!newBorders.options.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
-        this.setProjection(newBorders.options.projections[0]);
-      }
-      newBorders.addTo(this._map).bringToFront();
-    }
-
-    this.config.countryBorders = borders;
   }
 
   /**
@@ -157,7 +179,7 @@ export class LMap extends GeonaMap {
    */
   setProjection(projection) {
     // TODO check the basemap supports the projection.
-    // This is a bit of a hack and isn't officially supported by leaflet. Everything may fall over!
+    // This is a bit of a hack and isn't officially supported by Leaflet. Everything may fall over!
     let leafletProjection = leafletizeProjection(projection);
 
     if (this._map.options.crs !== leafletProjection) {
@@ -187,23 +209,29 @@ export class LMap extends GeonaMap {
       this._map.setMinZoom(minZoom);
 
       this.config.projection = projection;
+
+      console.log(this._map);
+      // TODO hopefully this won't infinite loop because you're adding a new layer each time
+      this._map.eachLayer((layer) => {
+        if (layer._crs !== undefined) {
+          layer.remove();
+          this._mapLayers.removeLayer(layer);
+          // We add the same layer, but now the map projection will have changed.
+          // eslint-disable-next-line new-cap
+          let newLayer = new L.tileLayer.wms(layer._url, {
+            layers: layer.options.layers,
+            format: layer.wmsParams.format,
+            transparent: layer.options.transparent,
+            attribution: layer.options.attribution,
+            version: layer.options.version,
+            zIndex: layer.options.zIndex,
+            modifier: layer.options.modifier,
+          }).addTo(this._map);
+          this._mapLayers.addLayer(newLayer);
+        }
+      });
     }
   }
-
-  /**
-   * Add the specified data layer onto the map.
-   * @param {String} layerId The id of the data layer being added.
-   * @param {Integer} [index] The zero-based index to insert the layer into.
-   */
-  // addLayer(layerId, index) {
-  //   if (this._availableLayers[layerId].get('projections').includes(this._map.options.crs.code)) {
-  //     if (this.config.countryBorders !== 'none') {
-  //       // this._map.getLayers().length
-  //     } else {
-  //       //
-  //     }
-  //   }
-  // }
 
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
@@ -302,15 +330,19 @@ export class LMap extends GeonaMap {
   }
 
   /**
-   * Add the specified layer onto the map.
-   * @param {Layer} geonaLayer A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
-   * @param {Integer} [index]  The optional zero-based index to insert the layer at on the map.
+   * Create a Leaflet map layer from a Geona layer definition, and add to the map.
+   * @param {Layer}   geonaLayer A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
+   * @param {String}  [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
+   * @param {Integer} [index]    The optional one-based index to insert the layer at on the map.
    */
-  addLayer(geonaLayer, index) {
-    if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
+  addLayer(geonaLayer, modifier, index = undefined) {
+    // If a layer is a basemap we might change the projection
+    // anyway, so it doesn't matter if the layer supports the current projection
+    if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) || modifier === 'basemap') {
       let layer;
       let title;
       let time;
+      let zIndex = index;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
@@ -327,13 +359,35 @@ export class LMap extends GeonaMap {
             attribution: geonaLayer.attribution,
             version: geonaLayer.layerServer.version,
           });
+          console.log('layer.format: ' + layer.format);
+          if (modifier !== undefined) {
+            layer.modifier = modifier;
+          }
           break;
         case 'wmts':
-          title = selectPropertyLanguage(geonaLayer.title);
-          layer = createWmtsTileLayer(geonaLayer, deLeafletizeProjection(this._map.options.crs));
+          alert('WMTS not currently supported for Leaflet');
+          // title = selectPropertyLanguage(geonaLayer.title);
+          // layer = createWmtsTileLayer(geonaLayer, deLeafletizeProjection(this._map.options.crs));
           break;
       }
-      this._map.addLayer(layer);
+      if (layer.modifier === 'basemap') {
+        this._clearBasemap(layer);
+        zIndex = 1;
+      } else if (layer.modifier === 'borders') {
+        this._clearBorders(layer);
+        zIndex = this._mapLayers.getLayers().length;
+      }
+
+      layer.addTo(this._map);
+      this._mapLayers.addLayer(layer);
+
+      if (layer.modifier === 'basemap') {
+        layer.bringToBack();
+      } else if (layer.modifier === 'borders') {
+        layer.bringToFront();
+      }
+
+      this._geonaLayers.push(geonaLayer);
     } else {
       alert('Cannot use this projection for this layer');
     }
@@ -387,7 +441,7 @@ export class LMap extends GeonaMap {
  * Load the default basemaps, and any defined in the config.
  */
   _loadBasemaps() {
-  // TODO load from config too
+    // TODO load from config too
     for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
@@ -397,6 +451,7 @@ export class LMap extends GeonaMap {
             attribution: layer.source.attributions,
             projections: layer.projections,
             viewSettings: layer.viewSettings,
+            modifier: 'basemap',
           });
           break;
       }
@@ -407,7 +462,7 @@ export class LMap extends GeonaMap {
  * Load the default border layers, and any defined in the config.
  */
   _loadCountryBorderLayers() {
-  // TODO load from config too
+    // TODO load from config too
     for (let layer of defaultBorders) {
       switch (layer.source.type) {
         case 'wms':
@@ -418,6 +473,7 @@ export class LMap extends GeonaMap {
             format: 'image/png',
             transparent: true,
             projections: layer.projections,
+            modifier: 'borders',
           });
       }
     }

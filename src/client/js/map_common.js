@@ -174,7 +174,7 @@ export const basemaps = [
     },
   },
   {
-    id: 'gebco',
+    id: 'gebco_08_grid',
     title: 'GEBCO',
     projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
@@ -313,7 +313,7 @@ for (let basemap of basemaps) {
  */
 export const borderLayers = [
   {
-    id: 'white',
+    id: 'line-white',
     title: 'White border lines',
     projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
@@ -328,7 +328,7 @@ export const borderLayers = [
     },
   },
   {
-    id: 'black',
+    id: 'line_black',
     title: 'Black border lines',
     projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
@@ -343,7 +343,7 @@ export const borderLayers = [
     },
   },
   {
-    id: 'blue',
+    id: 'line',
     title: 'Blue border lines',
     projections: ['EPSG:4326', 'EPSG:3857'],
     source: {
