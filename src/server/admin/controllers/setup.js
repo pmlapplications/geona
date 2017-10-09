@@ -58,7 +58,7 @@ export function databaseHandler(req, res, next) {
       requestUtils.displayFriendlyError(error, res);
     }
 
-    // check if the directory is there, if not try and create it
+    // check if the directory is there, if not try to create it
     let folder = database.path.substring(0, database.path.lastIndexOf('/'));
     if (!fs.existsSync(folder)) {
       try {
