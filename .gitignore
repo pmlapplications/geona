@@ -1,5 +1,6 @@
 *.sublime-project
 *.sublime-workspace
+.DS_Store
 .nyc_output
 .sass-cache
 .tern-project
