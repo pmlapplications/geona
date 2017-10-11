@@ -130,7 +130,7 @@ export class LMap extends GeonaMap {
   _clearBasemap(layer) {
     if (this.config.basemap !== 'none') {
       this._mapLayers.eachLayer((currentLayer) => {
-        if (currentLayer.modifier === 'basemap') {
+        if (currentLayer.options.modifier === 'basemap') {
           currentLayer.remove();
         }
       });
@@ -147,7 +147,7 @@ export class LMap extends GeonaMap {
   _clearBorders() {
     if (this.config.countryBorders !== 'none') {
       this._mapLayers.eachLayer((currentLayer) => {
-        if (currentLayer.modifier === 'borders') {
+        if (currentLayer.options.modifier === 'borders') {
           currentLayer.remove();
         }
       });
@@ -371,32 +371,33 @@ export class LMap extends GeonaMap {
             crs: projection,
           });
           if (modifier !== undefined) {
-            layer.modifier = modifier;
+            layer.options.modifier = modifier;
           }
           break;
         case 'wmts':
           alert('WMTS is not supported for Leaflet');
           break;
       }
-      if (layer.modifier === 'basemap') {
+      if (modifier === 'basemap') {
         this._clearBasemap(layer);
-      } else if (layer.modifier === 'borders') {
+      } else if (modifier === 'borders') {
         this._clearBorders();
       }
 
       layer.addTo(this._map);
       this._mapLayers.addLayer(layer);
 
-      if (layer.modifier === 'basemap') {
+      if (modifier === 'basemap') {
         this.reorderLayers(layer.identifier, 0);
         this.config.basemap = layer.identifier;
-      } else if (layer.modifier === 'borders') {
+      } else if (modifier === 'borders') {
         this.config.countryBorders = layer.identifier;
       }
 
       this._geonaLayers.push(geonaLayer);
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
+      // FIXME
       if (this.config.countryBorders !== 'none' && this._initialized === true) {
         this.reorderLayers(this.config.countryBorders, this._mapLayers.length);
       }
@@ -406,17 +407,36 @@ export class LMap extends GeonaMap {
   }
 
   /**
+   * Removes the layer from the map.
+   * @param {String} layerIdentifier The identifier of the layer being removed.
+   */
+  removeLayer(layerIdentifier) {
+    for (let layer of this._mapLayers.getLayers()) {
+      if (layer.options.identifier === layerIdentifier) {
+        layer.remove();
+        this._mapLayers.removeLayer(layer);
+        if (layer.options.modifier === 'basemap') {
+          this.config.basemap = 'none';
+        } else if (layer.options.modifier === 'borders') {
+          this.config.countryBorders = 'none';
+        }
+      }
+    }
+    console.log(this._mapLayers.getLayers());
+  }
+
+  /**
    * Moves the layer to the specified index, and reorders the other map layers where required.
    * Displaced layers move downwards when reordered.
-   * @param {String}  layerName The name of the layer to be moved.
+   * @param {String}  layerIdentifier The identifier of the layer to be moved.
    * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
    */
-  reorderLayers(layerName, index) {
+  reorderLayers(layerIdentifier, index) {
     let layer;
     console.log(this._mapLayers);
     for (let currentLayer of this._mapLayers.getLayers()) {
       // TODO check
-      if (currentLayer.identifier === layerName) {
+      if (currentLayer.identifier === layerIdentifier) {
         layer = currentLayer;
       }
     }
@@ -431,7 +451,7 @@ export class LMap extends GeonaMap {
       }
       layer.options.zIndex = index;
     } else {
-      alert('Layer ' + layerName + ' does not exist on the map.');
+      alert('Layer ' + layerIdentifier + ' does not exist on the map.');
     }
   }
 

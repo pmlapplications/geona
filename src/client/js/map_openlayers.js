@@ -34,7 +34,7 @@ export class OlMap extends GeonaMap {
     this.basemaps_ = {};
     /** @private @type {Object} The available map layers, as OpenLayers Tile layers */
     this._availableLayers = {};
-    /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
+    /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
     this.activeLayers_ = {};
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
@@ -376,7 +376,11 @@ export class OlMap extends GeonaMap {
   removeLayer(layerId) {
     if (this.map_.getLayers().getArray().includes(this.activeLayers_[layerId])) {
       this.map_.removeLayer(this.activeLayers_[layerId]);
-      // remove this layerId from the config
+      if(this.activeLayers_[layerId].get('modifier') === 'basemap'){
+        this.config.basemap = 'none';
+      } else if (this.activeLayers_[layerId].get('modifier') === 'borders') {
+        this.config.countryBorders = 'none';
+      }
     }
   }
 
