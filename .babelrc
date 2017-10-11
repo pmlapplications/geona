@@ -2,7 +2,8 @@
   "env": { // BABEL_ENV configs
     "server": { // For building or running the server
       "plugins": [
-        "dynamic-import-node"
+        "dynamic-import-node",
+        "transform-decorators-legacy"
       ],
       "presets": [
         [
@@ -13,7 +14,8 @@
               "node": 4
             }
           }
-        ]
+        ],
+        ["stage-0"]
       ]
     },
 

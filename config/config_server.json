@@ -1,4 +1,11 @@
 {
   "port": 7890,
-  "subFolderPath": "geona",
+  "plugins": [],
+  "subFolderPath": "/geona",
+  "database": {
+    "type": "sqlite3",
+    "path": "",
+    "dialect": "sqlite",
+    "storage": "/Users/bencalton/git/web-development/geona/database/geona.db"
+  }
 }

@@ -16,6 +16,8 @@ import {server as configServer} from './config';
 import mainRouter from './routers/main';
 import './hbs_helpers';
 
+import database from './database';
+
 // Probably want to remove this after testing.
 blocked((ms) => {
   console.log('Node thread blocked for ' + ms + ' ms!');

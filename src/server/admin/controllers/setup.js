@@ -11,6 +11,9 @@ import * as requestUtils from '../../utils/request';
 import * as menu from '../../templates/menu';
 import DatabaseAdapter from '../../database';
 
+import User from '../../models/users';
+
+
 let subFolderPath = config.server.get('subFolderPath');
 
 /**
@@ -172,12 +175,22 @@ export function oauthHandler(req, res) {
     OAuth: providers,
   });
 
-  let update = config.updateServerConfig(serverConfig);
-  if (typeof(update) === Error) {
-    requestUtils.displayFriendlyError(update, res);
-  } else {
-    res.redirect(subFolderPath + '/admin');
-  }
+  // let update = config.updateServerConfig(serverConfig);
+  // if (typeof(update) === Error) {
+  //   requestUtils.displayFriendlyError(update, res);
+  // } else {
+  //   res.redirect(subFolderPath + '/admin');
+  // }
+
+  let user = User.findOrCreate({
+    where: {
+      username: 'bac@pml.ac.uk',
+    },
+    defaults: {
+      firstName: 'Ben',
+      lastName: 'Calton',
+    }
+  });
 
   return false;
 }
