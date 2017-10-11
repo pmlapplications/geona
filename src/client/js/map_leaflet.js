@@ -6,6 +6,7 @@ import {
   addLayerDefaults, selectPropertyLanguage,
 } from './map_common';
 import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
+import $ from 'jquery';
 
 let L;
 
@@ -62,6 +63,8 @@ export class LMap extends GeonaMap {
     this._basemap = false;
     /** @type {Boolean} Whether the map currently has country borders */
     this._borders = false;
+    /** @private @type {Boolean} Tracks whether the map has been initialized */
+    this._initialized = false;
 
     /**  @type {L.map} The Leaflet map */
     this._map = L.map(mapDiv, {
@@ -96,12 +99,16 @@ export class LMap extends GeonaMap {
     this._loadBasemaps();
     this._loadCountryBorderLayers();
 
-    this._availableLayers.gebco_08_grid.addTo(this._map);
-    this._mapLayers.addLayer(this._availableLayers.gebco_08_grid);
-    this._availableLayers.line_black.addTo(this._map);
-    this._mapLayers.addLayer(this._availableLayers.line_black);
+    this.addLayer(this._availableLayers['terrain-light'], 'basemap');
+    // this._availableLayers.gebco_08_grid.addTo(this._map);
+    // this._mapLayers.addLayer(this._availableLayers.gebco_08_grid);
+    this.addLayer(this._availableLayers.line_black, 'borders');
+    // this._availableLayers.line_black.addTo(this._map);
+    // this._mapLayers.addLayer(this._availableLayers.line_black);
 
     this.loadConfig_();
+    // Must come last in the constructor
+    this._initialized = true;
   }
 
   /**
@@ -309,26 +316,59 @@ export class LMap extends GeonaMap {
   addLayer(geonaLayer, modifier) {
     // If a layer is a basemap we might change the projection
     // anyway, so it doesn't matter if the layer supports the current projection
+    console.log(geonaLayer);
     if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) || modifier === 'basemap') {
       let layer;
       let title;
       let time;
+      let requiredLayer;
+      let format;
+      let projection;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
+          // Select the closest time to current map layers, or the most recent time
           if (geonaLayer.isTemporal === true) {
             // Change to be the closest time previous to the current layers' times
             // i.e. if (currently a temporal layer on the map) {...} else {set to lastTime}
             time = geonaLayer.lastTime;
           }
+          // FIXME this is basically only here for the border layers, but it might break if another layer has a single layer as an Object rather than a String
+          requiredLayer = geonaLayer.layerServer.layers;
+          if (geonaLayer.layerServer.layers.length !== 1) {
+            requiredLayer = geonaLayer.identifier;
+          }
+          // FIXME fix parser so this doesn't happen
+          if ($.isEmptyObject(geonaLayer.styles)) {
+            geonaLayer.styles = undefined;
+          }
+          // Select an appropriate format
+          // FIXME this probably needs reevaluating - try to use the format from the LegendURL of the Style.
+          if (geonaLayer.formats !== undefined) {
+            if (geonaLayer.formats.includes('image/png')) {
+              format = 'image/png';
+            } else if (geonaLayer.formats.includes('image/jpeg')) {
+              format = 'image/jpeg';
+            } else {
+              format = geonaLayer.formats[0];
+            }
+          }
+          // At this stage of the method, only basemaps might have different projections.
+          if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
+            projection = this._map.options.crs;
+          } else {
+            projection = leafletizeProjection(geonaLayer.projections[0]);
+          }
           // eslint-disable-next-line new-cap
           layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
             identifier: geonaLayer.identifier,
-            layers: geonaLayer.identifier,
-            format: 'image/png',
+            layers: requiredLayer,
+            styles: geonaLayer.styles || 'boxfill/alg',
+            format: format || 'image/png',
             transparent: true,
             attribution: geonaLayer.attribution,
             version: geonaLayer.layerServer.version,
+            crs: projection,
           });
           if (modifier !== undefined) {
             layer.modifier = modifier;
@@ -357,7 +397,7 @@ export class LMap extends GeonaMap {
       this._geonaLayers.push(geonaLayer);
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-      if (this.config.countryBorders !== 'none') {
+      if (this.config.countryBorders !== 'none' && this._initialized === true) {
         this.reorderLayers(this.config.countryBorders, this._mapLayers.length);
       }
     } else {
@@ -373,14 +413,15 @@ export class LMap extends GeonaMap {
    */
   reorderLayers(layerName, index) {
     let layer;
-    for (let currentLayer of this._mapLayers) {
+    console.log(this._mapLayers);
+    for (let currentLayer of this._mapLayers.getLayers()) {
       // TODO check
       if (currentLayer.identifier === layerName) {
         layer = currentLayer;
       }
     }
     if (layer !== undefined) {
-      for (let currentLayer of this._mapLayers) {
+      for (let currentLayer of this._mapLayers.getLayers()) {
         if (currentLayer._crs !== undefined) {
           if (currentLayer.options.zIndex <= index) {
             // Leaflet layers use higher values for higher positioning.
@@ -395,8 +436,8 @@ export class LMap extends GeonaMap {
   }
 
   /**
- * Load the data layers defined in the config
- */
+   * Load the data layers defined in the config
+   */
   _loadLayers() {
     for (let addedLayer of this.config.layers) {
       addedLayer = addLayerDefaults(addedLayer);
@@ -428,46 +469,26 @@ export class LMap extends GeonaMap {
   }
 
   /**
- * Load the default basemaps, and any defined in the config.
- */
+   * Load the default basemaps, and any defined in the config.
+   */
   _loadBasemaps() {
     // TODO load from config too
     for (let layer of defaultBasemaps) {
-      switch (layer.source.type) {
-        case 'wms':
-          this._availableLayers[layer.identifier] = L.tileLayer.wms(layer.source.url, {
-            layers: layer.source.params.layers,
-            version: layer.source.params.version,
-            attribution: layer.source.attributions,
-            projections: layer.projections,
-            viewSettings: layer.viewSettings,
-            identifier: layer.identifier,
-            modifier: 'basemap',
-          });
-          break;
+      if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('bingMapsApiKey is null or undefined');
       }
     }
   }
 
   /**
- * Load the default border layers, and any defined in the config.
- */
+   * Load the default border layers, and any defined in the config.
+   */
   _loadCountryBorderLayers() {
     // TODO load from config too
     for (let layer of defaultBorders) {
-      switch (layer.source.type) {
-        case 'wms':
-          this._availableLayers[layer.identifier] = L.tileLayer.wms(layer.source.url, {
-            layers: layer.source.params.layers,
-            version: layer.source.params.version,
-            styles: layer.source.params.styles,
-            format: 'image/png',
-            transparent: true,
-            projections: layer.projections,
-            identifier: layer.identifier,
-            modifier: 'borders',
-          });
-      }
+      this._availableLayers[layer.identifier] = layer;
     }
   }
 }
