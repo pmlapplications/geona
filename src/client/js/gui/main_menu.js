@@ -4,8 +4,7 @@ import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
-import LayerServer from '../../../common/layer/server/layer_server';
-import LayerServerWmts from '../../../common/layer/server/layer_server_wmts';
+import {getLayersFromWms, getLayersFromWmts} from '../map_common';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -101,49 +100,51 @@ export class MainMenu {
   }
 
   /**
-   * Requests layers from a WMS GetCapabilities request and creates a Geona Layer for each
+   * Populates a dropdown list for layers found from a WMS GetCapabilities request.
    */
-  getLayersFromWMS() {
-    this.clearPreviousUrlLayers();
+  getLayersFromWms() {
+    this._clearPreviousUrlLayers();
     let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
-    $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/' + encodeURIComponent(url))
-      .done((serverConfig) => {
-        let layers = new LayerServer(serverConfig);
+    getLayersFromWms(url)
+      .then((layers) => {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        for (let layer of layers.layers) {
-          dropdown.append('<option value="' + layer.name + '">' + layer.name + '</option>');
-          this.requestLayers.push(layer);
-        }
-      });
-  }
-
-  /**
-   * Requests layers from a WMTS GetCapabilities request and creates a Geona Layer for each
-   */
-  getLayersFromWMTS() {
-    this.clearPreviousUrlLayers();
-    let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
-    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url))
-      .done((serverConfig) => {
-        let layers = new LayerServerWmts(serverConfig);
-        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
-        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
-        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
+        console.log(layers);
         for (let layer of layers.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
-          this.requestLayers.push(layer);
         }
+        this.requestLayers = layers;
+      }).catch((err) => {
+        alert('No layers found.');
       });
   }
 
   /**
-   * Checks whether there are already layers from a getLayersFromWMS/WMTS call, and removes them if so.
-   * @return {Boolean} Whether there were previous layers found and removed
+   * Populates a dropdown list for layers found from a WMTS GetCapabilities request.
    */
-  clearPreviousUrlLayers() {
-    // TODO make private
+  getLayersFromWmts() {
+    this._clearPreviousUrlLayers();
+    let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
+    getLayersFromWmts(url)
+      .then((layers) => {
+        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
+        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
+        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
+        console.log(layers);
+        for (let layer of layers.layers) {
+          dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
+        }
+        this.requestLayers = layers;
+      }).catch((err) => {
+        alert('No layers found.');
+      });
+  }
+
+  /**
+ * Checks whether there are already layers in the dropdown from a getLayersFromWms/Wmts call, and removes them if so.
+ */
+  _clearPreviousUrlLayers() {
     let previousUrlLayersFound = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').contents().length > 0;
     if (previousUrlLayersFound === true) {
       this.parentDiv.find('.js-geona-explore-panel-content__layer-select').empty().addClass('hidden');
@@ -151,28 +152,28 @@ export class MainMenu {
       // Clears the array and removes all references to its previous values
       this.requestLayers.length = 0;
     }
-    return previousUrlLayersFound;
   }
 
   /**
-   * Adds the layer in the 'layer-select' input box to the map.
-   */
+ * Adds the layer in the 'layer-select' input box to the map.
+ */
   addUrlLayerToMap() {
     let selectedLayer = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
-    for (let layer of this.requestLayers) {
-      if (layer.name === selectedLayer || layer.identifier === selectedLayer) {
+    console.log(this.requestLayers);
+    for (let layer of this.requestLayers.layers) {
+      if (layer.identifier === selectedLayer) {
         this.geona.map.addLayer(layer);
       }
     }
   }
 
   /**
-   * Clears current panel content and adds layers currently on map to the list of layers.
-   *
-   * TODO Think if it would be better to do do each layer individually with add and remove, rather than
-   * clear and refresh. Clear and refresh requires a list to track the order of layers. However this list might be
-   * required for changing the map anyway.
-   */
+ * Clears current panel content and adds layers currently on map to the list of layers.
+ *
+ * TODO Think if it would be better to do do each layer individually with add and remove, rather than
+ * clear and refresh. Clear and refresh requires a list to track the order of layers. However this list might be
+ * required for changing the map anyway.
+ */
   displayLayersPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__layers').addClass('geona-menu__tab--active');
@@ -187,8 +188,8 @@ export class MainMenu {
   }
 
   /**
-   *
-   */
+ *
+ */
   displayAnalysisPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__analysis').addClass('geona-menu__tab--active');
@@ -201,8 +202,8 @@ export class MainMenu {
   }
 
   /**
-   *
-   */
+ *
+ */
   displayLoginPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__login').addClass('geona-menu__tab--active');
@@ -215,8 +216,8 @@ export class MainMenu {
   }
 
   /**
-   *
-   */
+ *
+ */
   displayHelpPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__help').addClass('geona-menu__tab--active');
@@ -229,8 +230,8 @@ export class MainMenu {
   }
 
   /**
-   *
-   */
+ *
+ */
   displaySharePanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__share').addClass('geona-menu__tab--active');

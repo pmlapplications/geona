@@ -223,29 +223,32 @@ function parse1_0(url, capabilities) {
       }
     }
     // Style is a mandatory property
-    layerData.styles = {};
+    layerData.styles = [];
     for (let style of dataset.value.style) {
-      layerData.styles[style.identifier.value] = {};
+      let styleObject = {};
+      styleObject.identifier = style.identifier.value;
 
       if (style.title) {
-        layerData.styles[style.identifier.value].title = parseTitles(style.title);
+        styleObject.title = parseTitles(style.title);
       }
 
       if (style._abstract) {
-        layerData.styles[style.identifier.value].abstract = parseAbstracts(style._abstract);
+        styleObject.abstract = parseAbstracts(style._abstract);
       }
 
       if (style.keywords) {
-        layerData.styles[style.identifier.value].keywords = parseKeywords(style.keywords);
+        styleObject.keywords = parseKeywords(style.keywords);
       }
 
       if (style.legendURL !== undefined) {
-        layerData.styles[style.identifier.value].legendURL = style.legendURL;
+        styleObject.legendURL = style.legendURL;
       }
 
       if (style.isDefault !== undefined) {
-        layerData.styles[style.identifier.value].isDefault = style.isDefault;
+        styleObject.isDefault = style.isDefault;
       }
+
+      layerData.styles.push(styleObject);
     }
 
     // Format is a mandatory property

@@ -21,50 +21,50 @@ export default class GeonaMap {
    * Set the graticule as visible or not.
    * @param  {Boolean} display True to display graticule
    */
-  displayGraticule(display) {}
+  displayGraticule(display) { }
 
   /**
    * Set the basemap, changing the projection if required.
    * @param {String} basemap The id of the basemap to use, or 'none'
    */
-  setBasemap(basemap) {}
+  setBasemap(basemap) { }
 
   /**
    * Set the country borders to display.
    * @param {String} borders The borders to display, or 'none'
    */
-  setCountryBorders(borders) {}
+  setCountryBorders(borders) { }
 
   /**
    * Set the projection, if supported by the current basemap.
    * @param {String} projection The projection to use, such as 'EPSG:4326'
    */
-  setProjection(projection) {}
+  setProjection(projection) { }
 
   /**
    * Add the specified data layer onto the map.
    * @param {String} layerId The id of the data layer being added.
    * @param {Integer} [index] The zero-based index to insert the layer into.
    */
-  addLayer(layerId, index) {}
+  addLayer(layerId, index) { }
 
   /**
    * Remove the specified data layer from the map.
    * @param {*} layerId The id of the data layer being removed.
    */
-  removeLayer(layerId) {}
+  removeLayer(layerId) { }
 
   /**
    * Makes an invisible layer visible.
    * @param {*} layerId The id of the data layer being made visible.
    */
-  showLayer(layerId) {}
+  showLayer(layerId) { }
 
   /**
    * Makes a layer invisible, but keeps it on the map.
    * @param {*} layerId The id of the data layer being made hidden.
    */
-  hideLayer(layerId) {}
+  hideLayer(layerId) { }
 
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
@@ -79,7 +79,7 @@ export default class GeonaMap {
    * @param {String}  options.projection The projection, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
-  setView(options) {}
+  setView(options) { }
 
   /**
    * Use the config to setup the map view.
@@ -88,10 +88,10 @@ export default class GeonaMap {
    * This function should not be overridden.
    */
   loadConfig_() {
-    this.setBasemap(this.config.basemap);
-    this.setCountryBorders(this.config.countryBorders);
+    // this.setBasemap(this.config.basemap);
+    // this.setCountryBorders(this.config.countryBorders);
     this.displayGraticule(this.config.graticule);
-    this.setProjection(this.config.projection);
+    // this.setProjection(this.config.projection);
     this.setView(this.config.viewSettings);
   }
 }

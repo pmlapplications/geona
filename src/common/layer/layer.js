@@ -26,6 +26,7 @@ export default class Layer {
 
     this.boundingBox = layerConfig.boundingBox;
     this.projections = layerConfig.projections || [];
+    this.styles = layerConfig.styles;
 
     this.isTemporal = layerConfig.isTemporal;
     this.firstTime = layerConfig.firstTime;

@@ -26,12 +26,12 @@ export function registerBindings(eventManager, menu) {
     menu.displayExplorePanel();
   });
   // Submit WMS URL
-  eventManager.bind('mainMenu.getLayersFromWMS', () => {
-    menu.getLayersFromWMS();
+  eventManager.bind('mainMenu.getLayersFromWms', () => {
+    menu.getLayersFromWms();
   });
   // Submit WMTS URL
-  eventManager.bind('mainMenu.getLayersFromWMTS', () => {
-    menu.getLayersFromWMTS();
+  eventManager.bind('mainMenu.getLayersFromWmts', () => {
+    menu.getLayersFromWmts();
   });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', () => {

@@ -257,9 +257,11 @@ function parseLayerCommon(layer, parentLayer = {}) {
 
   // Load the keywords
   if (layer.keywordList) {
-    thisLayer.keywords = {und: []};
-    for (let keyword of layer.keywordList.keyword) {
-      thisLayer.keywords.und.push(keyword.value);
+    if (layer.keywordList.keyword) {
+      thisLayer.keywords = {und: []};
+      for (let keyword of layer.keywordList.keyword) {
+        thisLayer.keywords.und.push(keyword.value);
+      }
     }
   }
 
@@ -286,6 +288,33 @@ function parseLayerCommon(layer, parentLayer = {}) {
     }
   } else if (parentLayer.attribution) {
     thisLayer.attribution = parentLayer.attribution;
+  }
+
+  // Load the layer styles
+  if (layer.style) {
+    thisLayer.styles = [];
+    for (let style of layer.style) {
+      let styleObject = {};
+      styleObject.name = style.name;
+      styleObject.title = style.title;
+      styleObject.abstract = style._abstract;
+      if (style.legendURL) {
+        styleObject.legendUrl = [];
+        for (let legend of style.legendURL) {
+          let legendObject = {};
+          legendObject.width = legend.width;
+          legendObject.height = legend.height;
+          legendObject.format = legend.format;
+          if (legend.onlineResource) {
+            legendObject.onlineResource = {};
+            legendObject.onlineResource.type = legend.onlineResource.type;
+            legendObject.onlineResource.href = legend.onlineResource.href;
+          }
+          styleObject.legendUrl.push(legendObject);
+        }
+      }
+      thisLayer.styles.push(styleObject);
+    }
   }
 
   // Load the authorities with 'replace' inheritance

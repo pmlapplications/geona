@@ -26,6 +26,12 @@ export function wcsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wmsGetLayers(req, res) {
+  // getCapabilities('wms', req.params.url)
+  //   .then((jsonCapabilities) => {
+  //     res.json(jsonifyCapabilities('wms', jsonCapabilities));
+  //   }).catch((err) => {
+  //     res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+  //   });
   parseWmsCapabilities(req.params.url)
     .then((layer) => {
       res.json(layer);

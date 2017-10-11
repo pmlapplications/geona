@@ -24,14 +24,10 @@ export class LMap extends GeonaMap {
     super();
     /** @type {Object} The map config */
     this.config = config;
-    /**  @type {Object} The available basemaps */
-    this._basemaps = {};
-    /**  @type {Object} The available country border layers */
-    this._countryBorderLayers = {};
-    /**  @type {Object} The available data layers */
+    /**  @type {Object} The available map layers */
     this._availableLayers = {};
     /**  @type {L.featureGroup} The layers on the map */
-    // TODO try putting '{attribution: 'Geona'} in the featureGroup initially
+    // TODO try putting '{attribution: 'Geona'}' in the featureGroup initially
     this._mapLayers = L.featureGroup();
     this._geonaLayers = [];
     /**  @type {L.latlngGraticule} The map graticule */
@@ -100,12 +96,12 @@ export class LMap extends GeonaMap {
     this._loadBasemaps();
     this._loadCountryBorderLayers();
 
-    this.loadConfig_();
+    this._availableLayers.gebco_08_grid.addTo(this._map);
+    this._mapLayers.addLayer(this._availableLayers.gebco_08_grid);
+    this._availableLayers.line_black.addTo(this._map);
+    this._mapLayers.addLayer(this._availableLayers.line_black);
 
-    this._basemaps.gebco_08_grid.addTo(this._map);
-    this._mapLayers.addLayer(this._basemaps.gebco_08_grid);
-    this._countryBorderLayers.line_black.addTo(this._map);
-    this._mapLayers.addLayer(this._countryBorderLayers.line_black);
+    this.loadConfig_();
   }
 
   /**
@@ -122,40 +118,18 @@ export class LMap extends GeonaMap {
 
   /**
    * Clears the basemap if it exists and changes the projection if required.
-   * @param {L.tileLayer.wms} layer The layer created in addLayer()
+   * @param {L.tileLayer.wms} [layer] The layer created in addLayer()
    */
   _clearBasemap(layer) {
-    // if (this.config.basemap !== 'none') {
-    //   this._basemaps[this.config.basemap].remove();
-    // }
-
-    // if (basemap !== 'none') {
-    //   // TODO throw error if the provided basemap doesn't exist
-    //   let newBasemap = this._basemaps[basemap];
-    //   let viewSettings = newBasemap.options.viewSettings;
-    //   console.log('setBasemap');
-    //   console.log(viewSettings);
-    //   if (!newBasemap.options.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
-    //     viewSettings.projection = newBasemap.options.projections[0];
-    //   }
-    //   console.log(viewSettings);
-    //   this.setView(viewSettings);
-
-    //   newBasemap.addTo(this._map).bringToBack();
-    // }
-
-    // this.config.basemap = basemap;
-    // this._geonaLayers.push();
-    if (this._basemap === true) {
-      // Leaflet doesn't track the ordering of layers...?
-      console.log(this._mapLayers.getLayers());
+    if (this.config.basemap !== 'none') {
       this._mapLayers.eachLayer((currentLayer) => {
         if (currentLayer.modifier === 'basemap') {
           currentLayer.remove();
         }
       });
+      this.config.basemap = 'none';
     }
-    if (this._map.options._crs !== layer.crs) {
+    if (layer !== undefined && this._map.options._crs !== layer.crs) {
       this.setProjection(deLeafletizeProjection(layer.crs));
     }
   }
@@ -164,12 +138,13 @@ export class LMap extends GeonaMap {
    * Clears the country borders if active.
    */
   _clearBorders() {
-    if (this._borders === true) {
+    if (this.config.countryBorders !== 'none') {
       this._mapLayers.eachLayer((currentLayer) => {
         if (currentLayer.modifier === 'borders') {
           currentLayer.remove();
         }
       });
+      this.config.countryBorders = 'none';
     }
   }
 
@@ -210,8 +185,6 @@ export class LMap extends GeonaMap {
 
       this.config.projection = projection;
 
-      console.log(this._map);
-      // TODO hopefully this won't infinite loop because you're adding a new layer each time
       this._map.eachLayer((layer) => {
         if (layer._crs !== undefined) {
           layer.remove();
@@ -261,7 +234,6 @@ export class LMap extends GeonaMap {
       this.config.viewSettings.maxExtent = options.maxExtent;
     }
 
-    console.log(options);
     if (options.center) {
       this._map.panTo([options.center.lat, options.center.lon]);
       // this._map.panTo(options.center);
@@ -333,16 +305,14 @@ export class LMap extends GeonaMap {
    * Create a Leaflet map layer from a Geona layer definition, and add to the map.
    * @param {Layer}   geonaLayer A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
    * @param {String}  [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
-   * @param {Integer} [index]    The optional one-based index to insert the layer at on the map.
    */
-  addLayer(geonaLayer, modifier, index = undefined) {
+  addLayer(geonaLayer, modifier) {
     // If a layer is a basemap we might change the projection
     // anyway, so it doesn't matter if the layer supports the current projection
     if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) || modifier === 'basemap') {
       let layer;
       let title;
       let time;
-      let zIndex = index;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
@@ -353,55 +323,75 @@ export class LMap extends GeonaMap {
           }
           // eslint-disable-next-line new-cap
           layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
-            layers: geonaLayer.name,
+            identifier: geonaLayer.identifier,
+            layers: geonaLayer.identifier,
             format: 'image/png',
             transparent: true,
             attribution: geonaLayer.attribution,
             version: geonaLayer.layerServer.version,
           });
-          console.log('layer.format: ' + layer.format);
           if (modifier !== undefined) {
             layer.modifier = modifier;
           }
           break;
         case 'wmts':
-          alert('WMTS not currently supported for Leaflet');
-          // title = selectPropertyLanguage(geonaLayer.title);
-          // layer = createWmtsTileLayer(geonaLayer, deLeafletizeProjection(this._map.options.crs));
+          alert('WMTS is not supported for Leaflet');
           break;
       }
       if (layer.modifier === 'basemap') {
         this._clearBasemap(layer);
-        zIndex = 1;
       } else if (layer.modifier === 'borders') {
-        this._clearBorders(layer);
-        zIndex = this._mapLayers.getLayers().length;
+        this._clearBorders();
       }
 
       layer.addTo(this._map);
       this._mapLayers.addLayer(layer);
 
       if (layer.modifier === 'basemap') {
-        layer.bringToBack();
+        this.reorderLayers(layer.identifier, 0);
+        this.config.basemap = layer.identifier;
       } else if (layer.modifier === 'borders') {
-        layer.bringToFront();
+        this.config.countryBorders = layer.identifier;
       }
 
       this._geonaLayers.push(geonaLayer);
+
+      // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
+      if (this.config.countryBorders !== 'none') {
+        this.reorderLayers(this.config.countryBorders, this._mapLayers.length);
+      }
     } else {
       alert('Cannot use this projection for this layer');
     }
-    // var url = "http://wxs.ign.fr/" + ignKey + "/geoportail/wmts";
+  }
 
-    // var ign = new L.TileLayer.WMTS(url,
-    //   {
-    //     layer: layerIGNScanStd,
-    //     style: "normal",
-    //     tilematrixSet: "PM",
-    //     format: "image/jpeg",
-    //     attribution: "<a href='https://github.com/mylen/leaflet.TileLayer.WMTS'>GitHub</a>&copy; <a href='http://www.ign.fr'>IGN</a>"
-    //   }
-    // );
+  /**
+   * Moves the layer to the specified index, and reorders the other map layers where required.
+   * Displaced layers move downwards when reordered.
+   * @param {String}  layerName The name of the layer to be moved.
+   * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
+   */
+  reorderLayers(layerName, index) {
+    let layer;
+    for (let currentLayer of this._mapLayers) {
+      // TODO check
+      if (currentLayer.identifier === layerName) {
+        layer = currentLayer;
+      }
+    }
+    if (layer !== undefined) {
+      for (let currentLayer of this._mapLayers) {
+        if (currentLayer._crs !== undefined) {
+          if (currentLayer.options.zIndex <= index) {
+            // Leaflet layers use higher values for higher positioning.
+            currentLayer.options.zIndex -= 1;
+          }
+        }
+      }
+      layer.options.zIndex = index;
+    } else {
+      alert('Layer ' + layerName + ' does not exist on the map.');
+    }
   }
 
   /**
@@ -413,7 +403,7 @@ export class LMap extends GeonaMap {
 
       let layerData;
       for (let serverLayer of CCI5DAY.server.Layers) {
-        if (serverLayer.Name === addedLayer.id) {
+        if (serverLayer.Name === addedLayer.identifier) {
           layerData = serverLayer;
         }
       }
@@ -421,7 +411,7 @@ export class LMap extends GeonaMap {
       // let tile;
       switch (addedLayer.source.type) {
         case 'wms':
-          this._availableLayers[addedLayer.id] = L.tileLayer.wms(addedLayer.source.url, {
+          this._availableLayers[addedLayer.identifier] = L.tileLayer.wms(addedLayer.source.url, {
             layers: addedLayer.source.params.layers,
             version: addedLayer.source.params.version,
             attribution: addedLayer.source.attributions,
@@ -431,7 +421,7 @@ export class LMap extends GeonaMap {
           });
           break;
         case 'wmts':
-          console.error('WMTS not yet supported (TODO)');
+          console.error('WMTS not supported for Leaflet');
           break;
       }
     }
@@ -445,12 +435,13 @@ export class LMap extends GeonaMap {
     for (let layer of defaultBasemaps) {
       switch (layer.source.type) {
         case 'wms':
-          this._basemaps[layer.id] = L.tileLayer.wms(layer.source.url, {
+          this._availableLayers[layer.identifier] = L.tileLayer.wms(layer.source.url, {
             layers: layer.source.params.layers,
             version: layer.source.params.version,
             attribution: layer.source.attributions,
             projections: layer.projections,
             viewSettings: layer.viewSettings,
+            identifier: layer.identifier,
             modifier: 'basemap',
           });
           break;
@@ -466,13 +457,14 @@ export class LMap extends GeonaMap {
     for (let layer of defaultBorders) {
       switch (layer.source.type) {
         case 'wms':
-          this._countryBorderLayers[layer.id] = L.tileLayer.wms(layer.source.url, {
+          this._availableLayers[layer.identifier] = L.tileLayer.wms(layer.source.url, {
             layers: layer.source.params.layers,
             version: layer.source.params.version,
             styles: layer.source.params.styles,
             format: 'image/png',
             transparent: true,
             projections: layer.projections,
+            identifier: layer.identifier,
             modifier: 'borders',
           });
       }
@@ -570,7 +562,6 @@ export function init(geonaServer, next) {
           // Import Leaflet plugins
           return Promise.all([
             import('../vendor/js/leaflet_latlng_graticule'),
-            import('../vendor/js/leaflet_tilelayer_wmts'),
           ]);
         })
         .then(() => {
@@ -580,145 +571,4 @@ export function init(geonaServer, next) {
     mapJs.src = geonaServer + '/js/vendor_leaflet.js';
     head.appendChild(mapJs);
   }
-}
-
-/**
- * Generates a WMTS TileLayer for use on Leaflet maps.
- * @param {Layer}  geonaLayer    The Geona Layer object containing this layer data after parsing the GetCapabilities request
- * @param {String} mapProjection
- * @return {*}
- */
-function createWmtsTileLayer(geonaLayer, mapProjection) {
-  // var url = "http://wxs.ign.fr/" + ignKey + "/geoportail/wmts";
-
-  // var ign = new L.TileLayer.WMTS(url,
-  //   {
-  //     layer: layerIGNScanStd,
-  //     style: "normal",
-  //     tilematrixSet: "PM",
-  //     format: "image/jpeg",
-  //     attribution: "<a href='https://github.com/mylen/leaflet.TileLayer.WMTS'>GitHub</a>&copy; <a href='http://www.ign.fr'>IGN</a>"
-  //   }
-  // );
-  let layer;
-
-  let tileMatrixSetId;
-
-  // TODO check correct - Replace with thing to search for TileMatrixSet that supports the current projection
-  // TODO change parser to make any objects with the id as the key changed to arrays with the id as a property :(
-
-  // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
-  let matrixLimits;
-  for (let tileMatrixSet of Object.keys(geonaLayer.layerServer.tileMatrixSets)) {
-    for (let tileMatrixSetLink of geonaLayer.tileMatrixSetLinks) {
-      // If the TileMatrixSet is one of the links for the current layer and the current map projection is
-      // supported, we can use this tileMatrixSet for the layer.
-      if (tileMatrixSet === tileMatrixSetLink.tileMatrixSet) {
-        matrixLimits = tileMatrixSetLink.tileMatrixLimits;
-        if (geonaLayer.layerServer.tileMatrixSets[tileMatrixSet].projection === mapProjection) {
-          tileMatrixSetId = tileMatrixSet;
-        }
-      }
-    }
-  }
-  let format;
-  let url;
-
-  // TODO This should pick the style provided in a config
-  let style;
-  let defaultStyle;
-  for (let key in geonaLayer.styles) {
-    if (geonaLayer.styles.hasOwnProperty(key)) {
-      if (key.isDefault) {
-        defaultStyle = key;
-      }
-      style = key;
-    }
-  }
-  if (defaultStyle !== undefined) {
-    style = defaultStyle;
-  }
-
-  let requestEncoding;
-
-  let attribution;
-  if (geonaLayer.attribution) {
-    if (geonaLayer.attribution.onlineResource) {
-      attribution = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-    } else {
-      attribution = geonaLayer.attribution.title;
-    }
-  }
-
-  // Even though operationsMetadata can contain REST encodings alongside URLs, these URLs are not the
-  // templated form required for REST requests, so we only take KVP information from here. REST information
-  // is taken from the resourceUrls section.
-  if (geonaLayer.layerServer.operationsMetadata) {
-    if (geonaLayer.layerServer.operationsMetadata.GetTile) {
-      // If we can use a GET operation we use it instead of a POST.
-      if (geonaLayer.layerServer.operationsMetadata.GetTile.get !== undefined) {
-        let getTile = geonaLayer.layerServer.operationsMetadata.GetTile.get;
-        requestEncoding = 'KVP';
-        for (let tile of getTile) {
-          for (let encoding of tile.encoding) {
-            if (encoding === requestEncoding) {
-              url = tile.url;
-            }
-          }
-        }
-      } else {
-        let postTile = geonaLayer.layerServer.operationsMetadata.GetTile.post;
-        requestEncoding = 'KVP';
-        for (let tile of postTile) {
-          for (let encoding of tile.encoding) {
-            if (encoding === requestEncoding) {
-              url = tile.url;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  console.log('if url undefined:');
-  console.log(url === undefined);
-  console.log('if geonaLayer.resourceUrls:');
-  console.log(geonaLayer.resourceUrls !== undefined);
-
-  if (url === undefined && geonaLayer.resourceUrls) {
-    requestEncoding = 'REST';
-    for (let resource of geonaLayer.resourceUrls) {
-      if (resource.resourceType === 'tile') {
-        format = resource.format;
-        url = resource.template;
-      }
-    }
-  }
-
-  if (requestEncoding === 'KVP') {
-    layer = new L.TileLayer.WMTS(url,
-      {
-        layer: geonaLayer.identifier,
-        style: style,
-        tilematrixSet: tileMatrixSetId,
-        format: format,
-        attribution: attribution,
-      }
-    );
-  } else {
-    // let RestUrl = 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS/tile/1.0.0/WorldTimeZones/WorldTimeZones/default028mm/{z}/{y}/{x}.png';
-    // `WorldTimeZones/WorldTimeZones/default028mm/3/3/3.png?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&Layer=` + geonaLayer.identifier + `&Format=` + format + `&TileMatrixSet=` + tileMatrixSetId + `&TileMatrix={z}&TileRow={y}&TileCol={x}`;
-    console.log('url:' + url);
-    let restUrl = url.replace(/(?:^|\W)TileMatrix(?:$|\W)/, '{z}').replace('TileCol', 'y').replace('TileRow', 'x');
-    console.log('restUrl:' + restUrl);
-    layer = new L.TileLayer(restUrl, {
-      style: style,
-      TileMatrixSet: tileMatrixSetId,
-    });
-  }
-
-
-  // KVP we need (maybe)
-  // custom URL in the form (url + '&height='+ tile height +'&width='+tile width+'&tilematrixset='+tile matrix set id+'&version='+ version OR '1.0.0' +'&style='+style+'&layer='+layer+'&SERVICE=WMTS&REQUEST=GetTile&format='+format+'&TileMatrix='+tile matrix+'&tileRow='+tile row+'&tileCol='+tile col
-  return layer;
 }

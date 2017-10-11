@@ -37,6 +37,7 @@ export default class LayerServer {
       }
     }
 
+    // TODO remove this
     window.testingLayer = this.layers[0];
     window.testingSerCon = this;
   }

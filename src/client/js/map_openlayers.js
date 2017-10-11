@@ -6,8 +6,6 @@ import {
   basemaps as defaultBasemaps, borderLayers as defaultBorders,
   latLonLabelFormatter, selectPropertyLanguage,
 } from './map_common';
-import LayerServer from '../../common/layer/server/layer_server';
-import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 
 import proj4 from 'proj4';
 
@@ -34,8 +32,8 @@ export class OlMap extends GeonaMap {
     this.config = config;
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
     this.basemaps_ = {};
-    /** @private @type {Object} The available country border layers, as OpenLayers Tile layers */
-    this.countryBorderLayers_ = {};
+    /** @private @type {Object} The available map layers, as OpenLayers Tile layers */
+    this._availableLayers = {};
     /** @private @type {Object} The available data layers, as OpenLayers Tile layers */
     this.activeLayers_ = {};
     /** @private @type {ol.Graticule} The map graticule */
@@ -92,19 +90,24 @@ export class OlMap extends GeonaMap {
       ],
     });
 
-    this.loadBasemaps_();
-    this.loadCountryBorderLayers_();
+    this._loadBasemaps();
+    this._loadCountryBorderLayers();
     // this.loadLayers_();
+
+    this.addLayer(this._availableLayers['terrain-light'], 'basemap');
+    this.addLayer(this._availableLayers.line_black, 'borders');
+    // this.map_.addLayer(this._availableLayers['terrain-light']);
+    // this.activeLayers_['terrain-light'] = this._availableLayers['terrain-light'];
+    // this.map_.addLayer(this._availableLayers.line_black);
+    // this.activeLayers_.line_black = this._availableLayers.line_black;
 
     this.loadConfig_();
 
     // Must come last in the method
     this.initialized_ = true;
 
-    // this.addLayer('chlor_a');
-    // this.addLayer('ph_hcmr');
-
     // wms
+    // https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?service=WMS&request=GetCapabilities
     // $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServer(serverConfig);
@@ -113,6 +116,7 @@ export class OlMap extends GeonaMap {
     // ----------------------------------------------------------------------------------------------
 
     // // wmts 3857 - success
+    // http://www.ngi.be/cartoweb/1.0.0/WMTSCapabilities.xml
     // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fwww.ngi.be%2Fcartoweb%2F1.0.0%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
@@ -124,11 +128,11 @@ export class OlMap extends GeonaMap {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
-    // wmts 3857 - success
-    $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
-      .done((serverConfig) => {
-        let keepingEslintHappy = new LayerServerWmts(serverConfig);
-      });
+    // // wmts 3857 - success
+    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
+    //   .done((serverConfig) => {
+    //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
+    //   });
 
     // // wmts 3857 - success
     // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
@@ -174,49 +178,33 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Set the basemap, changing the projection if required.
-   * @param {String} basemap The id of the basemap to use, or 'none'
+   * Clears the basemap ready for a new one, changing the projection if required.
+   * @param {ol.Layer.Tile} [layer] Optional layer created in addLayer(), used for setting a new projection
    */
-  setBasemap(basemap) {
+  _clearBasemap(layer = undefined) {
     if (this.initialized_ === true && this.config.basemap !== 'none') {
-      this.map_.removeLayer(this.map_.getLayers().item(0));
-    }
-
-    if (basemap !== 'none') {
-      if (this.basemaps_[basemap].get('projections').includes(this.map_.getView().getProjection().getCode())) {
-        this.setView(this.basemaps_[basemap].get('viewSettings'));
-      } else {
-        let options = this.basemaps_[basemap].get('viewSettings');
-        options.projection = this.basemaps_[basemap].get('projections')[0];
-        this.setView(options);
+      for (let currentLayer of this.map_.getLayers().getArray()) {
+        if (currentLayer.get('modifier') === 'basemap') {
+          console.log('match');
+          this.map_.removeLayer(currentLayer);
+        }
       }
-      // Add the new basemap after updating the view
-      this.map_.getLayers().insertAt(0, this.basemaps_[basemap]);
+      this.config.basemap = 'none';
     }
-    this.config.basemap = basemap;
+    if (layer !== undefined && !layer.get('projections').includes(this.map_.getView().getProjection().getCode())) {
+      this.setProjection(layer.get('projections')[0]);
+    }
   }
 
   /**
-   * Set the country borders to display.
-   * @param {String} borders The borders to display, or 'none'
+   * Clear the country borders if active
    */
-  setCountryBorders(borders) {
+  _clearBorders() {
     if (this.initialized_ === true && this.config.countryBorders !== 'none') {
       // Removes the top-most layer (borders will always be on top)
       this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
     }
-
-    if (borders !== 'none') {
-      try {
-        this.map_.addLayer(this.countryBorderLayers_[borders]);
-      } catch (e) {
-        // TODO handle error
-        // error will have occurred because the borders have not loaded, or because the specified border does not exist.
-        console.error(e);
-      }
-    }
-
-    this.config.countryBorders = borders;
+    this.config.countryBorders = 'none';
   }
 
   /**
@@ -225,9 +213,9 @@ export class OlMap extends GeonaMap {
    */
   setProjection(projection) {
     if (this.config.basemap !== 'none') {
-      let basemapId = this.map_.getLayers().item(0).get('id');
+      let basemapId = this.map_.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
-      if (this.basemaps_[basemapId].get('projections').includes(projection)) {
+      if (this._availableLayers[basemapId].projections.includes(projection)) {
         this.setView({projection: projection});
       } else {
         alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
@@ -240,30 +228,66 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Add the specified data layer onto the map.
-   * @param {Layer} geonaLayer The Layer object to be created on the map.
-   * @param {Integer} [index] The zero-based index to insert the layer into.
+   * Moves the layer to the specified index, and reorders the other map layers where required.
+   * Displaced layers move downwards when reordered.
+   * @param {String}  layerName The name of the layer to be moved.
+   * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
    */
-  addLayer(geonaLayer, index) {
+  reorderLayers(layerName, index) {
+    let layer;
+    for (let currentLayer of this.map_.getLayers().getArray()) {
+      // TODO check
+      if (currentLayer.get('identifier') === layerName) {
+        layer = currentLayer;
+      }
+    }
+    if (layer !== undefined) {
+      for (let currentLayer of this.map_.getLayers().getArray()) {
+        if (currentLayer.get('zIndex') <= index) {
+          // Leaflet layers use higher values for higher positioning.
+          let currentZIndex = currentLayer.get('zIndex');
+          currentLayer.set('zIndex', currentZIndex -= 1);
+        }
+      }
+      layer.set('zIndex', index);
+    } else {
+      alert('Layer ' + layerName + ' does not exist on the map.');
+    }
+  }
+
+  /**
+   * Add the specified data layer onto the map.
+   * @param {Layer}   geonaLayer The Layer object to be created on the map.
+   * @param {String}  [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
+   */
+  addLayer(geonaLayer, modifier = undefined) {
     if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
       let source;
       let title;
       let time;
+      let requiredLayer;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
           if (geonaLayer.isTemporal === true) {
             time = geonaLayer.lastTime;
           }
+          requiredLayer = geonaLayer.layerServer.layers;
+          if (geonaLayer.layerServer.layers.length !== 1) {
+            requiredLayer = geonaLayer.identifier;
+          }
+          // FIXME fix parser so this doesn't happen
+          if ($.isEmptyObject(geonaLayer.styles)) {
+            geonaLayer.styles = undefined;
+          }
           source = new ol.source.TileWMS({
             url: geonaLayer.layerServer.url,
             projection: this.map_.getView().getProjection().getCode() || geonaLayer.projections[0],
             crossOrigin: null,
             params: {
-              LAYERS: geonaLayer.name,
-              FORMAT: 'image/png', // TODO maybe change later
-              // TODO STYLES:
-              STYLES: 'boxfill/alg',
+              LAYERS: requiredLayer,
+              FORMAT: geonaLayer.formats || 'image/png',
+              STYLES: geonaLayer.styles || 'boxfill/alg',
               // TODO update once isTemporal, firstTime and lastTime are working
               time: '2015-12-27T00:00:00.000Z',
               wrapDateLine: true,
@@ -291,31 +315,37 @@ export class OlMap extends GeonaMap {
           break;
       }
 
-      this.activeLayers_[geonaLayer.name] = new ol.layer.Tile({
-        name: title,
+      this.activeLayers_[geonaLayer.identifier] = new ol.layer.Tile({
+        identifier: geonaLayer.identifier,
         viewSettings: geonaLayer.viewSettings,
         projections: geonaLayer.projections,
         source: source,
+        modifier: modifier,
       });
+      let layer = this.activeLayers_[geonaLayer.identifier];
 
-      // If we are re-ordering we will have an index
-      if (index) {
-        if (this.config.basemap === 'none') {
-          this.map_.getLayers().insertAt(index + 1, this.activeLayers_[geonaLayer.name]);
-        } else {
-          this.map_.getLayers().insertAt(index, this.activeLayers_[geonaLayer.name]);
-        }
-      } else if (this.config.countryBorders !== 'none') {
-        // Insert below the top layer
-        this.map_.getLayers().insertAt(this.map_.getLayers().getLength() - 1, this.activeLayers_[geonaLayer.name]);
-      } else {
-        this.map_.addLayer(this.activeLayers_[geonaLayer.name]);
+      // If the map layer is a unique type, we clear the old layer for that type before we add the new one.
+      if (modifier === 'basemap') {
+        this._clearBasemap(layer);
+      } else if (modifier === 'borders') {
+        this._clearBorders(layer);
       }
-      // if the config doesn't already contain this geonaLayer.name, add it to the layers object
-      // if(this.config.layers){}
+
+      this.map_.addLayer(layer);
+
+      if (modifier === 'basemap') {
+        this.reorderLayers(geonaLayer.identifier, 0);
+        this.config.basemap = geonaLayer.identifier;
+      } else if (modifier === 'borders') {
+        this.config.countryBorders = geonaLayer.identifier;
+      }
+
+      // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
+      if (this.config.countryBorders !== 'none' && this.initialized_ === true) {
+        this.reorderLayers(this.config.countryBorders, this.map_.getLayers().getArray().length);
+      }
     } else {
       alert('This layer cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
-      // alert(this.activeLayers_[geonaLayer.name].get('title') + ' cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
     }
   }
 
@@ -414,98 +444,47 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Load the data layers defined in the config
-   * @private
-   */
-  // loadLayers_() {
-  //   for (let addedLayer of this.config.layers) {
-  //     addedLayer = addLayerDefaults(addedLayer);
-  //     let source;
-  //     switch (addedLayer.source.type) {
-  //       case 'wms':
-  //         source = new ol.source.TileWMS({
-  //           url: addedLayer.source.url,
-  //           crossOrigin: addedLayer.source.crossOrigin,
-  //           projection: addedLayer.projections[0],
-  //           attributions: addedLayer.source.attributions,
-  //           params: {
-  //             LAYERS: addedLayer.source.params.layers,
-  //             VERSION: addedLayer.source.params.version,
-  //             FORMAT: addedLayer.source.params.format,
-  //             STYLES: addedLayer.source.params.styles,
-  //             NUMCOLORBANDS: addedLayer.source.params.numcolorbands,
-  //             time: addedLayer.source.params.time,
-  //             wrapDateLine: addedLayer.source.params.wrapDateLine,
-  //           },
-  //         });
-  //         break;
-  //       case 'wmts':
-  //         console.error('WMTS not yet supported (TODO)');
-  //         break;
-  //     }
-
-  //     let layerData;
-  //     for (let serverLayer of CCI5DAY.server.Layers) {
-  //       if (serverLayer.Name === addedLayer.id) {
-  //         layerData = serverLayer;
-  //       }
-  //     }
-
-  //     this.activeLayers_[addedLayer.id] = new ol.layer.Tile({
-  //       name: addedLayer.name,
-  //       title: addedLayer.title,
-  //       abstract: addedLayer.abstract,
-  //       projections: addedLayer.projections,
-  //       source: source,
-  //       viewSettings: addedLayer.viewSettings,
-  //       layerData: layerData,
-  //     });
-  //   }
-  // }
-
-  /**
    * Load the default basemaps, and any defined in the config.
-   * @private
    */
-  loadBasemaps_() {
+  _loadBasemaps() {
     // TODO load from config too
     for (let layer of defaultBasemaps) {
-      if (layer.source.type !== 'bing' || (layer.source.type === 'bing' && this.config.bingMapsApiKey)) {
-        this.basemaps_[layer.id] = {};
-
-        let source;
-        switch (layer.source.type) {
-          case 'wms':
-            source = new ol.source.TileWMS({
-              url: layer.source.url,
-              crossOrigin: layer.source.crossOrigin,
-              projection: layer.projections[0],
-              attributions: layer.source.attributions,
-              params: {
-                LAYERS: layer.source.params.layers,
-                VERSION: layer.source.params.version,
-                FORMAT: layer.source.params.format,
-                wrapDateLine: layer.source.params.wrapDateLine,
-              },
-            });
-            break;
-          case 'osm':
-            source = new ol.source.OSM();
-            break;
-          case 'bing':
-            source = new ol.source.BingMaps({
-              key: this.config.bingMapsApiKey,
-              imagerySet: layer.source.imagerySet,
-            });
-        }
-        this.basemaps_[layer.id] = new ol.layer.Tile({
-          id: layer.id,
-          title: layer.title,
-          description: layer.description,
-          projections: layer.projections,
-          source: source,
-          viewSettings: layer.viewSettings,
-        });
+      if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+        this._availableLayers[layer.identifier] = layer;
+        // let source;
+        // switch (layer.source.type) {
+        //   case 'wms':
+        //     source = new ol.source.TileWMS({
+        //       url: layer.source.url,
+        //       crossOrigin: layer.source.crossOrigin,
+        //       projection: layer.projections[0],
+        //       attributions: layer.source.attributions,
+        //       params: {
+        //         LAYERS: layer.source.params.layers,
+        //         VERSION: layer.source.params.version,
+        //         FORMAT: layer.source.params.format,
+        //         wrapDateLine: layer.source.params.wrapDateLine,
+        //       },
+        //     });
+        //     break;
+        //   case 'osm':
+        //     source = new ol.source.OSM();
+        //     break;
+        //   case 'bing':
+        //     source = new ol.source.BingMaps({
+        //       key: this.config.bingMapsApiKey,
+        //       imagerySet: layer.source.imagerySet,
+        //     });
+        // }
+        // this._availableLayers[layer.identifier] = new ol.layer.Tile({
+        //   identifier: layer.identifier,
+        //   title: layer.title,
+        //   description: layer.description,
+        //   projections: layer.projections,
+        //   source: source,
+        //   viewSettings: layer.viewSettings,
+        //   modifier: 'basemap',
+        // });
       } else {
         console.error('bingMapsApiKey is null or undefined');
       }
@@ -514,27 +493,28 @@ export class OlMap extends GeonaMap {
 
   /**
    * Load the default border layers, and any defined in the config.
-   * @private
    */
-  loadCountryBorderLayers_() {
+  _loadCountryBorderLayers() {
     // TODO load from config too
     for (let layer of defaultBorders) {
-      let source = new ol.source.TileWMS({
-        url: layer.source.url,
-        crossOrigin: layer.source.crossOrigin,
-        projection: this.map_.getView().getProjection(),
-        params: {
-          LAYERS: layer.source.params.layers,
-          VERSION: layer.source.params.version,
-          STYLES: layer.source.params.styles,
-        },
-      });
+      this._availableLayers[layer.identifier] = layer;
+      // let source = new ol.source.TileWMS({
+      //   url: layer.source.url,
+      //   crossOrigin: layer.source.crossOrigin,
+      //   projection: this.map_.getView().getProjection(),
+      //   params: {
+      //     LAYERS: layer.source.params.layers,
+      //     VERSION: layer.source.params.version,
+      //     STYLES: layer.source.params.styles,
+      //   },
+      // });
 
-      this.countryBorderLayers_[layer.id] = new ol.layer.Tile({
-        id: layer.id,
-        title: layer.title,
-        source: source,
-      });
+      // this._availableLayers[layer.identifier] = new ol.layer.Tile({
+      //   identifier: layer.identifier,
+      //   title: layer.title,
+      //   source: source,
+      //   modifier: 'borders',
+      // });
     }
   }
 }
@@ -567,8 +547,9 @@ export function init(geonaServer, next) {
 /**
  * Create an openlayers WMTS source from a Geona Layer.
  * Adapted from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L299
- * @param  {Layer}          layer The Geona layer
- * @return {ol.source.WMTS}       A new openlayers WMTS source
+ * @param  {Layer}          layer         The Geona layer
+ * @param  {String}         mapProjection The current map projection, e.g. 'EPSG:4326'
+ * @return {ol.source.WMTS}               A new openlayers WMTS source
  */
 function wmtsSourceFromLayer(layer, mapProjection) {
   let tileMatrixSetId;
@@ -592,9 +573,6 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   }
 
   // Get the tileMatrixSet object from the layer server
-  console.log('layer.layerserver.tileMatrixSets + tileMatrixSetId');
-  console.log(layer.layerServer.tileMatrixSets);
-  console.log(tileMatrixSetId);
   let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
 
   let format;
@@ -609,13 +587,11 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   // TODO This should pick the style provided in a config
   let style;
   let defaultStyle;
-  for (let key in layer.styles) {
-    if (layer.styles.hasOwnProperty(key)) {
-      if (key.isDefault) {
-        defaultStyle = key;
-      }
-      style = key;
+  for (let currentStyle of layer.styles) {
+    if (currentStyle.isDefault === true) {
+      defaultStyle = currentStyle.identifier;
     }
+    style = currentStyle.identifier;
   }
   if (defaultStyle !== undefined) {
     style = defaultStyle;
@@ -644,15 +620,9 @@ function wmtsSourceFromLayer(layer, mapProjection) {
     }
   }
 
-  console.log('tileMatrixSet:');
-  console.log(tileMatrixSet);
   let projection = ol.proj.get(tileMatrixSet.projection);
 
   // Get the extent in the right projection format from the layer bounding box
-  console.log('projections:');
-  console.log(projection);
-  console.log(mapProjection);
-  // TODO, right the conversion isn't happening when it needs to, so you need to make sure bounding boxes etc. in degrees are converted to metres when they need to be - which isn't necessarily the same for every layer!
   let extent;
   if (layer.boundingBox.style === 'wgs84BoundingBox') { // WGS84 will use degrees as units, and be in lon/lat
     // If the map projection is in metres (m) we need to convert the bounding box coordinates.
@@ -697,7 +667,7 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   //   [layer.boundingBox.minLon, layer.boundingBox.minLat, layer.boundingBox.maxLon, layer.boundingBox.maxLat],
   //   'EPSG:4326', projection
   // );
-  console.log([layer.boundingBox.minLon, layer.boundingBox.minLat, layer.boundingBox.maxLon, layer.boundingBox.maxLat]);
+  // TODO these four ifs can probably be removed - check that WMTS layers work before and after removing
   if (isNaN(extent[0])) {
     extent[0] = Number.NEGATIVE_INFINITY;
   }
@@ -710,13 +680,11 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   if (isNaN(extent[3])) {
     extent[3] = Number.POSITIVE_INFINITY;
   }
-  console.log('extent:' + extent);
 
-  // TODO Not sure if wrapX should always be true. It should be fine though
+  // Not sure if wrapX should always be true. It should be fine though
   let wrapX = true;
 
   // Get the tile grid
-  console.log(tileMatrixSet);
   let tileGrid = wmtsTileGridFromMatrixSet(tileMatrixSet, extent, matrixLimits);
 
   let urls = [];
@@ -764,16 +732,6 @@ function wmtsSourceFromLayer(layer, mapProjection) {
     }
   }
 
-  console.log(urls);
-  console.log(layer.identifier);
-  console.log(tileMatrixSet);
-  console.log(format);
-  console.log(projection);
-  console.log(requestEncoding);
-  console.log(tileGrid);
-  console.log(style);
-  console.log(dimensions);
-
   return new ol.source.WMTS({
     urls: urls,
     layer: layer.identifier,
@@ -817,7 +775,6 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   // they will need to be switched
 
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
-  console.log(axisOrientation);
 
   // Sort the array of tileMatrices by their scaleDenominators
   matrixSet.tileMatrices.sort(function(a, b) {
@@ -840,12 +797,9 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     let tileHeight = matrix.tileHeight;
 
     if (switchOriginXy) {
-      console.log('--- Coordinates swapped');
       // Swap the coordinates for the top left corner if needs be
       origins.push(matrix.topLeftCorner.reverse());
     } else {
-      console.log('--- Coordinates kept same');
-      // console.log(matrix.topLeftCorner.reverse());
       origins.push(matrix.topLeftCorner);
     }
 

@@ -112,11 +112,11 @@ function registerExploreTriggers(eventManager, parentDiv) {
     console.log('service: ' + service);
     switch (service) {
       case 'WMS':
-        eventManager.trigger('mainMenu.getLayersFromWMS');
+        eventManager.trigger('mainMenu.getLayersFromWms');
         console.log('wms trigger');
         break;
       case 'WMTS':
-        eventManager.trigger('mainMenu.getLayersFromWMTS');
+        eventManager.trigger('mainMenu.getLayersFromWmts');
         console.log('wmts trigger');
         break;
     }
