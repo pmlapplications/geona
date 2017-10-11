@@ -422,7 +422,30 @@ export class LMap extends GeonaMap {
         }
       }
     }
-    console.log(this._mapLayers.getLayers());
+  }
+
+  /**
+   * Hides the layer from view, whilst keeping it on the map.
+   * @param {*} layerIdentifier The identifier for the layer being hidden.
+   */
+  hideLayer(layerIdentifier) {
+    for (let layer of this._mapLayers.getLayers()) {
+      if (layer.options.identifier === layerIdentifier) {
+        layer.setOpacity(0);
+      }
+    }
+  }
+
+  /**
+   * Reveals the layer on the map.
+   * @param {*} layerIdentifier The identifier for the layer being shown.
+   */
+  showLayer(layerIdentifier) {
+    for (let layer of this._mapLayers.getLayers()) {
+      if (layer.options.identifier === layerIdentifier) {
+        layer.setOpacity(1);
+      }
+    }
   }
 
   /**
