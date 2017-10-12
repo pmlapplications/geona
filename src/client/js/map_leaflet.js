@@ -3,7 +3,7 @@
 import GeonaMap from './map';
 import {
   basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter,
-  addLayerDefaults, selectPropertyLanguage,
+  addLayerDefaults,
 } from './map_common';
 import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 import $ from 'jquery';
@@ -313,10 +313,25 @@ export class LMap extends GeonaMap {
    * @param {Layer}   geonaLayer A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
    * @param {String}  [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
    */
-  addLayer(geonaLayer, modifier) {
+  addLayer(geonaLayer, modifier = undefined) {
+    // Checks the map for any layers with the same identifier as the layer being added
+    let duplicate = false;
+    for (let layer of this._mapLayers.getLayers()) {
+      if (layer.options.identifier === geonaLayer.identifier) {
+        duplicate = true;
+      }
+    }
+    // We enforce that identifiers must be unique on the map.
+    // TODO offer option of changing identifier.
+    if (duplicate === true) {
+      alert('Layer with this identifier already exists on the map.');
+    } else
+    // Modifier sanity check
+    if (modifier !== 'basemap' && modifier !== 'borders' && modifier !== undefined) {
+      console.error('addLayer called with invalid modifier - must be "basemap" or "borders".');
+    } else
     // If a layer is a basemap we might change the projection
     // anyway, so it doesn't matter if the layer supports the current projection
-    console.log(geonaLayer);
     if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) || modifier === 'basemap') {
       let layer;
       let title;
@@ -324,6 +339,9 @@ export class LMap extends GeonaMap {
       let requiredLayer;
       let format;
       let projection;
+      // zIndex defines the zero-based index we want the layer to be displayed at by default.
+      // This will be overwritten if the layer is a basemap.
+      let zIndex = this._mapLayers.getLayers().length;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
@@ -369,6 +387,7 @@ export class LMap extends GeonaMap {
             attribution: geonaLayer.attribution,
             version: geonaLayer.layerServer.version,
             crs: projection,
+            zIndex: zIndex,
           });
           if (modifier !== undefined) {
             layer.options.modifier = modifier;
@@ -388,18 +407,17 @@ export class LMap extends GeonaMap {
       this._mapLayers.addLayer(layer);
 
       if (modifier === 'basemap') {
-        this.reorderLayers(layer.identifier, 0);
-        this.config.basemap = layer.identifier;
+        this.config.basemap = layer.options.identifier;
+        this.reorderLayers(layer.options.identifier, 0);
       } else if (modifier === 'borders') {
-        this.config.countryBorders = layer.identifier;
+        this.config.countryBorders = layer.options.identifier;
       }
 
       this._geonaLayers.push(geonaLayer);
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-      // FIXME
       if (this.config.countryBorders !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.countryBorders, this._mapLayers.length);
+        this.reorderLayers(this.config.countryBorders, this._mapLayers.getLayers().length - 1);
       }
     } else {
       alert('Cannot use this projection for this layer');
@@ -456,25 +474,34 @@ export class LMap extends GeonaMap {
    */
   reorderLayers(layerIdentifier, index) {
     let layer;
-    console.log(this._mapLayers);
     for (let currentLayer of this._mapLayers.getLayers()) {
-      // TODO check
-      if (currentLayer.identifier === layerIdentifier) {
+      if (currentLayer.options.identifier === layerIdentifier) {
         layer = currentLayer;
       }
     }
     if (layer !== undefined) {
-      for (let currentLayer of this._mapLayers.getLayers()) {
-        if (currentLayer._crs !== undefined) {
-          if (currentLayer.options.zIndex <= index) {
+      if (layer.options.zIndex < index) {
+        // We are moving the layer up
+        for (let currentLayer of this._mapLayers.getLayers()) {
+          if (currentLayer.options.zIndex <= index && currentLayer.options.zIndex > layer.options.zIndex) {
             // Leaflet layers use higher values for higher positioning.
-            currentLayer.options.zIndex -= 1;
+            let newZIndex = currentLayer.options.zIndex - 1;
+            currentLayer.setZIndex(newZIndex);
+          }
+        }
+      } else if (layer.options.zIndex > index) {
+        // We are moving the layer down
+        for (let currentLayer of this._mapLayers.getLayers()) {
+          if (currentLayer.options.zIndex >= index && currentLayer.options.zIndex < layer.options.zIndex) {
+            // Leaflet layers use higher values for higher positioning.
+            let newZIndex = currentLayer.options.zIndex + 1;
+            currentLayer.setZIndex(newZIndex);
           }
         }
       }
-      layer.options.zIndex = index;
+      layer.setZIndex(index);
     } else {
-      alert('Layer ' + layerIdentifier + ' does not exist on the map.');
+      alert('Layer ' + layerIdentifier + ' cannot be reordered, as it does not exist on the map.');
     }
   }
 

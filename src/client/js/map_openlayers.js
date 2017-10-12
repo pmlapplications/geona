@@ -44,10 +44,10 @@ export class OlMap extends GeonaMap {
         width: 1,
         lineDash: [1, 4],
       }),
-      latLabelFormatter: function (latitude) {
+      latLabelFormatter: function(latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lonLabelFormatter: function (longitude) {
+      lonLabelFormatter: function(longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -216,12 +216,12 @@ export class OlMap extends GeonaMap {
       let basemapId = this.map_.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
       if (this._availableLayers[basemapId].projections.includes(projection)) {
-        this.setView({ projection: projection });
+        this.setView({projection: projection});
       } else {
         alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     } else {
-      this.setView({ projection: projection });
+      this.setView({projection: projection});
     }
 
     this.config.projection = projection;
@@ -376,7 +376,7 @@ export class OlMap extends GeonaMap {
   removeLayer(layerId) {
     if (this.map_.getLayers().getArray().includes(this.activeLayers_[layerId])) {
       this.map_.removeLayer(this.activeLayers_[layerId]);
-      if(this.activeLayers_[layerId].get('modifier') === 'basemap'){
+      if (this.activeLayers_[layerId].get('modifier') === 'basemap') {
         this.config.basemap = 'none';
       } else if (this.activeLayers_[layerId].get('modifier') === 'borders') {
         this.config.countryBorders = 'none';
@@ -416,7 +416,7 @@ export class OlMap extends GeonaMap {
   setView(options) {
     let currentCenterLatLon = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection()
       .getCode()).reverse();
-    let center = options.center || { lat: currentCenterLatLon[0], lon: currentCenterLatLon[1] };
+    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this.map_.getView().getMaxZoom();
@@ -504,7 +504,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function () {
+    mapJs.onload = function() {
       import('openlayers')
         .then((olLib) => {
           ol = olLib;
@@ -750,7 +750,7 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
 
   // Sort the array of tileMatrices by their scaleDenominators
-  matrixSet.tileMatrices.sort(function (a, b) {
+  matrixSet.tileMatrices.sort(function(a, b) {
     return b.scaleDenominator - a.scaleDenominator;
   });
 
