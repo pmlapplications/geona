@@ -12,17 +12,19 @@ import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, TEST_CONTEXT} from '../jsonix';
  */
 export function getCapabilities(protocol, url) {
   return new Promise((resolve, reject) => {
+    // If a version is specified in the URL, it will be added onto the clean URL.
+    let version = '&' + url.match(/version=.*?(?=[&\s])|version=.*/);
     let cleanUrl = url.replace(/\?.*/g, '');
 
     switch (protocol) {
       case 'wms':
-        cleanUrl += '?service=WMS&request=GetCapabilities';
+        cleanUrl += '?service=WMS&request=GetCapabilities' + version;
         break;
       case 'wmts':
-        cleanUrl += '?service=WMTS&request=GetCapabilities';
+        cleanUrl += '?service=WMTS&request=GetCapabilities' + version;
         break;
       case 'wcs':
-        cleanUrl += '?service=WCS&request=GetCapabilities';
+        cleanUrl += '?service=WCS&request=GetCapabilities' + version;
         break;
     }
 

@@ -25,11 +25,17 @@ describe('server/utils/ogc/wms_capabilities_parser', () => {
     wmsParserTest(resPath + '/wms_1_1_1_capabilities_cci.xml', expPath + '/wms_1_1_1_capabilities_cci.json');
   });
 
+  /**
+   * This method is used to pass local files to the parseLocalWmsCapabilities method.
+   * @param {String} xmlPath      The path to the local XML document, stored under test_dependencies/resources.
+   * @param {String} expectedPath The path to the local JSON document, stored under test_dependencies/expected.
+   */
   function wmsParserTest(xmlPath, expectedPath) {
     let xml = fs.readFileSync(xmlPath, 'utf8');
     let expectedJson = JSON.parse(fs.readFileSync(expectedPath, 'utf8'));
 
     let result = JSON.parse(JSON.stringify(parseLocalWmsCapabilities(xml)));
+    // console.log(JSON.stringify(result));
 
     expect(result).to.deep.equal(expectedJson);
   }

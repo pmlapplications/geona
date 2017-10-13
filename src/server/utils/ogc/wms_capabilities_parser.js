@@ -34,7 +34,6 @@ export function parseWmsCapabilities(url) {
  */
 export function parseLocalWmsCapabilities(xml, url) {
   let jsonCapabilities;
-
   try {
     jsonCapabilities = jsonifyCapabilities('wms', xml);
   } catch (err) {
@@ -44,19 +43,22 @@ export function parseLocalWmsCapabilities(xml, url) {
   let capabilities = jsonCapabilities.value;
 
   let result;
-
   switch (capabilities.version) {
+    case '1':
+    case '1.0':
     case '1.0.0':
       throw new Error('No support for WMS 1.0.0 currently');
+    case '1.1':
     case '1.1.0':
+      throw new Error('No support for WMS 1.1.0 currently');
     case '1.1.1':
       result = parse1_1(url, capabilities);
       break;
+    case '1.3':
     case '1.3.0':
       result = parse1_3(url, capabilities);
       break;
   }
-
   return result;
 }
 
