@@ -72,6 +72,7 @@
     "nyc": "^11.2.1"
   },
   "dependencies": {
+    "@types/node": "^8.0.34",
     "any-db": "^2.1.0",
     "any-db-sqlite3": "^2.1.4",
     "babel-runtime": "^6.23.0",
@@ -103,9 +104,11 @@
     "passport-github2": "^0.1.11",
     "passport-google-oauth": "^1.0.0",
     "proj4": "^2.4.4",
+    "reflect-metadata": "^0.1.10",
     "request": "^2.81.0",
     "sqlite3": "^3.1.13",
     "swagger-jsdoc": "^1.9.6",
+    "typeorm": "^0.1.0",
     "w3c-schemas": "^1.4.0"
   }
 }
