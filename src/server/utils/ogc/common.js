@@ -14,6 +14,7 @@ export function getCapabilities(protocol, url) {
   return new Promise((resolve, reject) => {
     // If a version is specified in the URL, it will be added onto the clean URL.
     let version = '&' + url.match(/version=.*?(?=[&\s])|version=.*/);
+    // Cuts off the query string of the URL
     let cleanUrl = url.replace(/\?.*/g, '');
 
     switch (protocol) {
