@@ -1,0 +1,31 @@
+<html>
+
+<head>
+</head>
+
+<body>
+  <!-- Where Mocha inserts test results -->
+  <div id="mocha"></div>
+  <!-- Where test fixtures will be inserted -->
+  <div id="test" style="position: fixed; top:0; left: -99999px;"></div>
+
+  <!-- Testing dependencies -->
+  <script src="../../node_modules/chai/chai.js"></script>
+  <script src="../../node_modules/chai-http/index.js"></script>
+
+  <!-- Assertion style -->
+  <script>
+    mocha.setup('bdd');
+  </script>
+
+  <!-- File we are testing -->
+    <script src="../../static/client/js/bundle.js"></script>
+  <!-- Test suite -->
+  <script src="../../static/js/client_tests.js"></script>
+
+  <script>
+       mocha.run();
+  </script>
+</body>
+
+</html>

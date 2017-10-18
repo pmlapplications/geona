@@ -9,6 +9,10 @@ module.exports = function(grunt) {
     'static/js/loader.js': 'src/client_loader/loader.js',
   };
 
+  let clientTestsBundle = {
+    'static/js/client_tests.js': 'test/client/js/client_tests.js',
+  };
+
   let vendorLibs = [
     'babel-runtime/regenerator',
     'convict',
@@ -42,6 +46,7 @@ module.exports = function(grunt) {
     '!src/client/templates/**',
     '!src/server/vendor/**',
   ];
+
 
   grunt.initConfig({
     babel: {
@@ -104,6 +109,18 @@ module.exports = function(grunt) {
         options: {
           browserifyOptions: {
             standalone: 'geonaLoader',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
+      // Make tests bundle
+      clientTests: {
+        files: clientTestsBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientTests',
             debug: true,
           },
           watch: true,
@@ -226,6 +243,24 @@ module.exports = function(grunt) {
       },
     },
 
+    karma: {
+      options: {
+        configFile: 'karma.conf.js',
+        files: [
+          'node_modules/chai/chai.js',
+          'node_modules/chai-http',
+          'test/client/index.html',
+        ],
+      },
+      dev: {
+        browsers: ['PhantomJS', 'Chrome'],
+      },
+      prod: {
+        singleRun: true,
+        browsers: ['PhantomJS'],
+      },
+    },
+
     sass: {
       development: {
         options: {
@@ -271,4 +306,6 @@ module.exports = function(grunt) {
     'browserify:client', 'browserifyOther', 'watch']);
 
   grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
+  // Browserify the client tests
+  grunt.registerTask('browserifyClientTests', ['browserify:clientTests']);
 };

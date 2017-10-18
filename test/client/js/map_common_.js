@@ -7,7 +7,12 @@ import {selectPropertyLanguage} from '../../../src/client/js/map_common';
 chai.use(chaiHttp);
 let expect = chai.expect;
 
-describe('client/js/map_common', () => {
+export default describe('client/js/map_common', () => {
+  before(function() {
+    if (window.__html__) {
+      document.body.innerHTML = window.__html__['test/client/index.html'];
+    }
+  });
   describe('selectPropertyLanguage', () => {
     i18next.language = 'en-GB';
     it('should return the en-GB title', () => {

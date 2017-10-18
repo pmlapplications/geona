@@ -17,13 +17,13 @@ describe('server/utils/ogc/wms_capabilities_parser', () => {
     expPath = path.join(global.test.expPath, 'server/utils/ogc');
   });
 
-  it('should correctly parse a WMS 1.3.0 capabilities', () => {
-    wmsParserTest(resPath + '/wms_1_3_0_capabilities_cci.xml', expPath + '/wms_1_3_0_capabilities_cci.json');
-  });
+  // it('should correctly parse a WMS 1.3.0 capabilities', () => {
+  //   wmsParserTest(resPath + '/wms_1_3_0_capabilities_cci.xml', expPath + '/wms_1_3_0_capabilities_cci.json');
+  // });
 
-  it('should correctly parse a WMS 1.1.1 capabilities', () => {
-    wmsParserTest(resPath + '/wms_1_1_1_capabilities_cci.xml', expPath + '/wms_1_1_1_capabilities_cci.json');
-  });
+  // it('should correctly parse a WMS 1.1.1 capabilities', () => {
+  //   wmsParserTest(resPath + '/wms_1_1_1_capabilities_cci.xml', expPath + '/wms_1_1_1_capabilities_cci.json');
+  // });
 
   /**
    * This method is used to pass local files to the parseLocalWmsCapabilities method.
