@@ -1,12 +1,22 @@
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
+  // grunt.loadNpmTasks('grunt-karma');
+
   let clientBundle = {
     'static/js/bundle.js': 'src/client/js/geona.js',
   };
 
   let loaderBundle = {
     'static/js/loader.js': 'src/client_loader/loader.js',
+  };
+
+  let clientTestsBundle = {
+    'static/js/client_tests.js': 'test/client/js/map_common.js',
+  };
+
+  let clientMapCommonBundle = {
+    'static/js/map_common_es5.js': 'src/client/js/map_common.js',
   };
 
   let vendorLibs = [
@@ -104,6 +114,30 @@ module.exports = function(grunt) {
         options: {
           browserifyOptions: {
             standalone: 'geonaLoader',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
+      // Make the client tests bundle
+      clientTests: {
+        files: clientTestsBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientTests',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
+      // Make the client map common bundle
+      clientMapCommon: {
+        files: clientMapCommonBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientMapCommon',
             debug: true,
           },
           watch: true,
@@ -226,6 +260,18 @@ module.exports = function(grunt) {
       },
     },
 
+    karma: {
+      options: {
+        configFile: 'test/karma-conf.js',
+      },
+      unit: {
+        singleRun: true,
+      },
+      dev: {
+        singleRun: false,
+      },
+    },
+
     sass: {
       development: {
         options: {
@@ -270,5 +316,5 @@ module.exports = function(grunt) {
   grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
     'browserify:client', 'browserifyOther', 'watch']);
 
-  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
+  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:clientTests', 'browserify:clientMapCommon', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
 };
