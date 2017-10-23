@@ -1,0 +1,5 @@
+
+let otherFunction = () => {
+
+    return 'Spam';
+}

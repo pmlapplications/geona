@@ -32,7 +32,7 @@
     "clientDev": "grunt clientDev",
     "serverDev": "BABEL_ENV=server  nodemon -w src/server -w src/common -w config -w locales  src/server/app.js --exec babel-node",
     "buildServerDev": "nodemon -w src/server -w src/common --exec \"grunt server && npm run serve\"",
-    "test": "BABEL_ENV=test grunt browserifyOther && BABEL_ENV=test grunt karma:dev && BABEL_ENV=test nyc mocha test/server/**/*.js test/common/**/*.js",
+    "test": "BABEL_ENV=test karma start karma.conf.js && BABEL_ENV=test nyc mocha test/server/**/*.js test/common/**/*.js",
     "eslint-fix": "grunt eslint:fix"
   },
   "devDependencies": {
@@ -43,9 +43,10 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-babili": "^0.1.4",
-    "babel-preset-env": "^1.4.0",
+    "babel-preset-env": "^1.6.1",
     "babel-register": "^6.24.1",
     "babelify": "^7.3.0",
+    "browserify": "^14.5.0",
     "chai": "^4.1.0",
     "chai-http": "^3.0.0",
     "deamdify": "^0.3.0",
@@ -63,6 +64,7 @@
     "grunt-jsdoc": "^2.1.0",
     "grunt-karma": "^2.0.0",
     "karma": "^1.7.1",
+    "karma-browserify": "^5.1.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.0.1",
     "karma-html2js-preprocessor": "^1.1.0",
@@ -73,7 +75,8 @@
     "nodemon": "^1.11.0",
     "npm-check": "^5.4.4",
     "nyc": "^11.2.1",
-    "phantomjs": "^2.1.7"
+    "phantomjs": "^2.1.7",
+    "watchify": "^3.9.0"
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
