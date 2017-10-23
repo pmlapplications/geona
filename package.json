@@ -34,7 +34,7 @@
     "start": "npm run -s serve",
     "serve": "node lib/server/app.js",
     "clientDev": "grunt clientDev",
-    "serverDev": "BABEL_ENV=server  nodemon -w src/server -w src/common -w config -w locales  src/server/app.js --exec babel-node",
+    "serverDev": "BABEL_ENV=server  nodemon -w src/server -w src/common -w config -w locales  src/server/app.js --exec ts-node",
     "buildServerDev": "nodemon -w src/server -w src/common --exec \"grunt server && npm run serve\"",
     "test": "BABEL_ENV=test nyc mocha",
     "eslint-fix": "grunt eslint:fix"
@@ -108,7 +108,10 @@
     "request": "^2.81.0",
     "sqlite3": "^3.1.13",
     "swagger-jsdoc": "^1.9.6",
+    "ts-babel-node": "^1.1.1",
+    "ts-node": "^3.3.0",
     "typeorm": "^0.1.0",
+    "typescript": "^1.8.10",
     "w3c-schemas": "^1.4.0"
   }
 }

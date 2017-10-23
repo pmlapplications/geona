@@ -134,6 +134,9 @@ export function oauthHandler(req, res) {
   let admins = [];
   _.forEach(emails, function(email) {
     admins.push(email.trim());
+
+    let u = User.findOrCreate({email: email});
+    console.log(u);
   });
 
   serverConfig.load({

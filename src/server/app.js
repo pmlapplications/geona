@@ -11,6 +11,7 @@ import i18nextBackend from 'i18next-node-fs-backend';
 import * as path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 import bodyParser from 'body-parser';
+import {createConnection} from "typeorm";
 
 import {server as configServer} from './config';
 import mainRouter from './routers/main';
@@ -146,12 +147,23 @@ app.use(mainRouter);
 /*
  * Create the server and start it
  */
-
 export let server = http.createServer(app);
 
 server.listen(configServer.get('port'), function() {
   console.log('Server running at http://127.0.0.1:' + configServer.get('port'));
 });
+
+createConnection({
+  type: "sqlite",
+  database: "/Users/bencalton/Documents/PML/git/web-development/geona/database/geona.db",
+  entities: [
+      __dirname + "/entity/*.js"
+  ],
+  synchronize: true,
+}).then(connection => {
+  app.db = connection;
+
+}).catch(error => console.log(error));
 
 
 /*
@@ -159,10 +171,10 @@ server.listen(configServer.get('port'), function() {
  * TODO: More advanced plugin loading (API?)
  */
 
-for (let plugin of configServer.get('plugins')) {
-  console.log('Loading plugin: ' + plugin);
-  import(plugin).then((loadedPlugin) => loadedPlugin());
-}
+// for (let plugin of configServer.get('plugins')) {
+//   console.log('Loading plugin: ' + plugin);
+//   import(plugin).then((loadedPlugin) => loadedPlugin());
+// }
 
 
 /*
