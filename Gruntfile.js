@@ -12,11 +12,15 @@ module.exports = function(grunt) {
   };
 
   let clientTestsBundle = {
-    'static/js/client_tests.js': 'test/client/js/map_common.js',
+    'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
   };
 
   let clientMapCommonBundle = {
     'static/js/map_common_es5.js': 'src/client/js/map_common.js',
+  };
+
+  let clientMapLeafletBundle = {
+    'static/js/map_leaflet_es5.js': 'src/client/js/map_leaflet.js',
   };
 
   let vendorLibs = [
@@ -144,6 +148,18 @@ module.exports = function(grunt) {
         },
       },
 
+      // Make the client map leaflet bundle
+      clientMapLeaflet: {
+        files: clientMapLeafletBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientMapLeaflet',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
       // Make the main vendor bundle with all the common libraries
       vendor: {
         src: ['.'],
@@ -263,6 +279,9 @@ module.exports = function(grunt) {
     karma: {
       options: {
         configFile: 'test/karma-conf.js',
+        files: [
+          'test/client/index.html',
+        ],
       },
       unit: {
         singleRun: true,
@@ -316,5 +335,5 @@ module.exports = function(grunt) {
   grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
     'browserify:client', 'browserifyOther', 'watch']);
 
-  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:clientTests', 'browserify:clientMapCommon', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
+  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:clientTests', 'browserify:clientMapCommon', 'browserify:clientMapLeaflet', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
 };

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Geona Client Tests</title>
+
+  <!--Includes the loader in the html-->
+  <script src="js/loader.js"></script>
+
+  <!--This script defines a particular config,
+        then instantiates a new loader-->
+  <script>
+    function geonaOnReady(geona) {
+      console.log('Geona is ready.');
+      mocha.run();
+    }
+    var config1 = {
+      geonaVariable: 'geonaOl',
+      onReadyCallback: 'geonaOnReady',
+      divId: 'ol',
+      map: {
+        graticule: true,
+        bingMapsApiKey: 'AgNtBFpBNF81T-ODIf_9WzE8UF_epbsfiSu9RYMbLfq_wXU_bBVAoyBw8VzfSjkd',
+      }
+    };
+    var config2 = {
+      geonaVariable: 'geonaL',
+      divId: 'leaflet',
+      map: {
+        library: 'leaflet',
+        graticule: true,
+      }
+    };
+    // instantiates new loader for map
+    geonaLoader.load(config1);
+    geonaLoader.load(config2);
+
+    // setTimeout(function() {
+    //   var map2 = new gp2.Loader(config2);
+    // }, 2000);
+
+  </script>
+
+  <style type="text/css">
+    #ol {
+      position: absolute;
+      top: 500px;
+      left: 0;
+      width: 50%;
+      height: 50%;
+    }
+
+    #leaflet {
+      position: absolute;
+      top: 500px;
+      right: 0;
+      width: 50%;
+      height: 50%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="ol"></div>
+  <div id="leaflet"></div>
+
+  <div id="mocha"></div>
+
+  <div id="test" style=""></div>
+  <!-- Testing dependencies
+  <script src="../../node_modules/chai/chai.js"></script> -->
+
+  <script>
+    mocha.setup('bdd');
+  </script>
+
+  <!--<script src="js/bundle.js"></script>-->
+  <!-- Test suite -->
+  <!-- <script src="js/map_leaflet.js"></script> -->
+  <script src="js/client_tests.js"></script>
+
+</body>
+
+</html>
