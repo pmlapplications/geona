@@ -276,20 +276,20 @@ module.exports = function(grunt) {
       },
     },
 
-    karma: {
-      options: {
-        configFile: 'test/karma-conf.js',
-        files: [
-          'test/client/index.html',
-        ],
-      },
-      unit: {
-        singleRun: true,
-      },
-      dev: {
-        singleRun: false,
-      },
-    },
+    // karma: {
+    //   options: {
+    //     configFile: 'karma-conf.js',
+    //     files: [
+    //       'test/client/index.html',
+    //     ],
+    //   },
+    //   unit: {
+    //     singleRun: true,
+    //   },
+    //   dev: {
+    //     singleRun: false,
+    //   },
+    // },
 
     sass: {
       development: {
