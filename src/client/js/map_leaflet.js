@@ -468,40 +468,67 @@ export class LMap extends GeonaMap {
 
   /**
    * Moves the layer to the specified index, and reorders the other map layers where required.
-   * Displaced layers move downwards when reordered.
+   *
+   * Displaced layers move downwards if the reordered layer is being moved up.
+   * Displaced layers move upwards if the reordered layer is being moved down.
+   * Basemaps and country borders will remain at the bottom or top, even if an attempt is made to move a data layer
+   * lower or higher than the basemap or borders.
+   *
+   * The zIndex of all tile layers will be in a range of '0' to 'the number of layers - 1'.
+   * For example, with a basemap, a data layer, and a country borders
+   * layer, the zIndex values would be 0, 1, 2, in that order.
+   *
    * @param {String}  layerIdentifier The identifier of the layer to be moved.
    * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
    */
   reorderLayers(layerIdentifier, index) {
     let layer;
-    for (let currentLayer of this._mapLayers.getLayers()) {
-      if (currentLayer.options.identifier === layerIdentifier) {
-        layer = currentLayer;
-      }
-    }
-    if (layer !== undefined) {
-      if (layer.options.zIndex < index) {
-        // We are moving the layer up
-        for (let currentLayer of this._mapLayers.getLayers()) {
-          if (currentLayer.options.zIndex <= index && currentLayer.options.zIndex > layer.options.zIndex) {
-            // Leaflet layers use higher values for higher positioning.
-            let newZIndex = currentLayer.options.zIndex - 1;
-            currentLayer.setZIndex(newZIndex);
-          }
-        }
-      } else if (layer.options.zIndex > index) {
-        // We are moving the layer down
-        for (let currentLayer of this._mapLayers.getLayers()) {
-          if (currentLayer.options.zIndex >= index && currentLayer.options.zIndex < layer.options.zIndex) {
-            // Leaflet layers use higher values for higher positioning.
-            let newZIndex = currentLayer.options.zIndex + 1;
-            currentLayer.setZIndex(newZIndex);
-          }
-        }
-      }
-      layer.setZIndex(index);
+    let maxZIndex = this._mapLayers.getLayers().length - 1;
+
+    if (this.config.basemap !== 'none' && index <= 0) {
+      // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
+      throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
+    } else if (this.config.basemap === 'none' && index < 0) {
+      // There is no basemap, but the lowest allowed index is 0.
+      throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
+    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex) {
+      // There is a borders layer, which must stay one position above the rest of the layers.
+      throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
+    } else if (this.config.countryBorders === 'none' && index > maxZIndex) {
+      // There is no borders layer, but the index is higher than the number of layers - 1.
+      throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
-      alert('Layer ' + layerIdentifier + ' cannot be reordered, as it does not exist on the map.');
+      for (let currentLayer of this._mapLayers.getLayers()) {
+        if (currentLayer.options.identifier === layerIdentifier) {
+          layer = currentLayer;
+        }
+      }
+      if (layer !== undefined) {
+        if (layer.options.zIndex < index) {
+        // We are moving the layer up
+          for (let currentLayer of this._mapLayers.getLayers()) {
+            if (currentLayer.options.zIndex <= index && currentLayer.options.zIndex > layer.options.zIndex) {
+            // Layers use higher values for higher positioning.
+              let newZIndex = currentLayer.options.zIndex - 1;
+              currentLayer.setZIndex(newZIndex);
+            }
+          }
+        } else if (layer.options.zIndex > index) {
+        // We are moving the layer down
+          for (let currentLayer of this._mapLayers.getLayers()) {
+            if (currentLayer.options.zIndex >= index && currentLayer.options.zIndex < layer.options.zIndex) {
+            // Layers use higher values for higher positioning.
+              let newZIndex = currentLayer.options.zIndex + 1;
+              currentLayer.setZIndex(newZIndex);
+            }
+          }
+        }
+
+        layer.setZIndex(index);
+      } else {
+      // console.error('Layer ' + layerIdentifier + ' cannot be reordered, as it does not exist on the map.');
+        throw new Error('No layer with identifier \'' + layerIdentifier + '\' exists on the map');
+      }
     }
   }
 

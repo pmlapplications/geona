@@ -229,29 +229,66 @@ export class OlMap extends GeonaMap {
 
   /**
    * Moves the layer to the specified index, and reorders the other map layers where required.
-   * Displaced layers move downwards when reordered.
-   * @param {String}  layerName The name of the layer to be moved.
+   *
+   * Displaced layers move downwards if the reordered layer is being moved up.
+   * Displaced layers move upwards if the reordered layer is being moved down.
+   * Basemaps and country borders will remain at the bottom or top, even if an attempt is made to move a data layer
+   * lower or higher than the basemap or borders.
+   *
+   * The zIndex of all tile layers will be in a range of '0' to 'the number of layers - 1'.
+   * For example, with a basemap, a data layer, and a country borders
+   * layer, the zIndex values would be 0, 1, 2, in that order.
+   *
+   * @param {String}  layerIdentifier The identifier of the layer to be moved.
    * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
    */
-  reorderLayers(layerName, index) {
+  reorderLayers(layerIdentifier, index) {
     let layer;
-    for (let currentLayer of this.map_.getLayers().getArray()) {
-      // TODO check
-      if (currentLayer.get('identifier') === layerName) {
-        layer = currentLayer;
-      }
-    }
-    if (layer !== undefined) {
+    let maxZIndex = this.map_.getLayers().getArray().length - 1;
+
+    if (this.config.basemap !== 'none' && index <= 0) {
+      // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
+      throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
+    } else if (this.config.basemap === 'none' && index < 0) {
+      // There is no basemap, but the lowest allowed index is 0.
+      throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
+    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex) {
+      // There is a borders layer, which must stay one position above the rest of the layers.
+      throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
+    } else if (this.config.countryBorders === 'none' && index > maxZIndex) {
+      // There is no borders layer, but the index is higher than the number of layers - 1.
+      throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
+    } else {
       for (let currentLayer of this.map_.getLayers().getArray()) {
-        if (currentLayer.get('zIndex') <= index) {
-          // Leaflet layers use higher values for higher positioning.
-          let currentZIndex = currentLayer.get('zIndex');
-          currentLayer.set('zIndex', currentZIndex -= 1);
+        if (currentLayer.get('identifier') === layerIdentifier) {
+          layer = currentLayer;
         }
       }
-      layer.set('zIndex', index);
-    } else {
-      alert('Layer ' + layerName + ' does not exist on the map.');
+      if (layer !== undefined) {
+        if (layer.get('zIndex') < index) {
+          // We are moving the layer up
+          // FIXME the warning given by the getArray method might mean that the zIndex values are not being updated.
+          for (let currentLayer of this.map_.getLayers().getArray()) {
+            if (currentLayer.get('zIndex') <= index && currentLayer.get('zIndex') > layer.get('zIndex')) {
+              // Layers use higher values for higher positioning.
+              let currentZIndex = currentLayer.get('zIndex');
+              currentLayer.set('zIndex', currentZIndex - 1);
+            }
+          }
+        } else if (layer.get('zIndex') > index) {
+          // We are moving the layer down
+          for (let currentLayer of this.map_.getLayers().getArray()) {
+            if (currentLayer.get('zIndex') >= index && currentLayer.get('zIndex') < layer.get('zIndex')) {
+              // Layers use higher values for higher positioning.
+              let currentZIndex = currentLayer.get('zIndex');
+              currentLayer.set('zIndex', currentZIndex + 1);
+            }
+          }
+        }
+        layer.set('zIndex', index);
+      } else {
+        alert('Layer ' + layerIdentifier + ' does not exist on the map.');
+      }
     }
   }
 
