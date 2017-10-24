@@ -7,9 +7,9 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       'bac_src/**/*.js': ['browserify'],
-      'bac_test/**/*.js': ['browserify']
+      'bac_test/**/*.js': ['browserify'],
     },
-    
+
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
@@ -20,30 +20,31 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       transform: [
-        ['babelify', {plugins: 
-          ['dynamic-import-node', 
-          ['transform-runtime', {
-            'helpers': false,
-            'polyfill': false,
-            'regenerator': true,
-            'moduleName': 'babel-runtime'
-            }
-          ]],
-          presets: [["env",
+        ['babelify', {plugins:
+          ['dynamic-import-node',
+            ['transform-runtime', {
+              'helpers': false,
+              'polyfill': false,
+              'regenerator': true,
+              'moduleName': 'babel-runtime',
+            },
+            ]],
+        presets: [['env',
           {
-            "debug": false,
-            "targets": {
-              "node": 4
-            }
-          }]]
-        }]
-      ]
+            'debug': false,
+            'targets': {
+              'node': 4,
+            },
+          }]],
+        }],
+      ],
     },
-    
+
     // list of files / patterns to load in the browser
     files: [
       'bac_src/**/*.js',
-      'bac_test/**/*.js'
+      'bac_test/**/*.js',
+      'node_modules/jquery/dist/jquery.min.js',
     ],
 
     // list of files to exclude
@@ -82,6 +83,6 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
-  })
-}
+    concurrency: Infinity,
+  });
+};
