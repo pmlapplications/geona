@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import 'jquery-ui/ui/widgets/sortable';
+// window.$ = $ = jQuery;
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';

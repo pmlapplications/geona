@@ -6,8 +6,9 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'bac_src/**/*.js': ['browserify'],
-      'bac_test/**/*.js': ['browserify'],
+      // 'static/js/vendor.js': ['browserify'],
+      'src/client/**/*.js': ['browserify'],
+      'test/client/**/*.js': ['browserify'],
     },
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -15,7 +16,18 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'browserify'],
+    frameworks: ['mocha', 'browserify', 'jquery-3.2.1'],
+
+    plugins: [
+      'karma-jquery',
+      'karma-browserify',
+      'karma-mocha',
+      'karma-chrome-launcher',
+      'karma-firefox-launcher',
+      'karma-phantomjs-launcher',
+      'karma-html2js-preprocessor',
+    ],
+
 
     browserify: {
       debug: true,
@@ -42,9 +54,10 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'bac_src/**/*.js',
-      'bac_test/**/*.js',
-      'node_modules/jquery/dist/jquery.min.js',
+      'static/js/vendor.js',
+      'src/client/**/*.js',
+      'test/client/**/*.js',
+
     ],
 
     // list of files to exclude
