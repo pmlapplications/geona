@@ -117,6 +117,7 @@ export class MainMenu {
         }
         this.requestLayers = layers;
       }).catch((err) => {
+        console.error(err);
         alert('No layers found.');
       });
   }

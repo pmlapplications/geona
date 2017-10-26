@@ -34,9 +34,12 @@ export class Geona {
         if (this.config.get('onReadyCallback')) {
           // If a onReadyCallback is defined in the config, try to call it
           try {
+            // TODO add support for onReadyCallback being a function instead of a string
+            // so that the function can just be called, else we assume it's attached to the window
             window[this.config.get('onReadyCallback')](this);
           } catch (e) {
             console.error('Failed to call onReadyCallback: ' + e);
+            console.log(e);
           }
         }
       });

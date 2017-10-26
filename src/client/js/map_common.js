@@ -593,3 +593,8 @@ export const borderLayers = [
     },
   },
  */
+
+/**
+ * Default data layers to have available
+ */
+export const dataLayers = [];

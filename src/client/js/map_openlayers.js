@@ -4,6 +4,7 @@ import $ from 'jquery';
 import GeonaMap from './map';
 import {
   basemaps as defaultBasemaps, borderLayers as defaultBorders,
+  dataLayers as defaultDataLayers,
   latLonLabelFormatter, selectPropertyLanguage,
 } from './map_common';
 
@@ -92,10 +93,20 @@ export class OlMap extends GeonaMap {
 
     this._loadBasemaps();
     this._loadCountryBorderLayers();
-    // this.loadLayers_();
+    this._loadDataLayers();
 
-    this.addLayer(this._availableLayers['terrain-light'], 'basemap');
-    this.addLayer(this._availableLayers.line_black, 'borders');
+    if (this.config.basemap !== 'none') {
+      this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
+    }
+    if (this.config.countryBorders !== 'none') {
+      this.addLayer(this._availableLayers[this.config.countryBorders], 'borders');
+    }
+    if (this.config.data.length !== 0) {
+      for (let layer of this.config.data) {
+        this.addLayer(this._availableLayers[layer.identifier]);
+      }
+    }
+
     // this.map_.addLayer(this._availableLayers['terrain-light']);
     // this.activeLayers_['terrain-light'] = this._availableLayers['terrain-light'];
     // this.map_.addLayer(this._availableLayers.line_black);
@@ -246,16 +257,16 @@ export class OlMap extends GeonaMap {
     let layer;
     let maxZIndex = this.map_.getLayers().getArray().length - 1;
 
-    if (this.config.basemap !== 'none' && index <= 0) {
+    if (this.config.basemap !== 'none' && index <= 0 && this._initialized === true) {
       // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
       throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
-    } else if (this.config.basemap === 'none' && index < 0) {
+    } else if (this.config.basemap === 'none' && index < 0 && this._initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex) {
+    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex && this._initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.countryBorders === 'none' && index > maxZIndex) {
+    } else if (this.config.countryBorders === 'none' && index > maxZIndex && this._initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -508,10 +519,24 @@ export class OlMap extends GeonaMap {
    * Load the default basemaps, and any defined in the config.
    */
   _loadBasemaps() {
-    // TODO load from config too
     for (let layer of defaultBasemaps) {
       if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
-        this._availableLayers[layer.identifier] = layer;
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
+      } else {
+        console.error('bingMapsApiKey is null or undefined');
+      }
+    }
+    for (let layer of this.config.basemaps) {
+      if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
       } else {
         console.error('bingMapsApiKey is null or undefined');
       }
@@ -522,9 +547,39 @@ export class OlMap extends GeonaMap {
    * Load the default border layers, and any defined in the config.
    */
   _loadCountryBorderLayers() {
-    // TODO load from config too
     for (let layer of defaultBorders) {
-      this._availableLayers[layer.identifier] = layer;
+      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+      }
+    }
+    for (let layer of this.config.borders) {
+      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+      }
+    }
+  }
+
+  /**
+ * Load the default data layers, and any defined in the config.
+ */
+  _loadDataLayers() {
+    for (let layer of defaultDataLayers) {
+      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+      }
+    }
+    for (let layer of this.config.dataLayers) {
+      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+      }
     }
   }
 }
