@@ -7,8 +7,9 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       // 'static/js/vendor.js': ['browserify'],
-      'src/client/**/*.js': ['browserify'],
-      'test/client/**/*.js': ['browserify'],
+      'bac_src/**/*.js': ['browserify'],
+      'bac_test/**/*.js': ['browserify'],
+      'node_modules/chai-as-promised/lib/chai-as-promised.js': ['browserify'],
     },
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -16,7 +17,7 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'browserify', 'jquery-3.2.1'],
+    frameworks: ['browserify', 'jquery-3.2.1', 'mocha', 'chai-as-promised', 'chai'],
 
     plugins: [
       'karma-jquery',
@@ -26,6 +27,8 @@ module.exports = function(config) {
       'karma-firefox-launcher',
       'karma-phantomjs-launcher',
       'karma-html2js-preprocessor',
+      'karma-chai',
+      'karma-chai-as-promised',
     ],
 
 
@@ -54,9 +57,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'static/js/vendor.js',
-      'src/client/**/*.js',
-      'test/client/**/*.js',
+      'bac_src/**/*.js',
+      'bac_test/**/*.js',
 
     ],
 

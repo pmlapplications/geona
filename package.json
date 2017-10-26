@@ -33,6 +33,7 @@
     "serverDev": "BABEL_ENV=server  nodemon -w src/server -w src/common -w config -w locales  src/server/app.js --exec babel-node",
     "buildServerDev": "nodemon -w src/server -w src/common --exec \"grunt server && npm run serve\"",
     "test": "BABEL_ENV=test karma start karma.conf.js && BABEL_ENV=test nyc mocha test/server/**/*.js test/common/**/*.js",
+    "testClient": "BABEL_ENV=test karma start karma.conf.js",
     "eslint-fix": "grunt eslint:fix"
   },
   "devDependencies": {
@@ -48,6 +49,7 @@
     "babelify": "^7.3.0",
     "browserify": "^14.5.0",
     "chai": "^4.1.0",
+    "chai-as-promised": "^7.1.1",
     "chai-http": "^3.0.0",
     "deamdify": "^0.3.0",
     "eslint": "^4.2.0",
@@ -65,6 +67,8 @@
     "grunt-karma": "^2.0.0",
     "karma": "^1.7.1",
     "karma-browserify": "^5.1.1",
+    "karma-chai": "^0.1.0",
+    "karma-chai-as-promised": "^0.1.2",
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.0.1",
     "karma-html2js-preprocessor": "^1.1.0",
