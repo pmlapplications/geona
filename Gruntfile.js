@@ -23,6 +23,10 @@ module.exports = function(grunt) {
     'static/js/map_leaflet_es5.js': 'src/client/js/map_leaflet.js',
   };
 
+  let clientTestIndex = {
+    'static/index.html': 'test/client/index.html',
+  };
+
   let vendorLibs = [
     'babel-runtime/regenerator',
     'convict',

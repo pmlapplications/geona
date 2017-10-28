@@ -36,7 +36,7 @@ export class OlMap extends GeonaMap {
     /** @private @type {Object} The available map layers, as OpenLayers Tile layers */
     this._availableLayers = {};
     /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
-    this.activeLayers_ = {};
+    this._activeLayers = {};
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -56,7 +56,7 @@ export class OlMap extends GeonaMap {
     this._initialized = false;
 
     /** @private @type {ol.Map} The OpenLayers map */
-    this.map_ = new ol.Map({
+    this._map = new ol.Map({
       view: new ol.View(
         {
           center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
@@ -107,10 +107,10 @@ export class OlMap extends GeonaMap {
       }
     }
 
-    // this.map_.addLayer(this._availableLayers['terrain-light']);
-    // this.activeLayers_['terrain-light'] = this._availableLayers['terrain-light'];
-    // this.map_.addLayer(this._availableLayers.line_black);
-    // this.activeLayers_.line_black = this._availableLayers.line_black;
+    // this._map.addLayer(this._availableLayers['terrain-light']);
+    // this._activeLayers['terrain-light'] = this._availableLayers['terrain-light'];
+    // this._map.addLayer(this._availableLayers.line_black);
+    // this._activeLayers.line_black = this._availableLayers.line_black;
 
     this.loadConfig_();
 
@@ -180,7 +180,7 @@ export class OlMap extends GeonaMap {
    */
   displayGraticule(display) {
     if (display) {
-      this.graticule_.setMap(this.map_);
+      this.graticule_.setMap(this._map);
       this.config.graticule = true;
     } else {
       this.graticule_.setMap();
@@ -194,15 +194,14 @@ export class OlMap extends GeonaMap {
    */
   _clearBasemap(layer = undefined) {
     if (this._initialized === true && this.config.basemap !== 'none') {
-      for (let currentLayer of this.map_.getLayers().getArray()) {
+      for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'basemap') {
-          console.log('match');
-          this.map_.removeLayer(currentLayer);
+          this.removeLayer(currentLayer.get('identifier'));
         }
       }
       this.config.basemap = 'none';
     }
-    if (layer !== undefined && !layer.get('projections').includes(this.map_.getView().getProjection().getCode())) {
+    if (layer !== undefined && !layer.get('projections').includes(this._map.getView().getProjection().getCode())) {
       this.setProjection(layer.get('projections')[0]);
     }
   }
@@ -213,7 +212,12 @@ export class OlMap extends GeonaMap {
   _clearBorders() {
     if (this._initialized === true && this.config.countryBorders !== 'none') {
       // Removes the top-most layer (borders will always be on top)
-      this.map_.removeLayer(this.map_.getLayers().item(this.map_.getLayers().getLength() - 1));
+      for (let currentLayer of this._map.getLayers().getArray()) {
+        if (currentLayer.get('modifier') === 'borders') {
+          this.removeLayer(currentLayer.get('identifier'));
+        }
+      }
+      // this.removeLayer(this._map.getLayers().item(this._map.getLayers().getLength() - 1).get('identifier'));
     }
     this.config.countryBorders = 'none';
   }
@@ -224,12 +228,12 @@ export class OlMap extends GeonaMap {
    */
   setProjection(projection) {
     if (this.config.basemap !== 'none') {
-      let basemapId = this.map_.getLayers().item(0).get('identifier');
+      let basemapId = this._map.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
       if (this._availableLayers[basemapId].projections.includes(projection)) {
         this.setView({projection: projection});
       } else {
-        alert('Basemap ' + this.map_.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
+        alert('Basemap ' + this._map.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     } else {
       this.setView({projection: projection});
@@ -255,22 +259,23 @@ export class OlMap extends GeonaMap {
    */
   reorderLayers(layerIdentifier, index) {
     let layer;
-    let maxZIndex = this.map_.getLayers().getArray().length - 1;
+    let layerModifier = this._activeLayers[layerIdentifier].get('modifier');
+    let maxZIndex = this._map.getLayers().getArray().length - 1;
 
-    if (this.config.basemap !== 'none' && index <= 0 && this._initialized === true) {
+    if (this.config.basemap !== 'none' && index <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
       // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
       throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
     } else if (this.config.basemap === 'none' && index < 0 && this._initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex && this._initialized === true) {
+    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
     } else if (this.config.countryBorders === 'none' && index > maxZIndex && this._initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
-      for (let currentLayer of this.map_.getLayers().getArray()) {
+      for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('identifier') === layerIdentifier) {
           layer = currentLayer;
         }
@@ -279,7 +284,7 @@ export class OlMap extends GeonaMap {
         if (layer.get('zIndex') < index) {
           // We are moving the layer up
           // FIXME the warning given by the getArray method might mean that the zIndex values are not being updated.
-          for (let currentLayer of this.map_.getLayers().getArray()) {
+          for (let currentLayer of this._map.getLayers().getArray()) {
             if (currentLayer.get('zIndex') <= index && currentLayer.get('zIndex') > layer.get('zIndex')) {
               // Layers use higher values for higher positioning.
               let currentZIndex = currentLayer.get('zIndex');
@@ -288,7 +293,7 @@ export class OlMap extends GeonaMap {
           }
         } else if (layer.get('zIndex') > index) {
           // We are moving the layer down
-          for (let currentLayer of this.map_.getLayers().getArray()) {
+          for (let currentLayer of this._map.getLayers().getArray()) {
             if (currentLayer.get('zIndex') >= index && currentLayer.get('zIndex') < layer.get('zIndex')) {
               // Layers use higher values for higher positioning.
               let currentZIndex = currentLayer.get('zIndex');
@@ -305,11 +310,11 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {Layer}   geonaLayer The Layer object to be created on the map.
+   * @param {Layer}   geonaLayer The Geona Layer object to be created as an OpenLayers layer on the map.
    * @param {String}  [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
    */
   addLayer(geonaLayer, modifier = undefined) {
-    if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
+    if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
       let source;
       let title;
       let time;
@@ -343,8 +348,8 @@ export class OlMap extends GeonaMap {
             }
           }
           // At this stage of the method, only basemaps might have different projections.
-          if (geonaLayer.projections.includes(this.map_.getView().getProjection().getCode())) {
-            projection = this.map_.getView().getProjection().getCode();
+          if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+            projection = this._map.getView().getProjection().getCode();
           } else {
             projection = geonaLayer.projections[0];
           }
@@ -373,7 +378,7 @@ export class OlMap extends GeonaMap {
           break;
         case 'wmts': {
           title = selectPropertyLanguage(geonaLayer.title);
-          source = wmtsSourceFromLayer(geonaLayer, this.map_.getView().getProjection().getCode());
+          source = wmtsSourceFromLayer(geonaLayer, this._map.getView().getProjection().getCode());
           break;
         }
         case 'osm':
@@ -383,14 +388,18 @@ export class OlMap extends GeonaMap {
           break;
       }
 
-      this.activeLayers_[geonaLayer.identifier] = new ol.layer.Tile({
+      if (this._availableLayers[geonaLayer.identifier] === undefined) {
+        this._availableLayers[geonaLayer.identifier] = geonaLayer;
+      }
+
+      this._activeLayers[geonaLayer.identifier] = new ol.layer.Tile({
         identifier: geonaLayer.identifier,
         viewSettings: geonaLayer.viewSettings,
         projections: geonaLayer.projections,
         source: source,
         modifier: modifier,
       });
-      let layer = this.activeLayers_[geonaLayer.identifier];
+      let layer = this._activeLayers[geonaLayer.identifier];
 
       // If the map layer is a unique type, we clear the old layer for that type before we add the new one.
       if (modifier === 'basemap') {
@@ -399,7 +408,7 @@ export class OlMap extends GeonaMap {
         this._clearBorders(layer);
       }
 
-      this.map_.addLayer(layer);
+      this._map.addLayer(layer);
 
       if (modifier === 'basemap') {
         this.reorderLayers(geonaLayer.identifier, 0);
@@ -410,10 +419,10 @@ export class OlMap extends GeonaMap {
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
       if (this.config.countryBorders !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.countryBorders, this.map_.getLayers().getArray().length);
+        this.reorderLayers(this.config.countryBorders, this._map.getLayers().getArray().length);
       }
     } else {
-      alert('This layer cannot be displayed with the current ' + this.map_.getView().getProjection().getCode() + ' map projection.');
+      alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
     }
   }
 
@@ -422,13 +431,14 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being removed
    */
   removeLayer(layerId) {
-    if (this.map_.getLayers().getArray().includes(this.activeLayers_[layerId])) {
-      this.map_.removeLayer(this.activeLayers_[layerId]);
-      if (this.activeLayers_[layerId].get('modifier') === 'basemap') {
+    if (this._map.getLayers().getArray().includes(this._activeLayers[layerId])) {
+      this._map.removeLayer(this._activeLayers[layerId]);
+      if (this._activeLayers[layerId].get('modifier') === 'basemap') {
         this.config.basemap = 'none';
-      } else if (this.activeLayers_[layerId].get('modifier') === 'borders') {
+      } else if (this._activeLayers[layerId].get('modifier') === 'borders') {
         this.config.countryBorders = 'none';
       }
+      delete this._activeLayers[layerId];
     }
   }
 
@@ -437,7 +447,7 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being made visible
    */
   showLayer(layerId) {
-    this.activeLayers_[layerId].setVisible(true);
+    this._activeLayers[layerId].setVisible(true);
   }
 
   /**
@@ -445,7 +455,7 @@ export class OlMap extends GeonaMap {
    * @param {*} layerId The id of the data layer being made hidden
    */
   hideLayer(layerId) {
-    this.activeLayers_[layerId].setVisible(false);
+    this._activeLayers[layerId].setVisible(false);
   }
 
   /**
@@ -462,15 +472,15 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    let currentCenterLatLon = ol.proj.toLonLat(this.map_.getView().getCenter(), this.map_.getView().getProjection()
+    let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
-    let maxZoom = options.maxZoom || this.map_.getView().getMaxZoom();
-    let minZoom = options.minZoom || this.map_.getView().getMinZoom();
-    let projection = options.projection || this.map_.getView().getProjection().getCode();
-    let zoom = options.zoom || this.map_.getView().getZoom();
+    let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
+    let minZoom = options.minZoom || this._map.getView().getMinZoom();
+    let projection = options.projection || this._map.getView().getProjection().getCode();
+    let zoom = options.zoom || this._map.getView().getZoom();
 
     this.config.projection = projection;
     this.config.viewSettings.center = center;
@@ -503,14 +513,14 @@ export class OlMap extends GeonaMap {
       zoom: zoom,
     });
 
-    this.map_.setView(newView);
+    this._map.setView(newView);
 
     // Fit the map in the fitExtent
     if (fitExtent) {
-      this.map_.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
-      if (this.map_.getView().getZoom() < minZoom || this.map_.getView().getZoom() > maxZoom) {
-        this.map_.getView().setZoom(zoom);
-        this.map_.getView().setCenter(center);
+      this._map.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
+      if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
+        this._map.getView().setZoom(zoom);
+        this._map.getView().setCenter(center);
       }
     }
   }

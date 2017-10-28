@@ -182,6 +182,9 @@ export const basemaps = [
     title: {
       und: 'EOX',
     },
+    description: {
+      und: 'EPSG:4326 only, Europe only',
+    },
     attribution: {
       title: 'EOX',
       onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
@@ -193,6 +196,29 @@ export const basemaps = [
       layers: ['terrain-light'],
       version: '1.1.1',
       url: 'https://tiles.maps.eox.at/wms/?',
+    },
+  },
+  {
+    PROTOCOL: 'wms',
+    identifier: 's2cloudless',
+    title: {
+      und: 'EOX',
+    },
+    attribution: {
+      title: 'EOX Sentinel-2 Cloudless',
+      onlineResource: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
+    },
+    projections: ['EPSG:4326'],
+    formats: ['image/jpeg'],
+    isTemporal: false,
+    layerServer: {
+      layers: ['s2cloudless'],
+      version: '1.1.1',
+      url: 'https://tiles.maps.eox.at/wms/?',
+    },
+    viewSettings: {
+      maxZoom: 14,
+      fitExtent: [22.02, -33.86, 82.85, 56.12],
     },
   },
   // {
@@ -373,15 +399,6 @@ export const borderLayers = [
   //     },
   //   },
   // },
-  // {
-  //   id: 'line_black',
-  //   source: {
-  //     crossOrigin: null,
-  //     params: {
-  //       styles: 'line_black',
-  //     },
-  //   },
-  // },
   {
     identifier: 'line_black',
     PROTOCOL: 'wms',
@@ -392,6 +409,22 @@ export const borderLayers = [
     formats: ['image/png'],
     isTemporal: false,
     styles: 'line_black',
+    layerServer: {
+      layers: ['rsg:full_10m_borders'],
+      version: '1.1.0',
+      url: 'https://rsg.pml.ac.uk/geoserver/wms?',
+    },
+  },
+  {
+    identifier: 'line',
+    PROTOCOL: 'wms',
+    title: {
+      und: 'Blue border lines',
+    },
+    projections: ['EPSG:4326', 'EPSG:3857'],
+    formats: ['image/png'],
+    isTemporal: false,
+    styles: 'line',
     layerServer: {
       layers: ['rsg:full_10m_borders'],
       version: '1.1.0',
@@ -598,3 +631,7 @@ export const borderLayers = [
  * Default data layers to have available
  */
 export const dataLayers = [];
+
+for (let dataLayer of dataLayers) {
+  dataLayer = addLayerDefaults(dataLayer);
+}
