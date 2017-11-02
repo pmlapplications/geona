@@ -45,10 +45,10 @@ export class OlMap extends GeonaMap {
         width: 1,
         lineDash: [1, 4],
       }),
-      latLabelFormatter: function(latitude) {
+      latLabelFormatter: function (latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lonLabelFormatter: function(longitude) {
+      lonLabelFormatter: function (longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -231,79 +231,80 @@ export class OlMap extends GeonaMap {
       let basemapId = this._map.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
       if (this._availableLayers[basemapId].projections.includes(projection)) {
-        this.setView({projection: projection});
+        this.setView({ projection: projection });
       } else {
         alert('Basemap ' + this._map.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     } else {
-      this.setView({projection: projection});
+      this.setView({ projection: projection });
     }
 
     this.config.projection = projection;
   }
 
   /**
-   * Moves the layer to the specified index, and reorders the other map layers where required.
-   *
-   * Displaced layers move downwards if the reordered layer is being moved up.
-   * Displaced layers move upwards if the reordered layer is being moved down.
-   * Basemaps and country borders will remain at the bottom or top, even if an attempt is made to move a data layer
-   * lower or higher than the basemap or borders.
-   *
-   * The zIndex of all tile layers will be in a range of '0' to 'the number of layers - 1'.
-   * For example, with a basemap, a data layer, and a country borders
-   * layer, the zIndex values would be 0, 1, 2, in that order.
-   *
-   * @param {String}  layerIdentifier The identifier of the layer to be moved.
-   * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
+   * Set the map view with the provided options. Uses OpenLayers style zoom levels.
+   * @param {Object}  options            View options. All are optional
+   * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
+   * @param {Object}  options.fitExtent  Extent to fit the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   * @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
+   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   * @param {Number}  options.maxZoom    The maximum allowed zoom
+   * @param {Number}  options.minZoom    The minimum allowed zoom
+   * @param {String}  options.projection The projection, such as 'EPSG:4326'
+   * @param {Number}  options.zoom       The zoom
    */
-  reorderLayers(layerIdentifier, index) {
-    let layer;
-    let layerModifier = this._activeLayers[layerIdentifier].get('modifier');
-    let maxZIndex = this._map.getLayers().getArray().length - 1;
+  setView(options) {
+    let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
+      .getCode()).reverse();
+    let center = options.center || { lat: currentCenterLatLon[0], lon: currentCenterLatLon[1] };
+    let fitExtent = options.fitExtent;
+    let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
+    let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
+    let minZoom = options.minZoom || this._map.getView().getMinZoom();
+    let projection = options.projection || this._map.getView().getProjection().getCode();
+    let zoom = options.zoom || this._map.getView().getZoom();
 
-    if (this.config.basemap !== 'none' && index <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
-      // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
-      throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
-    } else if (this.config.basemap === 'none' && index < 0 && this._initialized === true) {
-      // There is no basemap, but the lowest allowed index is 0.
-      throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
-      // There is a borders layer, which must stay one position above the rest of the layers.
-      throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.countryBorders === 'none' && index > maxZIndex && this._initialized === true) {
-      // There is no borders layer, but the index is higher than the number of layers - 1.
-      throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
-    } else {
-      for (let currentLayer of this._map.getLayers().getArray()) {
-        if (currentLayer.get('identifier') === layerIdentifier) {
-          layer = currentLayer;
-        }
-      }
-      if (layer !== undefined) {
-        if (layer.get('zIndex') < index) {
-          // We are moving the layer up
-          // FIXME the warning given by the getArray method might mean that the zIndex values are not being updated.
-          for (let currentLayer of this._map.getLayers().getArray()) {
-            if (currentLayer.get('zIndex') <= index && currentLayer.get('zIndex') > layer.get('zIndex')) {
-              // Layers use higher values for higher positioning.
-              let currentZIndex = currentLayer.get('zIndex');
-              currentLayer.set('zIndex', currentZIndex - 1);
-            }
-          }
-        } else if (layer.get('zIndex') > index) {
-          // We are moving the layer down
-          for (let currentLayer of this._map.getLayers().getArray()) {
-            if (currentLayer.get('zIndex') >= index && currentLayer.get('zIndex') < layer.get('zIndex')) {
-              // Layers use higher values for higher positioning.
-              let currentZIndex = currentLayer.get('zIndex');
-              currentLayer.set('zIndex', currentZIndex + 1);
-            }
-          }
-        }
-        layer.set('zIndex', index);
-      } else {
-        alert('Layer ' + layerIdentifier + ' does not exist on the map.');
+    this.config.projection = projection;
+    this.config.viewSettings.center = center;
+    this.config.viewSettings.maxExtent = maxExtent;
+    this.config.viewSettings.maxZoom = maxZoom;
+    this.config.viewSettings.minZoom = minZoom;
+    this.config.viewSettings.zoom = zoom;
+
+    // Converts the min and max coordinates from LatLon to current projection
+    maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
+      .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
+
+    if (fitExtent) {
+      fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
+        .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
+    }
+    center = ol.proj.fromLonLat([center.lon, center.lat], projection);
+
+    // Ensure that the center is within the maxExtent
+    if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
+      center = ol.extent.getCenter(maxExtent);
+    }
+
+    let newView = new ol.View({
+      center: center,
+      extent: maxExtent,
+      maxZoom: maxZoom,
+      minZoom: minZoom,
+      projection: projection,
+      zoom: zoom,
+    });
+
+    this._map.setView(newView);
+
+    // Fit the map in the fitExtent
+    if (fitExtent) {
+      this._map.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
+      if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
+        this._map.getView().setZoom(zoom);
+        this._map.getView().setCenter(center);
       }
     }
   }
@@ -398,6 +399,9 @@ export class OlMap extends GeonaMap {
         projections: geonaLayer.projections,
         source: source,
         modifier: modifier,
+        // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
+        // This is to compensate for the fact that the layer has not been added to the map yet.
+        zIndex: this._map.getLayers().getArray().length,
       });
       let layer = this._activeLayers[geonaLayer.identifier];
 
@@ -419,7 +423,7 @@ export class OlMap extends GeonaMap {
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
       if (this.config.countryBorders !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.countryBorders, this._map.getLayers().getArray().length);
+        this.reorderLayers(this.config.countryBorders, this._map.getLayers().getArray().length - 1);
       }
     } else {
       alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
@@ -435,6 +439,10 @@ export class OlMap extends GeonaMap {
       this._map.removeLayer(this._activeLayers[layerId]);
       if (this._activeLayers[layerId].get('modifier') === 'basemap') {
         this.config.basemap = 'none';
+        // As we have removed the basemap, the zIndices should all be reduced by 1.
+        for (let layer of this._map.getLayers().getArray()) {
+          layer.set('zIndex', layer.get('zIndex') - 1);
+        }
       } else if (this._activeLayers[layerId].get('modifier') === 'borders') {
         this.config.countryBorders = 'none';
       }
@@ -459,68 +467,67 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Set the map view with the provided options. Uses OpenLayers style zoom levels.
-   * @param {Object}  options            View options. All are optional
-   * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
-   * @param {Object}  options.fitExtent  Extent to fit the view to, defined as
-   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
-   * @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
-   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
-   * @param {Number}  options.maxZoom    The maximum allowed zoom
-   * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection, such as 'EPSG:4326'
-   * @param {Number}  options.zoom       The zoom
+   * Moves the layer to the specified index, and reorders the other map layers where required.
+   *
+   * Displaced layers move downwards if the reordered layer is being moved up.
+   * Displaced layers move upwards if the reordered layer is being moved down.
+   * Basemaps and country borders will remain at the bottom or top, even if an attempt is made to move a data layer
+   * lower or higher than the basemap or borders.
+   *
+   * The zIndex of all tile layers will be in a range of '0' to 'the number of layers - 1'.
+   * For example, with a basemap, a data layer, and a country borders layer, the zIndex values would be
+   * 0, 1, 2, in that order.
+   *
+   * @param {String}  layerIdentifier The identifier of the layer to be moved.
+   * @param {Integer} targetIndex The zero-based index to insert the layer at. Higher values for higher layers.
    */
-  setView(options) {
-    let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
-      .getCode()).reverse();
-    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
-    let fitExtent = options.fitExtent;
-    let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
-    let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
-    let minZoom = options.minZoom || this._map.getView().getMinZoom();
-    let projection = options.projection || this._map.getView().getProjection().getCode();
-    let zoom = options.zoom || this._map.getView().getZoom();
+  reorderLayers(layerIdentifier, targetIndex) {
+    let layer;
+    let layerModifier = this._activeLayers[layerIdentifier].get('modifier');
+    let maxZIndex = this._map.getLayers().getArray().length - 1;
 
-    this.config.projection = projection;
-    this.config.viewSettings.center = center;
-    this.config.viewSettings.maxExtent = maxExtent;
-    this.config.viewSettings.maxZoom = maxZoom;
-    this.config.viewSettings.minZoom = minZoom;
-    this.config.viewSettings.zoom = zoom;
-
-    // Converts the min and max coordinates from LatLon to current projection
-    maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
-      .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
-
-    if (fitExtent) {
-      fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
-        .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
-    }
-    center = ol.proj.fromLonLat([center.lon, center.lat], projection);
-
-    // Ensure that the center is within the maxExtent
-    if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
-      center = ol.extent.getCenter(maxExtent);
-    }
-
-    let newView = new ol.View({
-      center: center,
-      extent: maxExtent,
-      maxZoom: maxZoom,
-      minZoom: minZoom,
-      projection: projection,
-      zoom: zoom,
-    });
-
-    this._map.setView(newView);
-
-    // Fit the map in the fitExtent
-    if (fitExtent) {
-      this._map.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
-      if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
-        this._map.getView().setZoom(zoom);
-        this._map.getView().setCenter(center);
+    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
+      // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
+      throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
+    } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
+      // There is no basemap, but the lowest allowed index is 0.
+      throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
+    } else if (this.config.countryBorders !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
+      // There is a borders layer, which must stay one position above the rest of the layers.
+      throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
+    } else if (this.config.countryBorders === 'none' && targetIndex > maxZIndex && this._initialized === true) {
+      // There is no borders layer, but the index is higher than the number of layers - 1.
+      throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
+    } else {
+      for (let currentLayer of this._map.getLayers().getArray()) {
+        if (currentLayer.get('identifier') === layerIdentifier) {
+          layer = currentLayer;
+        }
+      }
+      if (layer !== undefined) {
+        if (layer.get('zIndex') < targetIndex) {
+          // We are moving the layer up
+          // FIXME the warning given by the getArray method might mean that the zIndex values are not being updated.
+          for (let currentLayer of this._map.getLayers().getArray()) {
+            if (currentLayer.get('zIndex') <= targetIndex && currentLayer.get('zIndex') > layer.get('zIndex')) {
+              // Layers use higher values for higher positioning.
+              let currentZIndex = currentLayer.get('zIndex');
+              currentLayer.set('zIndex', currentZIndex - 1);
+            }
+          }
+        } else if (layer.get('zIndex') > targetIndex) {
+          // We are moving the layer down
+          for (let currentLayer of this._map.getLayers().getArray()) {
+            if (currentLayer.get('zIndex') >= targetIndex && currentLayer.get('zIndex') < layer.get('zIndex')) {
+              // Layers use higher values for higher positioning.
+              let currentZIndex = currentLayer.get('zIndex');
+              currentLayer.set('zIndex', currentZIndex + 1);
+            }
+          }
+        }
+        layer.set('zIndex', targetIndex);
+      } else {
+        alert('Layer ' + layerIdentifier + ' does not exist on the map.');
       }
     }
   }
@@ -574,8 +581,8 @@ export class OlMap extends GeonaMap {
   }
 
   /**
- * Load the default data layers, and any defined in the config.
- */
+   * Load the default data layers, and any defined in the config.
+   */
   _loadDataLayers() {
     for (let layer of defaultDataLayers) {
       if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
@@ -606,7 +613,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function() {
+    mapJs.onload = function () {
       import('openlayers')
         .then((olLib) => {
           ol = olLib;
@@ -852,7 +859,7 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
 
   // Sort the array of tileMatrices by their scaleDenominators
-  matrixSet.tileMatrices.sort(function(a, b) {
+  matrixSet.tileMatrices.sort(function (a, b) {
     return b.scaleDenominator - a.scaleDenominator;
   });
 

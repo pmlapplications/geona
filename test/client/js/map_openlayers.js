@@ -6622,7 +6622,7 @@ describe('client/js/map_openlayers', function() {
           allZIndices.push(layer.get('zIndex'));
         }
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
-        expect(allZIndices.sort()).to.equal([0, 1]);
+        expect(allZIndices.sort()).to.deep.equal([0, 1]);
       });
 
       after(function() {
@@ -6678,7 +6678,7 @@ describe('client/js/map_openlayers', function() {
           allZIndices.push(layer.get('zIndex'));
         }
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
-        expect(allZIndices.sort()).to.equal([0, 1, 2]);
+        expect(allZIndices.sort()).to.deep.equal([0, 1, 2]);
       });
 
       after(function() {
@@ -6735,7 +6735,7 @@ describe('client/js/map_openlayers', function() {
           allZIndices.push(layer.get('zIndex'));
         }
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
-        expect(allZIndices.sort()).to.equal([0, 1, 2]);
+        expect(allZIndices.sort()).to.deep.equal([0, 1, 2]);
       });
 
       after(function() {
@@ -6793,7 +6793,7 @@ describe('client/js/map_openlayers', function() {
           allZIndices.push(layer.get('zIndex'));
         }
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
-        expect(allZIndices.sort()).to.equal([0, 1]);
+        expect(allZIndices.sort()).to.deep.equal([0, 1]);
       });
 
       after(function() {
@@ -6850,7 +6850,7 @@ describe('client/js/map_openlayers', function() {
           allZIndices.push(layer.get('zIndex'));
         }
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
-        expect(allZIndices.sort()).to.equal([0, 1]);
+        expect(allZIndices.sort()).to.deep.equal([0, 1]);
       });
 
       after(function() {
@@ -6908,7 +6908,7 @@ describe('client/js/map_openlayers', function() {
           allZIndices.push(layer.get('zIndex'));
         }
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
-        expect(allZIndices.sort()).to.equal([0, 1, 2, 3, 4]);
+        expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3, 4]);
       });
 
       after(function() {
@@ -6948,5 +6948,11 @@ describe('client/js/map_openlayers', function() {
     });
     // TODO add test for saving layers once functionality implemented
     // it('should save the layers found', function() {});
+
+    after(function() {
+      // Clear all layers from the map
+      let layer = geona.map._map.getLayers().getArray()[0];
+      geona.map.removeLayer(layer.get('identifier'));
+    });
   });
 });
