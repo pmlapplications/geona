@@ -359,219 +359,219 @@ function parse1_0(url, capabilities) {
         thisMatrixSet.tileMatrices.push(thisMatrix);
       }
     }
-    return serverConfig;
   }
+  return serverConfig;
+}
 
-  /**
-   * Constructs an object containing titles separated by language code.
-   * @param {Array} titles An array of titles with value and optional lang properties.
-   * @return {Object}      Object with language separated titles.
-   */
-  function parseTitles(titles) {
-    let titleObject = {};
-    if (titles !== undefined) {
-      if (titles !== []) {
-        if (titles.length > 1) {
-          for (let currentTitle of titles) {
-            if (currentTitle.lang) {
-              Object.assign(titleObject, {
-                [currentTitle.lang]: currentTitle.value,
-              });
-            } else {
-              Object.assign(titleObject, {
-                'und': currentTitle.value,
-              });
-            }
+/**
+ * Constructs an object containing titles separated by language code.
+ * @param {Array} titles An array of titles with value and optional lang properties.
+ * @return {Object}      Object with language separated titles.
+ */
+function parseTitles(titles) {
+  let titleObject = {};
+  if (titles !== undefined) {
+    if (titles !== []) {
+      if (titles.length > 1) {
+        for (let currentTitle of titles) {
+          if (currentTitle.lang) {
+            Object.assign(titleObject, {
+              [currentTitle.lang]: currentTitle.value,
+            });
+          } else {
+            Object.assign(titleObject, {
+              'und': currentTitle.value,
+            });
           }
+        }
+      } else {
+        if (titles[0].lang) {
+          titleObject = {
+            [titles[0].lang]: titles[0].value,
+          };
         } else {
-          if (titles[0].lang) {
-            titleObject = {
-              [titles[0].lang]: titles[0].value,
-            };
-          } else {
-            titleObject = {
-              'und': titles[0].value,
-            };
-          }
+          titleObject = {
+            'und': titles[0].value,
+          };
         }
       }
     }
-    return titleObject;
   }
+  return titleObject;
+}
 
-  /**
-   * Constructs an object containing abstracts separated by language code.
-   * @param {Array} abstracts An array of abstracts with value and optional lang properties.
-   * @return {Object}         Object with language-separated abstracts.
-   */
-  function parseAbstracts(abstracts) {
-    let abstractObject = {};
-    if (abstracts !== undefined) {
-      if (abstracts !== []) {
-        if (abstracts.length > 1) {
-          for (let currentAbstract of abstracts) {
-            if (currentAbstract.lang) {
-              Object.assign(abstractObject, {
-                [currentAbstract.lang]: currentAbstract.value,
-              });
-            } else {
-              Object.assign(abstractObject, {
-                'und': currentAbstract.value,
-              });
-            }
-          }
-        } else if (abstracts !== []) {
-          if (abstracts[0].lang) {
-            abstractObject = {
-              [abstracts[0].lang]: abstracts[0].value,
-            };
+/**
+ * Constructs an object containing abstracts separated by language code.
+ * @param {Array} abstracts An array of abstracts with value and optional lang properties.
+ * @return {Object}         Object with language-separated abstracts.
+ */
+function parseAbstracts(abstracts) {
+  let abstractObject = {};
+  if (abstracts !== undefined) {
+    if (abstracts !== []) {
+      if (abstracts.length > 1) {
+        for (let currentAbstract of abstracts) {
+          if (currentAbstract.lang) {
+            Object.assign(abstractObject, {
+              [currentAbstract.lang]: currentAbstract.value,
+            });
           } else {
-            abstractObject = {
-              'und': abstracts[0].value,
-            };
+            Object.assign(abstractObject, {
+              'und': currentAbstract.value,
+            });
           }
+        }
+      } else if (abstracts !== []) {
+        if (abstracts[0].lang) {
+          abstractObject = {
+            [abstracts[0].lang]: abstracts[0].value,
+          };
+        } else {
+          abstractObject = {
+            'und': abstracts[0].value,
+          };
         }
       }
     }
-    return abstractObject;
   }
+  return abstractObject;
+}
 
-  /**
-   * Constructs an object containing arrays of keywords separated by language code.
-   * @param {Array} keywords An array of keywords with value and optional lang properties.
-   * @return {Object}        Object with language-separated keyword arrays.
-   */
-  function parseKeywords(keywords) {
-    let keywordObject = {};
-    if (keywords !== undefined) {
-      if (keywords !== []) {
-        for (let keywordList of keywords) {
-          if (keywordList.keyword !== []) {
-            for (let keyword of keywordList.keyword) {
-              // if undefined, we use the und language code
-              if (!keyword.lang) {
-                if (!keywordObject[keyword.lang]) {
-                  keywordObject.und = [];
-                }
-                keywordObject.und.push(keyword.value);
-              } else {
-                if (!keywordObject[keyword.lang]) {
-                  keywordObject[keyword.lang] = [];
-                }
-                keywordObject[keyword.lang].push(keyword.value);
+/**
+ * Constructs an object containing arrays of keywords separated by language code.
+ * @param {Array} keywords An array of keywords with value and optional lang properties.
+ * @return {Object}        Object with language-separated keyword arrays.
+ */
+function parseKeywords(keywords) {
+  let keywordObject = {};
+  if (keywords !== undefined) {
+    if (keywords !== []) {
+      for (let keywordList of keywords) {
+        if (keywordList.keyword !== []) {
+          for (let keyword of keywordList.keyword) {
+            // if undefined, we use the und language code
+            if (!keyword.lang) {
+              if (!keywordObject[keyword.lang]) {
+                keywordObject.und = [];
               }
+              keywordObject.und.push(keyword.value);
+            } else {
+              if (!keywordObject[keyword.lang]) {
+                keywordObject[keyword.lang] = [];
+              }
+              keywordObject[keyword.lang].push(keyword.value);
             }
           }
         }
       }
     }
-    return keywordObject;
   }
+  return keywordObject;
+}
 
-  /**
-   *
-   * @param {Array} dimensions
-   * @return {Object}
-   */
-  function parseDimensions(dimensions) {
-    let dimensionsArray = [];
-    if (dimensions !== undefined) {
-      if (dimensions !== []) {
-        for (let dimension of dimensions) {
-          // Contains all the information for one dimension 
-          let dimensionObject = {identifier: dimension.identifier.value};
-          if (dimension.title) {
-            dimensionObject.title = parseTitles(dimension.title);
-          }
-          if (dimension._abstract) {
-            dimensionObject.abstract = parseAbstracts(dimension._abstract);
-          }
-          if (dimension.keywords) {
-            dimensionObject.keywords = parseKeywords(dimension.keywords);
-          }
-          if (dimension.uom) {
-            dimensionObject.uom = dimension.uom.value;
-          }
-          if (dimension.unitSymbol) {
-            dimensionObject.unitSymbol = dimension.unitSymbol;
-          }
-
-          // Default is a mandatory property 
-          let dimDefault = dimension._default || dimension.default;
-          dimensionObject.default = dimDefault;
-
-          if (dimension.current) {
-            dimensionObject.current = dimension.current;
-          }
-
-          // Value is a mandatory property 
-          dimensionObject.value = dimension.value;
-
-          dimensionsArray.push(dimensionObject);
+/**
+ *
+ * @param {Array} dimensions
+ * @return {Object}
+ */
+function parseDimensions(dimensions) {
+  let dimensionsArray = [];
+  if (dimensions !== undefined) {
+    if (dimensions !== []) {
+      for (let dimension of dimensions) {
+        // Contains all the information for one dimension 
+        let dimensionObject = {identifier: dimension.identifier.value};
+        if (dimension.title) {
+          dimensionObject.title = parseTitles(dimension.title);
         }
+        if (dimension._abstract) {
+          dimensionObject.abstract = parseAbstracts(dimension._abstract);
+        }
+        if (dimension.keywords) {
+          dimensionObject.keywords = parseKeywords(dimension.keywords);
+        }
+        if (dimension.uom) {
+          dimensionObject.uom = dimension.uom.value;
+        }
+        if (dimension.unitSymbol) {
+          dimensionObject.unitSymbol = dimension.unitSymbol;
+        }
+
+        // Default is a mandatory property 
+        let dimDefault = dimension._default || dimension.default;
+        dimensionObject.default = dimDefault;
+
+        if (dimension.current) {
+          dimensionObject.current = dimension.current;
+        }
+
+        // Value is a mandatory property 
+        dimensionObject.value = dimension.value;
+
+        dimensionsArray.push(dimensionObject);
       }
     }
-    return dimensionsArray;
   }
+  return dimensionsArray;
+}
 
-  /**
-   * Converts the crs from the long OGC specification style into a normal crs string.
-   * @param {String}  crs The crs in OGC specification style, e.g. 'urn:ogc:def:crs:OGC:2:84'.
-   * @return {String}     The crs in normal style, e.g. 'OGC:84'.
-   */
-  function convertCrs(crs) {
-    return crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
-  }
+/**
+ * Converts the crs from the long OGC specification style into a normal crs string.
+ * @param {String}  crs The crs in OGC specification style, e.g. 'urn:ogc:def:crs:OGC:2:84'.
+ * @return {String}     The crs in normal style, e.g. 'OGC:84'.
+ */
+function convertCrs(crs) {
+  return crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+}
 
-  /**
-   * Populates and returns an Object containing bounding box data
-   * with the correct axis orientation, projection code and dimensions.
-   * @param {Object}  box The bounding box
-   * @return {Object}     The bounding box data as an Object
-   */
-  function populateBoundingBox(box) {
-    let boundingBox;
-    if (box.name.localPart === 'WGS84BoundingBox') {
+/**
+ * Populates and returns an Object containing bounding box data
+ * with the correct axis orientation, projection code and dimensions.
+ * @param {Object}  box The bounding box
+ * @return {Object}     The bounding box data as an Object
+ */
+function populateBoundingBox(box) {
+  let boundingBox;
+  if (box.name.localPart === 'WGS84BoundingBox') {
+    boundingBox = {
+      minLat: box.value.lowerCorner[1],
+      minLon: box.value.lowerCorner[0],
+      maxLat: box.value.upperCorner[1],
+      maxLon: box.value.upperCorner[0],
+      style: 'wgs84BoundingBox',
+      dimensions: box.value.dimensions,
+    };
+    if (box.value.crs) {
+      boundingBox.projection = convertCrs(box.value.crs);
+    }
+  } else {
+    // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
+    let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
+    if (xyOrientation === 'en') {
       boundingBox = {
         minLat: box.value.lowerCorner[1],
         minLon: box.value.lowerCorner[0],
         maxLat: box.value.upperCorner[1],
         maxLon: box.value.upperCorner[0],
-        style: 'wgs84BoundingBox',
+        style: 'boundingBox',
         dimensions: box.value.dimensions,
       };
       if (box.value.crs) {
         boundingBox.projection = convertCrs(box.value.crs);
       }
     } else {
-      // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
-      let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
-      if (xyOrientation === 'en') {
-        boundingBox = {
-          minLat: box.value.lowerCorner[1],
-          minLon: box.value.lowerCorner[0],
-          maxLat: box.value.upperCorner[1],
-          maxLon: box.value.upperCorner[0],
-          style: 'boundingBox',
-          dimensions: box.value.dimensions,
-        };
-        if (box.value.crs) {
-          boundingBox.projection = convertCrs(box.value.crs);
-        }
-      } else {
-        boundingBox = {
-          minLat: box.value.lowerCorner[0],
-          minLon: box.value.lowerCorner[1],
-          maxLat: box.value.upperCorner[0],
-          maxLon: box.value.upperCorner[1],
-          style: 'boundingBox',
-          dimensions: box.value.dimensions,
-        };
-        if (box.value.crs) {
-          boundingBox.projection = convertCrs(box.value.crs);
-        }
+      boundingBox = {
+        minLat: box.value.lowerCorner[0],
+        minLon: box.value.lowerCorner[1],
+        maxLat: box.value.upperCorner[0],
+        maxLon: box.value.upperCorner[1],
+        style: 'boundingBox',
+        dimensions: box.value.dimensions,
+      };
+      if (box.value.crs) {
+        boundingBox.projection = convertCrs(box.value.crs);
       }
     }
-    return boundingBox;
   }
+  return boundingBox;
 }

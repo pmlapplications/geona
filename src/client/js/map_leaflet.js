@@ -4,9 +4,7 @@ import GeonaMap from './map';
 import {
   basemaps as defaultBasemaps, borderLayers as defaultBorders,
   dataLayers as defaultDataLayers, latLonLabelFormatter,
-  addLayerDefaults,
 } from './map_common';
-import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
 import $ from 'jquery';
 
 let L;

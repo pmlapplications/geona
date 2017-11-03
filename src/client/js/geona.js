@@ -39,7 +39,6 @@ export class Geona {
             window[this.config.get('onReadyCallback')](this);
           } catch (e) {
             console.error('Failed to call onReadyCallback: ' + e);
-            console.log(e);
           }
         }
       });

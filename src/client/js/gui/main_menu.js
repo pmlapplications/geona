@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import 'jquery';
 import 'jquery-ui/ui/widgets/sortable';
 // window.$ = $ = jQuery;
 import * as templates from '../../templates/compiled';
@@ -132,13 +132,12 @@ export class MainMenu {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        console.log(layers);
         for (let layer of layers.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
         }
         this.requestLayers = layers;
       }).catch((err) => {
-        alert('No layers found.');
+        alert('No layers found. Error: ' + err);
       });
   }
 

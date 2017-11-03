@@ -1,21 +1,21 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
-import $ from 'jquery';
+import 'jquery';
 
-import { load } from '../../../src/client_loader/loader.js';
+import {load} from '../../../src/client_loader/loader.js';
 
-import { getLayersFromWms } from '../../../src/client/js/map_common.js';
+import {getLayersFromWms} from '../../../src/client/js/map_common.js';
 
 chai.use(chaiAsPromised);
 chai.use(chaiHttp);
 let expect = chai.expect;
 
-describe('client/js/map_leaflet', function () {
+describe('client/js/map_leaflet', function() {
   // Shorthand for window.geonaTest, used in the actual tests
   let geona;
 
-  before(function (done) {
+  before(function(done) {
     this.timeout(5000); // eslint-disable-line no-invalid-this
 
     /**
@@ -2203,7 +2203,7 @@ describe('client/js/map_leaflet', function () {
               layers: ['Rrs_412'],
               version: '1.3.0',
               url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
-            }
+            },
           },
           {
             'identifier': 'Rrs_443',
@@ -4328,7 +4328,7 @@ describe('client/js/map_leaflet', function () {
               layers: ['Rrs_443'],
               version: '1.3.0',
               url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
-            }
+            },
           },
           {
             'identifier': 'Rrs_490',
@@ -6453,51 +6453,51 @@ describe('client/js/map_leaflet', function () {
               layers: ['Rrs_490'],
               version: '1.3.0',
               url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
-            }
+            },
           },
         ],
       },
     };
 
-    Promise.resolve(load(config1)).catch(function (err) {
+    Promise.resolve(load(config1)).catch(function(err) {
       console.error(err);
       done();
     });
   });
 
-  describe('test setup completion', function () {
-    it('should find the Geona object on the window', function () {
+  describe('test setup completion', function() {
+    it('should find the Geona object on the window', function() {
       expect(window.geonaLeafTest).to.be.an('object');
     });
-    it('should find that the variable \'geona\' points to the Geona object on the window', function () {
+    it('should find that the variable \'geona\' points to the Geona object on the window', function() {
       expect(geona).to.deep.equal(window.geonaLeafTest);
     });
-    it('should find seven layers in _availableLayers', function () {
+    it('should find seven layers in _availableLayers', function() {
       let availableLayersArray = Object.keys(geona.map._availableLayers);
       expect(availableLayersArray.length).to.equal(7);
     });
   });
 
-  describe('addLayer()', function () {
+  describe('addLayer()', function() {
     // The data layer we are adding to the map
     let dataLayer;
     // The list of layers on the map - could replace _mapLayers?
     let mapLayers;
 
-    before(function () {
+    before(function() {
       dataLayer = geona.map._availableLayers.Rrs_412;
       geona.map.addLayer(dataLayer);
     });
 
-    it('should have added a data layer to the map', function () {
+    it('should have added a data layer to the map', function() {
       mapLayers = geona.map._mapLayers;
       // Also tests that there isn't another layer on the map (index 0 should be the only one with data)
       expect(mapLayers.getLayers()[0].options.identifier).to.equal(dataLayer.identifier);
     });
-    it('should have added that layer to _availableLayers', function () {
+    it('should have added that layer to _availableLayers', function() {
       expect(geona.map._availableLayers[dataLayer.identifier]).to.not.be.undefined;
     });
-    it('should have added that layer to _mapLayers', function () {
+    it('should have added that layer to _mapLayers', function() {
       let identifiedLayer;
       for (let layer of geona.map._mapLayers.getLayers()) {
         if (layer.options.identifier === dataLayer.identifier) {
@@ -6506,10 +6506,10 @@ describe('client/js/map_leaflet', function () {
       }
       expect(identifiedLayer).to.not.be.undefined;
     });
-    it('should only have one layer on the map', function () {
+    it('should only have one layer on the map', function() {
       expect(geona.map._mapLayers.getLayers().length).to.equal(1);
     });
-    it('should add the basemap modifier to basemaps', function () {
+    it('should add the basemap modifier to basemaps', function() {
       geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
       for (let layer of geona.map._mapLayers.getLayers()) {
         if (layer.options.identifier === 'terrain-light') {
@@ -6517,7 +6517,7 @@ describe('client/js/map_leaflet', function () {
         }
       }
     });
-    it('should add the borders modifier to borders layers', function () {
+    it('should add the borders modifier to borders layers', function() {
       geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
       for (let layer of geona.map._mapLayers.getLayers()) {
         if (layer.options.identifier === 'line_black') {
@@ -6525,7 +6525,7 @@ describe('client/js/map_leaflet', function () {
         }
       }
     });
-    it('should remove the previous basemap when a new basemap is added', function () {
+    it('should remove the previous basemap when a new basemap is added', function() {
       geona.map.addLayer(geona.map._availableLayers.s2cloudless, 'basemap');
       let identifiers = [];
       for (let layer of geona.map._mapLayers.getLayers()) {
@@ -6542,7 +6542,7 @@ describe('client/js/map_leaflet', function () {
         }
       }
     });
-    it('should remove the previous borders when a new borders layer is added', function () {
+    it('should remove the previous borders when a new borders layer is added', function() {
       geona.map.addLayer(geona.map._availableLayers.line, 'borders');
       let identifiers = [];
       for (let layer of geona.map._mapLayers.getLayers()) {
@@ -6561,8 +6561,8 @@ describe('client/js/map_leaflet', function () {
     });
   });
 
-  describe('_mapLayers', function () {
-    it('should only contain tile layers', function () {
+  describe('_mapLayers', function() {
+    it('should only contain tile layers', function() {
       for (let layer of geona.map._mapLayers.getLayers()) {
         if (layer.options.crs === undefined) {
           expect.fail(
@@ -6577,12 +6577,12 @@ describe('client/js/map_leaflet', function () {
     });
   });
 
-  describe('removeLayer()', function () {
+  describe('removeLayer()', function() {
     let data;
     let basemap;
     let borders;
 
-    before(function () {
+    before(function() {
       for (let layer of geona.map._mapLayers.getLayers()) {
         if (layer.options.modifier === undefined) {
           data = layer;
@@ -6594,7 +6594,7 @@ describe('client/js/map_leaflet', function () {
       }
     });
 
-    it('should remove the layer from the map', function () {
+    it('should remove the layer from the map', function() {
       geona.map.removeLayer(data.options.identifier);
 
       let layerKeys = Object.keys(geona.map._map._layers);
@@ -6604,10 +6604,10 @@ describe('client/js/map_leaflet', function () {
         }
       }
     });
-    it('should remove the layer from the _mapLayers', function () {
+    it('should remove the layer from the _mapLayers', function() {
       expect(geona.map._mapLayers.getLayers()).to.not.include(data);
     });
-    it('should remove the basemap from the map', function () {
+    it('should remove the basemap from the map', function() {
       geona.map.removeLayer(basemap.options.identifier);
       let layerKeys = Object.keys(geona.map._map._layers);
       for (let layer of layerKeys) {
@@ -6616,13 +6616,13 @@ describe('client/js/map_leaflet', function () {
         }
       }
     });
-    it('should remove the basemap from the _mapLayers', function () {
+    it('should remove the basemap from the _mapLayers', function() {
       expect(geona.map._mapLayers.getLayers()).to.not.include(basemap);
     });
-    it('should set the config basemap to be \'none\'', function () {
+    it('should set the config basemap to be \'none\'', function() {
       expect(geona.map.config.basemap).to.equal('none');
     });
-    it('should remove the borders from the map', function () {
+    it('should remove the borders from the map', function() {
       geona.map.removeLayer(borders.options.identifier);
       let layerKeys = Object.keys(geona.map._map._layers);
       for (let layer of layerKeys) {
@@ -6631,23 +6631,23 @@ describe('client/js/map_leaflet', function () {
         }
       }
     });
-    it('should remove the borders from the _mapLayers', function () {
+    it('should remove the borders from the _mapLayers', function() {
       expect(geona.map._mapLayers.getLayers()).to.not.include(borders);
     });
-    it('should set the config countryBorders to be \'none\'', function () {
+    it('should set the config countryBorders to be \'none\'', function() {
       expect(geona.map.config.countryBorders).to.equal('none');
     });
   });
 
-  describe('reorderLayers()', function () {
-    describe('reordering - 1x basemap, 1x borders, 0x data', function () {
-      before(function () {
+  describe('reorderLayers()', function() {
+    describe('reordering - 1x basemap, 1x borders, 0x data', function() {
+      before(function() {
         // Basic setup with one basemap and one borders layer.
         geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
         geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
       });
 
-      it('should have set the lowest zIndex to be 0', function () {
+      it('should have set the lowest zIndex to be 0', function() {
         let lowestZIndex = 999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex < lowestZIndex) {
@@ -6656,14 +6656,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(lowestZIndex).to.equal(0);
       });
-      it('should find a basemap at zIndex 0', function () {
+      it('should find a basemap at zIndex 0', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 0) {
             expect(layer.options.modifier).to.equal('basemap');
           }
         }
       });
-      it('should have set the highest zIndex to be 1', function () {
+      it('should have set the highest zIndex to be 1', function() {
         let highestZIndex = -999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex > highestZIndex) {
@@ -6672,14 +6672,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(highestZIndex).to.equal(1);
       });
-      it('should find a borders layer at zIndex 1', function () {
+      it('should find a borders layer at zIndex 1', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 1) {
             expect(layer.options.modifier).to.equal('borders');
           }
         }
       });
-      it('should find zIndex values of 0, 1, not necessarily in that order', function () {
+      it('should find zIndex values of 0, 1, not necessarily in that order', function() {
         let allZIndices = [];
         for (let layer of geona.map._mapLayers.getLayers()) {
           allZIndices.push(layer.options.zIndex);
@@ -6688,22 +6688,22 @@ describe('client/js/map_leaflet', function () {
         expect(allZIndices.sort()).to.deep.equal([0, 1]);
       });
 
-      after(function () {
+      after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('terrain-light');
         geona.map.removeLayer('line_black');
       });
     });
 
-    describe('reordering - 1x basemap, 1x borders, 1x data', function () {
-      before(function () {
+    describe('reordering - 1x basemap, 1x borders, 1x data', function() {
+      before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
         geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
         geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
         geona.map.addLayer(geona.map._availableLayers.Rrs_412);
       });
 
-      it('should have set the lowest zIndex to be 0', function () {
+      it('should have set the lowest zIndex to be 0', function() {
         let lowestZIndex = 999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex < lowestZIndex) {
@@ -6712,14 +6712,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(lowestZIndex).to.equal(0);
       });
-      it('should find a basemap at zIndex 0', function () {
+      it('should find a basemap at zIndex 0', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 0) {
             expect(layer.options.modifier).to.equal('basemap');
           }
         }
       });
-      it('should have set the highest zIndex to be 2', function () {
+      it('should have set the highest zIndex to be 2', function() {
         let highestZIndex = -999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex > highestZIndex) {
@@ -6728,14 +6728,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(highestZIndex).to.equal(2);
       });
-      it('should find a borders layer at zIndex 2', function () {
+      it('should find a borders layer at zIndex 2', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 2) {
             expect(layer.options.modifier).to.equal('borders');
           }
         }
       });
-      it('should find zIndex values of 0, 1, 2, not necessarily in that order', function () {
+      it('should find zIndex values of 0, 1, 2, not necessarily in that order', function() {
         let allZIndices = [];
         for (let layer of geona.map._mapLayers.getLayers()) {
           allZIndices.push(layer.options.zIndex);
@@ -6744,7 +6744,7 @@ describe('client/js/map_leaflet', function () {
         expect(allZIndices.sort()).to.deep.equal([0, 1, 2]);
       });
 
-      after(function () {
+      after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('terrain-light');
         geona.map.removeLayer('line_black');
@@ -6752,15 +6752,15 @@ describe('client/js/map_leaflet', function () {
       });
     });
 
-    describe('reordering - 1x data, 1x borders, 1x basemap', function () {
-      before(function () {
+    describe('reordering - 1x data, 1x borders, 1x basemap', function() {
+      before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
         geona.map.addLayer(geona.map._availableLayers.Rrs_412);
         geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
         geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
       });
 
-      it('should have set the lowest zIndex to be 0', function () {
+      it('should have set the lowest zIndex to be 0', function() {
         let lowestZIndex = 999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex < lowestZIndex) {
@@ -6769,14 +6769,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(lowestZIndex).to.equal(0);
       });
-      it('should find a basemap at zIndex 0', function () {
+      it('should find a basemap at zIndex 0', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 0) {
             expect(layer.options.modifier).to.equal('basemap');
           }
         }
       });
-      it('should have set the highest zIndex to be 2', function () {
+      it('should have set the highest zIndex to be 2', function() {
         let highestZIndex = -999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex > highestZIndex) {
@@ -6785,14 +6785,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(highestZIndex).to.equal(2);
       });
-      it('should find a borders layer at zIndex 2', function () {
+      it('should find a borders layer at zIndex 2', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 2) {
             expect(layer.options.modifier).to.equal('borders');
           }
         }
       });
-      it('should find zIndex values of 0, 1, 2, not necessarily in that order', function () {
+      it('should find zIndex values of 0, 1, 2, not necessarily in that order', function() {
         let allZIndices = [];
         for (let layer of geona.map._mapLayers.getLayers()) {
           allZIndices.push(layer.options.zIndex);
@@ -6801,7 +6801,7 @@ describe('client/js/map_leaflet', function () {
         expect(allZIndices.sort()).to.deep.equal([0, 1, 2]);
       });
 
-      after(function () {
+      after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('Rrs_412');
         geona.map.removeLayer('line_black');
@@ -6809,8 +6809,8 @@ describe('client/js/map_leaflet', function () {
       });
     });
 
-    describe('reordering - 1x data, 1x borders, 1x basemap, basemap removed', function () {
-      before(function () {
+    describe('reordering - 1x data, 1x borders, 1x basemap, basemap removed', function() {
+      before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
         geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
         geona.map.addLayer(geona.map._availableLayers.Rrs_412);
@@ -6818,7 +6818,7 @@ describe('client/js/map_leaflet', function () {
         geona.map.removeLayer('terrain-light');
       });
 
-      it('should have set the lowest zIndex to be 0', function () {
+      it('should have set the lowest zIndex to be 0', function() {
         let lowestZIndex = 999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex < lowestZIndex) {
@@ -6827,14 +6827,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(lowestZIndex).to.equal(0);
       });
-      it('should find a data layer at zIndex 0', function () {
+      it('should find a data layer at zIndex 0', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 0) {
             expect(layer.options.modifier).to.be.undefined;
           }
         }
       });
-      it('should have set the highest zIndex to be 1', function () {
+      it('should have set the highest zIndex to be 1', function() {
         let highestZIndex = -999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex > highestZIndex) {
@@ -6843,14 +6843,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(highestZIndex).to.equal(1);
       });
-      it('should find a borders layer at zIndex 1', function () {
+      it('should find a borders layer at zIndex 1', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 1) {
             expect(layer.options.modifier).to.equal('borders');
           }
         }
       });
-      it('should find zIndex values of 0, 1, not necessarily in that order', function () {
+      it('should find zIndex values of 0, 1, not necessarily in that order', function() {
         let allZIndices = [];
         for (let layer of geona.map._mapLayers.getLayers()) {
           allZIndices.push(layer.options.zIndex);
@@ -6859,15 +6859,15 @@ describe('client/js/map_leaflet', function () {
         expect(allZIndices.sort()).to.deep.equal([0, 1]);
       });
 
-      after(function () {
+      after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('Rrs_412');
         geona.map.removeLayer('line_black');
       });
     });
 
-    describe('reordering - 1x borders, 1x data, 1x basemap, borders removed', function () {
-      before(function () {
+    describe('reordering - 1x borders, 1x data, 1x basemap, borders removed', function() {
+      before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
         geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
         geona.map.addLayer(geona.map._availableLayers.Rrs_412);
@@ -6875,7 +6875,7 @@ describe('client/js/map_leaflet', function () {
         geona.map.removeLayer('line_black');
       });
 
-      it('should have set the lowest zIndex to be 0', function () {
+      it('should have set the lowest zIndex to be 0', function() {
         let lowestZIndex = 999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex < lowestZIndex) {
@@ -6884,14 +6884,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(lowestZIndex).to.equal(0);
       });
-      it('should find a basemap at zIndex 0', function () {
+      it('should find a basemap at zIndex 0', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 0) {
             expect(layer.options.modifier).to.equal('basemap');
           }
         }
       });
-      it('should have set the highest zIndex to be 1', function () {
+      it('should have set the highest zIndex to be 1', function() {
         let highestZIndex = -999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex > highestZIndex) {
@@ -6900,14 +6900,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(highestZIndex).to.equal(1);
       });
-      it('should find a data layer at zIndex 1', function () {
+      it('should find a data layer at zIndex 1', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 1) {
             expect(layer.options.modifier).to.be.undefined;
           }
         }
       });
-      it('should find zIndex values of 0, 1, not necessarily in that order', function () {
+      it('should find zIndex values of 0, 1, not necessarily in that order', function() {
         let allZIndices = [];
         for (let layer of geona.map._mapLayers.getLayers()) {
           allZIndices.push(layer.options.zIndex);
@@ -6916,15 +6916,15 @@ describe('client/js/map_leaflet', function () {
         expect(allZIndices.sort()).to.deep.equal([0, 1]);
       });
 
-      after(function () {
+      after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('Rrs_412');
         geona.map.removeLayer('terrain-light');
       });
     });
 
-    describe('reordering - 1x borders, 1x data, 1x basemap, 2x data', function () {
-      before(function () {
+    describe('reordering - 1x borders, 1x data, 1x basemap, 2x data', function() {
+      before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
         geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
         geona.map.addLayer(geona.map._availableLayers.Rrs_412);
@@ -6933,7 +6933,7 @@ describe('client/js/map_leaflet', function () {
         geona.map.addLayer(geona.map._availableLayers.Rrs_490);
       });
 
-      it('should have set the lowest zIndex to be 0', function () {
+      it('should have set the lowest zIndex to be 0', function() {
         let lowestZIndex = 999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex < lowestZIndex) {
@@ -6942,14 +6942,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(lowestZIndex).to.equal(0);
       });
-      it('should find a basemap at zIndex 0', function () {
+      it('should find a basemap at zIndex 0', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 0) {
             expect(layer.options.modifier).to.equal('basemap');
           }
         }
       });
-      it('should have set the highest zIndex to be 4', function () {
+      it('should have set the highest zIndex to be 4', function() {
         let highestZIndex = -999;
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex > highestZIndex) {
@@ -6958,14 +6958,14 @@ describe('client/js/map_leaflet', function () {
         }
         expect(highestZIndex).to.equal(4);
       });
-      it('should find a data layer at zIndex 4', function () {
+      it('should find a data layer at zIndex 4', function() {
         for (let layer of geona.map._mapLayers.getLayers()) {
           if (layer.options.zIndex === 1) {
             expect(layer.options.modifier).to.be.undefined;
           }
         }
       });
-      it('should find zIndex values of 0, 1, 2, 3, 4, not necessarily in that order', function () {
+      it('should find zIndex values of 0, 1, 2, 3, 4, not necessarily in that order', function() {
         let allZIndices = [];
         for (let layer of geona.map._mapLayers.getLayers()) {
           allZIndices.push(layer.options.zIndex);
@@ -6974,7 +6974,7 @@ describe('client/js/map_leaflet', function () {
         expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3, 4]);
       });
 
-      after(function () {
+      after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('line_black');
         geona.map.removeLayer('Rrs_443');
@@ -6985,25 +6985,25 @@ describe('client/js/map_leaflet', function () {
     });
   });
 
-  describe('getLayersFromWms()', function () {
+  describe('getLayersFromWms()', function() {
     let wmsLayers;
-    before(function (done) {
+    before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
       getLayersFromWms('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY')
-        .then(function (layers) {
+        .then(function(layers) {
           wmsLayers = layers;
           done();
         })
-        .catch(function (err) {
+        .catch(function(err) {
           console.error(err);
           done();
         });
     });
 
-    it('should have found some layers', function () {
+    it('should have found some layers', function() {
       expect(wmsLayers.layers.length).to.be.above(0);
     });
-    it('should add one of the retrieved layers to the map', function () {
+    it('should add one of the retrieved layers to the map', function() {
       geona.map.addLayer(wmsLayers.layers[0]);
 
       let firstMapLayer = geona.map._mapLayers.getLayers()[0];
@@ -7012,7 +7012,7 @@ describe('client/js/map_leaflet', function () {
     // TODO add test for saving layers once functionality implemented
     // it('should save the layers found', function() {});
 
-    after(function () {
+    after(function() {
       // Clear all layers from the map
       let layer = geona.map._mapLayers.getLayers()[0];
       geona.map.removeLayer(layer.options.identifier);

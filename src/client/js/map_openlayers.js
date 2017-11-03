@@ -645,7 +645,6 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   let tileMatrixSetId;
 
   // TODO check correct - Replace with thing to search for TileMatrixSet that supports the current projection
-  // TODO change parser to make any objects with the id as the key changed to arrays with the id as a property :(
 
   // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
   let matrixLimits;
@@ -757,19 +756,6 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   //   [layer.boundingBox.minLon, layer.boundingBox.minLat, layer.boundingBox.maxLon, layer.boundingBox.maxLat],
   //   'EPSG:4326', projection
   // );
-  // TODO these four ifs can probably be removed - check that WMTS layers work before and after removing
-  if (isNaN(extent[0])) {
-    extent[0] = Number.NEGATIVE_INFINITY;
-  }
-  if (isNaN(extent[1])) {
-    extent[1] = Number.NEGATIVE_INFINITY;
-  }
-  if (isNaN(extent[2])) {
-    extent[2] = Number.POSITIVE_INFINITY;
-  }
-  if (isNaN(extent[3])) {
-    extent[3] = Number.POSITIVE_INFINITY;
-  }
 
   // Not sure if wrapX should always be true. It should be fine though
   let wrapX = true;
