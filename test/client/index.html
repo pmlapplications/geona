@@ -7,6 +7,8 @@
 
   <!--Includes the loader in the html-->
   <!-- <script src="js/loader.js"></script> -->
+  <!-- Mocha CSS -->
+  <link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
 
   <style type="text/css">
     #oltest {
@@ -25,7 +27,7 @@
       height: 50%;
     }
 
-    #test {
+    #mochaWrap {
       position: absolute;
       top: 0;
       left: 0;
@@ -39,15 +41,17 @@
 <body>
 
   <div id="oltest"></div>
-  <div id="leaflet"></div>
+  <div id="leaftest"></div>
 
-  <div id="mocha"></div>
+  <div id="mochaWrap">
+    <div id="mocha"></div>
+  </div>
 
   <div id="test" style=""></div>
   <!-- Testing dependencies -->
   <!-- <script src="node_modules/mocha/mocha.js"></script> -->
   <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
-  <script src="node_modules/chai/chai.js"></script>
+  <script src="../node_modules/chai/chai.js"></script>
 
   <script>
     mocha.setup('bdd');
@@ -56,7 +60,7 @@
   <!--<script src="js/bundle.js"></script>-->
   <!-- Test suite -->
   <!-- <script src="js/map_leaflet.js"></script> -->
-  <script src="js/client_tests.js"></script>
+  <script src="../js/client_tests.js"></script>
 
   <script>
     mocha.run();

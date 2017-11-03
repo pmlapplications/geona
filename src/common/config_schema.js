@@ -113,7 +113,7 @@ export let client = {
     basemap: {
       doc: 'The basemap to use, or \'none\'.',
       format: String,
-      default: 'eox',
+      default: 'terrain-light',
     },
     bingMapsApiKey: {
       doc: 'An API key to use Bing maps basemaps.',

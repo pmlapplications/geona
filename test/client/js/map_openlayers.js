@@ -20,21 +20,21 @@ describe('client/js/map_openlayers', function() {
 
     /**
      * Called when the map has finished creation and exists as an object.
-     * @param {*} geonaParam Unused here, not sure if it's used in normal circumstances.
      */
     function geonaOnReady() {
       console.log('Geona is ready.');
-      geona = window.geonaTest;
+      geona = window.geonaOlTest;
       done();
     }
     window.geonaOnReady = geonaOnReady;
 
 
     let config1 = {
-      geonaVariable: 'geonaTest',
+      geonaVariable: 'geonaOlTest',
       onReadyCallback: 'geonaOnReady',
       divId: 'oltest',
       map: {
+        library: 'openlayers',
         graticule: true,
         bingMapsApiKey: 'AgNtBFpBNF81T-ODIf_9WzE8UF_epbsfiSu9RYMbLfq_wXU_bBVAoyBw8VzfSjkd',
         basemap: 'none',
@@ -82,6 +82,7 @@ describe('client/js/map_openlayers', function() {
         dataLayers: [
           {
             'identifier': 'Rrs_412',
+            'PROTOCOL': 'wms',
             'title': {
               'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
             },
@@ -2198,9 +2199,15 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
             },
+            'layerServer': {
+              layers: ['Rrs_412'],
+              version: '1.3.0',
+              url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
+            }
           },
           {
             'identifier': 'Rrs_443',
+            'PROTOCOL': 'wms',
             'title': {
               'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
             },
@@ -4317,9 +4324,15 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
             },
+            'layerServer': {
+              layers: ['Rrs_443'],
+              version: '1.3.0',
+              url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
+            }
           },
           {
             'identifier': 'Rrs_490',
+            'PROTOCOL': 'wms',
             'title': {
               'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
             },
@@ -6436,6 +6449,11 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
             },
+            'layerServer': {
+              layers: ['Rrs_490'],
+              version: '1.3.0',
+              url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
+            }
           },
         ],
       },
@@ -6449,12 +6467,12 @@ describe('client/js/map_openlayers', function() {
 
   describe('test setup completion', function() {
     it('should find the Geona object on the window', function() {
-      expect(window.geonaTest).to.be.an('object');
+      expect(window.geonaOlTest).to.be.an('object');
     });
     it('should find that the variable \'geona\' points to the Geona object on the window', function() {
-      expect(geona).to.deep.equal(window.geonaTest);
+      expect(geona).to.deep.equal(window.geonaOlTest);
     });
-    it('should find five layers in _availableLayers', function() {
+    it('should find seven layers in _availableLayers', function() {
       let availableLayersArray = Object.keys(geona.map._availableLayers);
       expect(availableLayersArray.length).to.equal(7);
     });
@@ -6531,15 +6549,9 @@ describe('client/js/map_openlayers', function() {
       for (let layer of geona.map._map.getLayers().getArray()) {
         if (layer.get('modifier') === undefined) {
           data = layer;
-        }
-      }
-      for (let layer of geona.map._map.getLayers().getArray()) {
-        if (layer.get('modifier') === 'basemap') {
+        } else if (layer.get('modifier') === 'basemap') {
           basemap = layer;
-        }
-      }
-      for (let layer of geona.map._map.getLayers().getArray()) {
-        if (layer.get('modifier') === 'borders') {
+        } else if (layer.get('modifier') === 'borders') {
           borders = layer;
         }
       }
@@ -6945,6 +6957,40 @@ describe('client/js/map_openlayers', function() {
 
       let firstMapLayer = geona.map._map.getLayers().getArray()[0];
       expect(firstMapLayer.get('identifier')).to.equal(wmsLayers.layers[0].identifier);
+    });
+    // TODO add test for saving layers once functionality implemented
+    // it('should save the layers found', function() {});
+
+    after(function() {
+      // Clear all layers from the map
+      let layer = geona.map._map.getLayers().getArray()[0];
+      geona.map.removeLayer(layer.get('identifier'));
+    });
+  });
+
+  describe('getLayersFromWmts()', function() {
+    let wmtsLayers;
+    before(function(done) {
+      this.timeout(10000); // eslint-disable-line no-invalid-this
+      getLayersFromWmts('https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?VERSION=1.0.0&Request=GetCapabilities&Service=WMTS')
+        .then(function(layers) {
+          wmtsLayers = layers;
+          done();
+        })
+        .catch(function(err) {
+          console.error(err);
+          done();
+        });
+    });
+
+    it('should have found some layers', function() {
+      expect(wmtsLayers.layers.length).to.be.above(0);
+    });
+    it('should add one of the retrieved layers to the map', function() {
+      geona.map.addLayer(wmtsLayers.layers[0]);
+
+      let firstMapLayer = geona.map._map.getLayers().getArray()[0];
+      expect(firstMapLayer.get('identifier')).to.equal(wmtsLayers.layers[0].identifier);
     });
     // TODO add test for saving layers once functionality implemented
     // it('should save the layers found', function() {});

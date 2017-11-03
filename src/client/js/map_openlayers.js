@@ -45,10 +45,10 @@ export class OlMap extends GeonaMap {
         width: 1,
         lineDash: [1, 4],
       }),
-      latLabelFormatter: function (latitude) {
+      latLabelFormatter: function(latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lonLabelFormatter: function (longitude) {
+      lonLabelFormatter: function(longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -95,22 +95,19 @@ export class OlMap extends GeonaMap {
     this._loadCountryBorderLayers();
     this._loadDataLayers();
 
-    if (this.config.basemap !== 'none') {
+    if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
     }
-    if (this.config.countryBorders !== 'none') {
+    if (this.config.countryBorders !== 'none' && this.config.countryBorders !== undefined) {
       this.addLayer(this._availableLayers[this.config.countryBorders], 'borders');
     }
-    if (this.config.data.length !== 0) {
-      for (let layer of this.config.data) {
-        this.addLayer(this._availableLayers[layer.identifier]);
+    if (this.config.data !== undefined) {
+      if (this.config.data.length !== 0) {
+        for (let layer of this.config.data) {
+          this.addLayer(this._availableLayers[layer.identifier]);
+        }
       }
     }
-
-    // this._map.addLayer(this._availableLayers['terrain-light']);
-    // this._activeLayers['terrain-light'] = this._availableLayers['terrain-light'];
-    // this._map.addLayer(this._availableLayers.line_black);
-    // this._activeLayers.line_black = this._availableLayers.line_black;
 
     this.loadConfig_();
 
@@ -231,12 +228,12 @@ export class OlMap extends GeonaMap {
       let basemapId = this._map.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
       if (this._availableLayers[basemapId].projections.includes(projection)) {
-        this.setView({ projection: projection });
+        this.setView({projection: projection});
       } else {
         alert('Basemap ' + this._map.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     } else {
-      this.setView({ projection: projection });
+      this.setView({projection: projection});
     }
 
     this.config.projection = projection;
@@ -258,7 +255,7 @@ export class OlMap extends GeonaMap {
   setView(options) {
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
-    let center = options.center || { lat: currentCenterLatLon[0], lon: currentCenterLatLon[1] };
+    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
@@ -387,6 +384,8 @@ export class OlMap extends GeonaMap {
             crossOrigin: null,
           });
           break;
+        case undefined:
+          throw new Error('Layer protocol is undefined');
       }
 
       if (this._availableLayers[geonaLayer.identifier] === undefined) {
@@ -507,7 +506,6 @@ export class OlMap extends GeonaMap {
       if (layer !== undefined) {
         if (layer.get('zIndex') < targetIndex) {
           // We are moving the layer up
-          // FIXME the warning given by the getArray method might mean that the zIndex values are not being updated.
           for (let currentLayer of this._map.getLayers().getArray()) {
             if (currentLayer.get('zIndex') <= targetIndex && currentLayer.get('zIndex') > layer.get('zIndex')) {
               // Layers use higher values for higher positioning.
@@ -547,15 +545,17 @@ export class OlMap extends GeonaMap {
         console.error('bingMapsApiKey is null or undefined');
       }
     }
-    for (let layer of this.config.basemaps) {
-      if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
-        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-          this._availableLayers[layer.identifier] = layer;
+    if (this.config.basemaps !== undefined) {
+      for (let layer of this.config.basemaps) {
+        if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+          if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+            this._availableLayers[layer.identifier] = layer;
+          } else {
+            console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+          }
         } else {
-          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+          console.error('bingMapsApiKey is null or undefined');
         }
-      } else {
-        console.error('bingMapsApiKey is null or undefined');
       }
     }
   }
@@ -571,11 +571,13 @@ export class OlMap extends GeonaMap {
         console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
       }
     }
-    for (let layer of this.config.borders) {
-      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-        this._availableLayers[layer.identifier] = layer;
-      } else {
-        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+    if (this.config.borders !== undefined) {
+      for (let layer of this.config.borders) {
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
       }
     }
   }
@@ -591,11 +593,13 @@ export class OlMap extends GeonaMap {
         console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
       }
     }
-    for (let layer of this.config.dataLayers) {
-      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-        this._availableLayers[layer.identifier] = layer;
-      } else {
-        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+    if (this.config.dataLayers !== undefined) {
+      for (let layer of this.config.dataLayers) {
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
       }
     }
   }
@@ -613,7 +617,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function () {
+    mapJs.onload = function() {
       import('openlayers')
         .then((olLib) => {
           ol = olLib;
@@ -859,7 +863,7 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
 
   // Sort the array of tileMatrices by their scaleDenominators
-  matrixSet.tileMatrices.sort(function (a, b) {
+  matrixSet.tileMatrices.sort(function(a, b) {
     return b.scaleDenominator - a.scaleDenominator;
   });
 

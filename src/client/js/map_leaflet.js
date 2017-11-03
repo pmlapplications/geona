@@ -2,7 +2,8 @@
 
 import GeonaMap from './map';
 import {
-  basemaps as defaultBasemaps, borderLayers as defaultBorders, latLonLabelFormatter,
+  basemaps as defaultBasemaps, borderLayers as defaultBorders,
+  dataLayers as defaultDataLayers, latLonLabelFormatter,
   addLayerDefaults,
 } from './map_common';
 import CCI5DAY from './rsg.pml.ac.uk-thredds-wms-CCI_ALL-v3.0-5DAY';
@@ -95,16 +96,24 @@ export class LMap extends GeonaMap {
     this._mapLayers.addTo(this._map);
 
 
-    // Load the default basemaps and borders layers, plus any custom ones defined in the config
+    // Load the default basemaps, borders layers, and data layers.
     this._loadBasemaps();
     this._loadCountryBorderLayers();
+    this._loadDataLayers();
 
-    this.addLayer(this._availableLayers['terrain-light'], 'basemap');
-    // this._availableLayers.gebco_08_grid.addTo(this._map);
-    // this._mapLayers.addLayer(this._availableLayers.gebco_08_grid);
-    this.addLayer(this._availableLayers.line_black, 'borders');
-    // this._availableLayers.line_black.addTo(this._map);
-    // this._mapLayers.addLayer(this._availableLayers.line_black);
+    if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
+      this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
+    }
+    if (this.config.countryBorders !== 'none' && this.config.countryBorders !== undefined) {
+      this.addLayer(this._availableLayers[this.config.countryBorders], 'borders');
+    }
+    if (this.config.data !== undefined) {
+      if (this.config.data.length !== 0) {
+        for (let layer of this.config.data) {
+          this.addLayer(this._availableLayers[layer.identifier]);
+        }
+      }
+    }
 
     this.loadConfig_();
     // Must come last in the constructor
@@ -131,10 +140,9 @@ export class LMap extends GeonaMap {
     if (this.config.basemap !== 'none') {
       this._mapLayers.eachLayer((currentLayer) => {
         if (currentLayer.options.modifier === 'basemap') {
-          currentLayer.remove();
+          this.removeLayer(currentLayer.options.identifier);
         }
       });
-      this.config.basemap = 'none';
     }
     if (layer !== undefined && this._map.options._crs !== layer.crs) {
       this.setProjection(deLeafletizeProjection(layer.crs));
@@ -148,10 +156,9 @@ export class LMap extends GeonaMap {
     if (this.config.countryBorders !== 'none') {
       this._mapLayers.eachLayer((currentLayer) => {
         if (currentLayer.options.modifier === 'borders') {
-          currentLayer.remove();
+          this.removeLayer(currentLayer.options.identifier);
         }
       });
-      this.config.countryBorders = 'none';
     }
   }
 
@@ -341,7 +348,6 @@ export class LMap extends GeonaMap {
       let projection;
       // zIndex defines the zero-based index we want the layer to be displayed at by default.
       // This will be overwritten if the layer is a basemap.
-      let zIndex = this._mapLayers.getLayers().length;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
@@ -387,7 +393,7 @@ export class LMap extends GeonaMap {
             attribution: geonaLayer.attribution,
             version: geonaLayer.layerServer.version,
             crs: projection,
-            zIndex: zIndex,
+            zIndex: this._mapLayers.getLayers().length,
           });
           if (modifier !== undefined) {
             layer.options.modifier = modifier;
@@ -396,6 +402,8 @@ export class LMap extends GeonaMap {
         case 'wmts':
           alert('WMTS is not supported for Leaflet');
           break;
+        case undefined:
+          throw new Error('Layer protocol is undefined');
       }
       if (modifier === 'basemap') {
         this._clearBasemap(layer);
@@ -407,8 +415,8 @@ export class LMap extends GeonaMap {
       this._mapLayers.addLayer(layer);
 
       if (modifier === 'basemap') {
-        this.config.basemap = layer.options.identifier;
         this.reorderLayers(layer.options.identifier, 0);
+        this.config.basemap = layer.options.identifier;
       } else if (modifier === 'borders') {
         this.config.countryBorders = layer.options.identifier;
       }
@@ -431,10 +439,14 @@ export class LMap extends GeonaMap {
   removeLayer(layerIdentifier) {
     for (let layer of this._mapLayers.getLayers()) {
       if (layer.options.identifier === layerIdentifier) {
-        layer.remove();
         this._mapLayers.removeLayer(layer);
+        layer.remove();
         if (layer.options.modifier === 'basemap') {
           this.config.basemap = 'none';
+          // As we have removed the basemap, the zIndices should all be reduced by 1
+          for (let remainingLayer of this._mapLayers.getLayers()) {
+            remainingLayer.setZIndex(remainingLayer.options.zIndex - 1);
+          }
         } else if (layer.options.modifier === 'borders') {
           this.config.countryBorders = 'none';
         }
@@ -479,22 +491,28 @@ export class LMap extends GeonaMap {
    * layer, the zIndex values would be 0, 1, 2, in that order.
    *
    * @param {String}  layerIdentifier The identifier of the layer to be moved.
-   * @param {Integer} index The zero-based index to insert the layer at. Higher values for higher layers.
+   * @param {Integer} targetIndex The zero-based index to insert the layer at. Higher values for higher layers.
    */
-  reorderLayers(layerIdentifier, index) {
+  reorderLayers(layerIdentifier, targetIndex) {
     let layer;
+    let layerModifier;
+    for (let mapLayer of this._mapLayers.getLayers()) {
+      if (mapLayer.options.identifier === layerIdentifier) {
+        layerModifier = mapLayer.options.modifier;
+      }
+    }
     let maxZIndex = this._mapLayers.getLayers().length - 1;
 
-    if (this.config.basemap !== 'none' && index <= 0) {
+    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
       // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
       throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
-    } else if (this.config.basemap === 'none' && index < 0) {
+    } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.countryBorders !== 'none' && index >= maxZIndex) {
+    } else if (this.config.countryBorders !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.countryBorders === 'none' && index > maxZIndex) {
+    } else if (this.config.countryBorders === 'none' && targetIndex > maxZIndex && this._initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -504,63 +522,30 @@ export class LMap extends GeonaMap {
         }
       }
       if (layer !== undefined) {
-        if (layer.options.zIndex < index) {
-        // We are moving the layer up
+        if (layer.options.zIndex < targetIndex) {
+          // We are moving the layer up
           for (let currentLayer of this._mapLayers.getLayers()) {
-            if (currentLayer.options.zIndex <= index && currentLayer.options.zIndex > layer.options.zIndex) {
-            // Layers use higher values for higher positioning.
+            if (currentLayer.options.zIndex <= targetIndex && currentLayer.options.zIndex > layer.options.zIndex) {
+              // Layers use higher values for higher positioning.
               let newZIndex = currentLayer.options.zIndex - 1;
               currentLayer.setZIndex(newZIndex);
             }
           }
-        } else if (layer.options.zIndex > index) {
-        // We are moving the layer down
+        } else if (layer.options.zIndex > targetIndex) {
+          // We are moving the layer down
           for (let currentLayer of this._mapLayers.getLayers()) {
-            if (currentLayer.options.zIndex >= index && currentLayer.options.zIndex < layer.options.zIndex) {
-            // Layers use higher values for higher positioning.
+            if (currentLayer.options.zIndex >= targetIndex && currentLayer.options.zIndex < layer.options.zIndex) {
+              // Layers use higher values for higher positioning.
               let newZIndex = currentLayer.options.zIndex + 1;
               currentLayer.setZIndex(newZIndex);
             }
           }
         }
 
-        layer.setZIndex(index);
+        layer.setZIndex(targetIndex);
       } else {
-      // console.error('Layer ' + layerIdentifier + ' cannot be reordered, as it does not exist on the map.');
+        // console.error('Layer ' + layerIdentifier + ' cannot be reordered, as it does not exist on the map.');
         throw new Error('No layer with identifier \'' + layerIdentifier + '\' exists on the map');
-      }
-    }
-  }
-
-  /**
-   * Load the data layers defined in the config
-   */
-  _loadLayers() {
-    for (let addedLayer of this.config.layers) {
-      addedLayer = addLayerDefaults(addedLayer);
-
-      let layerData;
-      for (let serverLayer of CCI5DAY.server.Layers) {
-        if (serverLayer.Name === addedLayer.identifier) {
-          layerData = serverLayer;
-        }
-      }
-
-      // let tile;
-      switch (addedLayer.source.type) {
-        case 'wms':
-          this._availableLayers[addedLayer.identifier] = L.tileLayer.wms(addedLayer.source.url, {
-            layers: addedLayer.source.params.layers,
-            version: addedLayer.source.params.version,
-            attribution: addedLayer.source.attributions,
-            projections: addedLayer.projections,
-            viewSettings: addedLayer.viewSettings,
-            layerData: layerData,
-          });
-          break;
-        case 'wmts':
-          console.error('WMTS not supported for Leaflet');
-          break;
       }
     }
   }
@@ -569,12 +554,28 @@ export class LMap extends GeonaMap {
    * Load the default basemaps, and any defined in the config.
    */
   _loadBasemaps() {
-    // TODO load from config too
     for (let layer of defaultBasemaps) {
       if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
-        this._availableLayers[layer.identifier] = layer;
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
       } else {
         console.error('bingMapsApiKey is null or undefined');
+      }
+    }
+    if (this.config.basemaps !== undefined) {
+      for (let layer of this.config.basemaps) {
+        if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+          if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+            this._availableLayers[layer.identifier] = layer;
+          } else {
+            console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+          }
+        } else {
+          console.error('bingMapsApiKey is null or undefined');
+        }
       }
     }
   }
@@ -583,9 +584,43 @@ export class LMap extends GeonaMap {
    * Load the default border layers, and any defined in the config.
    */
   _loadCountryBorderLayers() {
-    // TODO load from config too
     for (let layer of defaultBorders) {
-      this._availableLayers[layer.identifier] = layer;
+      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+      }
+    }
+    if (this.config.borders !== undefined) {
+      for (let layer of this.config.borders) {
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
+      }
+    }
+  }
+
+  /**
+   * Load the default data layers, and any defined in the config.
+   */
+  _loadDataLayers() {
+    for (let layer of defaultDataLayers) {
+      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        this._availableLayers[layer.identifier] = layer;
+      } else {
+        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+      }
+    }
+    if (this.config.dataLayers !== undefined) {
+      for (let layer of this.config.dataLayers) {
+        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          this._availableLayers[layer.identifier] = layer;
+        } else {
+          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
+        }
+      }
     }
   }
 }

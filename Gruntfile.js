@@ -12,7 +12,7 @@ module.exports = function(grunt) {
   };
 
   let clientTestsBundle = {
-    'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
+    'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
   };
 
   let clientMapCommonBundle = {
@@ -216,6 +216,16 @@ module.exports = function(grunt) {
           },
         ],
       },
+      test: {
+        files: [
+          {
+            expand: true,
+            cwd: 'test/client',
+            src: ['index.html'],
+            dest: 'static/test',
+          },
+        ],
+      },
     },
 
     env: { // Setting the BABEL_ENV environment variable to use the correct .babelrc config
@@ -337,7 +347,7 @@ module.exports = function(grunt) {
     'browserifyOther', 'env:babili', 'babel:babili']);
   // Build the client and watch for changes
   grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
-    'browserify:client', 'browserifyOther', 'watch']);
+    'browserify:client', 'browserifyOther', 'copy:test', 'watch']);
 
   grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:clientTests', 'browserify:clientMapCommon', 'browserify:clientMapLeaflet', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
 };
