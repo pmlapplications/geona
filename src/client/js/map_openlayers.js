@@ -319,6 +319,7 @@ export class OlMap extends GeonaMap {
       let requiredLayer;
       let format;
       let projection;
+      let style;
       switch (geonaLayer.PROTOCOL) {
         case 'wms':
           title = geonaLayer.title.und;
@@ -351,6 +352,9 @@ export class OlMap extends GeonaMap {
           } else {
             projection = geonaLayer.projections[0];
           }
+          if (geonaLayer.styles !== undefined) {
+            style = geonaLayer.styles[0].name;
+          }
           source = new ol.source.TileWMS({
             url: geonaLayer.layerServer.url,
             projection: projection,
@@ -358,7 +362,7 @@ export class OlMap extends GeonaMap {
             params: {
               LAYERS: requiredLayer,
               FORMAT: geonaLayer.formats || 'image/png',
-              STYLES: geonaLayer.styles || 'boxfill/alg',
+              STYLES: style || 'boxfill/alg',
               // TODO update once isTemporal, firstTime and lastTime are working
               time: '2015-12-27T00:00:00.000Z',
               wrapDateLine: true,

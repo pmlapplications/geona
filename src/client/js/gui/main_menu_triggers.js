@@ -109,15 +109,12 @@ function registerExploreTriggers(eventManager, parentDiv) {
   parentDiv.find('.js-geona-explore-panel-content__add-url').click(() => {
     // Check for service type
     let service = parentDiv.find('.js-geona-explore-panel-content__service option:selected').text();
-    console.log('service: ' + service);
     switch (service) {
       case 'WMS':
         eventManager.trigger('mainMenu.getLayersFromWms');
-        console.log('wms trigger');
         break;
       case 'WMTS':
         eventManager.trigger('mainMenu.getLayersFromWmts');
-        console.log('wmts trigger');
         break;
     }
   });

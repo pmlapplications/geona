@@ -12,7 +12,7 @@ module.exports = function(grunt) {
   };
 
   let clientTestsBundle = {
-    'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
+    'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
   };
 
   let clientMapCommonBundle = {
@@ -21,10 +21,6 @@ module.exports = function(grunt) {
 
   let clientMapLeafletBundle = {
     'static/js/map_leaflet_es5.js': 'src/client/js/map_leaflet.js',
-  };
-
-  let clientTestIndex = {
-    'static/index.html': 'test/client/index.html',
   };
 
   let vendorLibs = [

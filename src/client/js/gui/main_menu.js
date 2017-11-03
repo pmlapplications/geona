@@ -111,7 +111,6 @@ export class MainMenu {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        console.log(layers);
         for (let layer of layers.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
         }
@@ -161,7 +160,6 @@ export class MainMenu {
  */
   addUrlLayerToMap() {
     let selectedLayer = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
-    console.log(this.requestLayers);
     for (let layer of this.requestLayers.layers) {
       if (layer.identifier === selectedLayer) {
         this.geona.map.addLayer(layer);

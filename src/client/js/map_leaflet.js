@@ -346,6 +346,7 @@ export class LMap extends GeonaMap {
       let requiredLayer;
       let format;
       let projection;
+      let style;
       // zIndex defines the zero-based index we want the layer to be displayed at by default.
       // This will be overwritten if the layer is a basemap.
       switch (geonaLayer.PROTOCOL) {
@@ -383,11 +384,14 @@ export class LMap extends GeonaMap {
           } else {
             projection = leafletizeProjection(geonaLayer.projections[0]);
           }
+          if (geonaLayer.styles !== undefined) {
+            style = geonaLayer.styles[0].name;
+          }
           // eslint-disable-next-line new-cap
           layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
             identifier: geonaLayer.identifier,
             layers: requiredLayer,
-            styles: geonaLayer.styles || 'boxfill/alg',
+            styles: style || 'boxfill/alg',
             format: format || 'image/png',
             transparent: true,
             attribution: geonaLayer.attribution,
