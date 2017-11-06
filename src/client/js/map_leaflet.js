@@ -79,6 +79,8 @@ export class LMap extends GeonaMap {
       zoomControl: false,
     });
 
+    this._map.attributionControl.setPrefix('<a href="http://leafletjs.com/"> <img border="0" width="10px" height="10px" target="_blank" alt="Leaflet" src="https://raw.githubusercontent.com/Leaflet/Leaflet/master/docs/docs/images/favicon.ico"></a> Geona');
+
     L.control.zoom({
       zoomInText: '<span class="icon-zoom-in"></span>',
       zoomOutText: '<span class="icon-zoom-out"></span>',
@@ -344,6 +346,7 @@ export class LMap extends GeonaMap {
       let requiredLayer;
       let format;
       let projection;
+      let attribution;
       let style;
       // zIndex defines the zero-based index we want the layer to be displayed at by default.
       // This will be overwritten if the layer is a basemap.
@@ -385,6 +388,13 @@ export class LMap extends GeonaMap {
           if (geonaLayer.styles !== undefined) {
             style = geonaLayer.styles[0].name;
           }
+          if (geonaLayer.attribution) {
+            if (geonaLayer.attribution.onlineResource) {
+              attribution = geonaLayer.attribution.onlineResource;
+            } else {
+              attribution = geonaLayer.attribution.title;
+            }
+          }
           // eslint-disable-next-line new-cap
           layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
             identifier: geonaLayer.identifier,
@@ -392,7 +402,7 @@ export class LMap extends GeonaMap {
             styles: style || 'boxfill/alg',
             format: format || 'image/png',
             transparent: true,
-            attribution: geonaLayer.attribution,
+            attribution: attribution,
             version: geonaLayer.layerServer.version,
             crs: projection,
             zIndex: this._mapLayers.getLayers().length,

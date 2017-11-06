@@ -71,7 +71,11 @@ describe('client/js/map_leaflet', function() {
             projections: ['EPSG:4326', 'EPSG:3857'],
             formats: ['image/png'],
             isTemporal: false,
-            styles: 'line_black',
+            styles: [
+              {
+                name: 'line_black',
+              },
+            ],
             layerServer: {
               layers: ['rsg:full_10m_borders'],
               version: '1.1.0',
@@ -6476,6 +6480,9 @@ describe('client/js/map_leaflet', function() {
       let availableLayersArray = Object.keys(geona.map._availableLayers);
       expect(availableLayersArray.length).to.equal(7);
     });
+    it('should find attribution prefix', function() {
+      expect(geona.map._map.attributionControl.options.prefix).to.equal('<a href="http://leafletjs.com/"> <img border="0" width="10px" height="10px" target="_blank" alt="Leaflet" src="https://raw.githubusercontent.com/Leaflet/Leaflet/master/docs/docs/images/favicon.ico"></a> Geona');
+    });
   });
 
   describe('addLayer()', function() {
@@ -6516,6 +6523,10 @@ describe('client/js/map_leaflet', function() {
           expect(layer.options.modifier).to.equal('basemap');
         }
       }
+    });
+    it('should display the correct attribution for basemaps', function() {
+      let html = Object.keys(geona.map._map.attributionControl._attributions)[0];
+      expect(html).to.deep.equal(geona.map.config.basemaps[0].attribution.onlineResource);
     });
     it('should add the borders modifier to borders layers', function() {
       geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');

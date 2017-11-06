@@ -71,7 +71,11 @@ describe('client/js/map_openlayers', function() {
             projections: ['EPSG:4326', 'EPSG:3857'],
             formats: ['image/png'],
             isTemporal: false,
-            styles: 'line_black',
+            styles: [
+              {
+                name: 'line_black',
+              },
+            ],
             layerServer: {
               layers: ['rsg:full_10m_borders'],
               version: '1.1.0',
@@ -2203,7 +2207,7 @@ describe('client/js/map_openlayers', function() {
               layers: ['Rrs_412'],
               version: '1.3.0',
               url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
-            }
+            },
           },
           {
             'identifier': 'Rrs_443',
@@ -4328,7 +4332,7 @@ describe('client/js/map_openlayers', function() {
               layers: ['Rrs_443'],
               version: '1.3.0',
               url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
-            }
+            },
           },
           {
             'identifier': 'Rrs_490',
@@ -6453,7 +6457,7 @@ describe('client/js/map_openlayers', function() {
               layers: ['Rrs_490'],
               version: '1.3.0',
               url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
-            }
+            },
           },
         ],
       },
@@ -6485,8 +6489,8 @@ describe('client/js/map_openlayers', function() {
     let mapLayers;
 
     before(function() {
-        dataLayer = geona.map._availableLayers.Rrs_412;
-        geona.map.addLayer(dataLayer);
+      dataLayer = geona.map._availableLayers.Rrs_412;
+      geona.map.addLayer(dataLayer);
     });
 
     it('should have added a data layer to the map', function() {
@@ -6507,6 +6511,10 @@ describe('client/js/map_openlayers', function() {
     it('should add the basemap modifier to basemaps', function() {
       geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
       expect(geona.map._activeLayers['terrain-light'].get('modifier')).to.equal('basemap');
+    });
+    it('should display the correct attribution for basemaps', function() {
+      let html = geona.map._map.getLayers().getArray()[1].getSource().getAttributions()[0].getHTML();
+      expect(html).to.deep.equal('Geona | ' + geona.map.config.basemaps[0].attribution.onlineResource);
     });
     it('should add the borders modifier to borders layers', function() {
       geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');

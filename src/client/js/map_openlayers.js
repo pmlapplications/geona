@@ -314,6 +314,7 @@ export class OlMap extends GeonaMap {
   addLayer(geonaLayer, modifier = undefined) {
     if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
       let source;
+      let attributions;
       let title;
       let time;
       let requiredLayer;
@@ -355,9 +356,24 @@ export class OlMap extends GeonaMap {
           if (geonaLayer.styles !== undefined) {
             style = geonaLayer.styles[0].name;
           }
+          if (geonaLayer.attribution) {
+            if (geonaLayer.attribution.onlineResource) {
+              // attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+              attributions = geonaLayer.attribution.onlineResource;
+            } else {
+              attributions = geonaLayer.attribution.title;
+            }
+          }
+          // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers
+          // Not good because 'Geona' won't be displayed without any layers, if the layer it's attached to is
+          // removed, and will be out of sequence if the layers are added in different orders
+          if (this._map.getLayers().getArray().length === 0 || modifier === 'basemap') {
+            attributions = 'Geona | ' + attributions;
+          }
           source = new ol.source.TileWMS({
             url: geonaLayer.layerServer.url,
             projection: projection,
+            attributions: attributions,
             crossOrigin: null,
             params: {
               LAYERS: requiredLayer,
@@ -370,13 +386,6 @@ export class OlMap extends GeonaMap {
               VERSION: geonaLayer.layerServer.version,
             },
           });
-          if (geonaLayer.attribution) {
-            if (geonaLayer.attribution.onlineResource) {
-              source.attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-            } else {
-              source.attributions = geonaLayer.attribution.title;
-            }
-          }
           break;
         case 'wmts': {
           title = selectPropertyLanguage(geonaLayer.title);

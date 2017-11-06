@@ -408,7 +408,11 @@ export const borderLayers = [
     projections: ['EPSG:4326', 'EPSG:3857'],
     formats: ['image/png'],
     isTemporal: false,
-    styles: 'line_black',
+    styles: [
+      {
+        name: 'line_black',
+      },
+    ],
     layerServer: {
       layers: ['rsg:full_10m_borders'],
       version: '1.1.0',
@@ -424,7 +428,11 @@ export const borderLayers = [
     projections: ['EPSG:4326', 'EPSG:3857'],
     formats: ['image/png'],
     isTemporal: false,
-    styles: 'line',
+    styles: [
+      {
+        name: 'line',
+      },
+    ],
     layerServer: {
       layers: ['rsg:full_10m_borders'],
       version: '1.1.0',
