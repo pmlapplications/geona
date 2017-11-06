@@ -91,20 +91,20 @@ export class OlMap extends GeonaMap {
       ],
     });
 
-    this._loadBasemaps();
-    this._loadCountryBorderLayers();
+    this._loadBasemapLayers();
+    this._loadBordersLayers();
     this._loadDataLayers();
 
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
     }
-    if (this.config.countryBorders !== 'none' && this.config.countryBorders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.countryBorders], 'borders');
+    if (this.config.borders !== 'none' && this.config.borders !== undefined) {
+      this.addLayer(this._availableLayers[this.config.borders], 'borders');
     }
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
         for (let layer of this.config.data) {
-          this.addLayer(this._availableLayers[layer.identifier]);
+          this.addLayer(this._availableLayers[layer]);
         }
       }
     }
@@ -207,7 +207,7 @@ export class OlMap extends GeonaMap {
    * Clear the country borders if active
    */
   _clearBorders() {
-    if (this._initialized === true && this.config.countryBorders !== 'none') {
+    if (this._initialized === true && this.config.borders !== 'none') {
       // Removes the top-most layer (borders will always be on top)
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'borders') {
@@ -216,7 +216,7 @@ export class OlMap extends GeonaMap {
       }
       // this.removeLayer(this._map.getLayers().item(this._map.getLayers().getLength() - 1).get('identifier'));
     }
-    this.config.countryBorders = 'none';
+    this.config.borders = 'none';
   }
 
   /**
@@ -430,12 +430,12 @@ export class OlMap extends GeonaMap {
         this.reorderLayers(geonaLayer.identifier, 0);
         this.config.basemap = geonaLayer.identifier;
       } else if (modifier === 'borders') {
-        this.config.countryBorders = geonaLayer.identifier;
+        this.config.borders = geonaLayer.identifier;
       }
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-      if (this.config.countryBorders !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.countryBorders, this._map.getLayers().getArray().length - 1);
+      if (this.config.borders !== 'none' && this._initialized === true) {
+        this.reorderLayers(this.config.borders, this._map.getLayers().getArray().length - 1);
       }
     } else {
       alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
@@ -456,7 +456,7 @@ export class OlMap extends GeonaMap {
           layer.set('zIndex', layer.get('zIndex') - 1);
         }
       } else if (this._activeLayers[layerId].get('modifier') === 'borders') {
-        this.config.countryBorders = 'none';
+        this.config.borders = 'none';
       }
       delete this._activeLayers[layerId];
     }
@@ -504,10 +504,10 @@ export class OlMap extends GeonaMap {
     } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.countryBorders !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
+    } else if (this.config.borders !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.countryBorders === 'none' && targetIndex > maxZIndex && this._initialized === true) {
+    } else if (this.config.borders === 'none' && targetIndex > maxZIndex && this._initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -546,7 +546,7 @@ export class OlMap extends GeonaMap {
   /**
    * Load the default basemaps, and any defined in the config.
    */
-  _loadBasemaps() {
+  _loadBasemapLayers() {
     for (let layer of defaultBasemaps) {
       if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
@@ -558,8 +558,8 @@ export class OlMap extends GeonaMap {
         console.error('bingMapsApiKey is null or undefined');
       }
     }
-    if (this.config.basemaps !== undefined) {
-      for (let layer of this.config.basemaps) {
+    if (this.config.basemapLayers !== undefined) {
+      for (let layer of this.config.basemapLayers) {
         if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
           if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
             this._availableLayers[layer.identifier] = layer;
@@ -576,7 +576,7 @@ export class OlMap extends GeonaMap {
   /**
    * Load the default border layers, and any defined in the config.
    */
-  _loadCountryBorderLayers() {
+  _loadBordersLayers() {
     for (let layer of defaultBorders) {
       if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
         this._availableLayers[layer.identifier] = layer;
@@ -584,8 +584,8 @@ export class OlMap extends GeonaMap {
         console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
       }
     }
-    if (this.config.borders !== undefined) {
-      for (let layer of this.config.borders) {
+    if (this.config.bordersLayers !== undefined) {
+      for (let layer of this.config.bordersLayers) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
           this._availableLayers[layer.identifier] = layer;
         } else {

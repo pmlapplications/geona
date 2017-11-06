@@ -381,7 +381,7 @@ for (let basemap of basemaps) {
  * Default border layers.
  *
  * The object format is the same as for basemaps.
- * Additional border layers also need to be added to config_schema.js in client.map.countryBorders.format.
+ * Additional border layers also need to be added to config_schema.js in client.map.borders.format.
  */
 export const borderLayers = [
   // {

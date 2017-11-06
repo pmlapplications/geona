@@ -38,9 +38,9 @@ describe('client/js/map_openlayers', function() {
         graticule: true,
         bingMapsApiKey: 'AgNtBFpBNF81T-ODIf_9WzE8UF_epbsfiSu9RYMbLfq_wXU_bBVAoyBw8VzfSjkd',
         basemap: 'none',
-        countryBorders: 'none',
+        borders: 'none',
         data: [],
-        basemaps: [
+        basemapLayers: [
           {
             PROTOCOL: 'wms',
             identifier: 'terrain-light',
@@ -61,7 +61,7 @@ describe('client/js/map_openlayers', function() {
             },
           },
         ],
-        borders: [
+        bordersLayers: [
           {
             identifier: 'line_black',
             PROTOCOL: 'wms',
@@ -6514,7 +6514,7 @@ describe('client/js/map_openlayers', function() {
     });
     it('should display the correct attribution for basemaps', function() {
       let html = geona.map._map.getLayers().getArray()[1].getSource().getAttributions()[0].getHTML();
-      expect(html).to.deep.equal('Geona | ' + geona.map.config.basemaps[0].attribution.onlineResource);
+      expect(html).to.deep.equal('Geona | ' + geona.map.config.basemapLayers[0].attribution.onlineResource);
     });
     it('should add the borders modifier to borders layers', function() {
       geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
@@ -6589,8 +6589,8 @@ describe('client/js/map_openlayers', function() {
     it('should remove the borders from the _activeLayers', function() {
       expect(geona.map._activeLayers[borders.get('identifier')]).to.be.undefined;
     });
-    it('should set the config countryBorders to be \'none\'', function() {
-      expect(geona.map.config.countryBorders).to.equal('none');
+    it('should set the config borders to be \'none\'', function() {
+      expect(geona.map.config.borders).to.equal('none');
     });
   });
 

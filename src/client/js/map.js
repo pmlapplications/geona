@@ -89,7 +89,7 @@ export default class GeonaMap {
    */
   loadConfig_() {
     // this.setBasemap(this.config.basemap);
-    // this.setCountryBorders(this.config.countryBorders);
+    // this.setCountryBorders(this.config.borders);
     this.displayGraticule(this.config.graticule);
     // this.setProjection(this.config.projection);
     this.setView(this.config.viewSettings);
