@@ -98,14 +98,11 @@ export class LMap extends GeonaMap {
 
     // Load the default basemaps, borders layers, and data layers.
     this._loadBasemapLayers();
-    this._loadBordersLayers();
     this._loadDataLayers();
+    this._loadBordersLayers();
 
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
-    }
-    if (this.config.borders !== 'none' && this.config.borders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.borders], 'borders');
     }
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
@@ -114,6 +111,10 @@ export class LMap extends GeonaMap {
         }
       }
     }
+    if (this.config.borders !== 'none' && this.config.borders !== undefined) {
+      this.addLayer(this._availableLayers[this.config.borders], 'borders');
+    }
+
 
     this.loadConfig_();
     // Must come last in the constructor

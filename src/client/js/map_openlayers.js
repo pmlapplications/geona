@@ -92,21 +92,24 @@ export class OlMap extends GeonaMap {
     });
 
     this._loadBasemapLayers();
-    this._loadBordersLayers();
     this._loadDataLayers();
+    this._loadBordersLayers();
 
+    // Adds any defined basemap to the map
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
     }
-    if (this.config.borders !== 'none' && this.config.borders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.borders], 'borders');
-    }
+    // Adds all defined data layers to the map
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
         for (let layer of this.config.data) {
           this.addLayer(this._availableLayers[layer]);
         }
       }
+    }
+    // Adds any defined borders layer to the map
+    if (this.config.borders !== 'none' && this.config.borders !== undefined) {
+      this.addLayer(this._availableLayers[this.config.borders], 'borders');
     }
 
     this.loadConfig_();

@@ -6469,6 +6469,13 @@ describe('client/js/map_openlayers', function() {
     });
   });
 
+  describe('constructor', function() {
+    // Add new config to test default loading basemaps, data and borders
+    after(function() {
+      // Remove it all I guess
+    });
+  });
+
   describe('test setup completion', function() {
     it('should find the Geona object on the window', function() {
       expect(window.geonaOlTest).to.be.an('object');
