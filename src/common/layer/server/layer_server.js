@@ -12,7 +12,6 @@ export default class LayerServer {
    */
   constructor(serverConfig) {
     this.layers = [];
-    // let layers = [];
 
     this.protocol = serverConfig.protocol;
     this.version = serverConfig.version;
@@ -36,9 +35,5 @@ export default class LayerServer {
           break;
       }
     }
-
-    // TODO remove this
-    window.testingLayer = this.layers[0];
-    window.testingSerCon = this;
   }
 }

@@ -11,7 +11,7 @@ export default class Layer {
    *                                              Not all layer types require a server
    */
   constructor(layerConfig, layerServer) {
-    this.PROTOCOL = null;
+    this.protocol = null;
 
     this.layerServer = layerServer;
 

@@ -120,7 +120,7 @@ export let client = {
       format: Array,
       default: [
         {
-          PROTOCOL: 'wms',
+          protocol: 'wms',
           identifier: 'terrain-light',
           title: {
             und: 'EOX',
@@ -137,7 +137,7 @@ export let client = {
             version: '1.1.1',
             url: 'https://tiles.maps.eox.at/wms/?',
           },
-        }
+        },
       ],
     },
     bingMapsApiKey: {
@@ -156,7 +156,7 @@ export let client = {
       default: [
         {
           identifier: 'line_black',
-          PROTOCOL: 'wms',
+          protocol: 'wms',
           title: {
             und: 'Black border lines',
           },
@@ -191,7 +191,7 @@ export let client = {
       default: [
         {
           identifier: 'chlor_a',
-          PROTOCOL: 'wms',
+          protocol: 'wms',
           title: {
             und: 'mass_concentration_of_chlorophyll_a_in_sea_water',
           },
@@ -200,9 +200,13 @@ export let client = {
           },
           styles: [
             {
-              name: 'boxfill/cmocean_speed',
-              title: 'boxfill/cmocean_speed',
-              abstract: 'boxfill style, using the cmocean_speed palette',
+              identifier: 'boxfill/cmocean_speed',
+              title: {
+                und: 'boxfill/cmocean_speed',
+              },
+              abstract: {
+                und: 'boxfill style, using the cmocean_speed palette',
+              },
               legendUrl: [
                 {
                   width: 110,

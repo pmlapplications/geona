@@ -50,7 +50,7 @@ export function selectPropertyLanguage(property) {
  * @return {Object}         The layer with defaults added
  */
 export function addLayerDefaults(layer) {
-  switch (layer.PROTOCOL) {
+  switch (layer.protocol) {
     case 'wms':
       if (layer.crossOrigin === undefined) {
         layer.crossOrigin = null;
@@ -177,7 +177,7 @@ export function getLayersFromWmts(url) {
 
 export const basemaps = [
   {
-    PROTOCOL: 'wms',
+    protocol: 'wms',
     identifier: 'terrain-light',
     title: {
       und: 'EOX',
@@ -199,7 +199,7 @@ export const basemaps = [
     },
   },
   {
-    PROTOCOL: 'wms',
+    protocol: 'wms',
     identifier: 's2cloudless',
     title: {
       und: 'EOX',
@@ -246,7 +246,7 @@ export const basemaps = [
   //   identifier: 'gebco_08_grid',
   //   title: {und:'GEBCO'},
   //   projections: ['EPSG:4326', 'EPSG:3857'],
-  //   PROTOCOL: 'wms',
+  //   protocol: 'wms',
   //   isTemporal: false,
   //   attribution: {
   //     onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
@@ -401,7 +401,7 @@ export const borderLayers = [
   // },
   {
     identifier: 'line_black',
-    PROTOCOL: 'wms',
+    protocol: 'wms',
     title: {
       und: 'Black border lines',
     },
@@ -410,7 +410,7 @@ export const borderLayers = [
     isTemporal: false,
     styles: [
       {
-        name: 'line_black',
+        identifier: 'line_black',
       },
     ],
     layerServer: {
@@ -421,7 +421,7 @@ export const borderLayers = [
   },
   {
     identifier: 'line',
-    PROTOCOL: 'wms',
+    protocol: 'wms',
     title: {
       und: 'Blue border lines',
     },
@@ -430,7 +430,7 @@ export const borderLayers = [
     isTemporal: false,
     styles: [
       {
-        name: 'line',
+        identifier: 'line',
       },
     ],
     layerServer: {
@@ -456,14 +456,13 @@ export const borderLayers = [
   // },
 ];
 
-// Mostly old-style basemap config, can be removed
 /**
  * {
     identifier: 'terrain-light',
     title: {und: 'EOX'},
     description: 'EPSG:4326 only',
     projections: ['EPSG:4326'],
-    PROTOCOL: 'wms',
+    protocol: 'wms',
     isTemporal: false,
     attribution: {
       onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
@@ -508,7 +507,7 @@ export const borderLayers = [
     identifier: 'gebco_08_grid',
     title: {und:'GEBCO'},
     projections: ['EPSG:4326', 'EPSG:3857'],
-    PROTOCOL: 'wms',
+    protocol: 'wms',
     isTemporal: false,
     attribution: {
       onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',

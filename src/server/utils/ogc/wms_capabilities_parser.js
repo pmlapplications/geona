@@ -297,20 +297,33 @@ function parseLayerCommon(layer, parentLayer = {}) {
     thisLayer.styles = [];
     for (let style of layer.style) {
       let styleObject = {};
-      styleObject.name = style.name;
-      styleObject.title = style.title;
-      styleObject.abstract = style._abstract;
+      styleObject.identifier = style.name;
+      if (style.title) {
+        styleObject.title = {};
+        styleObject.title.und = style.title;
+      }
+      if (style._abstract) {
+        styleObject.abstract = {};
+        styleObject.abstract.und = style._abstract;
+      }
       if (style.legendURL) {
         styleObject.legendUrl = [];
         for (let legend of style.legendURL) {
           let legendObject = {};
           legendObject.width = legend.width;
           legendObject.height = legend.height;
-          legendObject.format = legend.format;
+          // WMS version 1.1.1 will have an object with JSONix tag and value, but version 1.3.0 just has a string.
+          if (legend.format.value) {
+            legendObject.format = legend.format.value;
+          } else {
+            legendObject.format = legend.format;
+          }
           if (legend.onlineResource) {
-            legendObject.onlineResource = {};
-            legendObject.onlineResource.type = legend.onlineResource.type;
-            legendObject.onlineResource.href = legend.onlineResource.href;
+            if (legend.onlineResource.type || legend.onlineResource.href) {
+              legendObject.onlineResource = {};
+              legendObject.onlineResource.type = legend.onlineResource.type;
+              legendObject.onlineResource.href = legend.onlineResource.href;
+            }
           }
           styleObject.legendUrl.push(legendObject);
         }

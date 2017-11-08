@@ -42,7 +42,7 @@ describe('client/js/map_openlayers', function() {
         data: [],
         basemapLayers: [
           {
-            PROTOCOL: 'wms',
+            protocol: 'wms',
             identifier: 'terrain-light',
             title: {
               und: 'EOX',
@@ -64,7 +64,7 @@ describe('client/js/map_openlayers', function() {
         bordersLayers: [
           {
             identifier: 'line_black',
-            PROTOCOL: 'wms',
+            protocol: 'wms',
             title: {
               und: 'Black border lines',
             },
@@ -86,7 +86,7 @@ describe('client/js/map_openlayers', function() {
         dataLayers: [
           {
             'identifier': 'Rrs_412',
-            'PROTOCOL': 'wms',
+            'protocol': 'wms',
             'title': {
               'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
             },
@@ -2211,7 +2211,7 @@ describe('client/js/map_openlayers', function() {
           },
           {
             'identifier': 'Rrs_443',
-            'PROTOCOL': 'wms',
+            'protocol': 'wms',
             'title': {
               'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
             },
@@ -4336,7 +4336,7 @@ describe('client/js/map_openlayers', function() {
           },
           {
             'identifier': 'Rrs_490',
-            'PROTOCOL': 'wms',
+            'protocol': 'wms',
             'title': {
               'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
             },

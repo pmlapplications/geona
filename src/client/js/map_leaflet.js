@@ -351,7 +351,7 @@ export class LMap extends GeonaMap {
       let style;
       // zIndex defines the zero-based index we want the layer to be displayed at by default.
       // This will be overwritten if the layer is a basemap.
-      switch (geonaLayer.PROTOCOL) {
+      switch (geonaLayer.protocol) {
         case 'wms':
           title = geonaLayer.title.und;
           // Select the closest time to current map layers, or the most recent time
@@ -387,7 +387,7 @@ export class LMap extends GeonaMap {
             projection = leafletizeProjection(geonaLayer.projections[0]);
           }
           if (geonaLayer.styles !== undefined) {
-            style = geonaLayer.styles[0].name;
+            style = geonaLayer.styles[0].identifier;
           }
           if (geonaLayer.attribution) {
             if (geonaLayer.attribution.onlineResource) {
@@ -568,7 +568,7 @@ export class LMap extends GeonaMap {
    */
   _loadBasemapLayers() {
     for (let layer of defaultBasemaps) {
-      if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+      if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
           this._availableLayers[layer.identifier] = layer;
         } else {
@@ -580,7 +580,7 @@ export class LMap extends GeonaMap {
     }
     if (this.config.basemapLayers !== undefined) {
       for (let layer of this.config.basemapLayers) {
-        if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+        if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
           if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
             this._availableLayers[layer.identifier] = layer;
           } else {

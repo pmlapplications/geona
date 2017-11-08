@@ -324,7 +324,7 @@ export class OlMap extends GeonaMap {
       let format;
       let projection;
       let style;
-      switch (geonaLayer.PROTOCOL) {
+      switch (geonaLayer.protocol) {
         case 'wms':
           title = geonaLayer.title.und;
           if (geonaLayer.isTemporal === true) {
@@ -357,7 +357,7 @@ export class OlMap extends GeonaMap {
             projection = geonaLayer.projections[0];
           }
           if (geonaLayer.styles !== undefined) {
-            style = geonaLayer.styles[0].name;
+            style = geonaLayer.styles[0].identifier;
           }
           if (geonaLayer.attribution) {
             if (geonaLayer.attribution.onlineResource) {
@@ -551,7 +551,7 @@ export class OlMap extends GeonaMap {
    */
   _loadBasemapLayers() {
     for (let layer of defaultBasemaps) {
-      if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+      if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
           this._availableLayers[layer.identifier] = layer;
         } else {
@@ -563,7 +563,7 @@ export class OlMap extends GeonaMap {
     }
     if (this.config.basemapLayers !== undefined) {
       for (let layer of this.config.basemapLayers) {
-        if (layer.PROTOCOL !== 'bing' || (layer.PROTOCOL === 'bing' && this.config.bingMapsApiKey)) {
+        if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
           if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
             this._availableLayers[layer.identifier] = layer;
           } else {
