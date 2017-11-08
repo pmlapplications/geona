@@ -3,7 +3,7 @@
 import LayerVisible from './layer_visible';
 
 /**
- * Class or a WMS layer.
+ * Class for a WMS layer.
  */
 export default class LayerWms extends LayerVisible {
   /**

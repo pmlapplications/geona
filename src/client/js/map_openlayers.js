@@ -5,7 +5,7 @@ import GeonaMap from './map';
 import {
   basemaps as defaultBasemaps, borderLayers as defaultBorders,
   dataLayers as defaultDataLayers,
-  latLonLabelFormatter, selectPropertyLanguage,
+  latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime,
 } from './map_common';
 
 import proj4 from 'proj4';
@@ -37,6 +37,8 @@ export class OlMap extends GeonaMap {
     this._availableLayers = {};
     /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
     this._activeLayers = {};
+    /** @private @type {String} The latest time that the active map layers are set to */
+    this._mapTime = '';
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -311,25 +313,23 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {Layer}   geonaLayer The Geona Layer object to be created as an OpenLayers layer on the map.
-   * @param {String}  [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
+   * @param {Layer}  geonaLayer The Geona Layer object to be created as an OpenLayers layer on the map.
+   * @param {String} [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
+   * @param {String} [time]     The time requested for this layer.
    */
-  addLayer(geonaLayer, modifier = undefined) {
+  addLayer(geonaLayer, modifier = undefined, requestedTime = undefined) {
     if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
       let source;
       let attributions;
       let title;
-      let time;
       let requiredLayer;
       let format;
       let projection;
       let style;
+      let time;
       switch (geonaLayer.protocol) {
         case 'wms':
           title = geonaLayer.title.und;
-          if (geonaLayer.isTemporal === true) {
-            time = geonaLayer.lastTime;
-          }
           // FIXME this is basically only here for the border layers, but it might break if another layer has a single layer as an Object rather than a String
           requiredLayer = geonaLayer.layerServer.layers;
           if (geonaLayer.layerServer.layers.length !== 1) {
@@ -373,6 +373,21 @@ export class OlMap extends GeonaMap {
           if (this._map.getLayers().getArray().length === 0 || modifier === 'basemap') {
             attributions = 'Geona | ' + attributions;
           }
+
+          // Selects the requested time, or the closest to the map time
+          if (requestedTime !== undefined) {
+            time = findNearestValidTime(geonaLayer, requestedTime);
+          } else if (modifier === undefined && this._mapTime !== '') {
+            time = findNearestValidTime(geonaLayer, this._mapTime);
+          } else if (modifier === undefined) {
+            if (geonaLayer.dimensions) {
+              if (geonaLayer.dimensions.time) {
+                let times = geonaLayer.dimensions.time.values;
+                time = times[times.length - 1];
+              }
+            }
+          }
+
           source = new ol.source.TileWMS({
             url: geonaLayer.layerServer.url,
             projection: projection,
@@ -382,8 +397,7 @@ export class OlMap extends GeonaMap {
               LAYERS: requiredLayer,
               FORMAT: geonaLayer.formats || 'image/png',
               STYLES: style || 'boxfill/alg',
-              // TODO update once isTemporal, firstTime and lastTime are working
-              time: '2015-12-27T00:00:00.000Z',
+              time: time,
               wrapDateLine: true,
               NUMCOLORBANDS: 255,
               VERSION: geonaLayer.layerServer.version,
@@ -425,6 +439,11 @@ export class OlMap extends GeonaMap {
         this._clearBasemap(layer);
       } else if (modifier === 'borders') {
         this._clearBorders(layer);
+      }
+
+      // Sets the map time if this is the first layer
+      if (this._mapTime === '' && time !== undefined) {
+        this._mapTime = time;
       }
 
       this._map.addLayer(layer);
@@ -542,6 +561,30 @@ export class OlMap extends GeonaMap {
         layer.set('zIndex', targetIndex);
       } else {
         alert('Layer ' + layerIdentifier + ' does not exist on the map.');
+      }
+    }
+  }
+
+  /**
+   * Updates the layer time.
+   * @param {*} layerIdentifier 
+   * @param {*} requestedTime 
+   */
+  loadNearestValidTime(layerIdentifier, requestedTime) {
+    let geonaLayer = this._availableLayers[layerIdentifier];
+    if (geonaLayer === undefined) {
+      throw new Error('No Geona layer with this identifier has been loaded.');
+    } else if (this._activeLayers[layerIdentifier] === undefined) {
+      throw new Error('No layer with this identifier is on the map.');
+    } else {
+      let time = findNearestValidTime(geonaLayer, requestedTime);
+      let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
+      this.removeLayer(layerIdentifier);
+      this.addLayer(geonaLayer, undefined, time);
+      this.reorderLayers(layerIdentifier, zIndex);
+
+      for (let layer of this._map.getLayers().getArray()) {
+        // this._mapTime = latest time
       }
     }
   }

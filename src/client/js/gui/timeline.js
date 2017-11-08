@@ -1,4 +1,5 @@
 import 'jquery';
+import 'd3';
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
@@ -22,8 +23,11 @@ export class Timeline {
       this.parentDiv.find('.js-geona-timeline').addClass('hidden');
     }
     if (!this.config.collapsible) {
-      this.parentDiv.find(',js-geona-timeline-toggle').remove();
+      this.parentDiv.find('.js-geona-timeline-toggle').remove();
     }
+
+    // Instantiate D3 timeline
+
 
     registerTriggers(this.gui.eventManager, this.parentDiv);
     registerBindings(this.gui.eventManager, this);

@@ -12,10 +12,10 @@ import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
  */
 
 /**
-  * Selects the appropriate language to use for a property from the available languages.
-  @param {Object} property A language-separated list of a property for a layer.
-  @return {*}              The value stored in the language property selected.
-  */
+ * Selects the appropriate language to use for a property from the available languages.
+ * @param {Object} property A language-separated list of a property for a layer.
+ * @return {*}              The value stored in the language property selected.
+ */
 export function selectPropertyLanguage(property) {
   // The current user language
   let language = i18next.language;
@@ -145,35 +145,66 @@ export function getLayersFromWmts(url) {
 }
 
 /**
- * Default basemaps.
- *
- * Basemap object format:
- * {String} id                    ID for this basemap
- * {String} title
- * {String} description
- * {Array}  projections           Projections supported
- * {Object} source
- * {String} source.type           The type of basemap - wms, osm, bing
- *
- * For a WMS source:
- *   {String} source.url          WMS url
- *   {String} source.crossOrigin  The crossOrigin attribute for loaded images
- *   {String} source.attributions
- *   {Object} source.params       WMS request parameters
- *
- * For a Bing source:
- *   {String} source.imagerySet   Bing imagery to use
- *
- * {Object} viewSettings          View settings for this basemap
- * {Number} viewSettings.center   Map center to move to when loading this basemap.
- *                                Defaults to undefined
- * {Array}  viewSettings.extent   The extent of this basemap. Array in the format [minLat, minLon, maxLat, maxLon].
- *                                Defaults to [-90, -180, 90, 180].
- * {Number} viewSettings.maxZoom  The maximum (closest) allowed zoom.
- *                                Defaults to 12.
- * {Number} viewSettings.minZoom  The minimum (furthest) allowed zoom.
- *                                Defaults to 3.
+ * Gets the nearest possible time prior to or matching the requested time.
+ * @param  {Layer}  geonaLayer    The Geona layer for the layer being changed.
+ * @param  {String} requestedTime The requested time in ISO8601 format.
+ * @return {String}               The nearest valid time to the requested time.
  */
+export function findNearestValidTime(geonaLayer, requestedTime) {
+  if (geonaLayer.dimensions !== undefined) {
+    if (geonaLayer.dimensions.time !== undefined) {
+      let nearestValidTime;
+
+      // We use Date objects for easy comparison
+      let dateNearestValidTime = new Date('1970-01-01T00:00:00Z');
+      let dateRequestedTime = new Date(requestedTime);
+
+      for (let currentTime of geonaLayer.dimensions.time.values) {
+        let dateCurrentTime = new Date(currentTime);
+        // Must match or be earlier than the requested time
+        if (dateCurrentTime <= dateRequestedTime && dateCurrentTime > dateNearestValidTime) {
+          nearestValidTime = currentTime;
+        }
+      }
+      return nearestValidTime;
+    } else {
+      throw new Error('Layer has no time dimension defined.');
+    }
+  } else {
+    throw new Error('Layer has no dimension defined.');
+  }
+}
+
+/**
+   * Default basemaps.
+   *
+   * Basemap object format:
+   * {String} id                    ID for this basemap
+   * {String} title
+   * {String} description
+   * {Array}  projections           Projections supported
+   * {Object} source
+   * {String} source.type           The type of basemap - wms, osm, bing
+   *
+   * For a WMS source:
+   *   {String} source.url          WMS url
+   *   {String} source.crossOrigin  The crossOrigin attribute for loaded images
+   *   {String} source.attributions
+   *   {Object} source.params       WMS request parameters
+   *
+   * For a Bing source:
+   *   {String} source.imagerySet   Bing imagery to use
+   *
+   * {Object} viewSettings          View settings for this basemap
+   * {Number} viewSettings.center   Map center to move to when loading this basemap.
+   *                                Defaults to undefined
+   * {Array}  viewSettings.extent   The extent of this basemap. Array in the format [minLat, minLon, maxLat, maxLon].
+   *                                Defaults to [-90, -180, 90, 180].
+   * {Number} viewSettings.maxZoom  The maximum (closest) allowed zoom.
+   *                                Defaults to 12.
+   * {Number} viewSettings.minZoom  The minimum (furthest) allowed zoom.
+   *                                Defaults to 3.
+   */
 
 export const basemaps = [
   {
@@ -378,11 +409,11 @@ for (let basemap of basemaps) {
 }
 
 /**
- * Default border layers.
- *
- * The object format is the same as for basemaps.
- * Additional border layers also need to be added to config_schema.js in client.map.borders.format.
- */
+   * Default border layers.
+   *
+   * The object format is the same as for basemaps.
+   * Additional border layers also need to be added to config_schema.js in client.map.borders.format.
+   */
 export const borderLayers = [
   // {
   //   id: 'line-white',
@@ -456,187 +487,187 @@ export const borderLayers = [
   // },
 ];
 
-/**
- * {
-    identifier: 'terrain-light',
-    title: {und: 'EOX'},
-    description: 'EPSG:4326 only',
-    projections: ['EPSG:4326'],
-    protocol: 'wms',
-    isTemporal: false,
-    attribution: {
-      onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
-      title: 'EOX',
-    },
-    layerServer: {
-      url: 'https://tiles.maps.eox.at/wms/?',
-      crossOrigin: null,
-      version: '1.1.1',
-      params: {
+  /**
+   * {
+      identifier: 'terrain-light',
+      title: {und: 'EOX'},
+      description: 'EPSG:4326 only',
+      projections: ['EPSG:4326'],
+      protocol: 'wms',
+      isTemporal: false,
+      attribution: {
+        onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
+        title: 'EOX',
+      },
+      layerServer: {
+        url: 'https://tiles.maps.eox.at/wms/?',
+        crossOrigin: null,
         version: '1.1.1',
-        format: 'image/jpeg',
-        wrapDateLine: true,
+        params: {
+          version: '1.1.1',
+          format: 'image/jpeg',
+          wrapDateLine: true,
+        },
+      },
+      viewSettings: {
+        maxZoom: 13,
       },
     },
-    viewSettings: {
-      maxZoom: 13,
+    // {
+    //   id: 'eoxS2Cloudless',
+    //   title: 'EOX Sentinel-2 Cloudless',
+    //   description: 'EPSG:4326 only, Europe only',
+    //   projections: ['EPSG:4326'],
+    //   source: {
+    //     type: 'wms',
+    //     url: 'https://tiles.maps.eox.at/wms/?',
+    //     crossOrigin: null,
+    //     attributions: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
+    //     params: {
+    //       layers: 's2cloudless',
+    //       version: '1.1.1',
+    //       wrapDateLine: true,
+    //     },
+    //   },
+    //   viewSettings: {
+    //     maxZoom: 14,
+    //     fitExtent: [22.02, -33.86, 82.85, 56.12],
+    //   },
+    // },
+    {
+      identifier: 'gebco_08_grid',
+      title: {und:'GEBCO'},
+      projections: ['EPSG:4326', 'EPSG:3857'],
+      protocol: 'wms',
+      isTemporal: false,
+      attribution: {
+        onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
+        title: 'GEBCO',
+      },
+      layerServer: {
+        url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+        crossOrigin: null,
+        version: '1.1.1',
+        params: {
+          format: 'image/jpeg',
+          wrapDateLine: true},
+      },
+      viewSettings: {
+        maxZoom: 7,
+      },
     },
-  },
-  // {
-  //   id: 'eoxS2Cloudless',
-  //   title: 'EOX Sentinel-2 Cloudless',
-  //   description: 'EPSG:4326 only, Europe only',
-  //   projections: ['EPSG:4326'],
-  //   source: {
-  //     type: 'wms',
-  //     url: 'https://tiles.maps.eox.at/wms/?',
-  //     crossOrigin: null,
-  //     attributions: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
-  //     params: {
-  //       layers: 's2cloudless',
-  //       version: '1.1.1',
-  //       wrapDateLine: true,
-  //     },
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 14,
-  //     fitExtent: [22.02, -33.86, 82.85, 56.12],
-  //   },
-  // },
-  {
-    identifier: 'gebco_08_grid',
-    title: {und:'GEBCO'},
-    projections: ['EPSG:4326', 'EPSG:3857'],
-    protocol: 'wms',
-    isTemporal: false,
-    attribution: {
-      onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
-      title: 'GEBCO',
+    // {
+    //   id: 'blueMarble',
+    //   title: 'Blue Marble',
+    //   description: 'EPSG:4326 only',
+    //   projections: ['EPSG:4326'],
+    //   source: {
+    //     type: 'wms',
+    //     url: 'https://tiles.maps.eox.at/wms/?',
+    //     crossOrigin: null,
+    //     attributions: 'Blue Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
+    //     params: {
+    //       layers: 'bluemarble',
+    //       version: '1.1.1',
+    //       wrapDateLine: true,
+    //     },
+    //   },
+    //   viewSettings: {
+    //     maxZoom: 8,
+    //   },
+    // },
+    // {
+    //   id: 'blackMarble',
+    //   title: 'Black Marble',
+    //   description: 'EPSG:4326 only',
+    //   projections: ['EPSG:4326'],
+    //   source: {
+    //     type: 'wms',
+    //     url: 'https://tiles.maps.eox.at/wms/?',
+    //     crossOrigin: null,
+    //     attributions: 'Black Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
+    //     params: {
+    //       layers: 'blackmarble',
+    //       version: '1.1.1',
+    //       wrapDateLine: true,
+    //     },
+    //   },
+    //   viewSettings: {
+    //     maxZoom: 8,
+    //   },
+    // },
+    {
+      id: 'osm',
+      title: 'OSM',
+      description: 'EPSG:3857 only',
+      projections: ['EPSG:3857'],
+      source: {
+        type: 'osm',
+      },
+      viewSettings: {
+        maxZoom: 19,
+      },
     },
-    layerServer: {
-      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-      crossOrigin: null,
-      version: '1.1.1',
-      params: {
-        format: 'image/jpeg',
-        wrapDateLine: true},
+    // {
+    //   id: 'bingMapsAerial',
+    //   title: 'Bing Maps - Aerial imagery',
+    //   description: 'EPSG:3857 only',
+    //   projections: ['EPSG:3857'],
+    //   source: {
+    //     type: 'bing',
+    //     imagerySet: 'Aerial',
+    //   },
+    //   viewSettings: {
+    //     maxZoom: 19,
+    //   },
+    // },
+    // {
+    //   id: 'bingMapsAerialWithLabels',
+    //   title: 'Bing Maps - Aerial imagery with labels',
+    //   description: 'EPSG:3857 only',
+    //   projections: ['EPSG:3857'],
+    //   source: {
+    //     type: 'bing',
+    //     imagerySet: 'AerialWithLabels',
+    //   },
+    //   viewSettings: {
+    //     maxZoom: 19,
+    //   },
+    // },
+    // {
+    //   id: 'bingMapsRoad',
+    //   title: 'Bing Maps - Road',
+    //   description: 'EPSG:3857 only',
+    //   projections: ['EPSG:3857'],
+    //   source: {
+    //     type: 'bing',
+    //     imagerySet: 'Road',
+    //   },
+    //   viewSettings: {
+    //     maxZoom: 19,
+    //   },
+    // },
+    {
+      id: 'bingMapsOS',
+      title: 'Ordnance Survey',
+      description: 'EPSG:3857 only, coverage of UK only',
+      projections: ['EPSG:3857'],
+      source: {
+        type: 'bing',
+        imagerySet: 'ordnanceSurvey',
+      },
+      viewSettings: {
+        minZoom: 10,
+        maxZoom: 16,
+        center: [51.502874, -0.126704],
+        maxExtent: [49.83, -6.33, 60.87, 1.84],
+      },
     },
-    viewSettings: {
-      maxZoom: 7,
-    },
-  },
-  // {
-  //   id: 'blueMarble',
-  //   title: 'Blue Marble',
-  //   description: 'EPSG:4326 only',
-  //   projections: ['EPSG:4326'],
-  //   source: {
-  //     type: 'wms',
-  //     url: 'https://tiles.maps.eox.at/wms/?',
-  //     crossOrigin: null,
-  //     attributions: 'Blue Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
-  //     params: {
-  //       layers: 'bluemarble',
-  //       version: '1.1.1',
-  //       wrapDateLine: true,
-  //     },
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 8,
-  //   },
-  // },
-  // {
-  //   id: 'blackMarble',
-  //   title: 'Black Marble',
-  //   description: 'EPSG:4326 only',
-  //   projections: ['EPSG:4326'],
-  //   source: {
-  //     type: 'wms',
-  //     url: 'https://tiles.maps.eox.at/wms/?',
-  //     crossOrigin: null,
-  //     attributions: 'Black Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
-  //     params: {
-  //       layers: 'blackmarble',
-  //       version: '1.1.1',
-  //       wrapDateLine: true,
-  //     },
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 8,
-  //   },
-  // },
-  {
-    id: 'osm',
-    title: 'OSM',
-    description: 'EPSG:3857 only',
-    projections: ['EPSG:3857'],
-    source: {
-      type: 'osm',
-    },
-    viewSettings: {
-      maxZoom: 19,
-    },
-  },
-  // {
-  //   id: 'bingMapsAerial',
-  //   title: 'Bing Maps - Aerial imagery',
-  //   description: 'EPSG:3857 only',
-  //   projections: ['EPSG:3857'],
-  //   source: {
-  //     type: 'bing',
-  //     imagerySet: 'Aerial',
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 19,
-  //   },
-  // },
-  // {
-  //   id: 'bingMapsAerialWithLabels',
-  //   title: 'Bing Maps - Aerial imagery with labels',
-  //   description: 'EPSG:3857 only',
-  //   projections: ['EPSG:3857'],
-  //   source: {
-  //     type: 'bing',
-  //     imagerySet: 'AerialWithLabels',
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 19,
-  //   },
-  // },
-  // {
-  //   id: 'bingMapsRoad',
-  //   title: 'Bing Maps - Road',
-  //   description: 'EPSG:3857 only',
-  //   projections: ['EPSG:3857'],
-  //   source: {
-  //     type: 'bing',
-  //     imagerySet: 'Road',
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 19,
-  //   },
-  // },
-  {
-    id: 'bingMapsOS',
-    title: 'Ordnance Survey',
-    description: 'EPSG:3857 only, coverage of UK only',
-    projections: ['EPSG:3857'],
-    source: {
-      type: 'bing',
-      imagerySet: 'ordnanceSurvey',
-    },
-    viewSettings: {
-      minZoom: 10,
-      maxZoom: 16,
-      center: [51.502874, -0.126704],
-      maxExtent: [49.83, -6.33, 60.87, 1.84],
-    },
-  },
- */
+   */
 
-/**
- * Default data layers to have available
- */
+  /**
+   * Default data layers to have available
+   */
 export const dataLayers = [];
 
 for (let dataLayer of dataLayers) {
