@@ -179,7 +179,7 @@ export let client = {
     data: {
       doc: 'The identifier for the data layers to put on the map by default.',
       format: Array,
-      default: [],
+      default: ['chlor_a', 'Rrs_412'],
     },
     // Required parameters: 'identifier', 'protocol', 'projections', 'layerServer'
     // Required layerServer parameters: 'layers', 'version', 'url'
@@ -245,6 +245,786 @@ export let client = {
                 '2001-07-05T00:00:00.000Z',
               ],
             },
+          },
+        },
+        {
+          'identifier': 'Rrs_412',
+          'protocol': 'wms',
+          'title': {
+            'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
+          },
+          'abstract': {
+            'und': 'Sea surface reflectance defined as the ratio of water-leaving radiance to surface irradiance at 412 nm.',
+          },
+          'styles': [
+            {
+              'name': 'boxfill/cmocean_speed',
+              'title': 'boxfill/cmocean_speed',
+              'abstract': 'boxfill style, using the cmocean_speed palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/ncview',
+              'title': 'boxfill/ncview',
+              'abstract': 'boxfill style, using the ncview palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/occam',
+              'title': 'boxfill/occam',
+              'abstract': 'boxfill style, using the occam palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_algae',
+              'title': 'boxfill/cmocean_algae',
+              'abstract': 'boxfill style, using the cmocean_algae palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_oxy',
+              'title': 'boxfill/cmocean_oxy',
+              'abstract': 'boxfill style, using the cmocean_oxy palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_haline',
+              'title': 'boxfill/cmocean_haline',
+              'abstract': 'boxfill style, using the cmocean_haline palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/sst_36',
+              'title': 'boxfill/sst_36',
+              'abstract': 'boxfill style, using the sst_36 palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_dense',
+              'title': 'boxfill/cmocean_dense',
+              'abstract': 'boxfill style, using the cmocean_dense palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/orange-descending',
+              'title': 'boxfill/orange-descending',
+              'abstract': 'boxfill style, using the orange-descending palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cci_blue_red',
+              'title': 'boxfill/cci_blue_red',
+              'abstract': 'boxfill style, using the cci_blue_red palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_turbid',
+              'title': 'boxfill/cmocean_turbid',
+              'abstract': 'boxfill style, using the cmocean_turbid palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_tempo',
+              'title': 'boxfill/cmocean_tempo',
+              'abstract': 'boxfill style, using the cmocean_tempo palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_deep',
+              'title': 'boxfill/cmocean_deep',
+              'abstract': 'boxfill style, using the cmocean_deep palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_curl',
+              'title': 'boxfill/cmocean_curl',
+              'abstract': 'boxfill style, using the cmocean_curl palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_thermal',
+              'title': 'boxfill/cmocean_thermal',
+              'abstract': 'boxfill style, using the cmocean_thermal palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/blue-descending',
+              'title': 'boxfill/blue-descending',
+              'abstract': 'boxfill style, using the blue-descending palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/redblue-reverse',
+              'title': 'boxfill/redblue-reverse',
+              'abstract': 'boxfill style, using the redblue-reverse palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/soil-moisture',
+              'title': 'boxfill/soil-moisture',
+              'abstract': 'boxfill style, using the soil-moisture palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_phase',
+              'title': 'boxfill/cmocean_phase',
+              'abstract': 'boxfill style, using the cmocean_phase palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/alg',
+              'title': 'boxfill/alg',
+              'abstract': 'boxfill style, using the alg palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cci_main',
+              'title': 'boxfill/cci_main',
+              'abstract': 'boxfill style, using the cci_main palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/orange',
+              'title': 'boxfill/orange',
+              'abstract': 'boxfill style, using the orange palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/greyscale',
+              'title': 'boxfill/greyscale',
+              'abstract': 'boxfill style, using the greyscale palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/greyscale-reverse',
+              'title': 'boxfill/greyscale-reverse',
+              'abstract': 'boxfill style, using the greyscale-reverse palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/balance-blue',
+              'title': 'boxfill/balance-blue',
+              'abstract': 'boxfill style, using the balance-blue palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_ice',
+              'title': 'boxfill/cmocean_ice',
+              'abstract': 'boxfill style, using the cmocean_ice palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_delta',
+              'title': 'boxfill/cmocean_delta',
+              'abstract': 'boxfill style, using the cmocean_delta palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_balance',
+              'title': 'boxfill/cmocean_balance',
+              'abstract': 'boxfill style, using the cmocean_balance palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_solar',
+              'title': 'boxfill/cmocean_solar',
+              'abstract': 'boxfill style, using the cmocean_solar palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/occam_pastel-30',
+              'title': 'boxfill/occam_pastel-30',
+              'abstract': 'boxfill style, using the occam_pastel-30 palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/ferret',
+              'title': 'boxfill/ferret',
+              'abstract': 'boxfill style, using the ferret palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/redblue',
+              'title': 'boxfill/redblue',
+              'abstract': 'boxfill style, using the redblue palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/colour-blind-safe',
+              'title': 'boxfill/colour-blind-safe',
+              'abstract': 'boxfill style, using the colour-blind-safe palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/alg2',
+              'title': 'boxfill/alg2',
+              'abstract': 'boxfill style, using the alg2 palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_gray',
+              'title': 'boxfill/cmocean_gray',
+              'abstract': 'boxfill style, using the cmocean_gray palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/blue',
+              'title': 'boxfill/blue',
+              'abstract': 'boxfill style, using the blue palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_matter',
+              'title': 'boxfill/cmocean_matter',
+              'abstract': 'boxfill style, using the cmocean_matter palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_amp',
+              'title': 'boxfill/cmocean_amp',
+              'abstract': 'boxfill style, using the cmocean_amp palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/green-descending',
+              'title': 'boxfill/green-descending',
+              'abstract': 'boxfill style, using the green-descending palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/cmocean_balance_reverse',
+              'title': 'boxfill/cmocean_balance_reverse',
+              'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+            {
+              'name': 'boxfill/rainbow',
+              'title': 'boxfill/rainbow',
+              'abstract': 'boxfill style, using the rainbow palette ',
+              'legendUrl': [
+                {
+                  'width': '110',
+                  'height': '264',
+                  'format': {
+                    'TYPE_NAME': 'WMS_1_1_1.Format',
+                    'value': 'image/png',
+                  },
+                  'onlineResource': {
+
+                  },
+                },
+              ],
+            },
+          ],
+          'projections': [
+            'EPSG:4326',
+            'EPSG:3857',
+          ],
+          'boundingBox': {
+            'minLat': '-89.97916412353516',
+            'minLon': '-179.9791717529297',
+            'maxLat': '89.97916412353516',
+            'maxLon': '179.9791717529297',
+          },
+          'dimensions': {
+            'time': {
+              'units': 'unknown',
+              'default': '2015-12-27T00:00:00.000Z',
+              'multipleValues': true,
+              'nearestValue': false,
+              'current': true,
+              'values': [
+                '1997-09-04T00:00:00.000Z',
+                '1998-01-11T00:00:00.000Z',
+                '2005-06-20T00:00:00.000Z',
+                '2015-12-27T00:00:00.000Z',
+              ],
+            },
+          },
+          'layerServer': {
+            layers: ['Rrs_412'],
+            version: '1.3.0',
+            url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
           },
         },
       ],

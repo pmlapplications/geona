@@ -156,7 +156,8 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
       let nearestValidTime;
 
       // We use Date objects for easy comparison
-      let dateNearestValidTime = new Date('1970-01-01T00:00:00Z');
+      let sortedTimes = geonaLayer.dimensions.time.values.sort();
+      let dateNearestValidTime = new Date(sortedTimes[0]);
       let dateRequestedTime = new Date(requestedTime);
 
       for (let currentTime of geonaLayer.dimensions.time.values) {

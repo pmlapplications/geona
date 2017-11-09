@@ -38,7 +38,7 @@ export class OlMap extends GeonaMap {
     /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
     this._activeLayers = {};
     /** @private @type {String} The latest time that the active map layers are set to */
-    this._mapTime = '';
+    this._mapTime = undefined;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -374,10 +374,10 @@ export class OlMap extends GeonaMap {
             attributions = 'Geona | ' + attributions;
           }
 
-          // Selects the requested time, or the closest to the map time
+          // Selects the requested time, the closest to the map time, or the default layer time.
           if (requestedTime !== undefined) {
             time = findNearestValidTime(geonaLayer, requestedTime);
-          } else if (modifier === undefined && this._mapTime !== '') {
+          } else if (modifier === undefined && this._mapTime !== undefined) {
             time = findNearestValidTime(geonaLayer, this._mapTime);
           } else if (modifier === undefined) {
             if (geonaLayer.dimensions) {
@@ -442,7 +442,7 @@ export class OlMap extends GeonaMap {
       }
 
       // Sets the map time if this is the first layer
-      if (this._mapTime === '' && time !== undefined) {
+      if (this._mapTime === undefined && time !== undefined) {
         this._mapTime = time;
       }
 
@@ -481,6 +481,30 @@ export class OlMap extends GeonaMap {
         }
       } else if (this._activeLayers[layerId].get('modifier') === 'borders') {
         this.config.borders = 'none';
+      } else {
+        // We removed a data layer, so the layers above the removed layer should have their zIndex reduced by 1.
+        let zIndex = this._activeLayers[layerId].get('zIndex');
+        for (let layer of this._map.getLayers().getArray()) {
+          if (layer.get('zIndex') > zIndex) {
+            layer.set('zIndex', layer.get('zIndex') - 1);
+          }
+        }
+        let data = this.config.data;
+        for (let i = data.length; i > 0; i--) {
+          if (data[i] === layerId) {
+            this.config.data.splice(i, 1);
+          }
+        }
+      }
+      // If this was the last data layer, the map time should be reset - we will use the dataLayersCounter for this.
+      let dataLayersCounter = 0;
+      for (let layer of this._map.getLayers().getArray()) {
+        if (layer.get('modifier') === undefined) {
+          dataLayersCounter++;
+        }
+      }
+      if (dataLayersCounter === 0) {
+        this._mapTime = undefined;
       }
       delete this._activeLayers[layerId];
     }
@@ -568,9 +592,9 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Updates the layer time.
-   * @param {*} layerIdentifier 
-   * @param {*} requestedTime 
+   * Updates the layer time to the nearest, past valid time for that layer.
+   * @param {String} layerIdentifier The identifier for the layer being updated.
+   * @param {String} requestedTime   The time in ISO 8601 format.
    */
   loadNearestValidTime(layerIdentifier, requestedTime) {
     let geonaLayer = this._availableLayers[layerIdentifier];

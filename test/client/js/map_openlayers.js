@@ -28,7 +28,7 @@ describe('client/js/map_openlayers', function() {
     }
     window.geonaOnReady = geonaOnReady;
 
-
+    // TODO put into file
     let config1 = {
       geonaVariable: 'geonaOlTest',
       onReadyCallback: 'geonaOnReady',
@@ -6603,6 +6603,7 @@ describe('client/js/map_openlayers', function() {
 
   // These tests might have too much duplication (i.e. could be made to test in fewer lines of code).
   // They also might not be comprehensive, as reorderLayers() deals with a variety of situations.
+  // TODO tests for zIndices where a data layer has been removed from the middle of the stack
   describe('reorderLayers()', function() {
     describe('reordering - 1x basemap, 1x borders, 0x data', function() {
       before(function() {
