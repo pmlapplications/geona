@@ -432,6 +432,8 @@ export class LMap extends GeonaMap {
         this.config.basemap = layer.options.identifier;
       } else if (modifier === 'borders') {
         this.config.borders = layer.options.identifier;
+      } else if (this._initialized === true) {
+        // this.config.data.push(layer.options.identifier);
       }
 
       this._geonaLayers.push(geonaLayer);

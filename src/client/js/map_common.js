@@ -147,7 +147,7 @@ export function getLayersFromWmts(url) {
 /**
  * Gets the nearest possible time prior to or matching the requested time.
  * @param  {Layer}  geonaLayer    The Geona layer for the layer being changed.
- * @param  {String} requestedTime The requested time in ISO8601 format.
+ * @param  {String} requestedTime The requested time in ISO 8601 format.
  * @return {String}               The nearest valid time to the requested time.
  */
 export function findNearestValidTime(geonaLayer, requestedTime) {
@@ -164,6 +164,7 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
         // Must match or be earlier than the requested time
         if (dateCurrentTime <= dateRequestedTime && dateCurrentTime > dateNearestValidTime) {
           nearestValidTime = currentTime;
+          dateNearestValidTime = new Date(currentTime);
         }
       }
       return nearestValidTime;

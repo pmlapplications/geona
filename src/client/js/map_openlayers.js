@@ -313,9 +313,9 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map.
-   * @param {Layer}  geonaLayer The Geona Layer object to be created as an OpenLayers layer on the map.
-   * @param {String} [modifier] An optional String used to indicate that a layer is 'basemap' or 'borders'
-   * @param {String} [time]     The time requested for this layer.
+   * @param {Layer}  geonaLayer          The Geona Layer object to be created as an OpenLayers layer on the map.
+   * @param {String} [modifier]          An optional String used to indicate that a layer is 'basemap' or 'borders'
+   * @param {String} [requestedTime]     The time requested for this layer.
    */
   addLayer(geonaLayer, modifier = undefined, requestedTime = undefined) {
     if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
@@ -382,8 +382,7 @@ export class OlMap extends GeonaMap {
           } else if (modifier === undefined) {
             if (geonaLayer.dimensions) {
               if (geonaLayer.dimensions.time) {
-                let times = geonaLayer.dimensions.time.values;
-                time = times[times.length - 1];
+                time = geonaLayer.dimensions.time.default;
               }
             }
           }
@@ -431,6 +430,7 @@ export class OlMap extends GeonaMap {
         // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
         // This is to compensate for the fact that the layer has not been added to the map yet.
         zIndex: this._map.getLayers().getArray().length,
+        layerTime: time,
       });
       let layer = this._activeLayers[geonaLayer.identifier];
 
@@ -453,6 +453,8 @@ export class OlMap extends GeonaMap {
         this.config.basemap = geonaLayer.identifier;
       } else if (modifier === 'borders') {
         this.config.borders = geonaLayer.identifier;
+      } else if (this._initialized === true) {
+        this.config.data.push(geonaLayer.identifier);
       }
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
@@ -576,6 +578,9 @@ export class OlMap extends GeonaMap {
       throw new Error('No Geona layer with this identifier has been loaded.');
     } else if (this._activeLayers[layerIdentifier] === undefined) {
       throw new Error('No layer with this identifier is on the map.');
+    } else if (this._activeLayers[layerIdentifier].get('modifier') !== undefined) {
+      let modifier = this._activeLayers[layerIdentifier].get('modifier');
+      throw new Error('Cannot change the time of a ' + modifier + 'layer.');
     } else {
       let time = findNearestValidTime(geonaLayer, requestedTime);
       let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
@@ -583,8 +588,19 @@ export class OlMap extends GeonaMap {
       this.addLayer(geonaLayer, undefined, time);
       this.reorderLayers(layerIdentifier, zIndex);
 
+      // We need to set the map time to be the latest layer time
+      // First we'll set it to the new time for this data layer, so we can compare it to the rest of the layers
+      this._mapTime = this._activeLayers[layerIdentifier].get('layerTime');
+      let mapTime = new Date(this._mapTime);
+
+      // Then we compare the map data layers to find the latest time for the data layers
       for (let layer of this._map.getLayers().getArray()) {
-        // this._mapTime = latest time
+        if (layer.get('modifier') === undefined) {
+          let layerTime = new Date(layer.get('layerTime'));
+          if (layerTime > mapTime) {
+            this._mapTime = layer.get('layerTime');
+          }
+        }
       }
     }
   }

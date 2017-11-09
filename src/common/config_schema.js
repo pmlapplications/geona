@@ -179,9 +179,7 @@ export let client = {
     data: {
       doc: 'The identifier for the data layers to put on the map by default.',
       format: Array,
-      default: [
-        'chlor_a',
-      ],
+      default: [],
     },
     // Required parameters: 'identifier', 'protocol', 'projections', 'layerServer'
     // Required layerServer parameters: 'layers', 'version', 'url'
@@ -222,15 +220,7 @@ export let client = {
           ],
           projections: [
             'EPSG:4326',
-            'CRS:84',
-            'EPSG:41001',
-            'EPSG:27700',
-            'EPSG:3408',
-            'EPSG:3409',
             'EPSG:3857',
-            'EPSG:900913',
-            'EPSG:32661',
-            'EPSG:32761',
           ],
           layerServer: {
             layers: ['chlor_a'],
@@ -251,6 +241,8 @@ export let client = {
               current: true,
               values: [
                 '2016-12-31T00:00:00.000Z',
+                '1997-09-04T00:00:00.000Z',
+                '2001-07-05T00:00:00.000Z',
               ],
             },
           },
