@@ -102,10 +102,19 @@ export class OlMap extends GeonaMap {
       this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
     }
     // Adds all defined data layers to the map
+    // TODO maybe the modifier should be stated in the Geona layer?
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
-        for (let layer of this.config.data) {
-          this.addLayer(this._availableLayers[layer]);
+        for (let layerIdentifier of this.config.data) {
+          if (this._availableLayers[layerIdentifier].dimensions) {
+            if (this._availableLayers[layerIdentifier].dimensions.time) {
+              this.addLayer(this._availableLayers[layerIdentifier], 'hasTime');
+            } else {
+              this.addLayer(this._availableLayers[layerIdentifier]);
+            }
+          } else {
+            this.addLayer(this._availableLayers[layerIdentifier]);
+          }
         }
       }
     }
@@ -377,9 +386,9 @@ export class OlMap extends GeonaMap {
           // Selects the requested time, the closest to the map time, or the default layer time.
           if (requestedTime !== undefined) {
             time = findNearestValidTime(geonaLayer, requestedTime);
-          } else if (modifier === undefined && this._mapTime !== undefined) {
+          } else if (modifier === 'hasTime' && this._mapTime !== undefined) {
             time = findNearestValidTime(geonaLayer, this._mapTime);
-          } else if (modifier === undefined) {
+          } else if (modifier === 'hasTime') {
             if (geonaLayer.dimensions) {
               if (geonaLayer.dimensions.time) {
                 time = geonaLayer.dimensions.time.default;
@@ -499,7 +508,7 @@ export class OlMap extends GeonaMap {
       // If this was the last data layer, the map time should be reset - we will use the dataLayersCounter for this.
       let dataLayersCounter = 0;
       for (let layer of this._map.getLayers().getArray()) {
-        if (layer.get('modifier') === undefined) {
+        if (layer.get('modifier') === 'hasTime') {
           dataLayersCounter++;
         }
       }
@@ -604,9 +613,9 @@ export class OlMap extends GeonaMap {
       throw new Error('No Geona layer with this identifier has been loaded.');
     } else if (this._activeLayers[layerIdentifier] === undefined) {
       throw new Error('No layer with this identifier is on the map.');
-    } else if (this._activeLayers[layerIdentifier].get('modifier') !== undefined) {
+    } else if (this._activeLayers[layerIdentifier].get('modifier') !== 'hasTime') {
       let modifier = this._activeLayers[layerIdentifier].get('modifier');
-      throw new Error('Cannot change the time of a ' + modifier + 'layer.');
+      throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
       let time = findNearestValidTime(geonaLayer, requestedTime);
@@ -619,7 +628,7 @@ export class OlMap extends GeonaMap {
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
         this.removeLayer(layerIdentifier);
-        this.addLayer(geonaLayer, undefined, time);
+        this.addLayer(geonaLayer, 'hasTime', time);
         this.reorderLayers(layerIdentifier, zIndex);
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
         this._mapTime = time;
@@ -631,7 +640,7 @@ export class OlMap extends GeonaMap {
       // We compare the map data layers to find the latest time for the visible data layers
       for (let layer of this._map.getLayers().getArray()) {
         // We check for visibility so that the map time will be the requested time if all layers are hidden
-        if (layer.get('modifier') === undefined && layer.getVisible() === true) {
+        if (layer.get('modifier') === 'hasTime' && layer.getVisible() === true) {
           let layerTime = new Date(layer.get('layerTime'));
           if (layerTime > mapTime) {
             this._mapTime = layer.get('layerTime');
@@ -650,7 +659,7 @@ export class OlMap extends GeonaMap {
     let layersAtStart = Object.keys(this._activeLayers);
 
     for (let layerIdentifier of layersAtStart) {
-      if (this._activeLayers[layerIdentifier].get('modifier') === undefined) {
+      if (this._activeLayers[layerIdentifier].get('modifier') === 'hasTime') {
         this.loadNearestValidTime(layerIdentifier, requestedTime);
       }
     }
