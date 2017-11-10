@@ -593,10 +593,12 @@ export class OlMap extends GeonaMap {
 
   /**
    * Updates the layer time to the nearest, past valid time for that layer.
+   * If no valid time is found, the layer is hidden.
    * @param {String} layerIdentifier The identifier for the layer being updated.
-   * @param {String} requestedTime   The time in ISO 8601 format.
+   * @param {String} requestedTime   The target time in ISO 8601 format.
    */
   loadNearestValidTime(layerIdentifier, requestedTime) {
+    // We use time values from the Geona layer object
     let geonaLayer = this._availableLayers[layerIdentifier];
     if (geonaLayer === undefined) {
       throw new Error('No Geona layer with this identifier has been loaded.');
@@ -606,25 +608,50 @@ export class OlMap extends GeonaMap {
       let modifier = this._activeLayers[layerIdentifier].get('modifier');
       throw new Error('Cannot change the time of a ' + modifier + 'layer.');
     } else {
+      // We find the nearest, past valid time for this layer
       let time = findNearestValidTime(geonaLayer, requestedTime);
-      let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
-      this.removeLayer(layerIdentifier);
-      this.addLayer(geonaLayer, undefined, time);
-      this.reorderLayers(layerIdentifier, zIndex);
+      if (time === 'noValidTime') {
+        // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
+        this.hideLayer(layerIdentifier);
+        // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
+        this._mapTime = requestedTime;
+      } else {
+        // We save the zIndex so we can reorder the layer to it's current position when we re-add it
+        let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
+        this.removeLayer(layerIdentifier);
+        this.addLayer(geonaLayer, undefined, time);
+        this.reorderLayers(layerIdentifier, zIndex);
+        // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
+        this._mapTime = time;
+      }
 
-      // We need to set the map time to be the latest layer time
-      // First we'll set it to the new time for this data layer, so we can compare it to the rest of the layers
-      this._mapTime = this._activeLayers[layerIdentifier].get('layerTime');
+      // We now find the latest map time.
       let mapTime = new Date(this._mapTime);
 
-      // Then we compare the map data layers to find the latest time for the data layers
+      // We compare the map data layers to find the latest time for the visible data layers
       for (let layer of this._map.getLayers().getArray()) {
-        if (layer.get('modifier') === undefined) {
+        // We check for visibility so that the map time will be the requested time if all layers are hidden
+        if (layer.get('modifier') === undefined && layer.getVisible() === true) {
           let layerTime = new Date(layer.get('layerTime'));
           if (layerTime > mapTime) {
             this._mapTime = layer.get('layerTime');
           }
         }
+      }
+    }
+  }
+
+  /**
+   * Loads all the data layers on the map to the nearest valid time, hiding the layers with no valid data.
+   * @param {String} requestedTime The target time in ISO 8601 format.
+   */
+  loadLayersToNearestValidTime(requestedTime) {
+    // layersAtStart holds the identifiers for the layers before we start changing all their times.
+    let layersAtStart = Object.keys(this._activeLayers);
+
+    for (let layerIdentifier of layersAtStart) {
+      if (this._activeLayers[layerIdentifier].get('modifier') === undefined) {
+        this.loadNearestValidTime(layerIdentifier, requestedTime);
       }
     }
   }
