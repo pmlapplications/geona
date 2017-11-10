@@ -153,10 +153,9 @@ export function getLayersFromWmts(url) {
 export function findNearestValidTime(geonaLayer, requestedTime) {
   if (geonaLayer.dimensions !== undefined) {
     if (geonaLayer.dimensions.time !== undefined) {
-      let nearestValidTime;
-
       // We use Date objects for easy comparison
       let sortedTimes = geonaLayer.dimensions.time.values.sort();
+      let nearestValidTime = sortedTimes[0];
       let dateNearestValidTime = new Date(sortedTimes[0]);
       let dateRequestedTime = new Date(requestedTime);
 

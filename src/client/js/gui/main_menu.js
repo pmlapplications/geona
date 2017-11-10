@@ -161,7 +161,15 @@ export class MainMenu {
     let selectedLayer = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
     for (let layer of this.requestLayers.layers) {
       if (layer.identifier === selectedLayer) {
-        this.geona.map.addLayer(layer);
+        if (layer.dimension) {
+          if (layer.dimension.time) {
+            this.geona.map.addLayer(layer, 'hasTime');
+          } else {
+            this.geona.map.addLayer(layer);
+          }
+        } else {
+          this.geona.map.addLayer(layer);
+        }
       }
     }
   }
