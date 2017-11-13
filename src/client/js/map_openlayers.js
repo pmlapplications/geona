@@ -338,8 +338,8 @@ export class OlMap extends GeonaMap {
 
     // Checks the map for any layers with the same identifier as the layer being added
     let duplicate = false;
-    for (let layer of this._mapLayers.getLayers()) {
-      if (layer.options.identifier === geonaLayer.identifier) {
+    for (let layer of this._map.getLayers().getArray()) {
+      if (layer.get('identifier') === geonaLayer.identifier) {
         duplicate = true;
       }
     }
@@ -504,22 +504,22 @@ export class OlMap extends GeonaMap {
 
   /**
    * Remove the specified data layer from the map
-   * @param {*} layerId The id of the data layer being removed
+   * @param {String} layerIdentifier The id of the data layer being removed
    */
-  removeLayer(layerId) {
-    if (this._map.getLayers().getArray().includes(this._activeLayers[layerId])) {
-      this._map.removeLayer(this._activeLayers[layerId]);
-      if (this._activeLayers[layerId].get('modifier') === 'basemap') {
+  removeLayer(layerIdentifier) {
+    if (this._map.getLayers().getArray().includes(this._activeLayers[layerIdentifier])) {
+      this._map.removeLayer(this._activeLayers[layerIdentifier]);
+      if (this._activeLayers[layerIdentifier].get('modifier') === 'basemap') {
         this.config.basemap = 'none';
         // As we have removed the basemap, the zIndices should all be reduced by 1.
         for (let layer of this._map.getLayers().getArray()) {
           layer.set('zIndex', layer.get('zIndex') - 1);
         }
-      } else if (this._activeLayers[layerId].get('modifier') === 'borders') {
+      } else if (this._activeLayers[layerIdentifier].get('modifier') === 'borders') {
         this.config.borders = 'none';
       } else {
         // We removed a data layer, so the layers above the removed layer should have their zIndex reduced by 1.
-        let zIndex = this._activeLayers[layerId].get('zIndex');
+        let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
         for (let layer of this._map.getLayers().getArray()) {
           if (layer.get('zIndex') > zIndex) {
             layer.set('zIndex', layer.get('zIndex') - 1);
@@ -527,7 +527,7 @@ export class OlMap extends GeonaMap {
         }
         let data = this.config.data;
         for (let i = data.length; i > 0; i--) {
-          if (data[i] === layerId) {
+          if (data[i] === layerIdentifier) {
             this.config.data.splice(i, 1);
           }
         }
@@ -542,26 +542,26 @@ export class OlMap extends GeonaMap {
       if (dataLayersCounter === 0) {
         this._mapTime = undefined;
       }
-      delete this._activeLayers[layerId];
+      delete this._activeLayers[layerIdentifier];
     }
   }
 
   /**
    * Makes an invisible layer visible
-   * @param {*} layerId The id of the data layer being made visible
+   * @param {String} layerIdentifier The id of the data layer being made visible
    */
-  showLayer(layerId) {
-    this._activeLayers[layerId].setVisible(true);
-    this._activeLayers[layerId].set('shown', true);
+  showLayer(layerIdentifier) {
+    this._activeLayers[layerIdentifier].setVisible(true);
+    this._activeLayers[layerIdentifier].set('shown', true);
   }
 
   /**
    * Makes a layer invisible, but keeps it on the map
-   * @param {*} layerId The id of the data layer being made hidden
+   * @param {String} layerIdentifier The id of the data layer being made hidden
    */
-  hideLayer(layerId) {
-    this._activeLayers[layerId].setVisible(false);
-    this._activeLayers[layerId].set('shown', false);
+  hideLayer(layerIdentifier) {
+    this._activeLayers[layerIdentifier].setVisible(false);
+    this._activeLayers[layerIdentifier].set('shown', false);
   }
 
   /**

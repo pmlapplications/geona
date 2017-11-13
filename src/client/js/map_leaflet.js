@@ -28,7 +28,7 @@ export class LMap extends GeonaMap {
     this._availableLayers = {};
     /**  @type {L.featureGroup} The layers on the map */
     this._mapLayers = L.featureGroup();
-    this._geonaLayers = [];
+    this._activeLayers = {};
     /** @type {String} The time the map is set to */
     this._mapTime = undefined;
     /**  @type {L.latlngGraticule} The map graticule */
@@ -428,6 +428,9 @@ export class LMap extends GeonaMap {
             version: geonaLayer.layerServer.version,
             crs: projection,
             zIndex: this._mapLayers.getLayers().length,
+            modifier: options.modifier,
+            layerTime: time,
+            shown: options.shown,
           });
           break;
         case 'wmts':
@@ -437,11 +440,7 @@ export class LMap extends GeonaMap {
           throw new Error('Layer protocol is undefined');
       }
 
-      this._geonaLayers.push(geonaLayer);
-
-      layer.options.modifier = options.modifier;
-      layer.options.layerTime = time;
-      layer.options.shown = options.shown;
+      this._activeLayers[geonaLayer.identifier] = geonaLayer;
 
       if (options.modifier === 'basemap') {
         this._clearBasemap(layer);
@@ -488,6 +487,7 @@ export class LMap extends GeonaMap {
       if (layer.options.identifier === layerIdentifier) {
         this._mapLayers.removeLayer(layer);
         layer.remove();
+        delete this._activeLayers[layerIdentifier];
         if (layer.options.modifier === 'basemap') {
           this.config.basemap = 'none';
           // As we have removed the basemap, the zIndices should all be reduced by 1
@@ -496,6 +496,29 @@ export class LMap extends GeonaMap {
           }
         } else if (layer.options.modifier === 'borders') {
           this.config.borders = 'none';
+        } else if (layer.options.modifier === 'hasTime' || layer.options.modifier === undefined) {
+          let zIndex = layer.options.zIndex;
+          for (let dataLayer of this._mapLayers.getLayers()) {
+            if (dataLayer.options.zIndex > zIndex) {
+              dataLayer.options.zIndex = dataLayer.options.zIndex - 1;
+            }
+          }
+          let data = this.config.data;
+          for (let i = data.length; i > 0; i--) {
+            if (data[i] === layerIdentifier) {
+              this.config.data.splice(i, 1);
+            }
+          }
+        }
+        // If this was the last data layer, the map time should be reset - we will use the dataLayersCounter for this.
+        let dataLayersCounter = 0;
+        for (let dataLayer of this._mapLayers.getLayers()) {
+          if (dataLayer.options.modifier === 'hasTime') {
+            dataLayersCounter++;
+          }
+        }
+        if (dataLayersCounter === 0) {
+          this._mapTime = undefined;
         }
       }
     }
@@ -503,25 +526,23 @@ export class LMap extends GeonaMap {
 
   /**
    * Reveals the layer on the map.
-   * @param {*} layerIdentifier The identifier for the layer being shown.
+   * @param {String} layerIdentifier The identifier for the layer being shown.
    */
   showLayer(layerIdentifier) {
-    for (let layer of this._mapLayers.getLayers()) {
-      if (layer.options.identifier === layerIdentifier) {
-        layer.setOpacity(1);
-      }
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      this._activeLayers[layerIdentifier].setVisible(true);
+      this._activeLayers[layerIdentifier].options.shown = true;
     }
   }
 
   /**
    * Hides the layer from view, whilst keeping it on the map.
-   * @param {*} layerIdentifier The identifier for the layer being hidden.
+   * @param {String} layerIdentifier The identifier for the layer being hidden.
    */
   hideLayer(layerIdentifier) {
-    for (let layer of this._mapLayers.getLayers()) {
-      if (layer.options.identifier === layerIdentifier) {
-        layer.setOpacity(0);
-      }
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      this._activeLayers[layerIdentifier].setVisible(false);
+      this._activeLayers[layerIdentifier].options.shown = false;
     }
   }
 
@@ -597,61 +618,76 @@ export class LMap extends GeonaMap {
     }
   }
 
-  //   /**
-  //    * Updates the layer time to the nearest, past valid time for that layer.
-  //    * If no valid time is found, the layer is hidden.
-  //    * @param {String} layerIdentifier The identifier for the layer being updated.
-  //    * @param {String} requestedTime   The target time in ISO 8601 format.
-  //    */
-  //   loadNearestValidTime(layerIdentifier, requestedTime) {
-  //     // We use time values from the Geona layer object
-  //     let geonaLayer = this._availableLayers[layerIdentifier];
-  //     if (geonaLayer === undefined) {
-  //       throw new Error('No Geona layer with this identifier has been loaded.');
-  //     } else if (this._activeLayers[layerIdentifier] === undefined) {
-  //       throw new Error('No layer with this identifier is on the map.');
-  //     } else if (this._activeLayers[layerIdentifier].get('modifier') !== 'hasTime') {
-  //       let modifier = this._activeLayers[layerIdentifier].get('modifier');
-  //       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
-  //     } else {
-  //       // We find the nearest, past valid time for this layer
-  //       let time = findNearestValidTime(geonaLayer, requestedTime);
-  //       if (time === 'noValidTime') {
-  //         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
-  //         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
-  //         this._activeLayers[layerIdentifier].setVisible(false);
-  //         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
-  //         this._mapTime = requestedTime;
-  //       } else {
-  //         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
-  //         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
-  //         // We save the visibility so the layer's state of visibility is kept upon changing time
-  //         let shown = this._activeLayers[layerIdentifier].get('shown');
+  /**
+     * Updates the layer time to the nearest, past valid time for that layer.
+     * If no valid time is found, the layer is hidden.
+     * @param {String} layerIdentifier The identifier for the layer being updated.
+     * @param {String} requestedTime   The target time in ISO 8601 format.
+     */
+  loadNearestValidTime(layerIdentifier, requestedTime) {
+    // We use time values from the Geona layer object
+    let geonaLayer = this._availableLayers[layerIdentifier];
+    if (geonaLayer === undefined) {
+      throw new Error('No Geona layer with this identifier has been loaded.');
+    } else if (this._activeLayers[layerIdentifier] === undefined) {
+      throw new Error('No layer with this identifier is on the map.');
+    } else if (this._activeLayers[layerIdentifier].options.modifier !== 'hasTime') {
+      let modifier = this._activeLayers[layerIdentifier].options.modifier;
+      throw new Error('Cannot change the time of a ' + modifier + ' layer.');
+    } else {
+      // We find the nearest, past valid time for this layer
+      let time = findNearestValidTime(geonaLayer, requestedTime);
+      if (time === 'noValidTime') {
+        // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
+        // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
+        this._activeLayers[layerIdentifier].setVisible(false);
+        // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
+        this._mapTime = requestedTime;
+      } else {
+        // We save the zIndex so we can reorder the layer to it's current position when we re-add it
+        let zIndex = this._activeLayers[layerIdentifier].options.zIndex;
+        // We save the visibility so the layer's state of visibility is kept upon changing time
+        let shown = this._activeLayers[layerIdentifier].options.shown;
 
-  //         this.removeLayer(layerIdentifier);
-  //         this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
-  //         this.reorderLayers(layerIdentifier, zIndex);
+        this.removeLayer(layerIdentifier);
+        this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
+        this.reorderLayers(layerIdentifier, zIndex);
 
-  //         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
-  //         this._mapTime = time;
-  //       }
+        // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
+        this._mapTime = time;
+      }
 
-  //       // We now find the latest map time.
-  //       let mapTime = new Date(this._mapTime);
+      // We now find the latest map time.
+      let mapTime = new Date(this._mapTime);
 
-  //       // We compare the map data layers to find the latest time for the visible data layers
-  //       for (let layer of this._map.getLayers().getArray()) {
-  //         // We check for visibility so that the map time will be the requested time if all layers are hidden
-  //         if (layer.get('modifier') === 'hasTime' && layer.getVisible() === true) {
-  //           let layerTime = new Date(layer.get('layerTime'));
-  //           if (layerTime > mapTime) {
-  //             this._mapTime = layer.get('layerTime');
-  //             mapTime = new Date(layer.get('layerTime'));
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
+      // We compare the map data layers to find the latest time for the visible data layers
+      for (let layer of this._mapLayers.getLayers()) {
+        // We check for visibility so that the map time will be the requested time if all layers are hidden
+        if (layer.options.modifier === 'hasTime' && layer.getVisible() === true) {
+          let layerTime = new Date(layer.options.layerTime);
+          if (layerTime > mapTime) {
+            this._mapTime = layer.options.layerTime;
+            mapTime = new Date(layer.options.layerTime);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Loads all the data layers on the map to the nearest valid time, hiding the layers with no valid data.
+   * @param {String} requestedTime The target time in ISO 8601 format.
+   */
+  loadLayersToNearestValidTime(requestedTime) {
+    // layersAtStart holds the identifiers for the layers before we start changing all their times.
+    let layersAtStart = Object.keys(this._activeLayers);
+
+    for (let layerIdentifier of layersAtStart) {
+      if (this._activeLayers[layerIdentifier].options.modifier === 'hasTime') {
+        this.loadNearestValidTime(layerIdentifier, requestedTime);
+      }
+    }
+  }
 
   /**
    * Load the default basemaps, and any defined in the config.
