@@ -431,6 +431,7 @@ export class LMap extends GeonaMap {
             modifier: options.modifier,
             layerTime: time,
             shown: options.shown,
+            opacity: 1,
           });
           break;
         case 'wmts':
@@ -440,7 +441,7 @@ export class LMap extends GeonaMap {
           throw new Error('Layer protocol is undefined');
       }
 
-      this._activeLayers[geonaLayer.identifier] = geonaLayer;
+      this._activeLayers[geonaLayer.identifier] = layer;
 
       if (options.modifier === 'basemap') {
         this._clearBasemap(layer);
@@ -457,7 +458,8 @@ export class LMap extends GeonaMap {
       this._mapLayers.addLayer(layer);
 
       if (options.shown === false) {
-        layer.setVisible(false);
+        layer.setOpacity(0);
+        layer.options.opacity = 0;
       }
 
       if (options.modifier === 'basemap') {
@@ -530,7 +532,11 @@ export class LMap extends GeonaMap {
    */
   showLayer(layerIdentifier) {
     if (this._activeLayers[layerIdentifier] !== undefined) {
-      this._activeLayers[layerIdentifier].setVisible(true);
+      // This changes all the tiles of the layer to be completely see-through
+      this._activeLayers[layerIdentifier].setOpacity(1);
+      // There is no corresponding getOpacity() method so we have to update our options manually
+      this._activeLayers[layerIdentifier].options.opacity = 1;
+      // A layer that is hidden due to being having no data at the current time will be shown again once there is data available
       this._activeLayers[layerIdentifier].options.shown = true;
     }
   }
@@ -541,7 +547,11 @@ export class LMap extends GeonaMap {
    */
   hideLayer(layerIdentifier) {
     if (this._activeLayers[layerIdentifier] !== undefined) {
-      this._activeLayers[layerIdentifier].setVisible(false);
+      // This changes all the tiles of the layer to be completely see-through
+      this._activeLayers[layerIdentifier].setOpacity(0);
+      // There is no corresponding getOpacity() method so we have to update our options manually
+      this._activeLayers[layerIdentifier].options.opacity = 0;
+      // A layer that is hidden due to being having no data at the current time will remain hidden once there is data available
       this._activeLayers[layerIdentifier].options.shown = false;
     }
   }
@@ -640,7 +650,8 @@ export class LMap extends GeonaMap {
       if (time === 'noValidTime') {
         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
-        this._activeLayers[layerIdentifier].setVisible(false);
+        this._activeLayers[layerIdentifier].setOpacity(0);
+        this._activeLayers[layerIdentifier].options.opacity = 0;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else {
@@ -663,7 +674,7 @@ export class LMap extends GeonaMap {
       // We compare the map data layers to find the latest time for the visible data layers
       for (let layer of this._mapLayers.getLayers()) {
         // We check for visibility so that the map time will be the requested time if all layers are hidden
-        if (layer.options.modifier === 'hasTime' && layer.getVisible() === true) {
+        if (layer.options.modifier === 'hasTime' && layer.options.opacity < 0) {
           let layerTime = new Date(layer.options.layerTime);
           if (layerTime > mapTime) {
             this._mapTime = layer.options.layerTime;

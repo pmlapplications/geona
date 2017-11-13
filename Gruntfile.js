@@ -12,8 +12,8 @@ module.exports = function(grunt) {
   };
 
   let clientTestsBundle = {
-    'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
-    // 'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
+    // 'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
+    'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
     // 'static/js/client_tests.js': 'test/client/js/map_common.js',
   };
 

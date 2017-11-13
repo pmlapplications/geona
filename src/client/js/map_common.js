@@ -155,13 +155,15 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
     if (geonaLayer.dimensions.time !== undefined) {
       // We use Date objects for easy comparison
       let sortedTimes = geonaLayer.dimensions.time.values.sort();
+      // We set this to the earliest as a starting point
       let nearestValidTime = sortedTimes[0];
       let dateNearestValidTime = new Date(sortedTimes[0]);
+      let dateLatestValidTime = new Date(sortedTimes[sortedTimes.length - 1]);
       let dateRequestedTime = new Date(requestedTime);
 
-      // If the requested time is earlier than the earliest possible
+      // If the requested time is earlier than the earliest possible or latest possible
       // time for this layer, return a message to indicate this
-      if (dateRequestedTime < dateNearestValidTime) {
+      if (dateRequestedTime < dateNearestValidTime || dateRequestedTime > dateLatestValidTime) {
         return 'noValidTime';
       } else {
         for (let currentTime of geonaLayer.dimensions.time.values) {

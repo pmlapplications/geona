@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
 
-import $ from 'jquery';
+import 'jquery';
 import {load} from '../../../src/client_loader/loader.js';
 
 import {getLayersFromWms, getLayersFromWmts} from '../../../src/client/js/map_common.js';
@@ -2938,7 +2938,6 @@ describe('client/js/map_openlayers', function() {
     });
   });
 
-  // TODO map common tests for findNearestValidTime
   describe('loadNearestValidTime', function() {
     // These variables are used as shorthand for the layers in the tests.
     // They are redefined in each test to keep them up-to-date with any changes we make during the tests.
@@ -3066,6 +3065,16 @@ describe('client/js/map_openlayers', function() {
     });
     it('should set the map time to 1900-01-01T00:00:00.000Z', function() {
       expect(geona.map._mapTime).to.equal('1900-01-01T00:00:00.000Z');
+    });
+    it('should hide both layers', function() {
+      geona.map.loadLayersToNearestValidTime('2200-01-01T00:00:00.000Z');
+      let rrs412 = geona.map._activeLayers.Rrs_412;
+      let rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs412.getVisible()).to.equal(false);
+      expect(rrs490.getVisible()).to.equal(false);
+    });
+    it('should set the map time to 2200-01-01T00:00:00.000Z', function() {
+      expect(geona.map._mapTime).to.equal('2200-01-01T00:00:00.000Z');
     });
 
     after(function() {

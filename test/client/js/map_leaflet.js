@@ -6996,6 +6996,153 @@ describe('client/js/map_leaflet', function() {
     });
   });
 
+  describe('loadNearestValidTime', function() {
+    // These variables are used as shorthand for the layers in the tests.
+    // They are redefined in each test to keep them up-to-date with any changes we make during the tests.
+    let rrs412;
+    let rrs490;
+
+    before(function() {
+      // Add a basemap, two data layers, and a borders layer.
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.line, {modifier: 'borders'});
+    });
+
+    it('should throw an error that the layer is undefined', function() {
+      expect(function() {
+        geona.map.loadNearestValidTime('', '2017-01-01T00:00:00.000Z');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer is not on the map', function() {
+      expect(function() {
+        geona.map.loadNearestValidTime('Rrs_443', '2017-01-01T00:00:00.000Z');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer is a basemap', function() {
+      expect(function() {
+        geona.map.loadNearestValidTime('terrain-light', '2017-01-01T00:00:00.000Z');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer is a borders layer', function() {
+      expect(function() {
+        geona.map.loadNearestValidTime('line', '2017-01-01T00:00:00.000Z');
+      }).to.throw(Error);
+    });
+    it('should find that the layer time for the first layer added is set to the default', function() {
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.options.layerTime).to.equal('2015-12-27T00:00:00.000Z');
+    });
+    it('should find that the layer time for the second layer added is set to the nearest valid time as the first layer', function() {
+      rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs490.options.layerTime).to.equal('2015-12-27T00:00:00.000Z');
+    });
+    it('should change the Rrs_412 layer time to 1998-01-01T00:00:00.000Z', function() {
+      geona.map.loadNearestValidTime('Rrs_412', '1998-01-01T00:00:00.000Z');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.options.layerTime).to.equal('1998-01-01T00:00:00.000Z');
+    });
+    it('should change the Rrs_490 layer time to 2001-04-01T00:00:00.000Z', function() {
+      geona.map.loadNearestValidTime('Rrs_490', '2001-04-01T00:00:00.000Z');
+      rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs490.options.layerTime).to.equal('2001-04-01T00:00:00.000Z');
+    });
+    it('should hide the layers because there is no valid time', function() {
+      geona.map.loadNearestValidTime('Rrs_490', '1900-12-27T00:00:00.000Z');
+      rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs490.options.opacity).to.equal(0);
+      expect(rrs490.options.shown).to.equal(true);
+
+      // For the purposes of the next tests, we will hide this layer before moving it to the invalid time
+      geona.map.hideLayer('Rrs_412');
+      geona.map.loadNearestValidTime('Rrs_412', '1900-12-27T00:00:00.000Z');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.options.opacity).to.equal(0);
+      expect(rrs412.options.shown).to.equal(false);
+    });
+    it('should keep the layer times the same as their previous time after being hidden', function() {
+      rrs490 = geona.map._activeLayers.Rrs_490;
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs490.options.layerTime).to.equal('2001-04-01T00:00:00.000Z');
+      expect(rrs412.options.layerTime).to.equal('1998-01-01T00:00:00.000Z');
+    });
+    it('should have set the map time to the requested time because there is no valid time', function() {
+      expect(geona.map._mapTime).to.equal('1900-12-27T00:00:00.000Z');
+    });
+    it('should make the layer visible', function() {
+      geona.map.loadNearestValidTime('Rrs_490', '2010-01-01T00:00:00.000Z');
+      rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs490.options.opacity).to.equal(1);
+      expect(rrs490.options.shown).to.equal(true);
+    });
+    it('should have set the map time to the time of the only visible layer', function() {
+      expect(geona.map._mapTime).to.equal('2008-08-08T00:00:00.000Z');
+    });
+    it('should keep the layer hidden if the layer had been hidden prior to moving out of valid time', function() {
+      // This test relies on layer Rrs_412 being hidden prior to moving out of valid time
+      geona.map.loadNearestValidTime('Rrs_412', '1998-01-01T00:00:00.000Z');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.options.opacity).to.equal(0);
+      expect(rrs412.options.shown).to.equal(false);
+    });
+
+    after(function() {
+      geona.map.removeLayer('terrain-light');
+      geona.map.removeLayer('Rrs_412');
+      geona.map.removeLayer('Rrs_490');
+      geona.map.removeLayer('line');
+    });
+  });
+
+  describe('loadLayersToNearestValidTime', function() {
+    before(function() {
+      // Add a basemap, two data layers, and a borders layer.
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.line, {modifier: 'borders'});
+    });
+
+    it('should set the layers to valid times', function() {
+      geona.map.loadLayersToNearestValidTime('2001-04-01T00:00:00.000Z');
+      let rrs412 = geona.map._activeLayers.Rrs_412;
+      let rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs412.options.layerTime).to.equal('1998-01-01T00:00:00.000Z');
+      expect(rrs490.options.layerTime).to.equal('2001-04-01T00:00:00.000Z');
+    });
+    it('should set the map time to 2001-04-01T00:00:00.000Z', function() {
+      expect(geona.map._mapTime).to.equal('2001-04-01T00:00:00.000Z');
+    });
+    it('should hide both layers', function() {
+      geona.map.loadLayersToNearestValidTime('1900-01-01T00:00:00.000Z');
+      let rrs412 = geona.map._activeLayers.Rrs_412;
+      let rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs412.options.opacity).to.equal(0);
+      expect(rrs490.options.opacity).to.equal(0);
+    });
+    it('should set the map time to 1900-01-01T00:00:00.000Z', function() {
+      expect(geona.map._mapTime).to.equal('1900-01-01T00:00:00.000Z');
+    });
+    it('should hide both layers', function() {
+      geona.map.loadLayersToNearestValidTime('2200-01-01T00:00:00.000Z');
+      let rrs412 = geona.map._activeLayers.Rrs_412;
+      let rrs490 = geona.map._activeLayers.Rrs_490;
+      expect(rrs412.options.opacity).to.equal(0);
+      expect(rrs490.options.opacity).to.equal(0);
+    });
+    it('should set the map time to 2200-01-01T00:00:00.000Z', function() {
+      expect(geona.map._mapTime).to.equal('2200-01-01T00:00:00.000Z');
+    });
+
+    after(function() {
+      geona.map.removeLayer('terrain-light');
+      geona.map.removeLayer('Rrs_412');
+      geona.map.removeLayer('Rrs_490');
+      geona.map.removeLayer('line');
+    });
+  });
+
   describe('getLayersFromWms()', function() {
     let wmsLayers;
     before(function(done) {

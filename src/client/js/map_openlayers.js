@@ -649,7 +649,7 @@ export class OlMap extends GeonaMap {
       // We find the nearest, past valid time for this layer
       let time = findNearestValidTime(geonaLayer, requestedTime);
       if (time === 'noValidTime') {
-        // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
+        // If the requested time is invalid for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
         this._activeLayers[layerIdentifier].setVisible(false);
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
