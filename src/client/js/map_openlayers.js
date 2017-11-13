@@ -320,7 +320,6 @@ export class OlMap extends GeonaMap {
     }
   }
 
-  // TODO change these optional parameters to be a config
   /**
    * Add the specified data layer onto the map.
    * @param {Layer}   geonaLayer      The Geona Layer object to be created as an OpenLayers layer on the map.

@@ -14,6 +14,7 @@ module.exports = function(grunt) {
   let clientTestsBundle = {
     // 'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
     'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
+    // 'static/js/client_tests.js': 'test/client/js/map_common.js',
   };
 
   let clientMapCommonBundle = {
@@ -342,7 +343,7 @@ module.exports = function(grunt) {
   // Build the client
   grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
     'browserifyOther', 'env:babili', 'babel:babili']);
-  // Build the client and watch for changes
+  // Build the client and client tests, and watch for changes
   grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
     'browserify:client', 'browserifyOther', 'copy:test', 'watch']);
 
