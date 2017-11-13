@@ -324,7 +324,7 @@ export class OlMap extends GeonaMap {
    * Add the specified data layer onto the map, using the specified options.
    *
    * @param {Layer}   geonaLayer            The Geona Layer object to be created as an OpenLayers layer on the map.
-   * @param {Object}  options               A list of options that affect the layers being added
+   * @param {Object}  [options]             A list of options that affect the layers being added
    * @param {String}  options.modifier      Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
    * @param {String}  options.requestedTime The time requested for this layer.
    * @param {Boolean} options.shown         Whether to show or hide the layer when it is first put on the map.
@@ -336,15 +336,27 @@ export class OlMap extends GeonaMap {
       options.shown = true;
     }
 
-    if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
-      let source;
+    // Checks the map for any layers with the same identifier as the layer being added
+    let duplicate = false;
+    for (let layer of this._mapLayers.getLayers()) {
+      if (layer.options.identifier === geonaLayer.identifier) {
+        duplicate = true;
+      }
+    }
+    // We enforce that identifiers must be unique on the map.
+    // TODO offer option of changing identifier.
+    if (duplicate === true) {
+      alert('Layer with this identifier already exists on the map.');
+    } else if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
       let attributions;
-      let title;
-      let requiredLayer;
       let format;
       let projection;
+      let requiredLayer;
+      let source;
       let style;
+      let title;
       let time;
+
       switch (geonaLayer.protocol) {
         case 'wms':
           title = geonaLayer.title.und;
