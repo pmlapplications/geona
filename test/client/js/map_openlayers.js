@@ -2485,7 +2485,7 @@ describe('client/js/map_openlayers', function() {
 
     before(function() {
       dataLayer = geona.map._availableLayers.Rrs_412;
-      geona.map.addLayer(dataLayer);
+      geona.map.addLayer(dataLayer, {modifier: 'hasTime'});
     });
 
     it('should have added a data layer to the map', function() {
@@ -2504,7 +2504,7 @@ describe('client/js/map_openlayers', function() {
       expect(Object.keys(geona.map._activeLayers).length).to.equal(1);
     });
     it('should add the basemap modifier to basemaps', function() {
-      geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
       expect(geona.map._activeLayers['terrain-light'].get('modifier')).to.equal('basemap');
     });
     it('should display the correct attribution for basemaps', function() {
@@ -2512,11 +2512,11 @@ describe('client/js/map_openlayers', function() {
       expect(html).to.deep.equal('Geona | ' + geona.map.config.basemapLayers[0].attribution.onlineResource);
     });
     it('should add the borders modifier to borders layers', function() {
-      geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
+      geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
       expect(geona.map._activeLayers.line_black.get('modifier')).to.equal('borders');
     });
     it('should remove the previous basemap when a new basemap is added', function() {
-      geona.map.addLayer(geona.map._availableLayers.s2cloudless, 'basemap');
+      geona.map.addLayer(geona.map._availableLayers.s2cloudless, {modifier: 'basemap'});
       // Amount of expects might be a bit overkill
       expect(geona.map._activeLayers.s2cloudless).to.not.be.undefined;
       expect(geona.map._activeLayers['terrain-light']).to.be.undefined;
@@ -2529,7 +2529,7 @@ describe('client/js/map_openlayers', function() {
       }
     });
     it('should remove the previous borders when a new borders layer is added', function() {
-      geona.map.addLayer(geona.map._availableLayers.line, 'borders');
+      geona.map.addLayer(geona.map._availableLayers.line, {modifier: 'borders'});
       // Amount of expects might be a bit overkill
       expect(geona.map._activeLayers.line_black).to.be.undefined;
       expect(geona.map._activeLayers.line).to.not.be.undefined;
@@ -2550,7 +2550,7 @@ describe('client/js/map_openlayers', function() {
 
     before(function() {
       for (let layer of geona.map._map.getLayers().getArray()) {
-        if (layer.get('modifier') === undefined) {
+        if (layer.get('modifier') === undefined || layer.get('modifier') === 'hasTime') {
           data = layer;
         } else if (layer.get('modifier') === 'basemap') {
           basemap = layer;
@@ -2596,8 +2596,8 @@ describe('client/js/map_openlayers', function() {
     describe('reordering - 1x basemap, 1x borders, 0x data', function() {
       before(function() {
         // Basic setup with one basemap and one borders layer.
-        geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-        geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
+        geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+        geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
       });
 
       it('should have set the lowest zIndex to be 0', function() {
@@ -2651,9 +2651,9 @@ describe('client/js/map_openlayers', function() {
     describe('reordering - 1x basemap, 1x borders, 1x data', function() {
       before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
-        geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-        geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
-        geona.map.addLayer(geona.map._availableLayers.Rrs_412);
+        geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+        geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
+        geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
       });
 
       it('should have set the lowest zIndex to be 0', function() {
@@ -2708,9 +2708,9 @@ describe('client/js/map_openlayers', function() {
     describe('reordering - 1x data, 1x borders, 1x basemap', function() {
       before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
-        geona.map.addLayer(geona.map._availableLayers.Rrs_412);
-        geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
-        geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
+        geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+        geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
+        geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
       });
 
       it('should have set the lowest zIndex to be 0', function() {
@@ -2765,9 +2765,9 @@ describe('client/js/map_openlayers', function() {
     describe('reordering - 1x data, 1x borders, 1x basemap, basemap removed', function() {
       before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
-        geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-        geona.map.addLayer(geona.map._availableLayers.Rrs_412);
-        geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
+        geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+        geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+        geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
         geona.map.removeLayer('terrain-light');
       });
 
@@ -2783,7 +2783,7 @@ describe('client/js/map_openlayers', function() {
       it('should find a data layer at zIndex 0', function() {
         for (let layer of geona.map._map.getLayers().getArray()) {
           if (layer.get('zIndex') === 0) {
-            expect(layer.get('modifier')).to.be.undefined;
+            expect(layer.get('modifier')).to.equal('hasTime');
           }
         }
       });
@@ -2822,9 +2822,9 @@ describe('client/js/map_openlayers', function() {
     describe('reordering - 1x borders, 1x data, 1x basemap, borders removed', function() {
       before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
-        geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-        geona.map.addLayer(geona.map._availableLayers.Rrs_412);
-        geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
+        geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+        geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+        geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
         geona.map.removeLayer('line_black');
       });
 
@@ -2856,7 +2856,7 @@ describe('client/js/map_openlayers', function() {
       it('should find a data layer at zIndex 1', function() {
         for (let layer of geona.map._map.getLayers().getArray()) {
           if (layer.get('zIndex') === 1) {
-            expect(layer.get('modifier')).to.be.undefined;
+            expect(layer.get('modifier')).to.equal('hasTime');
           }
         }
       });
@@ -2879,11 +2879,11 @@ describe('client/js/map_openlayers', function() {
     describe('reordering - 1x borders, 1x data, 1x basemap, 2x data', function() {
       before(function() {
         // Setup with one basemap, one borders layer, and one data layer.
-        geona.map.addLayer(geona.map._availableLayers.line_black, 'borders');
-        geona.map.addLayer(geona.map._availableLayers.Rrs_412);
-        geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-        geona.map.addLayer(geona.map._availableLayers.Rrs_443);
-        geona.map.addLayer(geona.map._availableLayers.Rrs_490);
+        geona.map.addLayer(geona.map._availableLayers.line_black, {modifier: 'borders'});
+        geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+        geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+        geona.map.addLayer(geona.map._availableLayers.Rrs_443, {modifier: 'hasTime'});
+        geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
       });
 
       it('should have set the lowest zIndex to be 0', function() {
@@ -2914,7 +2914,7 @@ describe('client/js/map_openlayers', function() {
       it('should find a data layer at zIndex 4', function() {
         for (let layer of geona.map._map.getLayers().getArray()) {
           if (layer.get('zIndex') === 1) {
-            expect(layer.get('modifier')).to.be.undefined;
+            expect(layer.get('modifier')).to.equal('hasTime');
           }
         }
       });
@@ -2947,10 +2947,10 @@ describe('client/js/map_openlayers', function() {
 
     before(function() {
       // Add a basemap, two data layers, and a borders layer.
-      geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-      geona.map.addLayer(geona.map._availableLayers.Rrs_412, 'hasTime');
-      geona.map.addLayer(geona.map._availableLayers.Rrs_490, 'hasTime');
-      geona.map.addLayer(geona.map._availableLayers.line, 'borders');
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.line, {modifier: 'borders'});
     });
 
     it('should throw an error that the layer is undefined', function() {
@@ -3041,10 +3041,10 @@ describe('client/js/map_openlayers', function() {
   describe('loadLayersToNearestValidTime', function() {
     before(function() {
       // Add a basemap, two data layers, and a borders layer.
-      geona.map.addLayer(geona.map._availableLayers['terrain-light'], 'basemap');
-      geona.map.addLayer(geona.map._availableLayers.Rrs_412, 'hasTime');
-      geona.map.addLayer(geona.map._availableLayers.Rrs_490, 'hasTime');
-      geona.map.addLayer(geona.map._availableLayers.line, 'borders');
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.line, {modifier: 'borders'});
     });
 
     it('should set the layers to valid times', function() {
@@ -3095,7 +3095,15 @@ describe('client/js/map_openlayers', function() {
       expect(wmsLayers.layers.length).to.be.above(0);
     });
     it('should add one of the retrieved layers to the map', function() {
-      geona.map.addLayer(wmsLayers.layers[0]);
+      if (wmsLayers.layers[0].dimensions) {
+        if (wmsLayers.layers[0].dimensions.time) {
+          geona.map.addLayer(wmsLayers.layers[0], {modifier: 'hasTime'});
+        } else {
+          geona.map.addLayer(wmsLayers.layers[0]);
+        }
+      } else {
+        geona.map.addLayer(wmsLayers.layers[0]);
+      }
 
       let firstMapLayer = geona.map._map.getLayers().getArray()[0];
       expect(firstMapLayer.get('identifier')).to.equal(wmsLayers.layers[0].identifier);

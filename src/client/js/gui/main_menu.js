@@ -163,7 +163,7 @@ export class MainMenu {
       if (layer.identifier === selectedLayer) {
         if (layer.dimension) {
           if (layer.dimension.time) {
-            this.geona.map.addLayer(layer, 'hasTime');
+            this.geona.map.addLayer(layer, {modifier: 'hasTime'});
           } else {
             this.geona.map.addLayer(layer);
           }

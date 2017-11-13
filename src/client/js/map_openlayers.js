@@ -99,7 +99,7 @@ export class OlMap extends GeonaMap {
 
     // Adds any defined basemap to the map
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
-      this.addLayer(this._availableLayers[this.config.basemap], 'basemap');
+      this.addLayer(this._availableLayers[this.config.basemap], {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
     // TODO maybe the modifier should be stated in the Geona layer?
@@ -108,7 +108,7 @@ export class OlMap extends GeonaMap {
         for (let layerIdentifier of this.config.data) {
           if (this._availableLayers[layerIdentifier].dimensions) {
             if (this._availableLayers[layerIdentifier].dimensions.time) {
-              this.addLayer(this._availableLayers[layerIdentifier], 'hasTime');
+              this.addLayer(this._availableLayers[layerIdentifier], {modifier: 'hasTime'});
             } else {
               this.addLayer(this._availableLayers[layerIdentifier]);
             }
@@ -120,7 +120,7 @@ export class OlMap extends GeonaMap {
     }
     // Adds any defined borders layer to the map
     if (this.config.borders !== 'none' && this.config.borders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.borders], 'borders');
+      this.addLayer(this._availableLayers[this.config.borders], {modifier: 'borders'});
     }
 
     this.loadConfig_();
@@ -321,13 +321,21 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Add the specified data layer onto the map.
-   * @param {Layer}   geonaLayer      The Geona Layer object to be created as an OpenLayers layer on the map.
-   * @param {String}  [modifier]      Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   * @param {String}  [requestedTime] The time requested for this layer.
-   * @param {Boolean} [shown]         Whether to show or hide the layer when it is first put on the map.
+   * Add the specified data layer onto the map, using the specified options.
+   *
+   * @param {Layer}   geonaLayer            The Geona Layer object to be created as an OpenLayers layer on the map.
+   * @param {Object}  options               A list of options that affect the layers being added
+   * @param {String}  options.modifier      Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   * @param {String}  options.requestedTime The time requested for this layer.
+   * @param {Boolean} options.shown         Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, modifier = undefined, requestedTime = undefined, shown = true) {
+  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, shown: true}) {
+    // Set default options if not specified
+    // No need to set modifier and requestedTime
+    if (options.shown === undefined) {
+      options.shown = true;
+    }
+
     if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
       let source;
       let attributions;
@@ -380,17 +388,17 @@ export class OlMap extends GeonaMap {
           // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers
           // Not good because 'Geona' won't be displayed without any layers, if the layer it's attached to is
           // removed, and will be out of sequence if the layers are added in different orders
-          if (this._map.getLayers().getArray().length === 0 || modifier === 'basemap') {
+          if (this._map.getLayers().getArray().length === 0 || options.modifier === 'basemap') {
             attributions = 'Geona | ' + attributions;
           }
 
           // TODO force a layer with time dimensions to be 'hasTime'?
           // Selects the requested time, the closest to the map time, or the default layer time.
-          if (requestedTime !== undefined) {
-            time = findNearestValidTime(geonaLayer, requestedTime);
-          } else if (modifier === 'hasTime' && this._mapTime !== undefined) {
+          if (options.requestedTime !== undefined) {
+            time = findNearestValidTime(geonaLayer, options.requestedTime);
+          } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
             time = findNearestValidTime(geonaLayer, this._mapTime);
-          } else if (modifier === 'hasTime') {
+          } else if (options.modifier === 'hasTime') {
             if (geonaLayer.dimensions) {
               if (geonaLayer.dimensions.time) {
                 time = geonaLayer.dimensions.time.default;
@@ -437,19 +445,19 @@ export class OlMap extends GeonaMap {
         viewSettings: geonaLayer.viewSettings,
         projections: geonaLayer.projections,
         source: source,
-        modifier: modifier,
+        modifier: options.modifier,
         // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
         // This is to compensate for the fact that the layer has not been added to the map yet.
         zIndex: this._map.getLayers().getArray().length,
         layerTime: time,
-        shown: shown,
+        shown: options.shown,
       });
       let layer = this._activeLayers[geonaLayer.identifier];
 
       // If the map layer is a unique type, we clear the old layer for that type before we add the new one.
-      if (modifier === 'basemap') {
+      if (options.modifier === 'basemap') {
         this._clearBasemap(layer);
-      } else if (modifier === 'borders') {
+      } else if (options.modifier === 'borders') {
         this._clearBorders(layer);
       }
 
@@ -460,14 +468,14 @@ export class OlMap extends GeonaMap {
 
       this._map.addLayer(layer);
 
-      if (shown === false) {
+      if (options.shown === false) {
         layer.setVisible(false);
       }
 
-      if (modifier === 'basemap') {
+      if (options.modifier === 'basemap') {
         this.reorderLayers(geonaLayer.identifier, 0);
         this.config.basemap = geonaLayer.identifier;
-      } else if (modifier === 'borders') {
+      } else if (options.modifier === 'borders') {
         this.config.borders = geonaLayer.identifier;
       } else if (this._initialized === true) {
         this.config.data.push(geonaLayer.identifier);
@@ -641,7 +649,7 @@ export class OlMap extends GeonaMap {
         let shown = this._activeLayers[layerIdentifier].get('shown');
 
         this.removeLayer(layerIdentifier);
-        this.addLayer(geonaLayer, 'hasTime', time, shown);
+        this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
         this.reorderLayers(layerIdentifier, zIndex);
 
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
