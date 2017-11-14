@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
 *  Create a Canvas as ImageOverlay to draw the Lat/Lon Graticule,
 *  and show the axis tick label on the edge of the map.

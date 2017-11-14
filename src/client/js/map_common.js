@@ -162,9 +162,9 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
       let dateRequestedTime = new Date(requestedTime);
 
       // If the requested time is earlier than the earliest possible or latest possible
-      // time for this layer, return a message to indicate this
+      // time for this layer, return undefined
       if (dateRequestedTime < dateNearestValidTime || dateRequestedTime > dateLatestValidTime) {
-        return 'noValidTime';
+        return undefined;
       } else {
         for (let currentTime of geonaLayer.dimensions.time.values) {
           let dateCurrentTime = new Date(currentTime);

@@ -12,8 +12,8 @@ module.exports = function(grunt) {
   };
 
   let clientTestsBundle = {
-    // 'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
-    'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
+    'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
+    // 'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
     // 'static/js/client_tests.js': 'test/client/js/map_common.js',
   };
 
@@ -40,7 +40,6 @@ module.exports = function(grunt) {
 
   let leafletPlugins = [
     './src/client/vendor/js/leaflet_latlng_graticule.js',
-    './src/client/vendor/js/leaflet_tilelayer_wmts.js',
   ];
 
   let clientExternalLibs = vendorLibs.concat(leafletPlugins).concat([

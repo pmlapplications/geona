@@ -3021,8 +3021,13 @@ describe('client/js/map_openlayers', function() {
     it('should have set the map time to the time of the only visible layer', function() {
       expect(geona.map._mapTime).to.equal('2008-08-08T00:00:00.000Z');
     });
+    it('should keep the layer hidden if the layer is out of valid time', function() {
+      geona.map.showLayer('Rrs_412');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.getVisible()).to.equal(false);
+    });
     it('should keep the layer hidden if the layer had been hidden prior to moving out of valid time', function() {
-      // This test relies on layer Rrs_412 being hidden prior to moving out of valid time
+      geona.map.hideLayer('Rrs_412');
       geona.map.loadNearestValidTime('Rrs_412', '1998-01-01T00:00:00.000Z');
       rrs412 = geona.map._activeLayers.Rrs_412;
       expect(rrs412.getVisible()).to.equal(false);

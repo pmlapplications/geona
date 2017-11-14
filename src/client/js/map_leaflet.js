@@ -59,10 +59,6 @@ export class LMap extends GeonaMap {
     });
 
     // TODO sort these when finished
-    /** @type {Boolean} Whether the map currently has a basemap */
-    this._basemap = false;
-    /** @type {Boolean} Whether the map currently has country borders */
-    this._borders = false;
     /** @private @type {Boolean} Tracks whether the map has been initialized */
     this._initialized = false;
 
@@ -417,22 +413,48 @@ export class LMap extends GeonaMap {
             }
           }
 
-          // eslint-disable-next-line new-cap
-          layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
-            identifier: geonaLayer.identifier,
-            layers: requiredLayer,
-            styles: style || 'boxfill/alg',
-            format: format || 'image/png',
-            transparent: true,
-            attribution: attribution,
-            version: geonaLayer.layerServer.version,
-            crs: projection,
-            zIndex: this._mapLayers.getLayers().length,
-            modifier: options.modifier,
-            layerTime: time,
-            shown: options.shown,
-            opacity: 1,
-          });
+          // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
+          // This is why we have 'time', 'Time' and 'TIME' to cover all cases
+          if (options.modifier === 'hasTime' && time !== undefined) {
+            // eslint-disable-next-line new-cap
+            layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
+              identifier: geonaLayer.identifier,
+              layers: requiredLayer,
+              styles: style || 'boxfill/alg',
+              format: format || 'image/png',
+              transparent: true,
+              attribution: attribution,
+              version: geonaLayer.layerServer.version,
+              crs: projection,
+              time: time,
+              Time: time,
+              TIME: time,
+              zIndex: this._mapLayers.getLayers().length,
+              modifier: options.modifier,
+              layerTime: time,
+              shown: options.shown,
+              opacity: 1,
+              timeHidden: false,
+            });
+          } else {
+            // eslint-disable-next-line new-cap
+            layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
+              identifier: geonaLayer.identifier,
+              layers: requiredLayer,
+              styles: style || 'boxfill/alg',
+              format: format || 'image/png',
+              transparent: true,
+              attribution: attribution,
+              version: geonaLayer.layerServer.version,
+              crs: projection,
+              zIndex: this._mapLayers.getLayers().length,
+              modifier: options.modifier,
+              layerTime: time,
+              shown: options.shown,
+              opacity: 1,
+              timeHidden: false,
+            });
+          }
           break;
         case 'wmts':
           alert('WMTS is not supported for Leaflet');
@@ -532,11 +554,14 @@ export class LMap extends GeonaMap {
    */
   showLayer(layerIdentifier) {
     if (this._activeLayers[layerIdentifier] !== undefined) {
-      // This changes all the tiles of the layer to be completely see-through
-      this._activeLayers[layerIdentifier].setOpacity(1);
-      // There is no corresponding getOpacity() method so we have to update our options manually
-      this._activeLayers[layerIdentifier].options.opacity = 1;
-      // A layer that is hidden due to being having no data at the current time will be shown again once there is data available
+      // We don't want to reveal the layer if it's been hidden due to invalid time
+      if (this._activeLayers[layerIdentifier].options.timeHidden === false) {
+        // This changes all the tiles of the layer to be completely see-through
+        this._activeLayers[layerIdentifier].setOpacity(1);
+        // There is no corresponding getOpacity() method so we have to update our options manually
+        this._activeLayers[layerIdentifier].options.opacity = 1;
+      }
+      // A layer hidden due to being having no data at the current time will be shown again once there is data available
       this._activeLayers[layerIdentifier].options.shown = true;
     }
   }
@@ -551,7 +576,7 @@ export class LMap extends GeonaMap {
       this._activeLayers[layerIdentifier].setOpacity(0);
       // There is no corresponding getOpacity() method so we have to update our options manually
       this._activeLayers[layerIdentifier].options.opacity = 0;
-      // A layer that is hidden due to being having no data at the current time will remain hidden once there is data available
+      // A layer hidden due to being having no data at the current time will remain hidden once there is data available
       this._activeLayers[layerIdentifier].options.shown = false;
     }
   }
@@ -647,11 +672,12 @@ export class LMap extends GeonaMap {
     } else {
       // We find the nearest, past valid time for this layer
       let time = findNearestValidTime(geonaLayer, requestedTime);
-      if (time === 'noValidTime') {
+      if (time === undefined) {
         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
         this._activeLayers[layerIdentifier].setOpacity(0);
         this._activeLayers[layerIdentifier].options.opacity = 0;
+        this._activeLayers[layerIdentifier].options.timeHidden = true;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else {
@@ -663,6 +689,7 @@ export class LMap extends GeonaMap {
         this.removeLayer(layerIdentifier);
         this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
         this.reorderLayers(layerIdentifier, zIndex);
+        this._activeLayers[layerIdentifier].options.timeHidden = false;
 
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
         this._mapTime = time;

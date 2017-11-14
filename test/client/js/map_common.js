@@ -67,13 +67,13 @@ describe('client/js/map_common', function() {
       let time = findNearestValidTime(geonaLayer, '2008-08-07T00:00:00.000Z');
       expect(time).to.equal('2001-05-05T00:00:00.000Z');
     });
-    it('should return \'noValidTime\' because the requested time is too far in the past', function() {
+    it('should return undefined because the requested time is too far in the past', function() {
       let time = findNearestValidTime(geonaLayer, '1996-08-07T00:00:00.000Z');
-      expect(time).to.equal('noValidTime');
+      expect(time).to.be.undefined;
     });
-    it('should return \'noValidTime\' because the requested time is too far in the future', function() {
+    it('should return undefined because the requested time is too far in the future', function() {
       let time = findNearestValidTime(geonaLayer, '2200-08-07T00:00:00.000Z');
-      expect(time).to.equal('noValidTime');
+      expect(time).to.be.undefined;
     });
   });
 });

@@ -463,6 +463,7 @@ export class OlMap extends GeonaMap {
         zIndex: this._map.getLayers().getArray().length,
         layerTime: time,
         shown: options.shown,
+        timeHidden: false,
       });
       let layer = this._activeLayers[geonaLayer.identifier];
 
@@ -551,8 +552,12 @@ export class OlMap extends GeonaMap {
    * @param {String} layerIdentifier The id of the data layer being made visible
    */
   showLayer(layerIdentifier) {
-    this._activeLayers[layerIdentifier].setVisible(true);
-    this._activeLayers[layerIdentifier].set('shown', true);
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      if (this._activeLayers[layerIdentifier].get('timeHidden') === false) {
+        this._activeLayers[layerIdentifier].setVisible(true);
+      }
+      this._activeLayers[layerIdentifier].set('shown', true);
+    }
   }
 
   /**
@@ -560,8 +565,10 @@ export class OlMap extends GeonaMap {
    * @param {String} layerIdentifier The id of the data layer being made hidden
    */
   hideLayer(layerIdentifier) {
-    this._activeLayers[layerIdentifier].setVisible(false);
-    this._activeLayers[layerIdentifier].set('shown', false);
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      this._activeLayers[layerIdentifier].setVisible(false);
+      this._activeLayers[layerIdentifier].set('shown', false);
+    }
   }
 
   /**
@@ -648,10 +655,11 @@ export class OlMap extends GeonaMap {
     } else {
       // We find the nearest, past valid time for this layer
       let time = findNearestValidTime(geonaLayer, requestedTime);
-      if (time === 'noValidTime') {
+      if (time === undefined) {
         // If the requested time is invalid for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
         this._activeLayers[layerIdentifier].setVisible(false);
+        this._activeLayers[layerIdentifier].set('timeHidden', true);
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else {
@@ -663,6 +671,7 @@ export class OlMap extends GeonaMap {
         this.removeLayer(layerIdentifier);
         this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
         this.reorderLayers(layerIdentifier, zIndex);
+        this._activeLayers[layerIdentifier].set('timeHidden', false);
 
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
         this._mapTime = time;
