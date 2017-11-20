@@ -32,7 +32,7 @@ export class SplashScreen {
    * TODO Removes the splash screen and places the saved map items on the map.
    */
   loadPreviousMap() {
-    // variable only set to stop eslint from complaining about using 'this' - can be removed with the alert.
+    // variable only set to stop eslint from complaining about using 'this' - can be removed along with the alert.
     this.eslintPleaser = alert('Need to save maps first. This alert is located in splash_screen.js');
   }
 }

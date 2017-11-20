@@ -104,12 +104,15 @@
     "jsonix": "^2.4.1",
     "leaflet": "^1.1.0",
     "lodash": "^4.17.4",
+    "moment": "^2.19.2",
+    "moment-es6": "^1.0.0",
     "node-sass": "^4.5.3",
     "ogc-schemas": "^2.6.1",
     "openlayers": "^4.3.1",
     "proj4": "^2.4.4",
     "request": "^2.81.0",
     "swagger-jsdoc": "^1.9.6",
+    "vis": "^4.21.0",
     "w3c-schemas": "^1.4.0"
   }
 }
