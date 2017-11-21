@@ -11,6 +11,7 @@ chai.use(chaiAsPromised);
 chai.use(chaiHttp);
 let expect = chai.expect;
 
+// TODO tests for all functions using WMTS layers (esp. time)
 describe('client/js/map_openlayers', function() {
   // Shorthand for window.geonaTest, used in the actual tests
   let geona;
