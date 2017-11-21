@@ -3,7 +3,12 @@ import * as templates from '../../templates/compiled';
 import Pikaday from 'pikaday';
 import moment from 'moment';
 
-import {Timebar} from './timebar';
+// import {DataSet, Timeline as Timebar} from 'vis/index-timeline-graph2d';
+import vis from 'vis';
+// import 'vis/dist/vis.min.css';
+
+
+// import {Timebar} from './timebar';
 import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
 
@@ -31,7 +36,87 @@ export class Timeline {
     }
 
     // D3 Timeline
-    this.timebar = new Timebar(this, {});
+    // this.timebar = new Timebar(this, {});
+
+    // Vis Timeline
+    // Instantiate timeline
+    let container = this.parentDiv.find('.js-geona-timeline-inner__timebar')[0];
+    this.items = new vis.DataSet([
+      {
+        id: 'back1',
+        type: 'background', style: 'height: 5px',
+        start: '2008-05-05T00:00:00.000Z', end: '2011-03-04T00:00:00.000Z',
+        group: 'layer1',
+      },
+      {
+        id: '1-1',
+        type: 'point', style: 'height: 5px',
+        start: '2010-08-08T00:00:00.000Z',
+        group: 'layer1',
+      },
+      {
+        id: 'back2',
+        type: 'background', style: 'height: 5px',
+        start: '2010-05-05T00:00:00.000Z', end: '2012-03-04T00:00:00.000Z',
+        group: 'layer2',
+      },
+      {
+        id: '2-1',
+        type: 'point', style: 'height: 5px',
+        start: '2010-05-05T00:00:00.000Z',
+        group: 'layer2',
+      },
+      {
+        id: 'back3',
+        type: 'background', style: 'height: 5px',
+        start: '2005-05-05T00:00:00.000Z', end: '2012-03-04T00:00:00.000Z',
+        group: 'layer3',
+      },
+      {
+        id: '3-1',
+        type: 'point', style: 'height: 5px',
+        start: '2007-05-05T00:00:00.000Z',
+        group: 'layer3',
+      },
+    ]);
+    let options = {
+      format: {
+        minorLabels: {
+          month: 'YYYY-MM',
+          day: 'YYYY-MM-DD',
+          weekday: 'YYYY-MM-DD',
+          hour: 'YYYY-MM-DD HH:mm',
+          minute: 'YYYY-MM-DD HH:mm',
+          second: 'YYYY-MM-DD HH:mm',
+        },
+      },
+      showCurrentTime: false,
+      showMajorLabels: false,
+      stack: false,
+      selectable: false,
+      width: 'calc(100% - 300px)',
+    };
+
+    // TODO Content should be 27 chars, or if more, should be ... after character 24 (25, 26, 27 as dots)
+    let groups = new vis.DataSet([
+      {
+        id: 'layer1',
+        content: 'layer 1',
+        style: 'height: 5px; font-size: 10px',
+      },
+      {
+        id: 'layer2',
+        content: 'layer 2',
+        style: 'height: 5px; font-size: 10px',
+      },
+      {
+        id: 'layer3',
+        content: 'layer 3',
+        style: 'height: 5px; font-size: 10px',
+      },
+    ]);
+    let timebar = new vis.Timeline(container, this.items, groups, options);
+    timebar.addCustomTime(new Date(), 'slider');
 
     // Pikaday widget - instantiated blank
     // TODO i18n for the pikaday
