@@ -12,4 +12,13 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('timeline.hideTimeline');
     }
   });
+
+  // Timebar - Show Pikaday widget
+  parentDiv.find('.js-geona-timeline-current-date')
+    .click(() => {
+      eventManager.trigger('timeline.showPikaday');
+    })
+    .focusout(() => {
+      eventManager.trigger('timeline.hidePikaday');
+    });
 }

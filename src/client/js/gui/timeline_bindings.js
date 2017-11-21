@@ -12,4 +12,13 @@ export function registerBindings(eventManager, timeline) {
   eventManager.bind('timeline.hideTimeline', () => {
     timeline.hideTimeline();
   });
+
+  // Show pikaday
+  eventManager.bind('timeline.showPikaday', () => {
+    timeline.showPikaday();
+  });
+  // Hide pikaday
+  eventManager.bind('timeline.hidePikaday', () => {
+    timeline.hidePikaday();
+  });
 }

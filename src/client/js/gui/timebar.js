@@ -1,6 +1,10 @@
 import 'jquery';
-import d3 from 'd3';
+import * as d3 from 'd3';
+import * as selection from 'd3-selection';
+// const d3 = require('d3');
 import moment from 'moment';
+import pikaday from 'pikaday';
+import 'pikaday-jquery';
 
 /**
  * Creates an interactive Timebar used to manipulate layer time
@@ -8,10 +12,11 @@ import moment from 'moment';
 export class Timebar {
   /**
    * The Timebar is a chart to visualise events in time
-   * @param {Timeline} timeline The GUI timeline element
-   * @param {Object}   options  Timebar options in JSON format
+   * @param {Timeline} timeline  The GUI timeline element
+   * @param {*}        container The DOM element to insert the timebar into
+   * @param {Object}   options   Timebar options in JSON format
    */
-  constructor(timeline, options) {
+  constructor(timeline, container, options = {}) {
     // Ensure there can only be one Timebar per map
     if (timeline.timebar !== undefined) {
       throw new Error('There can be only one instance of a Timebar per map.');
@@ -41,10 +46,12 @@ export class Timebar {
 
     this.now = new Date();
 
+    this.selectedDate = this.options.selectedDate;
+
     // The height for each lane of the chart (each lane contains the times for one layer)
     this.laneHeight = this.options.barHeight + this.options.barMargin * 2 + 1;
     // D3 colour categories scale with 10 contrasting colours
-    this.colours = d3.scale.category10();
+    this.colors = d3.scaleOrdinal(d3.schemeCategory10);
 
     this.recalculateHeight();
     this.recalculateWidth();
@@ -102,12 +109,15 @@ export class Timebar {
         // FIXME trigger event ('timebar.zoom', params');
       });
 
-    let element = this.parentDiv.find('.js-geona-timeline-inner__timebar')[0];
-    // this.chart = d3.select(element);
-    this.chart = element
+    // let element = this.parentDiv.find('.js-geona-timeline-inner__timebar')[0];
+    // element.append('svg');
+    // element.attr('class', 'timeline');
+    // element.class(this.zoom);
+    // this.chart = element;
+    this.chart = d3.select('div#' + this.id)
       .append('svg')
-      .attr('class', 'timeline')
-      .class(this.zoom);
+      .attr('class', 'timebar')
+      .call(this.zoom);
     // .on('click', this.clickDate())
     // .on('mousedown', () => {
     //  isDragging = false;
@@ -139,14 +149,23 @@ export class Timebar {
     this.draggedDate = this.selectedDate;
 
     // FIXME put in timebar_bindings/triggers
-    this.selectedDateLine = this.main.append('svg:rect')
+    this.selectedDateLine = this.main
+      .append('svg:rect')
       .attr('cursor', 'e-resize')
       .attr('class', 'js-selected-date-line')
+      // .call(
+      //   d3.drag()
+      //     .origin(Object)
+      //     .on('drag', this.dragDate())
+      //     .on('dragend', this.updateTimebarDates())
+      // )
       .call(
-        d3.drag().origin(Object)
+        d3.drag()
+          .subject(Object)
           .on('drag', this.dragDate())
           .on('dragend', this.updateTimebarDates())
-      ).on('mousedown', () => {
+      )
+      .on('mousedown', () => {
         d3.event.stopPropagation();
       });
 
@@ -177,7 +196,7 @@ export class Timebar {
       }],
       ['%Y-%m-%d', function(d) {
         // YYYY-MM-DD
-        return d.getUTCDate() != 1;
+        return d.getUTCDate() !== 1;
       }],
       ['%b %Y', function() {
         // 3 letter month YYYY
@@ -202,6 +221,19 @@ export class Timebar {
         this.redraw();
       }
     });
+
+    // // Set up the pikaday date input
+    // this.parentDiv.find('.js-geona-timeline-current-date')
+    //   .pikaday({
+    //     format: 'YYYY-MM-DD HH:mm',
+    //     use24hour: true,
+    //     onSelect: function() {
+    //       let selected = this.getMoment();
+    //       // Convert selected into UTC as pikaday uses local time
+    //       selected = moment.utc(selected.toArray());
+    //       // FIXME trigger command to change date
+    //     },
+    //   });
   }
 
   /**
@@ -300,7 +332,7 @@ export class Timebar {
     this.isDragging = true;
     // Converts the position of the date into an x coordinate,
     // then adds the amount the bar has moved from its previous position
-    let x = this.xScale(this.draggedDate) + d3.event.dx;
+    let x = this.xScale(this.draggedDate) + selection.event.dx;
 
     // Prevent dragging the selector off the end of the row
     // TODO the < and > operators were switched in the original code. Should they be <= and >= instead?
