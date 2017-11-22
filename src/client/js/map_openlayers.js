@@ -47,10 +47,10 @@ export class OlMap extends GeonaMap {
         width: 1,
         lineDash: [1, 4],
       }),
-      latLabelFormatter: function (latitude) {
+      latLabelFormatter: function(latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lonLabelFormatter: function (longitude) {
+      lonLabelFormatter: function(longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -99,7 +99,7 @@ export class OlMap extends GeonaMap {
 
     // Adds any defined basemap to the map
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
-      this.addLayer(this._availableLayers[this.config.basemap], { modifier: 'basemap' });
+      this.addLayer(this._availableLayers[this.config.basemap], {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
     // TODO maybe the modifier should be stated in the Geona layer?
@@ -108,7 +108,7 @@ export class OlMap extends GeonaMap {
         for (let layerIdentifier of this.config.data) {
           if (this._availableLayers[layerIdentifier].dimensions) {
             if (this._availableLayers[layerIdentifier].dimensions.time) {
-              this.addLayer(this._availableLayers[layerIdentifier], { modifier: 'hasTime' });
+              this.addLayer(this._availableLayers[layerIdentifier], {modifier: 'hasTime'});
             } else {
               this.addLayer(this._availableLayers[layerIdentifier]);
             }
@@ -120,7 +120,7 @@ export class OlMap extends GeonaMap {
     }
     // Adds any defined borders layer to the map
     if (this.config.borders !== 'none' && this.config.borders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.borders], { modifier: 'borders' });
+      this.addLayer(this._availableLayers[this.config.borders], {modifier: 'borders'});
     }
 
     this.loadConfig_();
@@ -242,12 +242,12 @@ export class OlMap extends GeonaMap {
       let basemapId = this._map.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
       if (this._availableLayers[basemapId].projections.includes(projection)) {
-        this.setView({ projection: projection });
+        this.setView({projection: projection});
       } else {
         alert('Basemap ' + this._map.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     } else {
-      this.setView({ projection: projection });
+      this.setView({projection: projection});
     }
 
     this.config.projection = projection;
@@ -269,7 +269,7 @@ export class OlMap extends GeonaMap {
   setView(options) {
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
-    let center = options.center || { lat: currentCenterLatLon[0], lon: currentCenterLatLon[1] };
+    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
@@ -331,11 +331,12 @@ export class OlMap extends GeonaMap {
    * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
    * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, options = { modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true }) {
+  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
     // TODO try and clean this method up - maybe split it up into separate methods.
     // Maybe have a wmsSourceFromLayer() for the list of options?
     // Also the bit at the end where modifiers are checked and reordering happens needs tidied.
     // Maybe allow the zIndex in the options.
+    // TODO change the layers from style.name to style.identifier
 
 
     // Set default options if not specified
@@ -399,9 +400,10 @@ export class OlMap extends GeonaMap {
             // Default to the first style
             style = geonaLayer.styles[0].identifier;
             // Search for the requested style and set that as the style if found
-            // TODO should this throw an error or silently deal with the incorrect style?
+            // TODO should this throw an error or silently deal with an incorrect requestedStyle?
             for (let layerStyle of geonaLayer.styles) {
               if (layerStyle.identifier === options.requestedStyle) {
+                console.log('matched style');
                 style = options.requestedStyle;
               }
             }
@@ -443,7 +445,7 @@ export class OlMap extends GeonaMap {
             params: {
               LAYERS: requiredLayer,
               FORMAT: geonaLayer.formats || 'image/png',
-              STYLES: style,
+              STYLES: style || '',
               time: time,
               wrapDateLine: true,
               NUMCOLORBANDS: 255,
@@ -682,11 +684,17 @@ export class OlMap extends GeonaMap {
       } else {
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
-        // We save the visibility so the layer's state of visibility is kept upon changing time
-        let shown = this._activeLayers[layerIdentifier].get('shown');
+        // We define the layer options so that only the time changes
+        let layerOptions = {
+          modifier: 'hasTime',
+          requestedStyle: this._activeLayers[layerIdentifier].get('source').getParams().STYLES,
+          // We save the layer's 'shown' value so the layer's state of visibility is kept upon changing time
+          shown: this._activeLayers[layerIdentifier].get('shown'),
+          requestedTime: time,
+        };
 
         this.removeLayer(layerIdentifier);
-        this.addLayer(geonaLayer, { modifier: 'hasTime', requestedTime: time, shown: shown });
+        this.addLayer(geonaLayer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
         this._activeLayers[layerIdentifier].set('timeHidden', false);
 
@@ -732,7 +740,6 @@ export class OlMap extends GeonaMap {
    * @param {String} styleIdentifier The identifier for the desired style.
    */
   changeLayerStyle(layerIdentifier, styleIdentifier) {
-    // TODO untested
     let layer = this._activeLayers[layerIdentifier];
     let geonaLayer = this._availableLayers[layerIdentifier];
 
@@ -753,8 +760,8 @@ export class OlMap extends GeonaMap {
           let layerOptions = {
             modifier: layer.get('modifier'),
             requestedTime: layer.get('layerTime'),
-            requestedStyle: layer.get('source').getParams().STYLES,
             shown: layer.get('shown'),
+            requestedStyle: styleIdentifier,
           };
           // Save the z-index so the layer remains in position
           let zIndex = layer.get('zIndex');
@@ -762,7 +769,6 @@ export class OlMap extends GeonaMap {
           this.removeLayer(layerIdentifier);
           this.addLayer(geonaLayer, layerOptions);
           this.reorderLayers(layerIdentifier, zIndex);
-
         } else {
           throw new Error('Specified style ' + styleIdentifier + ' is not defined for the layer ' + layerIdentifier + '.');
         }
@@ -859,7 +865,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function () {
+    mapJs.onload = function() {
       import('openlayers')
         .then((olLib) => {
           ol = olLib;
@@ -1091,7 +1097,7 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
 
   // Sort the array of tileMatrices by their scaleDenominators
-  matrixSet.tileMatrices.sort(function (a, b) {
+  matrixSet.tileMatrices.sort(function(a, b) {
     return b.scaleDenominator - a.scaleDenominator;
   });
 

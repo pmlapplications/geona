@@ -96,7 +96,7 @@ describe('client/js/map_openlayers', function() {
             },
             'styles': [
               {
-                'name': 'boxfill/cmocean_speed',
+                'identifier': 'boxfill/cmocean_speed',
                 'title': 'boxfill/cmocean_speed',
                 'abstract': 'boxfill style, using the cmocean_speed palette ',
                 'legendUrl': [
@@ -114,7 +114,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/ncview',
+                'identifier': 'boxfill/ncview',
                 'title': 'boxfill/ncview',
                 'abstract': 'boxfill style, using the ncview palette ',
                 'legendUrl': [
@@ -132,7 +132,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/occam',
+                'identifier': 'boxfill/occam',
                 'title': 'boxfill/occam',
                 'abstract': 'boxfill style, using the occam palette ',
                 'legendUrl': [
@@ -150,7 +150,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_algae',
+                'identifier': 'boxfill/cmocean_algae',
                 'title': 'boxfill/cmocean_algae',
                 'abstract': 'boxfill style, using the cmocean_algae palette ',
                 'legendUrl': [
@@ -168,7 +168,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_oxy',
+                'identifier': 'boxfill/cmocean_oxy',
                 'title': 'boxfill/cmocean_oxy',
                 'abstract': 'boxfill style, using the cmocean_oxy palette ',
                 'legendUrl': [
@@ -186,7 +186,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_haline',
+                'identifier': 'boxfill/cmocean_haline',
                 'title': 'boxfill/cmocean_haline',
                 'abstract': 'boxfill style, using the cmocean_haline palette ',
                 'legendUrl': [
@@ -204,7 +204,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/sst_36',
+                'identifier': 'boxfill/sst_36',
                 'title': 'boxfill/sst_36',
                 'abstract': 'boxfill style, using the sst_36 palette ',
                 'legendUrl': [
@@ -222,7 +222,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_dense',
+                'identifier': 'boxfill/cmocean_dense',
                 'title': 'boxfill/cmocean_dense',
                 'abstract': 'boxfill style, using the cmocean_dense palette ',
                 'legendUrl': [
@@ -240,7 +240,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/orange-descending',
+                'identifier': 'boxfill/orange-descending',
                 'title': 'boxfill/orange-descending',
                 'abstract': 'boxfill style, using the orange-descending palette ',
                 'legendUrl': [
@@ -258,7 +258,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cci_blue_red',
+                'identifier': 'boxfill/cci_blue_red',
                 'title': 'boxfill/cci_blue_red',
                 'abstract': 'boxfill style, using the cci_blue_red palette ',
                 'legendUrl': [
@@ -276,7 +276,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_turbid',
+                'identifier': 'boxfill/cmocean_turbid',
                 'title': 'boxfill/cmocean_turbid',
                 'abstract': 'boxfill style, using the cmocean_turbid palette ',
                 'legendUrl': [
@@ -294,7 +294,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_tempo',
+                'identifier': 'boxfill/cmocean_tempo',
                 'title': 'boxfill/cmocean_tempo',
                 'abstract': 'boxfill style, using the cmocean_tempo palette ',
                 'legendUrl': [
@@ -312,7 +312,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_deep',
+                'identifier': 'boxfill/cmocean_deep',
                 'title': 'boxfill/cmocean_deep',
                 'abstract': 'boxfill style, using the cmocean_deep palette ',
                 'legendUrl': [
@@ -330,7 +330,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_curl',
+                'identifier': 'boxfill/cmocean_curl',
                 'title': 'boxfill/cmocean_curl',
                 'abstract': 'boxfill style, using the cmocean_curl palette ',
                 'legendUrl': [
@@ -348,7 +348,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_thermal',
+                'identifier': 'boxfill/cmocean_thermal',
                 'title': 'boxfill/cmocean_thermal',
                 'abstract': 'boxfill style, using the cmocean_thermal palette ',
                 'legendUrl': [
@@ -366,7 +366,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/blue-descending',
+                'identifier': 'boxfill/blue-descending',
                 'title': 'boxfill/blue-descending',
                 'abstract': 'boxfill style, using the blue-descending palette ',
                 'legendUrl': [
@@ -384,7 +384,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/redblue-reverse',
+                'identifier': 'boxfill/redblue-reverse',
                 'title': 'boxfill/redblue-reverse',
                 'abstract': 'boxfill style, using the redblue-reverse palette ',
                 'legendUrl': [
@@ -402,7 +402,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/soil-moisture',
+                'identifier': 'boxfill/soil-moisture',
                 'title': 'boxfill/soil-moisture',
                 'abstract': 'boxfill style, using the soil-moisture palette ',
                 'legendUrl': [
@@ -420,7 +420,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_phase',
+                'identifier': 'boxfill/cmocean_phase',
                 'title': 'boxfill/cmocean_phase',
                 'abstract': 'boxfill style, using the cmocean_phase palette ',
                 'legendUrl': [
@@ -438,7 +438,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/alg',
+                'identifier': 'boxfill/alg',
                 'title': 'boxfill/alg',
                 'abstract': 'boxfill style, using the alg palette ',
                 'legendUrl': [
@@ -456,7 +456,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cci_main',
+                'identifier': 'boxfill/cci_main',
                 'title': 'boxfill/cci_main',
                 'abstract': 'boxfill style, using the cci_main palette ',
                 'legendUrl': [
@@ -474,7 +474,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/orange',
+                'identifier': 'boxfill/orange',
                 'title': 'boxfill/orange',
                 'abstract': 'boxfill style, using the orange palette ',
                 'legendUrl': [
@@ -492,7 +492,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/greyscale',
+                'identifier': 'boxfill/greyscale',
                 'title': 'boxfill/greyscale',
                 'abstract': 'boxfill style, using the greyscale palette ',
                 'legendUrl': [
@@ -510,7 +510,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/greyscale-reverse',
+                'identifier': 'boxfill/greyscale-reverse',
                 'title': 'boxfill/greyscale-reverse',
                 'abstract': 'boxfill style, using the greyscale-reverse palette ',
                 'legendUrl': [
@@ -528,7 +528,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/balance-blue',
+                'identifier': 'boxfill/balance-blue',
                 'title': 'boxfill/balance-blue',
                 'abstract': 'boxfill style, using the balance-blue palette ',
                 'legendUrl': [
@@ -546,7 +546,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_ice',
+                'identifier': 'boxfill/cmocean_ice',
                 'title': 'boxfill/cmocean_ice',
                 'abstract': 'boxfill style, using the cmocean_ice palette ',
                 'legendUrl': [
@@ -564,7 +564,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_delta',
+                'identifier': 'boxfill/cmocean_delta',
                 'title': 'boxfill/cmocean_delta',
                 'abstract': 'boxfill style, using the cmocean_delta palette ',
                 'legendUrl': [
@@ -582,7 +582,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance',
+                'identifier': 'boxfill/cmocean_balance',
                 'title': 'boxfill/cmocean_balance',
                 'abstract': 'boxfill style, using the cmocean_balance palette ',
                 'legendUrl': [
@@ -600,7 +600,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_solar',
+                'identifier': 'boxfill/cmocean_solar',
                 'title': 'boxfill/cmocean_solar',
                 'abstract': 'boxfill style, using the cmocean_solar palette ',
                 'legendUrl': [
@@ -618,7 +618,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/occam_pastel-30',
+                'identifier': 'boxfill/occam_pastel-30',
                 'title': 'boxfill/occam_pastel-30',
                 'abstract': 'boxfill style, using the occam_pastel-30 palette ',
                 'legendUrl': [
@@ -636,7 +636,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/ferret',
+                'identifier': 'boxfill/ferret',
                 'title': 'boxfill/ferret',
                 'abstract': 'boxfill style, using the ferret palette ',
                 'legendUrl': [
@@ -654,7 +654,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/redblue',
+                'identifier': 'boxfill/redblue',
                 'title': 'boxfill/redblue',
                 'abstract': 'boxfill style, using the redblue palette ',
                 'legendUrl': [
@@ -672,7 +672,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/colour-blind-safe',
+                'identifier': 'boxfill/colour-blind-safe',
                 'title': 'boxfill/colour-blind-safe',
                 'abstract': 'boxfill style, using the colour-blind-safe palette ',
                 'legendUrl': [
@@ -690,7 +690,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/alg2',
+                'identifier': 'boxfill/alg2',
                 'title': 'boxfill/alg2',
                 'abstract': 'boxfill style, using the alg2 palette ',
                 'legendUrl': [
@@ -708,7 +708,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_gray',
+                'identifier': 'boxfill/cmocean_gray',
                 'title': 'boxfill/cmocean_gray',
                 'abstract': 'boxfill style, using the cmocean_gray palette ',
                 'legendUrl': [
@@ -726,7 +726,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/blue',
+                'identifier': 'boxfill/blue',
                 'title': 'boxfill/blue',
                 'abstract': 'boxfill style, using the blue palette ',
                 'legendUrl': [
@@ -744,7 +744,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_matter',
+                'identifier': 'boxfill/cmocean_matter',
                 'title': 'boxfill/cmocean_matter',
                 'abstract': 'boxfill style, using the cmocean_matter palette ',
                 'legendUrl': [
@@ -762,7 +762,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_amp',
+                'identifier': 'boxfill/cmocean_amp',
                 'title': 'boxfill/cmocean_amp',
                 'abstract': 'boxfill style, using the cmocean_amp palette ',
                 'legendUrl': [
@@ -780,7 +780,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/green-descending',
+                'identifier': 'boxfill/green-descending',
                 'title': 'boxfill/green-descending',
                 'abstract': 'boxfill style, using the green-descending palette ',
                 'legendUrl': [
@@ -798,7 +798,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance_reverse',
+                'identifier': 'boxfill/cmocean_balance_reverse',
                 'title': 'boxfill/cmocean_balance_reverse',
                 'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
                 'legendUrl': [
@@ -816,7 +816,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/rainbow',
+                'identifier': 'boxfill/rainbow',
                 'title': 'boxfill/rainbow',
                 'abstract': 'boxfill style, using the rainbow palette ',
                 'legendUrl': [
@@ -883,7 +883,7 @@ describe('client/js/map_openlayers', function() {
             },
             'styles': [
               {
-                'name': 'boxfill/cmocean_speed',
+                'identifier': 'boxfill/cmocean_speed',
                 'title': 'boxfill/cmocean_speed',
                 'abstract': 'boxfill style, using the cmocean_speed palette ',
                 'legendUrl': [
@@ -901,7 +901,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/ncview',
+                'identifier': 'boxfill/ncview',
                 'title': 'boxfill/ncview',
                 'abstract': 'boxfill style, using the ncview palette ',
                 'legendUrl': [
@@ -919,7 +919,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/occam',
+                'identifier': 'boxfill/occam',
                 'title': 'boxfill/occam',
                 'abstract': 'boxfill style, using the occam palette ',
                 'legendUrl': [
@@ -937,7 +937,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_algae',
+                'identifier': 'boxfill/cmocean_algae',
                 'title': 'boxfill/cmocean_algae',
                 'abstract': 'boxfill style, using the cmocean_algae palette ',
                 'legendUrl': [
@@ -955,7 +955,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_oxy',
+                'identifier': 'boxfill/cmocean_oxy',
                 'title': 'boxfill/cmocean_oxy',
                 'abstract': 'boxfill style, using the cmocean_oxy palette ',
                 'legendUrl': [
@@ -973,7 +973,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_haline',
+                'identifier': 'boxfill/cmocean_haline',
                 'title': 'boxfill/cmocean_haline',
                 'abstract': 'boxfill style, using the cmocean_haline palette ',
                 'legendUrl': [
@@ -991,7 +991,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/sst_36',
+                'identifier': 'boxfill/sst_36',
                 'title': 'boxfill/sst_36',
                 'abstract': 'boxfill style, using the sst_36 palette ',
                 'legendUrl': [
@@ -1009,7 +1009,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_dense',
+                'identifier': 'boxfill/cmocean_dense',
                 'title': 'boxfill/cmocean_dense',
                 'abstract': 'boxfill style, using the cmocean_dense palette ',
                 'legendUrl': [
@@ -1027,7 +1027,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/orange-descending',
+                'identifier': 'boxfill/orange-descending',
                 'title': 'boxfill/orange-descending',
                 'abstract': 'boxfill style, using the orange-descending palette ',
                 'legendUrl': [
@@ -1045,7 +1045,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cci_blue_red',
+                'identifier': 'boxfill/cci_blue_red',
                 'title': 'boxfill/cci_blue_red',
                 'abstract': 'boxfill style, using the cci_blue_red palette ',
                 'legendUrl': [
@@ -1063,7 +1063,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_turbid',
+                'identifier': 'boxfill/cmocean_turbid',
                 'title': 'boxfill/cmocean_turbid',
                 'abstract': 'boxfill style, using the cmocean_turbid palette ',
                 'legendUrl': [
@@ -1081,7 +1081,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_tempo',
+                'identifier': 'boxfill/cmocean_tempo',
                 'title': 'boxfill/cmocean_tempo',
                 'abstract': 'boxfill style, using the cmocean_tempo palette ',
                 'legendUrl': [
@@ -1099,7 +1099,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_deep',
+                'identifier': 'boxfill/cmocean_deep',
                 'title': 'boxfill/cmocean_deep',
                 'abstract': 'boxfill style, using the cmocean_deep palette ',
                 'legendUrl': [
@@ -1117,7 +1117,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_curl',
+                'identifier': 'boxfill/cmocean_curl',
                 'title': 'boxfill/cmocean_curl',
                 'abstract': 'boxfill style, using the cmocean_curl palette ',
                 'legendUrl': [
@@ -1135,7 +1135,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_thermal',
+                'identifier': 'boxfill/cmocean_thermal',
                 'title': 'boxfill/cmocean_thermal',
                 'abstract': 'boxfill style, using the cmocean_thermal palette ',
                 'legendUrl': [
@@ -1153,7 +1153,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/blue-descending',
+                'identifier': 'boxfill/blue-descending',
                 'title': 'boxfill/blue-descending',
                 'abstract': 'boxfill style, using the blue-descending palette ',
                 'legendUrl': [
@@ -1171,7 +1171,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/redblue-reverse',
+                'identifier': 'boxfill/redblue-reverse',
                 'title': 'boxfill/redblue-reverse',
                 'abstract': 'boxfill style, using the redblue-reverse palette ',
                 'legendUrl': [
@@ -1189,7 +1189,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/soil-moisture',
+                'identifier': 'boxfill/soil-moisture',
                 'title': 'boxfill/soil-moisture',
                 'abstract': 'boxfill style, using the soil-moisture palette ',
                 'legendUrl': [
@@ -1207,7 +1207,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_phase',
+                'identifier': 'boxfill/cmocean_phase',
                 'title': 'boxfill/cmocean_phase',
                 'abstract': 'boxfill style, using the cmocean_phase palette ',
                 'legendUrl': [
@@ -1225,7 +1225,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/alg',
+                'identifier': 'boxfill/alg',
                 'title': 'boxfill/alg',
                 'abstract': 'boxfill style, using the alg palette ',
                 'legendUrl': [
@@ -1243,7 +1243,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cci_main',
+                'identifier': 'boxfill/cci_main',
                 'title': 'boxfill/cci_main',
                 'abstract': 'boxfill style, using the cci_main palette ',
                 'legendUrl': [
@@ -1261,7 +1261,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/orange',
+                'identifier': 'boxfill/orange',
                 'title': 'boxfill/orange',
                 'abstract': 'boxfill style, using the orange palette ',
                 'legendUrl': [
@@ -1279,7 +1279,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/greyscale',
+                'identifier': 'boxfill/greyscale',
                 'title': 'boxfill/greyscale',
                 'abstract': 'boxfill style, using the greyscale palette ',
                 'legendUrl': [
@@ -1297,7 +1297,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/greyscale-reverse',
+                'identifier': 'boxfill/greyscale-reverse',
                 'title': 'boxfill/greyscale-reverse',
                 'abstract': 'boxfill style, using the greyscale-reverse palette ',
                 'legendUrl': [
@@ -1315,7 +1315,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/balance-blue',
+                'identifier': 'boxfill/balance-blue',
                 'title': 'boxfill/balance-blue',
                 'abstract': 'boxfill style, using the balance-blue palette ',
                 'legendUrl': [
@@ -1333,7 +1333,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_ice',
+                'identifier': 'boxfill/cmocean_ice',
                 'title': 'boxfill/cmocean_ice',
                 'abstract': 'boxfill style, using the cmocean_ice palette ',
                 'legendUrl': [
@@ -1351,7 +1351,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_delta',
+                'identifier': 'boxfill/cmocean_delta',
                 'title': 'boxfill/cmocean_delta',
                 'abstract': 'boxfill style, using the cmocean_delta palette ',
                 'legendUrl': [
@@ -1369,7 +1369,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance',
+                'identifier': 'boxfill/cmocean_balance',
                 'title': 'boxfill/cmocean_balance',
                 'abstract': 'boxfill style, using the cmocean_balance palette ',
                 'legendUrl': [
@@ -1387,7 +1387,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_solar',
+                'identifier': 'boxfill/cmocean_solar',
                 'title': 'boxfill/cmocean_solar',
                 'abstract': 'boxfill style, using the cmocean_solar palette ',
                 'legendUrl': [
@@ -1405,7 +1405,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/occam_pastel-30',
+                'identifier': 'boxfill/occam_pastel-30',
                 'title': 'boxfill/occam_pastel-30',
                 'abstract': 'boxfill style, using the occam_pastel-30 palette ',
                 'legendUrl': [
@@ -1423,7 +1423,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/ferret',
+                'identifier': 'boxfill/ferret',
                 'title': 'boxfill/ferret',
                 'abstract': 'boxfill style, using the ferret palette ',
                 'legendUrl': [
@@ -1441,7 +1441,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/redblue',
+                'identifier': 'boxfill/redblue',
                 'title': 'boxfill/redblue',
                 'abstract': 'boxfill style, using the redblue palette ',
                 'legendUrl': [
@@ -1459,7 +1459,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/colour-blind-safe',
+                'identifier': 'boxfill/colour-blind-safe',
                 'title': 'boxfill/colour-blind-safe',
                 'abstract': 'boxfill style, using the colour-blind-safe palette ',
                 'legendUrl': [
@@ -1477,7 +1477,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/alg2',
+                'identifier': 'boxfill/alg2',
                 'title': 'boxfill/alg2',
                 'abstract': 'boxfill style, using the alg2 palette ',
                 'legendUrl': [
@@ -1495,7 +1495,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_gray',
+                'identifier': 'boxfill/cmocean_gray',
                 'title': 'boxfill/cmocean_gray',
                 'abstract': 'boxfill style, using the cmocean_gray palette ',
                 'legendUrl': [
@@ -1513,7 +1513,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/blue',
+                'identifier': 'boxfill/blue',
                 'title': 'boxfill/blue',
                 'abstract': 'boxfill style, using the blue palette ',
                 'legendUrl': [
@@ -1531,7 +1531,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_matter',
+                'identifier': 'boxfill/cmocean_matter',
                 'title': 'boxfill/cmocean_matter',
                 'abstract': 'boxfill style, using the cmocean_matter palette ',
                 'legendUrl': [
@@ -1549,7 +1549,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_amp',
+                'identifier': 'boxfill/cmocean_amp',
                 'title': 'boxfill/cmocean_amp',
                 'abstract': 'boxfill style, using the cmocean_amp palette ',
                 'legendUrl': [
@@ -1567,7 +1567,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/green-descending',
+                'identifier': 'boxfill/green-descending',
                 'title': 'boxfill/green-descending',
                 'abstract': 'boxfill style, using the green-descending palette ',
                 'legendUrl': [
@@ -1585,7 +1585,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance_reverse',
+                'identifier': 'boxfill/cmocean_balance_reverse',
                 'title': 'boxfill/cmocean_balance_reverse',
                 'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
                 'legendUrl': [
@@ -1603,7 +1603,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/rainbow',
+                'identifier': 'boxfill/rainbow',
                 'title': 'boxfill/rainbow',
                 'abstract': 'boxfill style, using the rainbow palette ',
                 'legendUrl': [
@@ -1671,7 +1671,7 @@ describe('client/js/map_openlayers', function() {
             },
             'styles': [
               {
-                'name': 'boxfill/cmocean_speed',
+                'identifier': 'boxfill/cmocean_speed',
                 'title': 'boxfill/cmocean_speed',
                 'abstract': 'boxfill style, using the cmocean_speed palette ',
                 'legendUrl': [
@@ -1689,7 +1689,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/ncview',
+                'identifier': 'boxfill/ncview',
                 'title': 'boxfill/ncview',
                 'abstract': 'boxfill style, using the ncview palette ',
                 'legendUrl': [
@@ -1707,7 +1707,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/occam',
+                'identifier': 'boxfill/occam',
                 'title': 'boxfill/occam',
                 'abstract': 'boxfill style, using the occam palette ',
                 'legendUrl': [
@@ -1725,7 +1725,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_algae',
+                'identifier': 'boxfill/cmocean_algae',
                 'title': 'boxfill/cmocean_algae',
                 'abstract': 'boxfill style, using the cmocean_algae palette ',
                 'legendUrl': [
@@ -1743,7 +1743,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_oxy',
+                'identifier': 'boxfill/cmocean_oxy',
                 'title': 'boxfill/cmocean_oxy',
                 'abstract': 'boxfill style, using the cmocean_oxy palette ',
                 'legendUrl': [
@@ -1761,7 +1761,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_haline',
+                'identifier': 'boxfill/cmocean_haline',
                 'title': 'boxfill/cmocean_haline',
                 'abstract': 'boxfill style, using the cmocean_haline palette ',
                 'legendUrl': [
@@ -1779,7 +1779,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/sst_36',
+                'identifier': 'boxfill/sst_36',
                 'title': 'boxfill/sst_36',
                 'abstract': 'boxfill style, using the sst_36 palette ',
                 'legendUrl': [
@@ -1797,7 +1797,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_dense',
+                'identifier': 'boxfill/cmocean_dense',
                 'title': 'boxfill/cmocean_dense',
                 'abstract': 'boxfill style, using the cmocean_dense palette ',
                 'legendUrl': [
@@ -1815,7 +1815,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/orange-descending',
+                'identifier': 'boxfill/orange-descending',
                 'title': 'boxfill/orange-descending',
                 'abstract': 'boxfill style, using the orange-descending palette ',
                 'legendUrl': [
@@ -1833,7 +1833,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cci_blue_red',
+                'identifier': 'boxfill/cci_blue_red',
                 'title': 'boxfill/cci_blue_red',
                 'abstract': 'boxfill style, using the cci_blue_red palette ',
                 'legendUrl': [
@@ -1851,7 +1851,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_turbid',
+                'identifier': 'boxfill/cmocean_turbid',
                 'title': 'boxfill/cmocean_turbid',
                 'abstract': 'boxfill style, using the cmocean_turbid palette ',
                 'legendUrl': [
@@ -1869,7 +1869,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_tempo',
+                'identifier': 'boxfill/cmocean_tempo',
                 'title': 'boxfill/cmocean_tempo',
                 'abstract': 'boxfill style, using the cmocean_tempo palette ',
                 'legendUrl': [
@@ -1887,7 +1887,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_deep',
+                'identifier': 'boxfill/cmocean_deep',
                 'title': 'boxfill/cmocean_deep',
                 'abstract': 'boxfill style, using the cmocean_deep palette ',
                 'legendUrl': [
@@ -1905,7 +1905,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_curl',
+                'identifier': 'boxfill/cmocean_curl',
                 'title': 'boxfill/cmocean_curl',
                 'abstract': 'boxfill style, using the cmocean_curl palette ',
                 'legendUrl': [
@@ -1923,7 +1923,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_thermal',
+                'identifier': 'boxfill/cmocean_thermal',
                 'title': 'boxfill/cmocean_thermal',
                 'abstract': 'boxfill style, using the cmocean_thermal palette ',
                 'legendUrl': [
@@ -1941,7 +1941,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/blue-descending',
+                'identifier': 'boxfill/blue-descending',
                 'title': 'boxfill/blue-descending',
                 'abstract': 'boxfill style, using the blue-descending palette ',
                 'legendUrl': [
@@ -1959,7 +1959,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/redblue-reverse',
+                'identifier': 'boxfill/redblue-reverse',
                 'title': 'boxfill/redblue-reverse',
                 'abstract': 'boxfill style, using the redblue-reverse palette ',
                 'legendUrl': [
@@ -1977,7 +1977,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/soil-moisture',
+                'identifier': 'boxfill/soil-moisture',
                 'title': 'boxfill/soil-moisture',
                 'abstract': 'boxfill style, using the soil-moisture palette ',
                 'legendUrl': [
@@ -1995,7 +1995,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_phase',
+                'identifier': 'boxfill/cmocean_phase',
                 'title': 'boxfill/cmocean_phase',
                 'abstract': 'boxfill style, using the cmocean_phase palette ',
                 'legendUrl': [
@@ -2013,7 +2013,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/alg',
+                'identifier': 'boxfill/alg',
                 'title': 'boxfill/alg',
                 'abstract': 'boxfill style, using the alg palette ',
                 'legendUrl': [
@@ -2031,7 +2031,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cci_main',
+                'identifier': 'boxfill/cci_main',
                 'title': 'boxfill/cci_main',
                 'abstract': 'boxfill style, using the cci_main palette ',
                 'legendUrl': [
@@ -2049,7 +2049,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/orange',
+                'identifier': 'boxfill/orange',
                 'title': 'boxfill/orange',
                 'abstract': 'boxfill style, using the orange palette ',
                 'legendUrl': [
@@ -2067,7 +2067,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/greyscale',
+                'identifier': 'boxfill/greyscale',
                 'title': 'boxfill/greyscale',
                 'abstract': 'boxfill style, using the greyscale palette ',
                 'legendUrl': [
@@ -2085,7 +2085,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/greyscale-reverse',
+                'identifier': 'boxfill/greyscale-reverse',
                 'title': 'boxfill/greyscale-reverse',
                 'abstract': 'boxfill style, using the greyscale-reverse palette ',
                 'legendUrl': [
@@ -2103,7 +2103,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/balance-blue',
+                'identifier': 'boxfill/balance-blue',
                 'title': 'boxfill/balance-blue',
                 'abstract': 'boxfill style, using the balance-blue palette ',
                 'legendUrl': [
@@ -2121,7 +2121,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_ice',
+                'identifier': 'boxfill/cmocean_ice',
                 'title': 'boxfill/cmocean_ice',
                 'abstract': 'boxfill style, using the cmocean_ice palette ',
                 'legendUrl': [
@@ -2139,7 +2139,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_delta',
+                'identifier': 'boxfill/cmocean_delta',
                 'title': 'boxfill/cmocean_delta',
                 'abstract': 'boxfill style, using the cmocean_delta palette ',
                 'legendUrl': [
@@ -2157,7 +2157,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance',
+                'identifier': 'boxfill/cmocean_balance',
                 'title': 'boxfill/cmocean_balance',
                 'abstract': 'boxfill style, using the cmocean_balance palette ',
                 'legendUrl': [
@@ -2175,7 +2175,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_solar',
+                'identifier': 'boxfill/cmocean_solar',
                 'title': 'boxfill/cmocean_solar',
                 'abstract': 'boxfill style, using the cmocean_solar palette ',
                 'legendUrl': [
@@ -2193,7 +2193,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/occam_pastel-30',
+                'identifier': 'boxfill/occam_pastel-30',
                 'title': 'boxfill/occam_pastel-30',
                 'abstract': 'boxfill style, using the occam_pastel-30 palette ',
                 'legendUrl': [
@@ -2211,7 +2211,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/ferret',
+                'identifier': 'boxfill/ferret',
                 'title': 'boxfill/ferret',
                 'abstract': 'boxfill style, using the ferret palette ',
                 'legendUrl': [
@@ -2229,7 +2229,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/redblue',
+                'identifier': 'boxfill/redblue',
                 'title': 'boxfill/redblue',
                 'abstract': 'boxfill style, using the redblue palette ',
                 'legendUrl': [
@@ -2247,7 +2247,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/colour-blind-safe',
+                'identifier': 'boxfill/colour-blind-safe',
                 'title': 'boxfill/colour-blind-safe',
                 'abstract': 'boxfill style, using the colour-blind-safe palette ',
                 'legendUrl': [
@@ -2265,7 +2265,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/alg2',
+                'identifier': 'boxfill/alg2',
                 'title': 'boxfill/alg2',
                 'abstract': 'boxfill style, using the alg2 palette ',
                 'legendUrl': [
@@ -2283,7 +2283,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_gray',
+                'identifier': 'boxfill/cmocean_gray',
                 'title': 'boxfill/cmocean_gray',
                 'abstract': 'boxfill style, using the cmocean_gray palette ',
                 'legendUrl': [
@@ -2301,7 +2301,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/blue',
+                'identifier': 'boxfill/blue',
                 'title': 'boxfill/blue',
                 'abstract': 'boxfill style, using the blue palette ',
                 'legendUrl': [
@@ -2319,7 +2319,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_matter',
+                'identifier': 'boxfill/cmocean_matter',
                 'title': 'boxfill/cmocean_matter',
                 'abstract': 'boxfill style, using the cmocean_matter palette ',
                 'legendUrl': [
@@ -2337,7 +2337,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_amp',
+                'identifier': 'boxfill/cmocean_amp',
                 'title': 'boxfill/cmocean_amp',
                 'abstract': 'boxfill style, using the cmocean_amp palette ',
                 'legendUrl': [
@@ -2355,7 +2355,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/green-descending',
+                'identifier': 'boxfill/green-descending',
                 'title': 'boxfill/green-descending',
                 'abstract': 'boxfill style, using the green-descending palette ',
                 'legendUrl': [
@@ -2373,7 +2373,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance_reverse',
+                'identifier': 'boxfill/cmocean_balance_reverse',
                 'title': 'boxfill/cmocean_balance_reverse',
                 'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
                 'legendUrl': [
@@ -2391,7 +2391,7 @@ describe('client/js/map_openlayers', function() {
                 ],
               },
               {
-                'name': 'boxfill/rainbow',
+                'identifier': 'boxfill/rainbow',
                 'title': 'boxfill/rainbow',
                 'abstract': 'boxfill style, using the rainbow palette ',
                 'legendUrl': [
@@ -2592,7 +2592,6 @@ describe('client/js/map_openlayers', function() {
 
   // These tests might have too much duplication (i.e. could be made to test in fewer lines of code).
   // They also might not be comprehensive, as reorderLayers() deals with a variety of situations.
-  // TODO tests for zIndices where a data layer has been removed from the middle of the stack
   describe('reorderLayers()', function() {
     describe('reordering - 1x basemap, 1x borders, 0x data', function() {
       before(function() {
@@ -2927,11 +2926,21 @@ describe('client/js/map_openlayers', function() {
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
         expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3, 4]);
       });
+      it('should find zIndex values of 0, 1, 2, 3, not necessarily in that order', function() {
+        // Remove data layer from middle
+        geona.map.removeLayer('Rrs_443');
+
+        let allZIndices = [];
+        for (let layer of geona.map._map.getLayers().getArray()) {
+          allZIndices.push(layer.get('zIndex'));
+        }
+        // zIndices don't have to be in ascending order, but we sort here for easy comparison.
+        expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3]);
+      });
 
       after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('line_black');
-        geona.map.removeLayer('Rrs_443');
         geona.map.removeLayer('Rrs_490');
         geona.map.removeLayer('Rrs_412');
         geona.map.removeLayer('terrain-light');
@@ -3088,6 +3097,75 @@ describe('client/js/map_openlayers', function() {
       geona.map.removeLayer('Rrs_412');
       geona.map.removeLayer('Rrs_490');
       geona.map.removeLayer('line');
+    });
+  });
+
+  describe('changeLayerStyle', function() {
+    // These variables are used as shorthand for the layers in the tests.
+    // They are redefined in each test to keep them up-to-date with any changes we make during the tests.
+    let rrs412;
+    let rrs490;
+
+    before(function() {
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+    });
+
+    it('should throw an error that the layer isn\'t in _availableLayers', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('', 'boxfill/occam');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer isn\'t in _activeLayers', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('Rrs_443', 'boxfill/occam');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer has no available styles', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('terrain-light', '');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer doesn\'t support the requested style', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('Rrs_412', '');
+      }).to.throw(Error);
+    });
+
+    // Defined in the next test, used elsewhere
+    let initialZIndex;
+    it('should change the layer style', function() {
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      initialZIndex = rrs412.get('zIndex');
+
+      let initialStyle = rrs412.get('source').getParams().STYLES;
+      geona.map.changeLayerStyle('Rrs_412', 'boxfill/occam');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.get('source').getParams().STYLES).to.equal('boxfill/occam');
+      expect(rrs412.get('source').getParams().STYLES).to.not.equal(initialStyle);
+    });
+    it('should keep the zIndex the same before and after changing style', function() {
+      // Uses the zIndex defined in the previous test
+      let currentZIndex = rrs412.get('zIndex');
+      expect(currentZIndex).to.equal(initialZIndex);
+    });
+    it('should keep the style after the time changes', function() {
+      let initialStyle = rrs412.get('source').getParams().STYLES;
+      let initialTime = rrs412.get('layerTime');
+      geona.map.loadNearestValidTime('Rrs_412', '2002-01-01T00:00:00.000Z');
+
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      let currentStyle = rrs412.get('source').getParams().STYLES;
+      let currentTime = rrs412.get('layerTime');
+      expect(currentStyle).to.equal(initialStyle);
+      expect(currentTime).to.not.equal(initialTime);
+    });
+
+    after(function() {
+      geona.map.removeLayer('terrain-light');
+      geona.map.removeLayer('Rrs_412');
+      geona.map.removeLayer('Rrs_490');
     });
   });
 

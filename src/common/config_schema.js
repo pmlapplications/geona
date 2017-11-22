@@ -258,7 +258,7 @@ export let client = {
           },
           'styles': [
             {
-              'name': 'boxfill/cmocean_speed',
+              'identifier': 'boxfill/cmocean_speed',
               'title': 'boxfill/cmocean_speed',
               'abstract': 'boxfill style, using the cmocean_speed palette ',
               'legendUrl': [
@@ -276,7 +276,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/ncview',
+              'identifier': 'boxfill/ncview',
               'title': 'boxfill/ncview',
               'abstract': 'boxfill style, using the ncview palette ',
               'legendUrl': [
@@ -294,7 +294,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/occam',
+              'identifier': 'boxfill/occam',
               'title': 'boxfill/occam',
               'abstract': 'boxfill style, using the occam palette ',
               'legendUrl': [
@@ -312,7 +312,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_algae',
+              'identifier': 'boxfill/cmocean_algae',
               'title': 'boxfill/cmocean_algae',
               'abstract': 'boxfill style, using the cmocean_algae palette ',
               'legendUrl': [
@@ -330,7 +330,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_oxy',
+              'identifier': 'boxfill/cmocean_oxy',
               'title': 'boxfill/cmocean_oxy',
               'abstract': 'boxfill style, using the cmocean_oxy palette ',
               'legendUrl': [
@@ -348,7 +348,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_haline',
+              'identifier': 'boxfill/cmocean_haline',
               'title': 'boxfill/cmocean_haline',
               'abstract': 'boxfill style, using the cmocean_haline palette ',
               'legendUrl': [
@@ -366,7 +366,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/sst_36',
+              'identifier': 'boxfill/sst_36',
               'title': 'boxfill/sst_36',
               'abstract': 'boxfill style, using the sst_36 palette ',
               'legendUrl': [
@@ -384,7 +384,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_dense',
+              'identifier': 'boxfill/cmocean_dense',
               'title': 'boxfill/cmocean_dense',
               'abstract': 'boxfill style, using the cmocean_dense palette ',
               'legendUrl': [
@@ -402,7 +402,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/orange-descending',
+              'identifier': 'boxfill/orange-descending',
               'title': 'boxfill/orange-descending',
               'abstract': 'boxfill style, using the orange-descending palette ',
               'legendUrl': [
@@ -420,7 +420,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cci_blue_red',
+              'identifier': 'boxfill/cci_blue_red',
               'title': 'boxfill/cci_blue_red',
               'abstract': 'boxfill style, using the cci_blue_red palette ',
               'legendUrl': [
@@ -438,7 +438,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_turbid',
+              'identifier': 'boxfill/cmocean_turbid',
               'title': 'boxfill/cmocean_turbid',
               'abstract': 'boxfill style, using the cmocean_turbid palette ',
               'legendUrl': [
@@ -456,7 +456,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_tempo',
+              'identifier': 'boxfill/cmocean_tempo',
               'title': 'boxfill/cmocean_tempo',
               'abstract': 'boxfill style, using the cmocean_tempo palette ',
               'legendUrl': [
@@ -474,7 +474,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_deep',
+              'identifier': 'boxfill/cmocean_deep',
               'title': 'boxfill/cmocean_deep',
               'abstract': 'boxfill style, using the cmocean_deep palette ',
               'legendUrl': [
@@ -492,7 +492,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_curl',
+              'identifier': 'boxfill/cmocean_curl',
               'title': 'boxfill/cmocean_curl',
               'abstract': 'boxfill style, using the cmocean_curl palette ',
               'legendUrl': [
@@ -510,7 +510,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_thermal',
+              'identifier': 'boxfill/cmocean_thermal',
               'title': 'boxfill/cmocean_thermal',
               'abstract': 'boxfill style, using the cmocean_thermal palette ',
               'legendUrl': [
@@ -528,7 +528,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/blue-descending',
+              'identifier': 'boxfill/blue-descending',
               'title': 'boxfill/blue-descending',
               'abstract': 'boxfill style, using the blue-descending palette ',
               'legendUrl': [
@@ -546,7 +546,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/redblue-reverse',
+              'identifier': 'boxfill/redblue-reverse',
               'title': 'boxfill/redblue-reverse',
               'abstract': 'boxfill style, using the redblue-reverse palette ',
               'legendUrl': [
@@ -564,7 +564,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/soil-moisture',
+              'identifier': 'boxfill/soil-moisture',
               'title': 'boxfill/soil-moisture',
               'abstract': 'boxfill style, using the soil-moisture palette ',
               'legendUrl': [
@@ -582,7 +582,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_phase',
+              'identifier': 'boxfill/cmocean_phase',
               'title': 'boxfill/cmocean_phase',
               'abstract': 'boxfill style, using the cmocean_phase palette ',
               'legendUrl': [
@@ -600,7 +600,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/alg',
+              'identifier': 'boxfill/alg',
               'title': 'boxfill/alg',
               'abstract': 'boxfill style, using the alg palette ',
               'legendUrl': [
@@ -618,7 +618,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cci_main',
+              'identifier': 'boxfill/cci_main',
               'title': 'boxfill/cci_main',
               'abstract': 'boxfill style, using the cci_main palette ',
               'legendUrl': [
@@ -636,7 +636,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/orange',
+              'identifier': 'boxfill/orange',
               'title': 'boxfill/orange',
               'abstract': 'boxfill style, using the orange palette ',
               'legendUrl': [
@@ -654,7 +654,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/greyscale',
+              'identifier': 'boxfill/greyscale',
               'title': 'boxfill/greyscale',
               'abstract': 'boxfill style, using the greyscale palette ',
               'legendUrl': [
@@ -672,7 +672,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/greyscale-reverse',
+              'identifier': 'boxfill/greyscale-reverse',
               'title': 'boxfill/greyscale-reverse',
               'abstract': 'boxfill style, using the greyscale-reverse palette ',
               'legendUrl': [
@@ -690,7 +690,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/balance-blue',
+              'identifier': 'boxfill/balance-blue',
               'title': 'boxfill/balance-blue',
               'abstract': 'boxfill style, using the balance-blue palette ',
               'legendUrl': [
@@ -708,7 +708,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_ice',
+              'identifier': 'boxfill/cmocean_ice',
               'title': 'boxfill/cmocean_ice',
               'abstract': 'boxfill style, using the cmocean_ice palette ',
               'legendUrl': [
@@ -726,7 +726,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_delta',
+              'identifier': 'boxfill/cmocean_delta',
               'title': 'boxfill/cmocean_delta',
               'abstract': 'boxfill style, using the cmocean_delta palette ',
               'legendUrl': [
@@ -744,7 +744,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_balance',
+              'identifier': 'boxfill/cmocean_balance',
               'title': 'boxfill/cmocean_balance',
               'abstract': 'boxfill style, using the cmocean_balance palette ',
               'legendUrl': [
@@ -762,7 +762,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_solar',
+              'identifier': 'boxfill/cmocean_solar',
               'title': 'boxfill/cmocean_solar',
               'abstract': 'boxfill style, using the cmocean_solar palette ',
               'legendUrl': [
@@ -780,7 +780,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/occam_pastel-30',
+              'identifier': 'boxfill/occam_pastel-30',
               'title': 'boxfill/occam_pastel-30',
               'abstract': 'boxfill style, using the occam_pastel-30 palette ',
               'legendUrl': [
@@ -798,7 +798,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/ferret',
+              'identifier': 'boxfill/ferret',
               'title': 'boxfill/ferret',
               'abstract': 'boxfill style, using the ferret palette ',
               'legendUrl': [
@@ -816,7 +816,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/redblue',
+              'identifier': 'boxfill/redblue',
               'title': 'boxfill/redblue',
               'abstract': 'boxfill style, using the redblue palette ',
               'legendUrl': [
@@ -834,7 +834,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/colour-blind-safe',
+              'identifier': 'boxfill/colour-blind-safe',
               'title': 'boxfill/colour-blind-safe',
               'abstract': 'boxfill style, using the colour-blind-safe palette ',
               'legendUrl': [
@@ -852,7 +852,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/alg2',
+              'identifier': 'boxfill/alg2',
               'title': 'boxfill/alg2',
               'abstract': 'boxfill style, using the alg2 palette ',
               'legendUrl': [
@@ -870,7 +870,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_gray',
+              'identifier': 'boxfill/cmocean_gray',
               'title': 'boxfill/cmocean_gray',
               'abstract': 'boxfill style, using the cmocean_gray palette ',
               'legendUrl': [
@@ -888,7 +888,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/blue',
+              'identifier': 'boxfill/blue',
               'title': 'boxfill/blue',
               'abstract': 'boxfill style, using the blue palette ',
               'legendUrl': [
@@ -906,7 +906,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_matter',
+              'identifier': 'boxfill/cmocean_matter',
               'title': 'boxfill/cmocean_matter',
               'abstract': 'boxfill style, using the cmocean_matter palette ',
               'legendUrl': [
@@ -924,7 +924,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_amp',
+              'identifier': 'boxfill/cmocean_amp',
               'title': 'boxfill/cmocean_amp',
               'abstract': 'boxfill style, using the cmocean_amp palette ',
               'legendUrl': [
@@ -942,7 +942,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/green-descending',
+              'identifier': 'boxfill/green-descending',
               'title': 'boxfill/green-descending',
               'abstract': 'boxfill style, using the green-descending palette ',
               'legendUrl': [
@@ -960,7 +960,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/cmocean_balance_reverse',
+              'identifier': 'boxfill/cmocean_balance_reverse',
               'title': 'boxfill/cmocean_balance_reverse',
               'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
               'legendUrl': [
@@ -978,7 +978,7 @@ export let client = {
               ],
             },
             {
-              'name': 'boxfill/rainbow',
+              'identifier': 'boxfill/rainbow',
               'title': 'boxfill/rainbow',
               'abstract': 'boxfill style, using the rainbow palette ',
               'legendUrl': [
