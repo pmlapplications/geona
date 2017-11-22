@@ -95,740 +95,658 @@ describe('client/js/map_leaflet', function() {
             },
             'styles': [
               {
-                'name': 'boxfill/cmocean_speed',
-                'title': 'boxfill/cmocean_speed',
-                'abstract': 'boxfill style, using the cmocean_speed palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_speed',
+                title: {
+                  und: 'boxfill/cmocean_speed',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_speed palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/ncview',
-                'title': 'boxfill/ncview',
-                'abstract': 'boxfill style, using the ncview palette ',
-                'legendUrl': [
+                identifier: 'boxfill/ncview',
+                title: {
+                  und: 'boxfill/ncview',
+                },
+                abstract: {
+                  und: 'boxfill style, using the ncview palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/occam',
-                'title': 'boxfill/occam',
-                'abstract': 'boxfill style, using the occam palette ',
-                'legendUrl': [
+                identifier: 'boxfill/occam',
+                title: {
+                  und: 'boxfill/occam',
+                },
+                abstract: {
+                  und: 'boxfill style, using the occam palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_algae',
-                'title': 'boxfill/cmocean_algae',
-                'abstract': 'boxfill style, using the cmocean_algae palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_algae',
+                title: {
+                  und: 'boxfill/cmocean_algae',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_algae palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_oxy',
-                'title': 'boxfill/cmocean_oxy',
-                'abstract': 'boxfill style, using the cmocean_oxy palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_oxy',
+                title: {
+                  und: 'boxfill/cmocean_oxy',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_oxy palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_haline',
-                'title': 'boxfill/cmocean_haline',
-                'abstract': 'boxfill style, using the cmocean_haline palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_haline',
+                title: {
+                  und: 'boxfill/cmocean_haline',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_haline palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/sst_36',
-                'title': 'boxfill/sst_36',
-                'abstract': 'boxfill style, using the sst_36 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/sst_36',
+                title: {
+                  und: 'boxfill/sst_36',
+                },
+                abstract: {
+                  und: 'boxfill style, using the sst_36 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_dense',
-                'title': 'boxfill/cmocean_dense',
-                'abstract': 'boxfill style, using the cmocean_dense palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_dense',
+                title: {
+                  und: 'boxfill/cmocean_dense',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_dense palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/orange-descending',
-                'title': 'boxfill/orange-descending',
-                'abstract': 'boxfill style, using the orange-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/orange-descending',
+                title: {
+                  und: 'boxfill/orange-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the orange-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cci_blue_red',
-                'title': 'boxfill/cci_blue_red',
-                'abstract': 'boxfill style, using the cci_blue_red palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cci_blue_red',
+                title: {
+                  und: 'boxfill/cci_blue_red',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cci_blue_red palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_turbid',
-                'title': 'boxfill/cmocean_turbid',
-                'abstract': 'boxfill style, using the cmocean_turbid palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_turbid',
+                title: {
+                  und: 'boxfill/cmocean_turbid',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_turbid palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_tempo',
-                'title': 'boxfill/cmocean_tempo',
-                'abstract': 'boxfill style, using the cmocean_tempo palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_tempo',
+                title: {
+                  und: 'boxfill/cmocean_tempo',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_tempo palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_deep',
-                'title': 'boxfill/cmocean_deep',
-                'abstract': 'boxfill style, using the cmocean_deep palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_deep',
+                title: {
+                  und: 'boxfill/cmocean_deep',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_deep palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_curl',
-                'title': 'boxfill/cmocean_curl',
-                'abstract': 'boxfill style, using the cmocean_curl palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_curl',
+                title: {
+                  und: 'boxfill/cmocean_curl',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_curl palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_thermal',
-                'title': 'boxfill/cmocean_thermal',
-                'abstract': 'boxfill style, using the cmocean_thermal palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_thermal',
+                title: {
+                  und: 'boxfill/cmocean_thermal',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_thermal palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/blue-descending',
-                'title': 'boxfill/blue-descending',
-                'abstract': 'boxfill style, using the blue-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/blue-descending',
+                title: {
+                  und: 'boxfill/blue-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the blue-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/redblue-reverse',
-                'title': 'boxfill/redblue-reverse',
-                'abstract': 'boxfill style, using the redblue-reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/redblue-reverse',
+                title: {
+                  und: 'boxfill/redblue-reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the redblue-reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/soil-moisture',
-                'title': 'boxfill/soil-moisture',
-                'abstract': 'boxfill style, using the soil-moisture palette ',
-                'legendUrl': [
+                identifier: 'boxfill/soil-moisture',
+                title: {
+                  und: 'boxfill/soil-moisture',
+                },
+                abstract: {
+                  und: 'boxfill style, using the soil-moisture palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_phase',
-                'title': 'boxfill/cmocean_phase',
-                'abstract': 'boxfill style, using the cmocean_phase palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_phase',
+                title: {
+                  und: 'boxfill/cmocean_phase',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_phase palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/alg',
-                'title': 'boxfill/alg',
-                'abstract': 'boxfill style, using the alg palette ',
-                'legendUrl': [
+                identifier: 'boxfill/alg',
+                title: {
+                  und: 'boxfill/alg',
+                },
+                abstract: {
+                  und: 'boxfill style, using the alg palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cci_main',
-                'title': 'boxfill/cci_main',
-                'abstract': 'boxfill style, using the cci_main palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cci_main',
+                title: {
+                  und: 'boxfill/cci_main',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cci_main palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/orange',
-                'title': 'boxfill/orange',
-                'abstract': 'boxfill style, using the orange palette ',
-                'legendUrl': [
+                identifier: 'boxfill/orange',
+                title: {
+                  und: 'boxfill/orange',
+                },
+                abstract: {
+                  und: 'boxfill style, using the orange palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/greyscale',
-                'title': 'boxfill/greyscale',
-                'abstract': 'boxfill style, using the greyscale palette ',
-                'legendUrl': [
+                identifier: 'boxfill/greyscale',
+                title: {
+                  und: 'boxfill/greyscale',
+                },
+                abstract: {
+                  und: 'boxfill style, using the greyscale palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/greyscale-reverse',
-                'title': 'boxfill/greyscale-reverse',
-                'abstract': 'boxfill style, using the greyscale-reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/greyscale-reverse',
+                title: {
+                  und: 'boxfill/greyscale-reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the greyscale-reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/balance-blue',
-                'title': 'boxfill/balance-blue',
-                'abstract': 'boxfill style, using the balance-blue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/balance-blue',
+                title: {
+                  und: 'boxfill/balance-blue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the balance-blue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_ice',
-                'title': 'boxfill/cmocean_ice',
-                'abstract': 'boxfill style, using the cmocean_ice palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_ice',
+                title: {
+                  und: 'boxfill/cmocean_ice',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_ice palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_delta',
-                'title': 'boxfill/cmocean_delta',
-                'abstract': 'boxfill style, using the cmocean_delta palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_delta',
+                title: {
+                  und: 'boxfill/cmocean_delta',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_delta palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance',
-                'title': 'boxfill/cmocean_balance',
-                'abstract': 'boxfill style, using the cmocean_balance palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_balance',
+                title: {
+                  und: 'boxfill/cmocean_balance',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_balance palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_solar',
-                'title': 'boxfill/cmocean_solar',
-                'abstract': 'boxfill style, using the cmocean_solar palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_solar',
+                title: {
+                  und: 'boxfill/cmocean_solar',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_solar palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/occam_pastel-30',
-                'title': 'boxfill/occam_pastel-30',
-                'abstract': 'boxfill style, using the occam_pastel-30 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/occam_pastel-30',
+                title: {
+                  und: 'boxfill/occam_pastel-30',
+                },
+                abstract: {
+                  und: 'boxfill style, using the occam_pastel-30 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/ferret',
-                'title': 'boxfill/ferret',
-                'abstract': 'boxfill style, using the ferret palette ',
-                'legendUrl': [
+                identifier: 'boxfill/ferret',
+                title: {
+                  und: 'boxfill/ferret',
+                },
+                abstract: {
+                  und: 'boxfill style, using the ferret palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/redblue',
-                'title': 'boxfill/redblue',
-                'abstract': 'boxfill style, using the redblue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/redblue',
+                title: {
+                  und: 'boxfill/redblue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the redblue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/colour-blind-safe',
-                'title': 'boxfill/colour-blind-safe',
-                'abstract': 'boxfill style, using the colour-blind-safe palette ',
-                'legendUrl': [
+                identifier: 'boxfill/colour-blind-safe',
+                title: {
+                  und: 'boxfill/colour-blind-safe',
+                },
+                abstract: {
+                  und: 'boxfill style, using the colour-blind-safe palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/alg2',
-                'title': 'boxfill/alg2',
-                'abstract': 'boxfill style, using the alg2 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/alg2',
+                title: {
+                  und: 'boxfill/alg2',
+                },
+                abstract: {
+                  und: 'boxfill style, using the alg2 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_gray',
-                'title': 'boxfill/cmocean_gray',
-                'abstract': 'boxfill style, using the cmocean_gray palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_gray',
+                title: {
+                  und: 'boxfill/cmocean_gray',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_gray palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/blue',
-                'title': 'boxfill/blue',
-                'abstract': 'boxfill style, using the blue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/blue',
+                title: {
+                  und: 'boxfill/blue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the blue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_matter',
-                'title': 'boxfill/cmocean_matter',
-                'abstract': 'boxfill style, using the cmocean_matter palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_matter',
+                title: {
+                  und: 'boxfill/cmocean_matter',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_matter palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_amp',
-                'title': 'boxfill/cmocean_amp',
-                'abstract': 'boxfill style, using the cmocean_amp palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_amp',
+                title: {
+                  und: 'boxfill/cmocean_amp',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_amp palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/green-descending',
-                'title': 'boxfill/green-descending',
-                'abstract': 'boxfill style, using the green-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/green-descending',
+                title: {
+                  und: 'boxfill/green-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the green-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance_reverse',
-                'title': 'boxfill/cmocean_balance_reverse',
-                'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_balance_reverse',
+                title: {
+                  und: 'boxfill/cmocean_balance_reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_balance_reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/rainbow',
-                'title': 'boxfill/rainbow',
-                'abstract': 'boxfill style, using the rainbow palette ',
-                'legendUrl': [
+                identifier: 'boxfill/rainbow',
+                title: {
+                  und: 'boxfill/rainbow',
+                },
+                abstract: {
+                  und: 'boxfill style, using the rainbow palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
@@ -882,740 +800,658 @@ describe('client/js/map_leaflet', function() {
             },
             'styles': [
               {
-                'name': 'boxfill/cmocean_speed',
-                'title': 'boxfill/cmocean_speed',
-                'abstract': 'boxfill style, using the cmocean_speed palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_speed',
+                title: {
+                  und: 'boxfill/cmocean_speed',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_speed palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/ncview',
-                'title': 'boxfill/ncview',
-                'abstract': 'boxfill style, using the ncview palette ',
-                'legendUrl': [
+                identifier: 'boxfill/ncview',
+                title: {
+                  und: 'boxfill/ncview',
+                },
+                abstract: {
+                  und: 'boxfill style, using the ncview palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/occam',
-                'title': 'boxfill/occam',
-                'abstract': 'boxfill style, using the occam palette ',
-                'legendUrl': [
+                identifier: 'boxfill/occam',
+                title: {
+                  und: 'boxfill/occam',
+                },
+                abstract: {
+                  und: 'boxfill style, using the occam palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_algae',
-                'title': 'boxfill/cmocean_algae',
-                'abstract': 'boxfill style, using the cmocean_algae palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_algae',
+                title: {
+                  und: 'boxfill/cmocean_algae',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_algae palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_oxy',
-                'title': 'boxfill/cmocean_oxy',
-                'abstract': 'boxfill style, using the cmocean_oxy palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_oxy',
+                title: {
+                  und: 'boxfill/cmocean_oxy',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_oxy palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_haline',
-                'title': 'boxfill/cmocean_haline',
-                'abstract': 'boxfill style, using the cmocean_haline palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_haline',
+                title: {
+                  und: 'boxfill/cmocean_haline',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_haline palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/sst_36',
-                'title': 'boxfill/sst_36',
-                'abstract': 'boxfill style, using the sst_36 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/sst_36',
+                title: {
+                  und: 'boxfill/sst_36',
+                },
+                abstract: {
+                  und: 'boxfill style, using the sst_36 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_dense',
-                'title': 'boxfill/cmocean_dense',
-                'abstract': 'boxfill style, using the cmocean_dense palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_dense',
+                title: {
+                  und: 'boxfill/cmocean_dense',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_dense palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/orange-descending',
-                'title': 'boxfill/orange-descending',
-                'abstract': 'boxfill style, using the orange-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/orange-descending',
+                title: {
+                  und: 'boxfill/orange-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the orange-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cci_blue_red',
-                'title': 'boxfill/cci_blue_red',
-                'abstract': 'boxfill style, using the cci_blue_red palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cci_blue_red',
+                title: {
+                  und: 'boxfill/cci_blue_red',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cci_blue_red palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_turbid',
-                'title': 'boxfill/cmocean_turbid',
-                'abstract': 'boxfill style, using the cmocean_turbid palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_turbid',
+                title: {
+                  und: 'boxfill/cmocean_turbid',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_turbid palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_tempo',
-                'title': 'boxfill/cmocean_tempo',
-                'abstract': 'boxfill style, using the cmocean_tempo palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_tempo',
+                title: {
+                  und: 'boxfill/cmocean_tempo',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_tempo palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_deep',
-                'title': 'boxfill/cmocean_deep',
-                'abstract': 'boxfill style, using the cmocean_deep palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_deep',
+                title: {
+                  und: 'boxfill/cmocean_deep',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_deep palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_curl',
-                'title': 'boxfill/cmocean_curl',
-                'abstract': 'boxfill style, using the cmocean_curl palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_curl',
+                title: {
+                  und: 'boxfill/cmocean_curl',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_curl palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_thermal',
-                'title': 'boxfill/cmocean_thermal',
-                'abstract': 'boxfill style, using the cmocean_thermal palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_thermal',
+                title: {
+                  und: 'boxfill/cmocean_thermal',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_thermal palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/blue-descending',
-                'title': 'boxfill/blue-descending',
-                'abstract': 'boxfill style, using the blue-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/blue-descending',
+                title: {
+                  und: 'boxfill/blue-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the blue-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/redblue-reverse',
-                'title': 'boxfill/redblue-reverse',
-                'abstract': 'boxfill style, using the redblue-reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/redblue-reverse',
+                title: {
+                  und: 'boxfill/redblue-reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the redblue-reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/soil-moisture',
-                'title': 'boxfill/soil-moisture',
-                'abstract': 'boxfill style, using the soil-moisture palette ',
-                'legendUrl': [
+                identifier: 'boxfill/soil-moisture',
+                title: {
+                  und: 'boxfill/soil-moisture',
+                },
+                abstract: {
+                  und: 'boxfill style, using the soil-moisture palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_phase',
-                'title': 'boxfill/cmocean_phase',
-                'abstract': 'boxfill style, using the cmocean_phase palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_phase',
+                title: {
+                  und: 'boxfill/cmocean_phase',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_phase palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/alg',
-                'title': 'boxfill/alg',
-                'abstract': 'boxfill style, using the alg palette ',
-                'legendUrl': [
+                identifier: 'boxfill/alg',
+                title: {
+                  und: 'boxfill/alg',
+                },
+                abstract: {
+                  und: 'boxfill style, using the alg palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cci_main',
-                'title': 'boxfill/cci_main',
-                'abstract': 'boxfill style, using the cci_main palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cci_main',
+                title: {
+                  und: 'boxfill/cci_main',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cci_main palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/orange',
-                'title': 'boxfill/orange',
-                'abstract': 'boxfill style, using the orange palette ',
-                'legendUrl': [
+                identifier: 'boxfill/orange',
+                title: {
+                  und: 'boxfill/orange',
+                },
+                abstract: {
+                  und: 'boxfill style, using the orange palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/greyscale',
-                'title': 'boxfill/greyscale',
-                'abstract': 'boxfill style, using the greyscale palette ',
-                'legendUrl': [
+                identifier: 'boxfill/greyscale',
+                title: {
+                  und: 'boxfill/greyscale',
+                },
+                abstract: {
+                  und: 'boxfill style, using the greyscale palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/greyscale-reverse',
-                'title': 'boxfill/greyscale-reverse',
-                'abstract': 'boxfill style, using the greyscale-reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/greyscale-reverse',
+                title: {
+                  und: 'boxfill/greyscale-reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the greyscale-reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/balance-blue',
-                'title': 'boxfill/balance-blue',
-                'abstract': 'boxfill style, using the balance-blue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/balance-blue',
+                title: {
+                  und: 'boxfill/balance-blue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the balance-blue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_ice',
-                'title': 'boxfill/cmocean_ice',
-                'abstract': 'boxfill style, using the cmocean_ice palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_ice',
+                title: {
+                  und: 'boxfill/cmocean_ice',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_ice palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_delta',
-                'title': 'boxfill/cmocean_delta',
-                'abstract': 'boxfill style, using the cmocean_delta palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_delta',
+                title: {
+                  und: 'boxfill/cmocean_delta',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_delta palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance',
-                'title': 'boxfill/cmocean_balance',
-                'abstract': 'boxfill style, using the cmocean_balance palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_balance',
+                title: {
+                  und: 'boxfill/cmocean_balance',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_balance palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_solar',
-                'title': 'boxfill/cmocean_solar',
-                'abstract': 'boxfill style, using the cmocean_solar palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_solar',
+                title: {
+                  und: 'boxfill/cmocean_solar',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_solar palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/occam_pastel-30',
-                'title': 'boxfill/occam_pastel-30',
-                'abstract': 'boxfill style, using the occam_pastel-30 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/occam_pastel-30',
+                title: {
+                  und: 'boxfill/occam_pastel-30',
+                },
+                abstract: {
+                  und: 'boxfill style, using the occam_pastel-30 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/ferret',
-                'title': 'boxfill/ferret',
-                'abstract': 'boxfill style, using the ferret palette ',
-                'legendUrl': [
+                identifier: 'boxfill/ferret',
+                title: {
+                  und: 'boxfill/ferret',
+                },
+                abstract: {
+                  und: 'boxfill style, using the ferret palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/redblue',
-                'title': 'boxfill/redblue',
-                'abstract': 'boxfill style, using the redblue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/redblue',
+                title: {
+                  und: 'boxfill/redblue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the redblue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/colour-blind-safe',
-                'title': 'boxfill/colour-blind-safe',
-                'abstract': 'boxfill style, using the colour-blind-safe palette ',
-                'legendUrl': [
+                identifier: 'boxfill/colour-blind-safe',
+                title: {
+                  und: 'boxfill/colour-blind-safe',
+                },
+                abstract: {
+                  und: 'boxfill style, using the colour-blind-safe palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/alg2',
-                'title': 'boxfill/alg2',
-                'abstract': 'boxfill style, using the alg2 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/alg2',
+                title: {
+                  und: 'boxfill/alg2',
+                },
+                abstract: {
+                  und: 'boxfill style, using the alg2 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_gray',
-                'title': 'boxfill/cmocean_gray',
-                'abstract': 'boxfill style, using the cmocean_gray palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_gray',
+                title: {
+                  und: 'boxfill/cmocean_gray',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_gray palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/blue',
-                'title': 'boxfill/blue',
-                'abstract': 'boxfill style, using the blue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/blue',
+                title: {
+                  und: 'boxfill/blue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the blue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_matter',
-                'title': 'boxfill/cmocean_matter',
-                'abstract': 'boxfill style, using the cmocean_matter palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_matter',
+                title: {
+                  und: 'boxfill/cmocean_matter',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_matter palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_amp',
-                'title': 'boxfill/cmocean_amp',
-                'abstract': 'boxfill style, using the cmocean_amp palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_amp',
+                title: {
+                  und: 'boxfill/cmocean_amp',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_amp palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/green-descending',
-                'title': 'boxfill/green-descending',
-                'abstract': 'boxfill style, using the green-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/green-descending',
+                title: {
+                  und: 'boxfill/green-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the green-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance_reverse',
-                'title': 'boxfill/cmocean_balance_reverse',
-                'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_balance_reverse',
+                title: {
+                  und: 'boxfill/cmocean_balance_reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_balance_reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/rainbow',
-                'title': 'boxfill/rainbow',
-                'abstract': 'boxfill style, using the rainbow palette ',
-                'legendUrl': [
+                identifier: 'boxfill/rainbow',
+                title: {
+                  und: 'boxfill/rainbow',
+                },
+                abstract: {
+                  und: 'boxfill style, using the rainbow palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
@@ -1670,740 +1506,658 @@ describe('client/js/map_leaflet', function() {
             },
             'styles': [
               {
-                'name': 'boxfill/cmocean_speed',
-                'title': 'boxfill/cmocean_speed',
-                'abstract': 'boxfill style, using the cmocean_speed palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_speed',
+                title: {
+                  und: 'boxfill/cmocean_speed',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_speed palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/ncview',
-                'title': 'boxfill/ncview',
-                'abstract': 'boxfill style, using the ncview palette ',
-                'legendUrl': [
+                identifier: 'boxfill/ncview',
+                title: {
+                  und: 'boxfill/ncview',
+                },
+                abstract: {
+                  und: 'boxfill style, using the ncview palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/occam',
-                'title': 'boxfill/occam',
-                'abstract': 'boxfill style, using the occam palette ',
-                'legendUrl': [
+                identifier: 'boxfill/occam',
+                title: {
+                  und: 'boxfill/occam',
+                },
+                abstract: {
+                  und: 'boxfill style, using the occam palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_algae',
-                'title': 'boxfill/cmocean_algae',
-                'abstract': 'boxfill style, using the cmocean_algae palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_algae',
+                title: {
+                  und: 'boxfill/cmocean_algae',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_algae palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_oxy',
-                'title': 'boxfill/cmocean_oxy',
-                'abstract': 'boxfill style, using the cmocean_oxy palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_oxy',
+                title: {
+                  und: 'boxfill/cmocean_oxy',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_oxy palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_haline',
-                'title': 'boxfill/cmocean_haline',
-                'abstract': 'boxfill style, using the cmocean_haline palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_haline',
+                title: {
+                  und: 'boxfill/cmocean_haline',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_haline palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/sst_36',
-                'title': 'boxfill/sst_36',
-                'abstract': 'boxfill style, using the sst_36 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/sst_36',
+                title: {
+                  und: 'boxfill/sst_36',
+                },
+                abstract: {
+                  und: 'boxfill style, using the sst_36 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_dense',
-                'title': 'boxfill/cmocean_dense',
-                'abstract': 'boxfill style, using the cmocean_dense palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_dense',
+                title: {
+                  und: 'boxfill/cmocean_dense',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_dense palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/orange-descending',
-                'title': 'boxfill/orange-descending',
-                'abstract': 'boxfill style, using the orange-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/orange-descending',
+                title: {
+                  und: 'boxfill/orange-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the orange-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cci_blue_red',
-                'title': 'boxfill/cci_blue_red',
-                'abstract': 'boxfill style, using the cci_blue_red palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cci_blue_red',
+                title: {
+                  und: 'boxfill/cci_blue_red',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cci_blue_red palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_turbid',
-                'title': 'boxfill/cmocean_turbid',
-                'abstract': 'boxfill style, using the cmocean_turbid palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_turbid',
+                title: {
+                  und: 'boxfill/cmocean_turbid',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_turbid palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_tempo',
-                'title': 'boxfill/cmocean_tempo',
-                'abstract': 'boxfill style, using the cmocean_tempo palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_tempo',
+                title: {
+                  und: 'boxfill/cmocean_tempo',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_tempo palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_deep',
-                'title': 'boxfill/cmocean_deep',
-                'abstract': 'boxfill style, using the cmocean_deep palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_deep',
+                title: {
+                  und: 'boxfill/cmocean_deep',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_deep palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_curl',
-                'title': 'boxfill/cmocean_curl',
-                'abstract': 'boxfill style, using the cmocean_curl palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_curl',
+                title: {
+                  und: 'boxfill/cmocean_curl',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_curl palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_thermal',
-                'title': 'boxfill/cmocean_thermal',
-                'abstract': 'boxfill style, using the cmocean_thermal palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_thermal',
+                title: {
+                  und: 'boxfill/cmocean_thermal',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_thermal palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/blue-descending',
-                'title': 'boxfill/blue-descending',
-                'abstract': 'boxfill style, using the blue-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/blue-descending',
+                title: {
+                  und: 'boxfill/blue-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the blue-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/redblue-reverse',
-                'title': 'boxfill/redblue-reverse',
-                'abstract': 'boxfill style, using the redblue-reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/redblue-reverse',
+                title: {
+                  und: 'boxfill/redblue-reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the redblue-reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/soil-moisture',
-                'title': 'boxfill/soil-moisture',
-                'abstract': 'boxfill style, using the soil-moisture palette ',
-                'legendUrl': [
+                identifier: 'boxfill/soil-moisture',
+                title: {
+                  und: 'boxfill/soil-moisture',
+                },
+                abstract: {
+                  und: 'boxfill style, using the soil-moisture palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_phase',
-                'title': 'boxfill/cmocean_phase',
-                'abstract': 'boxfill style, using the cmocean_phase palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_phase',
+                title: {
+                  und: 'boxfill/cmocean_phase',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_phase palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/alg',
-                'title': 'boxfill/alg',
-                'abstract': 'boxfill style, using the alg palette ',
-                'legendUrl': [
+                identifier: 'boxfill/alg',
+                title: {
+                  und: 'boxfill/alg',
+                },
+                abstract: {
+                  und: 'boxfill style, using the alg palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cci_main',
-                'title': 'boxfill/cci_main',
-                'abstract': 'boxfill style, using the cci_main palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cci_main',
+                title: {
+                  und: 'boxfill/cci_main',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cci_main palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/orange',
-                'title': 'boxfill/orange',
-                'abstract': 'boxfill style, using the orange palette ',
-                'legendUrl': [
+                identifier: 'boxfill/orange',
+                title: {
+                  und: 'boxfill/orange',
+                },
+                abstract: {
+                  und: 'boxfill style, using the orange palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/greyscale',
-                'title': 'boxfill/greyscale',
-                'abstract': 'boxfill style, using the greyscale palette ',
-                'legendUrl': [
+                identifier: 'boxfill/greyscale',
+                title: {
+                  und: 'boxfill/greyscale',
+                },
+                abstract: {
+                  und: 'boxfill style, using the greyscale palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/greyscale-reverse',
-                'title': 'boxfill/greyscale-reverse',
-                'abstract': 'boxfill style, using the greyscale-reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/greyscale-reverse',
+                title: {
+                  und: 'boxfill/greyscale-reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the greyscale-reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/balance-blue',
-                'title': 'boxfill/balance-blue',
-                'abstract': 'boxfill style, using the balance-blue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/balance-blue',
+                title: {
+                  und: 'boxfill/balance-blue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the balance-blue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_ice',
-                'title': 'boxfill/cmocean_ice',
-                'abstract': 'boxfill style, using the cmocean_ice palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_ice',
+                title: {
+                  und: 'boxfill/cmocean_ice',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_ice palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_delta',
-                'title': 'boxfill/cmocean_delta',
-                'abstract': 'boxfill style, using the cmocean_delta palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_delta',
+                title: {
+                  und: 'boxfill/cmocean_delta',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_delta palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance',
-                'title': 'boxfill/cmocean_balance',
-                'abstract': 'boxfill style, using the cmocean_balance palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_balance',
+                title: {
+                  und: 'boxfill/cmocean_balance',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_balance palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_solar',
-                'title': 'boxfill/cmocean_solar',
-                'abstract': 'boxfill style, using the cmocean_solar palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_solar',
+                title: {
+                  und: 'boxfill/cmocean_solar',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_solar palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/occam_pastel-30',
-                'title': 'boxfill/occam_pastel-30',
-                'abstract': 'boxfill style, using the occam_pastel-30 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/occam_pastel-30',
+                title: {
+                  und: 'boxfill/occam_pastel-30',
+                },
+                abstract: {
+                  und: 'boxfill style, using the occam_pastel-30 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/ferret',
-                'title': 'boxfill/ferret',
-                'abstract': 'boxfill style, using the ferret palette ',
-                'legendUrl': [
+                identifier: 'boxfill/ferret',
+                title: {
+                  und: 'boxfill/ferret',
+                },
+                abstract: {
+                  und: 'boxfill style, using the ferret palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/redblue',
-                'title': 'boxfill/redblue',
-                'abstract': 'boxfill style, using the redblue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/redblue',
+                title: {
+                  und: 'boxfill/redblue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the redblue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/colour-blind-safe',
-                'title': 'boxfill/colour-blind-safe',
-                'abstract': 'boxfill style, using the colour-blind-safe palette ',
-                'legendUrl': [
+                identifier: 'boxfill/colour-blind-safe',
+                title: {
+                  und: 'boxfill/colour-blind-safe',
+                },
+                abstract: {
+                  und: 'boxfill style, using the colour-blind-safe palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/alg2',
-                'title': 'boxfill/alg2',
-                'abstract': 'boxfill style, using the alg2 palette ',
-                'legendUrl': [
+                identifier: 'boxfill/alg2',
+                title: {
+                  und: 'boxfill/alg2',
+                },
+                abstract: {
+                  und: 'boxfill style, using the alg2 palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_gray',
-                'title': 'boxfill/cmocean_gray',
-                'abstract': 'boxfill style, using the cmocean_gray palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_gray',
+                title: {
+                  und: 'boxfill/cmocean_gray',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_gray palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/blue',
-                'title': 'boxfill/blue',
-                'abstract': 'boxfill style, using the blue palette ',
-                'legendUrl': [
+                identifier: 'boxfill/blue',
+                title: {
+                  und: 'boxfill/blue',
+                },
+                abstract: {
+                  und: 'boxfill style, using the blue palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_matter',
-                'title': 'boxfill/cmocean_matter',
-                'abstract': 'boxfill style, using the cmocean_matter palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_matter',
+                title: {
+                  und: 'boxfill/cmocean_matter',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_matter palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_amp',
-                'title': 'boxfill/cmocean_amp',
-                'abstract': 'boxfill style, using the cmocean_amp palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_amp',
+                title: {
+                  und: 'boxfill/cmocean_amp',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_amp palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/green-descending',
-                'title': 'boxfill/green-descending',
-                'abstract': 'boxfill style, using the green-descending palette ',
-                'legendUrl': [
+                identifier: 'boxfill/green-descending',
+                title: {
+                  und: 'boxfill/green-descending',
+                },
+                abstract: {
+                  und: 'boxfill style, using the green-descending palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/cmocean_balance_reverse',
-                'title': 'boxfill/cmocean_balance_reverse',
-                'abstract': 'boxfill style, using the cmocean_balance_reverse palette ',
-                'legendUrl': [
+                identifier: 'boxfill/cmocean_balance_reverse',
+                title: {
+                  und: 'boxfill/cmocean_balance_reverse',
+                },
+                abstract: {
+                  und: 'boxfill style, using the cmocean_balance_reverse palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
               {
-                'name': 'boxfill/rainbow',
-                'title': 'boxfill/rainbow',
-                'abstract': 'boxfill style, using the rainbow palette ',
-                'legendUrl': [
+                identifier: 'boxfill/rainbow',
+                title: {
+                  und: 'boxfill/rainbow',
+                },
+                abstract: {
+                  und: 'boxfill style, using the rainbow palette ',
+                },
+                legendUrl: [
                   {
-                    'width': '110',
-                    'height': '264',
-                    'format': {
-                      'TYPE_NAME': 'WMS_1_1_1.Format',
-                      'value': 'image/png',
-                    },
-                    'onlineResource': {
-
-                    },
+                    width: '110',
+                    height: '264',
+                    format: 'image/png',
                   },
                 ],
               },
@@ -2972,11 +2726,20 @@ describe('client/js/map_leaflet', function() {
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
         expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3, 4]);
       });
+      it('should find zIndex values of 0, 1, 2, 3, not necessarily in that order', function() {
+        // Remove data layer from middle
+        geona.map.removeLayer('Rrs_443');
 
+        let allZIndices = [];
+        for (let layer of geona.map._mapLayers.getLayers()) {
+          allZIndices.push(layer.options.zIndex);
+        }
+        // zIndices don't have to be in ascending order, but we sort here for easy comparison.
+        expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3]);
+      });
       after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('line_black');
-        geona.map.removeLayer('Rrs_443');
         geona.map.removeLayer('Rrs_490');
         geona.map.removeLayer('Rrs_412');
         geona.map.removeLayer('terrain-light');
@@ -3133,6 +2896,74 @@ describe('client/js/map_leaflet', function() {
       geona.map.removeLayer('Rrs_412');
       geona.map.removeLayer('Rrs_490');
       geona.map.removeLayer('line');
+    });
+  });
+
+  describe('changeLayerStyle', function() {
+    // This variable is used as shorthand for the layer in the tests.
+    // It is redefined in each test to keep it up-to-date with any changes we make during the tests.
+    let rrs412;
+
+    before(function() {
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+    });
+
+    it('should throw an error that the layer isn\'t in _availableLayers', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('', 'boxfill/occam');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer isn\'t in _activeLayers', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('Rrs_443', 'boxfill/occam');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer has no available styles', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('terrain-light', '');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer doesn\'t support the requested style', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('Rrs_412', '');
+      }).to.throw(Error);
+    });
+
+    // Defined in the next test, used elsewhere
+    let initialZIndex;
+    it('should change the layer style', function() {
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      initialZIndex = rrs412.options.zIndex;
+
+      let initialStyle = rrs412.options.styles;
+      geona.map.changeLayerStyle('Rrs_412', 'boxfill/occam');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.options.styles).to.equal('boxfill/occam');
+      expect(rrs412.options.styles).to.not.equal(initialStyle);
+    });
+    it('should keep the zIndex the same before and after changing style', function() {
+      // Uses the zIndex defined in the previous test
+      let currentZIndex = rrs412.options.zIndex;
+      expect(currentZIndex).to.equal(initialZIndex);
+    });
+    it('should keep the style after the time changes', function() {
+      let initialStyle = rrs412.options.styles;
+      let initialTime = rrs412.options.layerTime;
+      geona.map.loadNearestValidTime('Rrs_412', '2002-01-01T00:00:00.000Z');
+
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      let currentStyle = rrs412.options.styles;
+      let currentTime = rrs412.options.layerTime;
+      expect(currentStyle).to.equal(initialStyle);
+      expect(currentTime).to.not.equal(initialTime);
+    });
+
+    after(function() {
+      geona.map.removeLayer('terrain-light');
+      geona.map.removeLayer('Rrs_412');
+      geona.map.removeLayer('Rrs_490');
     });
   });
 

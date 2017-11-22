@@ -322,14 +322,20 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified data layer onto the map, using the specified options.
+   * Will also add a Geona layer to the _availableLayers if not already included.
    *
-   * @param {Layer}   geonaLayer            The Geona Layer object to be created as an OpenLayers layer on the map.
-   * @param {Object}  [options]             A list of options that affect the layers being added
-   * @param {String}  options.modifier      Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   * @param {String}  options.requestedTime The time requested for this layer.
-   * @param {Boolean} options.shown         Whether to show or hide the layer when it is first put on the map.
+   * @param {Layer}   geonaLayer               The Geona Layer object to be created as an OpenLayers layer on the map.
+   * @param {Object}  [options]                A list of options that affect the layers being added
+   * @param {String}    options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   * @param {String}    options.requestedTime  The time requested for this layer.
+   * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
+   * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, shown: true}) {
+  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
+    // TODO try and clean this method up - maybe split it up into separate methods.
+    // Maybe have a wmsSourceFromLayer() for the list of options?
+    // Also the bit at the end where modifiers are checked and reordering happens needs tidied.
+
     // Set default options if not specified
     // No need to set modifier and requestedTime
     if (options.shown === undefined) {
@@ -346,8 +352,10 @@ export class OlMap extends GeonaMap {
     // We enforce that identifiers must be unique on the map.
     // TODO offer option of changing identifier.
     if (duplicate === true) {
-      alert('Layer with this identifier already exists on the map.');
-    } else if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+      alert('Layer with the identifier ' + geonaLayer.identifier + ' already exists on the map.');
+    } else if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+      alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
+    } else {
       let attributions;
       let format;
       let projection;
@@ -370,7 +378,7 @@ export class OlMap extends GeonaMap {
             geonaLayer.styles = undefined;
           }
           // Select an appropriate format
-          // FIXME this probably needs reevaluating - try to use the format from the LegendURL of the Style.
+          // If a format is found in the layer style, the format is set to that instead
           if (geonaLayer.formats !== undefined) {
             if (geonaLayer.formats.includes('image/png')) {
               format = 'image/png';
@@ -380,15 +388,32 @@ export class OlMap extends GeonaMap {
               format = geonaLayer.formats[0];
             }
           }
-          // At this stage of the method, only basemaps might have different projections.
+          // Select appropriate style
+          if (geonaLayer.styles !== undefined) {
+            // Default to the first style
+            style = geonaLayer.styles[0].identifier;
+            if (geonaLayer.styles[0].legendUrl !== undefined) {
+              format = geonaLayer.styles[0].legendUrl[0].format;
+            }
+            // Search for the requested style and set that as the style if found
+            // TODO should this throw an error or silently deal with an incorrect requestedStyle?
+            for (let layerStyle of geonaLayer.styles) {
+              if (layerStyle.identifier === options.requestedStyle) {
+                style = options.requestedStyle;
+                if (layerStyle.legendUrl !== undefined) {
+                  format = layerStyle.legendUrl[0].format;
+                }
+              }
+            }
+          }
+
+          // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
           if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
             projection = this._map.getView().getProjection().getCode();
           } else {
             projection = geonaLayer.projections[0];
           }
-          if (geonaLayer.styles !== undefined) {
-            style = geonaLayer.styles[0].identifier;
-          }
+
           if (geonaLayer.attribution) {
             if (geonaLayer.attribution.onlineResource) {
               // attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
@@ -426,7 +451,7 @@ export class OlMap extends GeonaMap {
             params: {
               LAYERS: requiredLayer,
               FORMAT: geonaLayer.formats || 'image/png',
-              STYLES: style || 'boxfill/alg',
+              STYLES: style || '',
               time: time,
               wrapDateLine: true,
               NUMCOLORBANDS: 255,
@@ -498,8 +523,6 @@ export class OlMap extends GeonaMap {
       if (this.config.borders !== 'none' && this._initialized === true) {
         this.reorderLayers(this.config.borders, this._map.getLayers().getArray().length - 1);
       }
-    } else {
-      alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
     }
   }
 
@@ -665,11 +688,17 @@ export class OlMap extends GeonaMap {
       } else {
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
-        // We save the visibility so the layer's state of visibility is kept upon changing time
-        let shown = this._activeLayers[layerIdentifier].get('shown');
+        // We define the layer options so that only the time changes
+        let layerOptions = {
+          modifier: 'hasTime',
+          requestedStyle: this._activeLayers[layerIdentifier].get('source').getParams().STYLES,
+          // We save the layer's 'shown' value so the layer's state of visibility is kept upon changing time
+          shown: this._activeLayers[layerIdentifier].get('shown'),
+          requestedTime: time,
+        };
 
         this.removeLayer(layerIdentifier);
-        this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
+        this.addLayer(geonaLayer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
         this._activeLayers[layerIdentifier].set('timeHidden', false);
 
@@ -715,7 +744,42 @@ export class OlMap extends GeonaMap {
    * @param {String} styleIdentifier The identifier for the desired style.
    */
   changeLayerStyle(layerIdentifier, styleIdentifier) {
-    // TODO
+    let layer = this._activeLayers[layerIdentifier];
+    let geonaLayer = this._availableLayers[layerIdentifier];
+
+    if (geonaLayer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not loaded into this Geona instance.');
+    } else if (layer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not active on the map.');
+    } else {
+      if (geonaLayer.styles) {
+        let validStyle = false;
+        for (let style of geonaLayer.styles) {
+          if (style.identifier === styleIdentifier) {
+            validStyle = true;
+          }
+        }
+        if (validStyle === true) {
+          // Save the layer options for re-adding
+          let layerOptions = {
+            modifier: layer.get('modifier'),
+            requestedTime: layer.get('layerTime'),
+            shown: layer.get('shown'),
+            requestedStyle: styleIdentifier,
+          };
+          // Save the z-index so the layer remains in position
+          let zIndex = layer.get('zIndex');
+
+          this.removeLayer(layerIdentifier);
+          this.addLayer(geonaLayer, layerOptions);
+          this.reorderLayers(layerIdentifier, zIndex);
+        } else {
+          throw new Error('Specified style ' + styleIdentifier + ' is not defined for the layer ' + layerIdentifier + '.');
+        }
+      } else {
+        throw new Error('There are no styles specified for the layer ' + layerIdentifier + '.');
+      }
+    }
   }
 
   /**
