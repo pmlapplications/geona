@@ -228,8 +228,8 @@ function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
       break;
   }
 
-  // If this layer has a name, and therefore supports getMap, add it to the array of layers
-  if (thisLayer.name) {
+  // If this layer has an identifier, and therefore supports getMap, add it to the array of layers
+  if (thisLayer.identifier) {
     layers.push(thisLayer);
   }
 
@@ -252,7 +252,7 @@ function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
 function parseLayerCommon(layer, parentLayer = {}) {
   // Create thisLayer with the basic non-inheritable properties
   let thisLayer = {
-    name: layer.name,
+    identifier: layer.name,
     title: {und: layer.title},
     abstract: {und: layer._abstract},
   };

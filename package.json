@@ -89,6 +89,7 @@
     "chalk": "^2.0.1",
     "convict": "^4.0.0",
     "d3": "^4.11.0",
+    "dragula": "^3.7.2",
     "eventemitter3": "^2.0.3",
     "express": "^4.15.2",
     "grunt-handlebars-compiler": "^0.3.1",

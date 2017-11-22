@@ -791,6 +791,17 @@ export class OlMap extends GeonaMap {
       }
     }
   }
+
+  /**
+   * Translates a generic request for a layer key into an OpenLayers get() and returns the result.
+   * Used for methods not specific to one map library (e.g. in the GUI).
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of.
+   * @return {*}                      The value for the requested key.
+   */
+  _layerGet(layerIdentifier, key) {
+    return this._activeLayers[layerIdentifier].get(key);
+  }
 }
 
 /**

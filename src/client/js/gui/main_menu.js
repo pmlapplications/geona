@@ -1,11 +1,12 @@
 import 'jquery';
-import 'jquery-ui/ui/widgets/sortable';
+import dragula from 'dragula';
+// import 'jquery-ui/ui/widgets/sortable';
 // window.$ = $ = jQuery;
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
-import {getLayersFromWms, getLayersFromWmts} from '../map_common';
+import {getLayersFromWms, getLayersFromWmts, selectPropertyLanguage} from '../map_common';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -190,8 +191,26 @@ export class MainMenu {
       .removeClass('hidden');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.layers_panel());
-    // TODO remove line below once actually doing something
-    this.parentDiv.find('.js-geona-layers-content').prepend(templates.layers_panel_item());
+
+    let dragger = dragula([this.parentDiv.find('.js-geona-layers-content')[0]]);
+
+    // Loop through the active layers on the map and populate the layers list
+    for (let activeLayer of this.geona.map._activeLayers) {
+      let modifier = this.geona.map._layerGet(activeLayer.identifier, 'modifier');
+      if (modifier !== 'basemap' && modifier !== 'borders') {
+        // Get the data in the correct format from the geona layer
+        let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayer.identifier]);
+        // Insert layer data object at the top of the list
+        this.parentDiv.find('.js-geona-layers-content').prepend(templates.layers_panel_item(data));
+      }
+    }
+
+    // 1) On drop, send an event which tells the list to update its ordering
+    // 2) You need a list lol, you will probably have to keep track of the order yourself
+    //    Probably just get the full list of items in the unordered list using jquery, and order based on the layer identifier which will be stored within the <li>
+    // 3) Use some populated ones
+    // 4) Work this list in reverse
+    // dragger.on('drop', );
   }
 
   /**
@@ -249,4 +268,44 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.share_panel());
   }
+}
+
+/**
+   * Takes a Geona layer and constructs an object to use when displaying layer information on the layers list
+   * @param {Layer}   geonaLayer The Geona layer definition to get information from.
+   * @return {Object}            Object containing information used by the layer item template
+   */
+function _compileLayerInformation(geonaLayer) {
+  let layerInformation = {
+    identifier: geonaLayer.identifier,
+  };
+  if (geonaLayer.title !== undefined) {
+    layerInformation.title = selectPropertyLanguage(geonaLayer.title);
+  }
+  if (geonaLayer.boundingBox !== undefined) {
+    layerInformation.boundingBox = {
+      north: geonaLayer.boundingBox.maxLat,
+      east: geonaLayer.boundingBox.maxLon,
+      south: geonaLayer.boundingBox.minLat,
+      west: geonaLayer.boundingBox.minLon,
+    };
+  }
+  if (geonaLayer.dimensions !== undefined) {
+    if (geonaLayer.dimensions.time) {
+      let sortedDates = geonaLayer.dimensions.time.values.sort();
+      layerInformation.dateRange = {
+        start: sortedDates[0],
+        end: sortedDates[sortedDates.length - 1],
+      };
+    }
+  }
+  if (geonaLayer.abstract !== undefined) {
+    layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
+  }
+  // TODO contact info is in he layer above - in the server?
+  // if (geonaLayer.) {
+
+  // }
+
+  return layerInformation;
 }

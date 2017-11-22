@@ -1,33 +1,41 @@
-<li class="js-geona-layers-list__item geona-layers-list__item" value="{{layerName}}">
+<li class="js-geona-layers-list__item geona-layers-list__item" value="{{data.identifier}}">
   <table>
     <tr>
       <td>Title</td>
-      <td>{{data.Title}}</td>
+      <td>{{data.title}}</td>
     </tr>
     <tr>
       <td>Indicators</td>
-      <td>{{data.tags.indicator_type}}</td>
-    </tr>
-    <tr>
-      <td>Provider</td>
-      <td>{{data.tags.data_provider}}</td>
-    </tr>
-    <tr>
-      <td>Abstract</td>
-      <td>{{data.Abstract}}</td>
-    </tr>
-    <tr>
-      <td>Date range</td>
-      <td>{{data.FirstDate}} - {{data.LastDate}}</td>
+      <td>{{data.indicator}}</td>
     </tr>
     <tr>
       <td>Bounding box</td>
       <td>
-        {{data.EX_GeographicBoundingBox.NorthBoundLatitude}} N,
-        {{data.EX_GeographicBoundingBox.EastBoundLongitude}} E,
-        {{data.EX_GeographicBoundingBox.SouthBoundLatitude}} S,
-        {{data.EX_GeographicBoundingBox.WestBoundLongitude}} W
+        {{data.boundingBox.north}} N,
+        {{data.boundingBox.east}} E,
+        {{data.boundingBox.south}} S,
+        {{data.boundingBox.west}} W,
       </td>
+    </tr>
+    <tr>
+      <td>Date range</td>
+      <td>{{data.dateRange.start}} - {{data.dateRange.end}}</td>
+    </tr>
+    <tr>
+      <td>Abstract</td>
+      <td>{{data.abstract}}</td>
+    </tr>
+    <tr>
+      <td>Contact</td>
+      <td>{{data.contact}}</td>
+    </tr>
+    <tr>
+      <td>Telephone</td>
+      <td>{{data.phone}}</td>
+    </tr>
+    <tr>
+      <td>Email</td>
+      <td>{{data.email}}</td>
     </tr>
   </table>
 </li>
