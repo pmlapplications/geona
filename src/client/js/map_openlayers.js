@@ -335,9 +335,6 @@ export class OlMap extends GeonaMap {
     // TODO try and clean this method up - maybe split it up into separate methods.
     // Maybe have a wmsSourceFromLayer() for the list of options?
     // Also the bit at the end where modifiers are checked and reordering happens needs tidied.
-    // Maybe allow the zIndex in the options.
-    // TODO change the layers from style.name to style.identifier
-
 
     // Set default options if not specified
     // No need to set modifier and requestedTime
@@ -355,8 +352,10 @@ export class OlMap extends GeonaMap {
     // We enforce that identifiers must be unique on the map.
     // TODO offer option of changing identifier.
     if (duplicate === true) {
-      alert('Layer with this identifier already exists on the map.');
-    } else if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+      alert('Layer with the identifier ' + geonaLayer.identifier + ' already exists on the map.');
+    } else if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+      alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
+    } else {
       let attributions;
       let format;
       let projection;
@@ -379,7 +378,7 @@ export class OlMap extends GeonaMap {
             geonaLayer.styles = undefined;
           }
           // Select an appropriate format
-          // FIXME this probably needs reevaluating - try to use the format from the LegendURL of the Style.
+          // If a format is found in the layer style, the format is set to that instead
           if (geonaLayer.formats !== undefined) {
             if (geonaLayer.formats.includes('image/png')) {
               format = 'image/png';
@@ -389,24 +388,32 @@ export class OlMap extends GeonaMap {
               format = geonaLayer.formats[0];
             }
           }
+          // Select appropriate style
+          if (geonaLayer.styles !== undefined) {
+            // Default to the first style
+            style = geonaLayer.styles[0].identifier;
+            if (geonaLayer.styles[0].legendUrl !== undefined) {
+              format = geonaLayer.styles[0].legendUrl[0].format;
+            }
+            // Search for the requested style and set that as the style if found
+            // TODO should this throw an error or silently deal with an incorrect requestedStyle?
+            for (let layerStyle of geonaLayer.styles) {
+              if (layerStyle.identifier === options.requestedStyle) {
+                style = options.requestedStyle;
+                if (layerStyle.legendUrl !== undefined) {
+                  format = layerStyle.legendUrl[0].format;
+                }
+              }
+            }
+          }
+
           // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
           if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
             projection = this._map.getView().getProjection().getCode();
           } else {
             projection = geonaLayer.projections[0];
           }
-          // Select appropriate style
-          if (geonaLayer.styles !== undefined) {
-            // Default to the first style
-            style = geonaLayer.styles[0].identifier;
-            // Search for the requested style and set that as the style if found
-            // TODO should this throw an error or silently deal with an incorrect requestedStyle?
-            for (let layerStyle of geonaLayer.styles) {
-              if (layerStyle.identifier === options.requestedStyle) {
-                style = options.requestedStyle;
-              }
-            }
-          }
+
           if (geonaLayer.attribution) {
             if (geonaLayer.attribution.onlineResource) {
               // attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
@@ -516,8 +523,6 @@ export class OlMap extends GeonaMap {
       if (this.config.borders !== 'none' && this._initialized === true) {
         this.reorderLayers(this.config.borders, this._map.getLayers().getArray().length - 1);
       }
-    } else {
-      alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
     }
   }
 

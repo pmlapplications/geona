@@ -376,7 +376,7 @@ export class LMap extends GeonaMap {
             geonaLayer.styles = undefined;
           }
           // Select an appropriate format
-          // FIXME this probably needs reevaluating - try to use the format from the LegendURL of the Style.
+          // If a format is found in the layer style, the format is set to that instead
           if (geonaLayer.formats !== undefined) {
             if (geonaLayer.formats.includes('image/png')) {
               format = 'image/png';
@@ -386,22 +386,30 @@ export class LMap extends GeonaMap {
               format = geonaLayer.formats[0];
             }
           }
-          // At this stage of the method, only basemaps might have different projections.
-          if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
-            projection = this._map.options.crs;
-          } else {
-            projection = leafletizeProjection(geonaLayer.projections[0]);
-          }
+          // Select appropriate style
           if (geonaLayer.styles !== undefined) {
             // Default to the first style
             style = geonaLayer.styles[0].identifier;
+            if (geonaLayer.styles[0].legendUrl !== undefined) {
+              format = geonaLayer.styles[0].legendUrl[0].format;
+            }
             // Search for the requested style and set that as the style if found
             // TODO should this throw an error or silently deal with an incorrect requestedStyle?
             for (let layerStyle of geonaLayer.styles) {
               if (layerStyle.identifier === options.requestedStyle) {
                 style = options.requestedStyle;
+                if (layerStyle.legendUrl !== undefined) {
+                  format = layerStyle.legendUrl[0].format;
+                }
               }
             }
+          }
+
+          // At this stage of the method, only basemaps might have different projections.
+          if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
+            projection = this._map.options.crs;
+          } else {
+            projection = leafletizeProjection(geonaLayer.projections[0]);
           }
           if (geonaLayer.attribution) {
             if (geonaLayer.attribution.onlineResource) {
