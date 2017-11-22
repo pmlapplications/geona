@@ -323,13 +323,16 @@ export class LMap extends GeonaMap {
 
   /**
    * Create a Leaflet map layer from a Geona layer definition, and add to the map.
-   * @param {Layer}   geonaLayer A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
-   * @param {Object}  [options]             A list of options that affect the layers being added
-   * @param {String}  options.modifier      Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   * @param {String}  options.requestedTime The time requested for this layer.
-   * @param {Boolean} options.shown         Whether to show or hide the layer when it is first put on the map.
+   * Will also add a Geona layer to the _availableLayers if not already included.
+   *
+   * @param {Layer}   geonaLayer               A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
+   * @param {Object}  [options]                A list of options that affect the layers being added
+   * @param {String}    options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   * @param {String}    options.requestedTime  The time requested for this layer.
+   * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
+   * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, shown: true}) {
+  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
     // Set default options if not specified
     // No need to set modifier and requestedTime
     if (options.shown === undefined) {
@@ -390,7 +393,15 @@ export class LMap extends GeonaMap {
             projection = leafletizeProjection(geonaLayer.projections[0]);
           }
           if (geonaLayer.styles !== undefined) {
+            // Default to the first style
             style = geonaLayer.styles[0].identifier;
+            // Search for the requested style and set that as the style if found
+            // TODO should this throw an error or silently deal with an incorrect requestedStyle?
+            for (let layerStyle of geonaLayer.styles) {
+              if (layerStyle.identifier === options.requestedStyle) {
+                style = options.requestedStyle;
+              }
+            }
           }
           if (geonaLayer.attribution) {
             if (geonaLayer.attribution.onlineResource) {
@@ -420,7 +431,7 @@ export class LMap extends GeonaMap {
             layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
               identifier: geonaLayer.identifier,
               layers: requiredLayer,
-              styles: style || 'boxfill/alg',
+              styles: style || '',
               format: format || 'image/png',
               transparent: true,
               attribution: attribution,
@@ -441,7 +452,7 @@ export class LMap extends GeonaMap {
             layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
               identifier: geonaLayer.identifier,
               layers: requiredLayer,
-              styles: style || 'boxfill/alg',
+              styles: style || '',
               format: format || 'image/png',
               transparent: true,
               attribution: attribution,
@@ -461,6 +472,10 @@ export class LMap extends GeonaMap {
           break;
         case undefined:
           throw new Error('Layer protocol is undefined');
+      }
+
+      if (this._availableLayers[geonaLayer.identifier] === undefined) {
+        this._availableLayers[geonaLayer.identifier] = geonaLayer;
       }
 
       this._activeLayers[geonaLayer.identifier] = layer;
@@ -683,11 +698,18 @@ export class LMap extends GeonaMap {
       } else {
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].options.zIndex;
-        // We save the visibility so the layer's state of visibility is kept upon changing time
-        let shown = this._activeLayers[layerIdentifier].options.shown;
+
+        // We define the layer options so that only the time changes
+        let layerOptions = {
+          modifier: 'hasTime',
+          requestedStyle: this._activeLayers[layerIdentifier].options.styles,
+          // We save the layer's 'shown' value so the layer's state of visibility is kept upon changing time
+          shown: this._activeLayers[layerIdentifier].options.shown,
+          requestedTime: time,
+        };
 
         this.removeLayer(layerIdentifier);
-        this.addLayer(geonaLayer, {modifier: 'hasTime', requestedTime: time, shown: shown});
+        this.addLayer(geonaLayer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
         this._activeLayers[layerIdentifier].options.timeHidden = false;
 
@@ -727,6 +749,49 @@ export class LMap extends GeonaMap {
     }
   }
 
+  /**
+   * Changes the style of the specified layer.
+   * @param {String} layerIdentifier The identifier for an active map layer.
+   * @param {String} styleIdentifier The identifier for the desired style.
+   */
+  changeLayerStyle(layerIdentifier, styleIdentifier) {
+    let layer = this._activeLayers[layerIdentifier];
+    let geonaLayer = this._availableLayers[layerIdentifier];
+
+    if (geonaLayer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not loaded into this Geona instance.');
+    } else if (layer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not active on the map.');
+    } else {
+      if (geonaLayer.styles) {
+        let validStyle = false;
+        for (let style of geonaLayer.styles) {
+          if (style.identifier === styleIdentifier) {
+            validStyle = true;
+          }
+        }
+        if (validStyle === true) {
+          // Save the layer options for re-adding
+          let layerOptions = {
+            modifier: layer.options.modifier,
+            requestedTime: layer.options.layerTime,
+            shown: layer.options.shown,
+            requestedStyle: styleIdentifier,
+          };
+          // Save the z-index so the layer remains in position
+          let zIndex = layer.options.zIndex;
+
+          this.removeLayer(layerIdentifier);
+          this.addLayer(geonaLayer, layerOptions);
+          this.reorderLayers(layerIdentifier, zIndex);
+        } else {
+          throw new Error('Specified style ' + styleIdentifier + ' is not defined for the layer ' + layerIdentifier + '.');
+        }
+      } else {
+        throw new Error('There are no styles specified for the layer ' + layerIdentifier + '.');
+      }
+    }
+  }
   /**
    * Load the default basemaps, and any defined in the config.
    */

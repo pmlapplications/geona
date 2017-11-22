@@ -3101,10 +3101,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('changeLayerStyle', function() {
-    // These variables are used as shorthand for the layers in the tests.
-    // They are redefined in each test to keep them up-to-date with any changes we make during the tests.
+    // This variable is used as shorthand for the layer in the tests.
+    // It is redefined in each test to keep it up-to-date with any changes we make during the tests.
     let rrs412;
-    let rrs490;
 
     before(function() {
       geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});

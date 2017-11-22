@@ -2972,11 +2972,20 @@ describe('client/js/map_leaflet', function() {
         // zIndices don't have to be in ascending order, but we sort here for easy comparison.
         expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3, 4]);
       });
+      it('should find zIndex values of 0, 1, 2, 3, not necessarily in that order', function() {
+        // Remove data layer from middle
+        geona.map.removeLayer('Rrs_443');
 
+        let allZIndices = [];
+        for (let layer of geona.map._mapLayers.getLayers()) {
+          allZIndices.push(layer.options.zIndex);
+        }
+        // zIndices don't have to be in ascending order, but we sort here for easy comparison.
+        expect(allZIndices.sort()).to.deep.equal([0, 1, 2, 3]);
+      });
       after(function() {
         // Remove the layers ready for the next tests.
         geona.map.removeLayer('line_black');
-        geona.map.removeLayer('Rrs_443');
         geona.map.removeLayer('Rrs_490');
         geona.map.removeLayer('Rrs_412');
         geona.map.removeLayer('terrain-light');
@@ -3133,6 +3142,74 @@ describe('client/js/map_leaflet', function() {
       geona.map.removeLayer('Rrs_412');
       geona.map.removeLayer('Rrs_490');
       geona.map.removeLayer('line');
+    });
+  });
+
+  describe('changeLayerStyle', function() {
+    // This variable is used as shorthand for the layer in the tests.
+    // It is redefined in each test to keep it up-to-date with any changes we make during the tests.
+    let rrs412;
+
+    before(function() {
+      geona.map.addLayer(geona.map._availableLayers['terrain-light'], {modifier: 'basemap'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+      geona.map.addLayer(geona.map._availableLayers.Rrs_490, {modifier: 'hasTime'});
+    });
+
+    it('should throw an error that the layer isn\'t in _availableLayers', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('', 'boxfill/occam');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer isn\'t in _activeLayers', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('Rrs_443', 'boxfill/occam');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer has no available styles', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('terrain-light', '');
+      }).to.throw(Error);
+    });
+    it('should throw an error that the layer doesn\'t support the requested style', function() {
+      expect(function() {
+        geona.map.changeLayerStyle('Rrs_412', '');
+      }).to.throw(Error);
+    });
+
+    // Defined in the next test, used elsewhere
+    let initialZIndex;
+    it('should change the layer style', function() {
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      initialZIndex = rrs412.options.zIndex;
+
+      let initialStyle = rrs412.options.styles;
+      geona.map.changeLayerStyle('Rrs_412', 'boxfill/occam');
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      expect(rrs412.options.styles).to.equal('boxfill/occam');
+      expect(rrs412.options.styles).to.not.equal(initialStyle);
+    });
+    it('should keep the zIndex the same before and after changing style', function() {
+      // Uses the zIndex defined in the previous test
+      let currentZIndex = rrs412.options.zIndex;
+      expect(currentZIndex).to.equal(initialZIndex);
+    });
+    it('should keep the style after the time changes', function() {
+      let initialStyle = rrs412.options.styles;
+      let initialTime = rrs412.options.layerTime;
+      geona.map.loadNearestValidTime('Rrs_412', '2002-01-01T00:00:00.000Z');
+
+      rrs412 = geona.map._activeLayers.Rrs_412;
+      let currentStyle = rrs412.options.styles;
+      let currentTime = rrs412.options.layerTime;
+      expect(currentStyle).to.equal(initialStyle);
+      expect(currentTime).to.not.equal(initialTime);
+    });
+
+    after(function() {
+      geona.map.removeLayer('terrain-light');
+      geona.map.removeLayer('Rrs_412');
+      geona.map.removeLayer('Rrs_490');
     });
   });
 

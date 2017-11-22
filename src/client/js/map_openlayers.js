@@ -403,7 +403,6 @@ export class OlMap extends GeonaMap {
             // TODO should this throw an error or silently deal with an incorrect requestedStyle?
             for (let layerStyle of geonaLayer.styles) {
               if (layerStyle.identifier === options.requestedStyle) {
-                console.log('matched style');
                 style = options.requestedStyle;
               }
             }
