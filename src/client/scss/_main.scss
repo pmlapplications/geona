@@ -155,6 +155,12 @@
 .geona-layers-list__item{
   border: 1px solid #000;
   margin: 1px;
+  font-size: 11px;
+}
+
+.geona-layers-list__item-row{
+  border-bottom: 1px solid #BBBBBB;
+  overflow-wrap: break-word;
 }
 
 /*------------------------------------*\

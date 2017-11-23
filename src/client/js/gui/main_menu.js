@@ -192,16 +192,18 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.layers_panel());
 
-    let dragger = dragula([this.parentDiv.find('.js-geona-layers-content')[0]]);
+    let dragger = dragula([this.parentDiv.find('.js-geona-layers-list')[0]]);
 
     // Loop through the active layers on the map and populate the layers list
-    for (let activeLayer of this.geona.map._activeLayers) {
-      let modifier = this.geona.map._layerGet(activeLayer.identifier, 'modifier');
+    for (let activeLayerKey of Object.keys(this.geona.map._activeLayers)) {
+      let modifier = this.geona.map._layerGet(activeLayerKey, 'modifier');
+
       if (modifier !== 'basemap' && modifier !== 'borders') {
         // Get the data in the correct format from the geona layer
-        let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayer.identifier]);
+        let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
+        console.log(data);
         // Insert layer data object at the top of the list
-        this.parentDiv.find('.js-geona-layers-content').prepend(templates.layers_panel_item(data));
+        this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
       }
     }
 
