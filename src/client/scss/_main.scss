@@ -157,10 +157,14 @@
   margin: 1px;
   font-size: 11px;
 }
-
+// TODO not working
 .geona-layers-list__item-row{
-  border-bottom: 1px solid #BBBBBB;
+  border-bottom: 1px solid #000000;
+}
+// TODO not working
+.geona-layers-list__item-data{
   overflow-wrap: break-word;
+  table-layout: fixed;
 }
 
 /*------------------------------------*\

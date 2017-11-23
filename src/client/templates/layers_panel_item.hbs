@@ -1,16 +1,16 @@
-<li class="js-geona-layers-list__item geona-layers-list__item" value="{{data.identifier}}">
+<li class="js-geona-layers-list__item geona-layers-list__item" data-identifier="{{data.identifier}}">
   <table>
     <tr class="geona-layers-list__item-row">
       <td>Title</td>
-      <td>{{data.title}}</td>
+      <td class="geona-layers-list__item-data">{{data.title}}</td>
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Indicators</td>
-      <td>{{data.indicator}}</td>
+      <td class="geona-layers-list__item-data">{{data.indicator}}</td>
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Bounding box</td>
-      <td>
+      <td class="geona-layers-list__item-data">
         {{data.boundingBox.north}} N,
         {{data.boundingBox.east}} E,
         {{data.boundingBox.south}} S,
@@ -19,23 +19,23 @@
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Date range</td>
-      <td>{{data.dateRange.start}} - {{data.dateRange.end}}</td>
+      <td class="geona-layers-list__item-data">{{data.dateRange.start}} to {{data.dateRange.end}}</td>
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Abstract</td>
-      <td>{{data.abstract}}</td>
+      <td class="geona-layers-list__item-data">{{data.abstract}}</td>
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Contact</td>
-      <td>{{data.contact}}</td>
+      <td class="geona-layers-list__item-data">{{data.contact}}</td>
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Telephone</td>
-      <td>{{data.phone}}</td>
+      <td class="geona-layers-list__item-data">{{data.phone}}</td>
     </tr>
     <tr class="geona-layers-list__item-row">
       <td>Email</td>
-      <td>{{data.email}}</td>
+      <td class="geona-layers-list__item-data">{{data.email}}</td>
     </tr>
   </table>
 </li>

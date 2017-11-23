@@ -1,7 +1,6 @@
 import 'jquery';
 import dragula from 'dragula';
-// import 'jquery-ui/ui/widgets/sortable';
-// window.$ = $ = jQuery;
+import moment from 'moment';
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
@@ -25,6 +24,8 @@ export class MainMenu {
 
     // requestLayers holds the layers found for the most recent WMS/WMTS request
     this.requestLayers = [];
+    // layersBoxList holds the order of the layers in the layers list
+    this.layersBoxList = [];
 
     // Sets up menu toggle control
     if (this.config.collapsible) {
@@ -192,8 +193,6 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.layers_panel());
 
-    let dragger = dragula([this.parentDiv.find('.js-geona-layers-list')[0]]);
-
     // Loop through the active layers on the map and populate the layers list
     for (let activeLayerKey of Object.keys(this.geona.map._activeLayers)) {
       let modifier = this.geona.map._layerGet(activeLayerKey, 'modifier');
@@ -201,18 +200,49 @@ export class MainMenu {
       if (modifier !== 'basemap' && modifier !== 'borders') {
         // Get the data in the correct format from the geona layer
         let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
-        console.log(data);
-        // Insert layer data object at the top of the list
+        // Insert layer data object at the top of the list - higher on the list means higher on the map
         this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
       }
     }
 
-    // 1) On drop, send an event which tells the list to update its ordering
-    // 2) You need a list lol, you will probably have to keep track of the order yourself
-    //    Probably just get the full list of items in the unordered list using jquery, and order based on the layer identifier which will be stored within the <li>
-    // 3) Use some populated ones
-    // 4) Work this list in reverse
-    // dragger.on('drop', );
+    this.layersBoxList.length = 0;
+    for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
+      this.layersBoxList.unshift(layerBox.dataset.identifier);
+    }
+    console.log(this.layersBoxList);
+  }
+
+  /**
+   * Reorders the map layers. Also recreates the layersBoxList array to match the current ul list of elements
+   * @param {String} item The item that was dragged and dropped.
+   */
+  reorderLayers(item) {
+    console.log('reorderLayers:');
+    console.log(item);
+    let currentMapOrder = this.layersBoxList;
+    // Reset the list
+    this.layersBoxList.length = 0;
+    // Repopulate the list
+    for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
+      this.layersBoxList.unshift(layerBox.dataset.identifier);
+    }
+
+    let basemapActive = false;
+    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+      if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'basemap') {
+        basemapActive = true;
+      }
+    }
+    for (let index = 0; index < this.layersBoxList.length; index++) {
+      if (this.layersBoxList[index] === item.dataset.identifier) {
+        // If there's a basemap we need to increase the index by 1 (layersBoxList does not track basemaps)
+        if (basemapActive === true) {
+          this.geona.map.reorderLayers(item.dataset.identifier, index + 1);
+        } else {
+          this.geona.map.reorderLayers(item.dataset.identifier, index);
+        }
+      }
+    }
   }
 
   /**
@@ -286,18 +316,18 @@ function _compileLayerInformation(geonaLayer) {
   }
   if (geonaLayer.boundingBox !== undefined) {
     layerInformation.boundingBox = {
-      north: geonaLayer.boundingBox.maxLat,
-      east: geonaLayer.boundingBox.maxLon,
-      south: geonaLayer.boundingBox.minLat,
-      west: geonaLayer.boundingBox.minLon,
+      north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
+      east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
+      south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
+      west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
     };
   }
   if (geonaLayer.dimensions !== undefined) {
     if (geonaLayer.dimensions.time) {
       let sortedDates = geonaLayer.dimensions.time.values.sort();
       layerInformation.dateRange = {
-        start: sortedDates[0],
-        end: sortedDates[sortedDates.length - 1],
+        start: moment.utc(sortedDates[0]).format('YYYY-MM-DD'),
+        end: moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD'),
       };
     }
   }

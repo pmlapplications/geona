@@ -1,4 +1,5 @@
 import 'jquery';
+import dragula from 'dragula';
 
 /**
  * Sets event triggers for main menu elements.
@@ -6,6 +7,7 @@ import 'jquery';
  * @param {JQuery}       parentDiv    The div which contains the current map.
  */
 export function registerTriggers(eventManager, parentDiv) {
+  // Tracks the last tab that was clicked
   let lastTabClicked = '';
 
   // Open/close menu
@@ -17,16 +19,20 @@ export function registerTriggers(eventManager, parentDiv) {
     }
   });
 
-  /* ------------------------------------*\
-      Explore Panel
-  \* ------------------------------------*/
+
+  /**
+   *  Explore Panel - more triggers are set in the registerExploreTriggers() method
+   */
   // Open/close panel
   parentDiv.find('.js-geona-menu__explore').click(() => {
     if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__explore') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
+      // if (exploreTriggers === false) {
       registerExploreTriggers(eventManager, parentDiv);
+      // exploreTriggers = true;
+      // }
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
@@ -41,6 +47,7 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLayersPanel');
+      registerLayersTriggers(eventManager, parentDiv);
     }
     lastTabClicked = 'js-geona-menu__layers';
   });
@@ -122,5 +129,21 @@ function registerExploreTriggers(eventManager, parentDiv) {
   // Add layer to map
   parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
     eventManager.trigger('mainMenu.addUrlLayerToMap');
+  });
+}
+
+/**
+ * Used by the main registerTriggers function to register triggers for
+ * Explore panel elements which are not loaded at startup.
+ * @param {EventManager} eventManager The event manager for the current instance of Geona.
+ * @param {JQuery}       parentDiv    The div which contains the current map.
+ */
+function registerLayersTriggers(eventManager, parentDiv) {
+  // Dragula reordering
+  let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]]);
+  dragger.on('drop', (item) => {
+    eventManager.trigger('mainMenu.reorderLayers', [item]);
+    console.log('trigger:');
+    console.log(item);
   });
 }
