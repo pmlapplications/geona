@@ -126,9 +126,17 @@ function registerExploreTriggers(eventManager, parentDiv) {
     }
   });
 
-  // Add layer to map
+  // Add URL layer to map
   parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
     eventManager.trigger('mainMenu.addUrlLayerToMap');
+  });
+
+  // Add available layer to map
+  parentDiv.find('.js-geona-explore-panel-content__available-layers').change(() => {
+    // console.log(parentDiv.find('js-geona-explore-panel-content__available-layers'));
+    if (parentDiv.find('.js-geona-explore-panel-content__available-layers').val() !== 'geona-available-layers-title') {
+      eventManager.trigger('mainMenu.addAvailableLayerToMap');
+    }
   });
 }
 

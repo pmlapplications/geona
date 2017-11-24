@@ -104,12 +104,8 @@ export class LMap extends GeonaMap {
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
         for (let layerIdentifier of this.config.data) {
-          if (this._availableLayers[layerIdentifier].dimensions) {
-            if (this._availableLayers[layerIdentifier].dimensions.time) {
-              this.addLayer(this._availableLayers[layerIdentifier], {modifier: 'hasTime'});
-            } else {
-              this.addLayer(this._availableLayers[layerIdentifier]);
-            }
+          if (this._availableLayers[layerIdentifier].modifier === 'hasTime') {
+            this.addLayer(this._availableLayers[layerIdentifier], {modifier: 'hasTime'});
           } else {
             this.addLayer(this._availableLayers[layerIdentifier]);
           }
@@ -483,6 +479,7 @@ export class LMap extends GeonaMap {
       }
 
       if (this._availableLayers[geonaLayer.identifier] === undefined) {
+        geonaLayer.modifier = options.modifier;
         this._availableLayers[geonaLayer.identifier] = geonaLayer;
       }
 
@@ -824,6 +821,7 @@ export class LMap extends GeonaMap {
     for (let layer of defaultBasemaps) {
       if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          layer.modifier = 'basemap';
           this._availableLayers[layer.identifier] = layer;
         } else {
           console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
@@ -836,6 +834,7 @@ export class LMap extends GeonaMap {
       for (let layer of this.config.basemapLayers) {
         if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
           if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+            layer.modifier = 'basemap';
             this._availableLayers[layer.identifier] = layer;
           } else {
             console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
@@ -853,6 +852,7 @@ export class LMap extends GeonaMap {
   _loadBordersLayers() {
     for (let layer of defaultBorders) {
       if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        layer.modifier = 'borders';
         this._availableLayers[layer.identifier] = layer;
       } else {
         console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
@@ -861,6 +861,7 @@ export class LMap extends GeonaMap {
     if (this.config.bordersLayers !== undefined) {
       for (let layer of this.config.bordersLayers) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          layer.modifier = 'borders';
           this._availableLayers[layer.identifier] = layer;
         } else {
           console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
@@ -875,6 +876,11 @@ export class LMap extends GeonaMap {
   _loadDataLayers() {
     for (let layer of defaultDataLayers) {
       if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+        if (layer.dimensions !== undefined) {
+          if (layer.dimensions.time !== undefined) {
+            layer.modifier = 'hasTime';
+          }
+        }
         this._availableLayers[layer.identifier] = layer;
       } else {
         console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
@@ -883,6 +889,11 @@ export class LMap extends GeonaMap {
     if (this.config.dataLayers !== undefined) {
       for (let layer of this.config.dataLayers) {
         if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
+          if (layer.dimensions !== undefined) {
+            if (layer.dimensions.time !== undefined) {
+              layer.modifier = 'hasTime';
+            }
+          }
           this._availableLayers[layer.identifier] = layer;
         } else {
           console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');

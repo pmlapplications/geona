@@ -1,5 +1,4 @@
 import 'jquery';
-import dragula from 'dragula';
 import moment from 'moment';
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
@@ -100,6 +99,16 @@ export class MainMenu {
       .removeClass('hidden');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.explore_panel());
+
+    // Populate available layers dropdown
+    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
+      let layer = this.geona.map._availableLayers[layerIdentifier];
+      if (layer.modifier !== 'basemap' && layer.modifier !== 'borders') {
+        this.parentDiv.find('.js-geona-explore-panel-content__available-layers').append(
+          '<option value="' + layerIdentifier + '">' + layerIdentifier + ' - ' + selectPropertyLanguage(layer.title) + '</option>'
+        );
+      }
+    }
   }
 
   /**
@@ -173,6 +182,19 @@ export class MainMenu {
           this.geona.map.addLayer(layer);
         }
       }
+    }
+  }
+
+  /**
+   * Adds the layer in the 'available-layers' input box to the map.
+   */
+  addAvailableLayerToMap() {
+    let layerIdentifier = this.parentDiv.find('.js-geona-explore-panel-content__available-layers').val();
+    let layer = this.geona.map._availableLayers[layerIdentifier];
+    if (layer.modifier === 'hasTime') {
+      this.geona.map.addLayer(layer, {modifier: 'hasTime'});
+    } else {
+      this.geona.map.addLayer(layer);
     }
   }
 

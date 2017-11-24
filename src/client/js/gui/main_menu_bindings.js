@@ -37,7 +37,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.addUrlLayerToMap', () => {
     menu.addUrlLayerToMap();
   });
-
+  // Add layer from availableLayers to map
+  eventManager.bind('mainMenu.addAvailableLayerToMap', () => {
+    menu.addAvailableLayerToMap();
+  });
 
   /*
    * Layers Panel
