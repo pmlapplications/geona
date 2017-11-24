@@ -143,7 +143,5 @@ function registerLayersTriggers(eventManager, parentDiv) {
   let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]]);
   dragger.on('drop', (item) => {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
-    console.log('trigger:');
-    console.log(item);
   });
 }

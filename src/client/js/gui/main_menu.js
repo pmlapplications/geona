@@ -193,15 +193,19 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.layers_panel());
 
-    // Loop through the active layers on the map and populate the layers list
-    for (let activeLayerKey of Object.keys(this.geona.map._activeLayers)) {
-      let modifier = this.geona.map._layerGet(activeLayerKey, 'modifier');
-
-      if (modifier !== 'basemap' && modifier !== 'borders') {
+    let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
+    // Double loop used to find the zIndex of a layer so the list can be populated correctly
+    for (let index = 0; index < activeLayersKeys.length; index++) {
+      // Loop through the active layers on the map and populate the layers list
+      for (let activeLayerKey of activeLayersKeys) {
+        let modifier = this.geona.map._layerGet(activeLayerKey, 'modifier');
+        let zIndex = this.geona.map._layerGet(activeLayerKey, 'zIndex');
+        if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
         // Get the data in the correct format from the geona layer
-        let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
-        // Insert layer data object at the top of the list - higher on the list means higher on the map
-        this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+          let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
+          // Insert layer data object at the top of the list - higher on the list means higher on the map
+          this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+        }
       }
     }
 
@@ -209,7 +213,6 @@ export class MainMenu {
     for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
       this.layersBoxList.unshift(layerBox.dataset.identifier);
     }
-    console.log(this.layersBoxList);
   }
 
   /**
@@ -217,9 +220,6 @@ export class MainMenu {
    * @param {String} item The item that was dragged and dropped.
    */
   reorderLayers(item) {
-    console.log('reorderLayers:');
-    console.log(item);
-    let currentMapOrder = this.layersBoxList;
     // Reset the list
     this.layersBoxList.length = 0;
     // Repopulate the list
@@ -233,6 +233,7 @@ export class MainMenu {
         basemapActive = true;
       }
     }
+
     for (let index = 0; index < this.layersBoxList.length; index++) {
       if (this.layersBoxList[index] === item.dataset.identifier) {
         // If there's a basemap we need to increase the index by 1 (layersBoxList does not track basemaps)

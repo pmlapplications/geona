@@ -49,8 +49,6 @@ export function registerBindings(eventManager, menu) {
   // Reorder layers
   // Item is the list item that was draged and dropped
   eventManager.bind('mainMenu.reorderLayers', (item) => {
-    console.log('binding:');
-    console.log(item[0]);
     menu.reorderLayers(item[0]);
   });
 

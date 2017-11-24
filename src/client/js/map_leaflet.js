@@ -801,14 +801,20 @@ export class LMap extends GeonaMap {
     }
   }
   /**
-   * Translates a generic request for a layer key into an Leaflet layer.options and returns the result.
+   * Translates a generic request for a layer key into an Leaflet options.key and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
-   * @param  {String} key             The key that we want to find the value of.
-   * @return {*}                      The value for the requested key.
+   * @param  {String|L.tileLayer.wms} layerIdentifier The identifier for the map layer we want to check,
+   *                                                  or the Leaflet layer itself.
+   * @param  {String}                 key             The key that we want to find the value of.
+   * @return {*}                                      The value for the requested key.
    */
   _layerGet(layerIdentifier, key) {
-    return this._activeLayers[layerIdentifier].options.key;
+    // Determine whether we've received a String or a tileLayer.wms
+    if (typeof layerIdentifier === 'string') {
+      return this._activeLayers[layerIdentifier].options[key];
+    } else {
+      return layerIdentifier.options[key];
+    }
   }
 
   /**
