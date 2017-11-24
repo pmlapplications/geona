@@ -2922,6 +2922,31 @@ describe('client/js/map_openlayers', function() {
     });
   });
 
+  describe('_layerGet', function() {
+    before(function() {
+      geona.map.addLayer(geona.map._availableLayers.Rrs_412, {modifier: 'hasTime'});
+    });
+
+    it('should return a zIndex of 0 from the layer identifier', function() {
+      let zIndex = geona.map._layerGet('Rrs_412', 'zIndex');
+      expect(zIndex).to.equal(0);
+    });
+    it('should return a zIndex of 0 from the layer object', function() {
+      let layer = geona.map._activeLayers.Rrs_412;
+      let zIndex = geona.map._layerGet(layer, 'zIndex');
+      expect(zIndex).to.equal(0);
+    });
+    it('should throw an undefined error from the layer identifier', function() {
+      expect(function() {
+        geona.map._layerGet('', 'zIndex');
+      }).to.throw(TypeError);
+    });
+
+    after(function() {
+      geona.map.removeLayer('Rrs_412');
+    });
+  });
+
   describe('getLayersFromWms()', function() {
     let wmsLayers;
     before(function(done) {
