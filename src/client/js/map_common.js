@@ -219,24 +219,24 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
 export const basemaps = [
   {
     protocol: 'wms',
-    identifier: 'terrain-light',
+    identifier: 'gebco_08_grid',
     title: {
-      und: 'EOX',
-    },
-    description: {
-      und: 'EPSG:4326 only, Europe only',
+      und: 'GEBCO',
     },
     attribution: {
-      title: 'EOX',
-      onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
+      title: 'GEBCO',
+      onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
     },
-    projections: ['EPSG:4326'],
+    projections: ['EPSG:4326', 'EPSG:3857'],
     formats: ['image/jpeg'],
     isTemporal: false,
     layerServer: {
-      layers: ['terrain-light'],
+      layers: ['gebco_08_grid'],
       version: '1.1.1',
-      url: 'https://tiles.maps.eox.at/wms/?',
+      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+    },
+    viewSettings: {
+      maxZoom: 7,
     },
   },
   {
@@ -262,27 +262,6 @@ export const basemaps = [
       fitExtent: [22.02, -33.86, 82.85, 56.12],
     },
   },
-  // {
-  //   id: 'eoxS2Cloudless',
-  //   title: 'EOX Sentinel-2 Cloudless',
-  //   description: 'EPSG:4326 only, Europe only',
-  //   projections: ['EPSG:4326'],
-  //   source: {
-  //     type: 'wms',
-  //     url: 'https://tiles.maps.eox.at/wms/?',
-  //     crossOrigin: null,
-  //     attributions: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
-  //     params: {
-  //       layers: 's2cloudless',
-  //       version: '1.1.1',
-  //       wrapDateLine: true,
-  //     },
-  //   },
-  //   viewSettings: {
-  //     maxZoom: 14,
-  //     fitExtent: [22.02, -33.86, 82.85, 56.12],
-  //   },
-  // },
   // {
   //   identifier: 'gebco_08_grid',
   //   title: {und:'GEBCO'},
@@ -441,17 +420,17 @@ export const borderLayers = [
   //   },
   // },
   {
-    identifier: 'line_black',
+    identifier: 'line-white',
     protocol: 'wms',
     title: {
-      und: 'Black border lines',
+      und: 'White border lines',
     },
     projections: ['EPSG:4326', 'EPSG:3857'],
     formats: ['image/png'],
     isTemporal: false,
     styles: [
       {
-        identifier: 'line_black',
+        identifier: 'line-white',
       },
     ],
     layerServer: {

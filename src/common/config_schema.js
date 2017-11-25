@@ -137,6 +137,9 @@ export let client = {
             version: '1.1.1',
             url: 'https://tiles.maps.eox.at/wms/?',
           },
+          viewSettings: {
+            maxZoom: 13,
+          },
         },
       ],
     },
