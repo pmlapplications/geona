@@ -1,5 +1,7 @@
 /** @module loader */
 
+// import 'babel-polyfill';
+
 /* global geona */
 
 let head = document.getElementsByTagName('head')[0];

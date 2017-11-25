@@ -64,7 +64,11 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.hideLayer', (item) => {
     menu.hideLayer(item[0]);
   });
-
+  // Remove layer
+  // Item is the list item that contained the icon that was clicked
+  eventManager.bind('mainMenu.removeLayer', (item) => {
+    menu.removeLayer(item[0]);
+  });
   /*
    * Analysis Panel
    */

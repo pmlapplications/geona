@@ -199,6 +199,21 @@ export class MainMenu {
   }
 
   /**
+   * Removes the layer specified in the item from the map
+   * @param {HTMLElement} item The list element that contains the element that was clicked.
+   */
+  removeLayer(item) {
+    this.geona.map.removeLayer(item.dataset.identifier);
+    // Returns true if browser is Internet Explorer 11
+    let isIE11 = Boolean(window.MSInputMethodContext) && Boolean(document.documentMode);
+    if (isIE11 === true) {
+      item.removeNode(true);
+    } else {
+      item.remove();
+    }
+  }
+
+  /**
    * Hides the layer specified in the item
    * @param {HTMLElement} item The list element that contains the element that was clicked.
    */

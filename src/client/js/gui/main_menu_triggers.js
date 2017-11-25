@@ -153,8 +153,8 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
   });
 
-  // Show/hide layers
-  // TODO use variable for icon
+  // Show/hide layer
+  // TODO why is 'this' invalid, and is there a better way to do it?
   parentDiv.find('.js-geona-layers-list__item-visibility').click(function() {
     // Finds the list element that contains the icon which was clicked
     let item = this.closest('li'); // eslint-disable-line no-invalid-this
@@ -165,5 +165,12 @@ function registerLayersTriggers(eventManager, parentDiv) {
       eventManager.trigger('mainMenu.hideLayer', [item]);
       this.classList.add('layer-hidden');// eslint-disable-line no-invalid-this
     }
+  });
+
+  // Remove layer
+  parentDiv.find('.js-geona-layers-list__item-remove').click(function() {
+    // Finds the list element that contains the icon which was clicked
+    let item = this.closest('li'); // eslint-disable-line no-invalid-this
+    eventManager.trigger('mainMenu.removeLayer', [item]);
   });
 }
