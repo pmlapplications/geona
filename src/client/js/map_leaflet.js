@@ -797,6 +797,7 @@ export class LMap extends GeonaMap {
       }
     }
   }
+
   /**
    * Translates a generic request for a layer key into an Leaflet options.key and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).

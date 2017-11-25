@@ -8,6 +8,7 @@
 /* eslint no-empty-function: 0 */
 /* eslint no-unused-expressions: 0 */
 /* eslint no-unused-vars: 0 */
+/* eslint valid-jsdoc: 0 */ // Used to prevent @return tags from erroring
 
 /**
  * Base class and interface for a map.
@@ -24,47 +25,22 @@ export default class GeonaMap {
   displayGraticule(display) { }
 
   /**
-   * Set the basemap, changing the projection if required.
-   * @param {String} basemap The id of the basemap to use, or 'none'
+   * Clears the basemap ready for a new one, changing the projection if required.
+   * @param {ol.layer.Tile|L.tileLayer.wms} [layer] Optional layer created in addLayer(),
+   *                                                used for setting a new projection
    */
-  setBasemap(basemap) { }
+  _clearBasemap(layer) { }
 
   /**
-   * Set the country borders to display.
-   * @param {String} borders The borders to display, or 'none'
+   * Clear the country borders if active
    */
-  setCountryBorders(borders) { }
+  _clearBorders() { }
 
   /**
    * Set the projection, if supported by the current basemap.
    * @param {String} projection The projection to use, such as 'EPSG:4326'
    */
   setProjection(projection) { }
-
-  /**
-   * Add the specified data layer onto the map.
-   * @param {String} layerId The id of the data layer being added.
-   * @param {Integer} [index] The zero-based index to insert the layer into.
-   */
-  addLayer(layerId, index) { }
-
-  /**
-   * Remove the specified data layer from the map.
-   * @param {*} layerId The id of the data layer being removed.
-   */
-  removeLayer(layerId) { }
-
-  /**
-   * Makes an invisible layer visible.
-   * @param {*} layerId The id of the data layer being made visible.
-   */
-  showLayer(layerId) { }
-
-  /**
-   * Makes a layer invisible, but keeps it on the map.
-   * @param {*} layerId The id of the data layer being made hidden.
-   */
-  hideLayer(layerId) { }
 
   /**
    * Set the map view with the provided options. Uses OpenLayers style zoom levels.
@@ -82,18 +58,98 @@ export default class GeonaMap {
   setView(options) { }
 
   /**
-   * Use the config to setup the map view.
+   * Add the specified data layer onto the map, using the specified options.
+   * Will also add a Geona layer to the _availableLayers if not already included.
    *
-   * This should be called at the end of a map constructor.
-   * This function should not be overridden.
+   * @param {Layer}   geonaLayer               The Geona Layer object to be created as an OpenLayers layer on the map.
+   * @param {Object}  [options]                A list of options that affect the layers being added
+   * @param {String}    options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   * @param {String}    options.requestedTime  The time requested for this layer.
+   * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
+   * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  loadConfig_() {
-    // this.setBasemap(this.config.basemap);
-    // this.setCountryBorders(this.config.borders);
-    this.displayGraticule(this.config.graticule);
-    // this.setProjection(this.config.projection);
-    this.setView(this.config.viewSettings);
-  }
+  addLayer(geonaLayer, options) { }
+
+  /**
+   * Remove the specified data layer from the map.
+   * @param {String} layerIdentifier The id of the data layer being removed.
+   */
+  removeLayer(layerIdentifier) { }
+
+  /**
+   * Makes an invisible layer visible.
+   * @param {String} layerIdentifier The id of the data layer being made visible.
+   */
+  showLayer(layerIdentifier) { }
+
+  /**
+   * Makes a layer invisible, but keeps it on the map.
+   * @param {String} layerIdentifier The id of the data layer being made hidden.
+   */
+  hideLayer(layerIdentifier) { }
+
+  /**
+   * Moves the layer to the specified index, and reorders the other map layers where required.
+   *
+   * Displaced layers move downwards if the reordered layer is being moved up.
+   * Displaced layers move upwards if the reordered layer is being moved down.
+   * Basemaps and country borders will remain at the bottom or top, even if an attempt is made to move a data layer
+   * lower or higher than the basemap or borders.
+   *
+   * The zIndex of all tile layers will be in a range of '0' to 'the number of layers - 1'.
+   * For example, with a basemap, a data layer, and a country borders layer, the zIndex values would be
+   * 0, 1, 2, in that order.
+   *
+   * @param {String}  layerIdentifier The identifier of the layer to be moved.
+   * @param {Integer} targetIndex The zero-based index to insert the layer at. Higher values for higher layers.
+   */
+  reorderLayers(layerIdentifier, targetIndex) { }
+
+  /**
+   * Updates the layer time to the nearest, past valid time for that layer.
+   * If no valid time is found, the layer is hidden.
+   * @param {String} layerIdentifier The identifier for the layer being updated.
+   * @param {String} requestedTime   The target time in ISO 8601 format.
+   */
+  loadNearestValidTime(layerIdentifier, requestedTime) { }
+
+  /**
+   * Loads all the data layers on the map to the nearest valid time, hiding the layers with no valid data.
+   * @param {String} requestedTime The target time in ISO 8601 format.
+   */
+  loadLayersToNearestValidTime(requestedTime) { }
+
+  /**
+   * Changes the style of the specified layer.
+   * @param {String} layerIdentifier The identifier for an active map layer.
+   * @param {String} styleIdentifier The identifier for the desired style.
+   */
+  changeLayerStyle(layerIdentifier, styleIdentifier) { }
+
+  /**
+   * Translates a generic request for a layer key into an OpenLayers get() and returns the result.
+   * Used for methods not specific to one map library (e.g. in the GUI).
+   * @param  {String|ol.layer.Tile} layerIdentifier The identifier for the map layer we want to check,
+   *                                                or the OpenLayers layer itself.
+   * @param  {String}               key             The key that we want to find the value of.
+   * @return {*}                                    The value for the requested key.
+   */
+  _layerGet(layerIdentifier, key) { }
+
+  /**
+   * Load the default basemaps, and any defined in the config.
+   */
+  _loadBasemapLayers() { }
+
+  /**
+   * Load the default border layers, and any defined in the config.
+   */
+  _loadBordersLayers() { }
+
+  /**
+   * Load the default data layers, and any defined in the config.
+   */
+  _loadDataLayers() { }
 }
 
 // Fields

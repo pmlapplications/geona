@@ -779,6 +779,23 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * Translates a generic request for a layer key into an OpenLayers get() and returns the result.
+   * Used for methods not specific to one map library (e.g. in the GUI).
+   * @param  {String|ol.layer.Tile} layerIdentifier The identifier for the map layer we want to check,
+   *                                                or the OpenLayers layer itself.
+   * @param  {String}               key             The key that we want to find the value of.
+   * @return {*}                                    The value for the requested key.
+   */
+  _layerGet(layerIdentifier, key) {
+    // Determine whether we've received a String or a Layer.Tile
+    if (typeof layerIdentifier === 'string') {
+      return this._activeLayers[layerIdentifier].get(key);
+    } else {
+      return layerIdentifier.get(key);
+    }
+  }
+
+  /**
    * Load the default basemaps, and any defined in the config.
    */
   _loadBasemapLayers() {
@@ -863,23 +880,6 @@ export class OlMap extends GeonaMap {
           console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
         }
       }
-    }
-  }
-
-  /**
-   * Translates a generic request for a layer key into an OpenLayers get() and returns the result.
-   * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String|ol.layer.Tile} layerIdentifier The identifier for the map layer we want to check,
-   *                                                or the OpenLayers layer itself.
-   * @param  {String}               key             The key that we want to find the value of.
-   * @return {*}                                    The value for the requested key.
-   */
-  _layerGet(layerIdentifier, key) {
-    // Determine whether we've received a String or a Layer.Tile
-    if (typeof layerIdentifier === 'string') {
-      return this._activeLayers[layerIdentifier].get(key);
-    } else {
-      return layerIdentifier.get(key);
     }
   }
 }
