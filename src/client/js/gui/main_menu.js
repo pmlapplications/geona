@@ -199,12 +199,24 @@ export class MainMenu {
   }
 
   /**
- * Clears current panel content and adds layers currently on map to the list of layers.
- *
- * TODO Think if it would be better to do do each layer individually with add and remove, rather than
- * clear and refresh. Clear and refresh requires a list to track the order of layers. However this list might be
- * required for changing the map anyway.
- */
+   * Hides the layer specified in the item
+   * @param {HTMLElement} item The list element that contains the element that was clicked.
+   */
+  hideLayer(item) {
+    this.geona.map.hideLayer(item.dataset.identifier);
+  }
+
+  /**
+   * Shows the layer specified in the item
+   * @param {HTMLElement} item The list element that contains the element that was clicked.
+   */
+  showLayer(item) {
+    this.geona.map.showLayer(item.dataset.identifier);
+  }
+
+  /**
+   * Clears current panel content and adds layers currently on map to the list of layers.
+   */
   displayLayersPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__layers').addClass('geona-menu__tab--active');
@@ -239,7 +251,7 @@ export class MainMenu {
 
   /**
    * Reorders the map layers. Also recreates the layersBoxList array to match the current ul list of elements
-   * @param {String} item The item that was dragged and dropped.
+   * @param {HTMLElement} item The item that was dragged and dropped.
    */
   reorderLayers(item) {
     // Reset the list

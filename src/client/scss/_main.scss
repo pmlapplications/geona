@@ -157,6 +157,16 @@
   margin: 1px;
   font-size: 11px;
 }
+
+.geona-layers-list__item-header-icon{
+  display: inline-block;
+  font-size: 20px;
+  cursor: pointer;
+  // TODO not working
+  .geona-layers-list__item-remove{
+    float: right;
+  }
+}
 // TODO not working
 .geona-layers-list__item-row{
   border-bottom: 1px solid #000000;

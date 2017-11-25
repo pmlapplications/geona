@@ -50,11 +50,20 @@ export function registerBindings(eventManager, menu) {
     menu.displayLayersPanel();
   });
   // Reorder layers
-  // Item is the list item that was draged and dropped
+  // Item is the list item that was dragged and dropped
   eventManager.bind('mainMenu.reorderLayers', (item) => {
     menu.reorderLayers(item[0]);
   });
-
+  // Show layer
+  // Item is the list item that contained the icon that was clicked
+  eventManager.bind('mainMenu.showLayer', (item) => {
+    menu.showLayer(item[0]);
+  });
+  // Hide layer
+  // Item is the list item that contained the icon that was clicked
+  eventManager.bind('mainMenu.hideLayer', (item) => {
+    menu.hideLayer(item[0]);
+  });
 
   /*
    * Analysis Panel

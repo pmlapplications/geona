@@ -142,7 +142,7 @@ function registerExploreTriggers(eventManager, parentDiv) {
 
 /**
  * Used by the main registerTriggers function to register triggers for
- * Explore panel elements which are not loaded at startup.
+ * Layers panel elements which are not loaded at startup.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery}       parentDiv    The div which contains the current map.
  */
@@ -151,5 +151,19 @@ function registerLayersTriggers(eventManager, parentDiv) {
   let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]]);
   dragger.on('drop', (item) => {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
+  });
+
+  // Show/hide layers
+  // TODO use variable for icon
+  parentDiv.find('.js-geona-layers-list__item-visibility').click(function() {
+    // Finds the list element that contains the icon which was clicked
+    let item = this.closest('li'); // eslint-disable-line no-invalid-this
+    if (this.classList.contains('layer-hidden')) {// eslint-disable-line no-invalid-this
+      eventManager.trigger('mainMenu.showLayer', [item]);
+      this.classList.remove('layer-hidden');// eslint-disable-line no-invalid-this
+    } else {
+      eventManager.trigger('mainMenu.hideLayer', [item]);
+      this.classList.add('layer-hidden');// eslint-disable-line no-invalid-this
+    }
   });
 }
