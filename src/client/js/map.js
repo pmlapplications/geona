@@ -150,6 +150,20 @@ export default class GeonaMap {
    * Load the default data layers, and any defined in the config.
    */
   _loadDataLayers() { }
+
+  /**
+  * Use the config to setup the map view.
+  *
+  * This should be called at the end of a map constructor.
+  * This function should not be overridden.
+  */
+  loadConfig_() {
+    // this.setBasemap(this.config.basemap);
+    // this.setCountryBorders(this.config.borders);
+    this.displayGraticule(this.config.graticule);
+    // this.setProjection(this.config.projection);
+    this.setView(this.config.viewSettings);
+  }
 }
 
 // Fields
