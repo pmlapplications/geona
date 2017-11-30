@@ -40,7 +40,36 @@ export function getCapabilities(protocol, url) {
 }
 
 /**
- * Convert a GetCapabilities XML into a JSON object.
+ * Performs a DescribeCoverage request and downloads the returned XML.
+ * @param  {String}  protocol The OGC protocol/service type
+ * @param  {String}  url      The URL of the service
+ * @return {Promise}          A Promise that resolves with the DescribeCoverage XML
+ */
+export function describeCoverage(protocol, url) {
+  return new Promise((resolve, reject) => {
+    // If a version is specified in the URL, it will be added onto the clean URL.
+    let version = '&' + url.match(/version=.*?(?=[&\s])|version=.*/);
+    // Cuts off the query string of the URL
+    let cleanUrl = url.replace(/\?.*/g, '');
+
+    switch (protocol) {
+      case 'wcs':
+        cleanUrl += '?service=WCS&request=DescribeCoverage' + version;
+        break;
+    }
+
+    request(cleanUrl, (err, response, body) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(body);
+    });
+  });
+}
+
+/**
+ * Convert a GetCapabilities or DescribeCoverage XML into a JSON object.
  * @param  {String} protocol The OGC protocol/service type
  * @param  {String} xml      The XML document as a String
  * @return {Object}          The capabilities as a JSON object

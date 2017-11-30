@@ -116,6 +116,8 @@
     "request": "^2.81.0",
     "swagger-jsdoc": "^1.9.6",
     "vis": "^4.21.0",
-    "w3c-schemas": "^1.4.0"
+    "w3c-schemas": "^1.4.0",
+    "xml-js": "^1.5.2",
+    "xml2js": "^0.4.19"
   }
 }

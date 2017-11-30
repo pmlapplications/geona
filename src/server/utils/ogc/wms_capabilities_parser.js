@@ -25,7 +25,7 @@ export function parseWmsCapabilities(url) {
 }
 
 /**
- * Parse an XML WMTS capabilitise document.
+ * Parse an XML WMTS capabilities document.
  * @param  {String} xml The XML document as a string
  * @param  {String} url (optional) The url of the service
  * @return {Object}     A LayerServer config Object
