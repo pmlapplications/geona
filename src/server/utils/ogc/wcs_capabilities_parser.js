@@ -3,6 +3,7 @@
 /* eslint camelcase: 0 */
 
 import {getCapabilities, describeCoverage, jsonifyCapabilities} from './common';
+import proj4 from 'proj4';
 let parseXml = require('xml-js');
 let fs = require('fs');
 
@@ -173,14 +174,6 @@ function parse1_0(url, capabilities, coverage) {
     serverConfig.url = url.replace(/\?.*/g, '');
   }
 
-  for (let brief of content.coverageOfferingBrief) {
-    let layer = {
-      identifier: brief.wcsName,
-      description: brief.wcsDescription,
-      label: brief.label,
-    };
-  }
-
   // console.log(coverage);
 
   /**
@@ -201,7 +194,7 @@ function parse1_0(url, capabilities, coverage) {
 
 // TODO this uses xml-js rather than jsonix. Change?
 /**
- * 
+ * Populates an array for all the layer definitions found.
  * @param  {JSON}  coverage The coverage for all layers from a WCS DescribeCoverage request
  * @return {Array}          The populated layers found
  */
@@ -210,6 +203,7 @@ function digForWcsLayers(coverage) {
 
   for (let element of coverage.elements[0].elements) {
     let layer = {};
+    layer.projections = [];
     for (let layerData of element.elements) {
       switch (layerData.name) {
         case 'description':
@@ -221,12 +215,22 @@ function digForWcsLayers(coverage) {
         case 'label':
           layer.abstract = layerData.elements[0].text;
           break;
+        case 'lonLatEnvelope':
+          if (layerData.attributes !== undefined) {
+            layer.projections.push(convertCrs(layerData.attributes.srsName));
+          }
+          layer.boundingBox = populateBoundingBox(layerData);
+          break;
         case 'domainSet':
           for (let domain of layerData.elements) {
             if (domain.name === 'temporalDomain') {
-              // layer.time
+              layer.dimensions = {};
+              layer.dimensions.time = {};
+              // TODO
+              // layer.dimensions.time.default;
+              layer.dimensions.time.values = [];
               for (let time of domain.elements) {
-                // 
+                layer.dimensions.time.push(time.elements[0].text);
               }
             }
           }
@@ -236,4 +240,56 @@ function digForWcsLayers(coverage) {
   }
 
   return layers;
+}
+
+/**
+ * Converts the crs from the long OGC specification style into a normal crs string.
+ * @param {String}  crs The crs in OGC specification style, e.g. 'urn:ogc:def:crs:OGC:2:84'.
+ * @return {String}     The crs in normal style, e.g. 'OGC:84'.
+ */
+function convertCrs(crs) {
+  return crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+}
+
+/**
+ * Populates and returns an Object containing bounding box data
+ * with the correct axis orientation, projection code and dimensions.
+ * @param {Object}  envelope The the lon/lat envelope
+ * @return {Object}          The bounding box data as an Object
+ */
+function populateBoundingBox(envelope) {
+  let boundingBox;
+  // Holds the two pairs of coordinates for the bounding box
+  let coordSet;
+  // Find the coordinates for the bounding box
+  for (let element of envelope.elements) {
+    if (element.name === 'gml:pos') {
+      coordSet.push(element.elements[0].text);
+    }
+  }
+  // Puts the lower-value coordinates first in the array
+  if (coordSet[0][0] > coordSet[1][0]) {
+    coordSet.reverse();
+  }
+
+  // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
+  let xyOrientation = proj4(convertCrs(envelope.attributes.srsName)).oProj.axis.substr(0, 2);
+  if (xyOrientation === 'en') {
+    boundingBox = {
+      minLat: coordSet[0][1],
+      minLon: coordSet[0][0],
+      maxLat: coordSet[1][1],
+      maxLon: coordSet[1][0],
+      style: 'boundingBox',
+    };
+  } else {
+    boundingBox = {
+      minLat: coordSet[0][0],
+      minLon: coordSet[0][1],
+      maxLat: coordSet[1][0],
+      maxLon: coordSet[1][1],
+      style: 'boundingBox',
+    };
+  }
+  return boundingBox;
 }
