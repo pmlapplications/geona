@@ -128,7 +128,7 @@ function parse1_0(url, capabilities, coverage) {
   // Check if we have Get, Post, or both methods for the online resource
   let getCapGetOrPost = capability.request.getCapabilities.dcpType[0].http.getOrPost;
   for (let method = 0; method < getCapGetOrPost.length; method++) {
-    if (method.TYPE_NAME === 'WCS_1_0_0.DCPTypeType.HTTP.Get') {
+    if (getCapGetOrPost[method].TYPE_NAME === 'WCS_1_0_0.DCPTypeType.HTTP.Get') {
       onlineResource.getCapabilities.get = getCapGetOrPost[method].onlineResource.href;
     } else {
       onlineResource.getCapabilities.post = getCapGetOrPost[method].onlineResource.href;
@@ -136,7 +136,7 @@ function parse1_0(url, capabilities, coverage) {
   }
   let desCovGetOrPost = capability.request.describeCoverage.dcpType[0].http.getOrPost;
   for (let method = 0; method < desCovGetOrPost.length; method++) {
-    if (method.TYPE_NAME === 'WCS_1_0_0.DCPTypeType.HTTP.Get') {
+    if (desCovGetOrPost[method].TYPE_NAME === 'WCS_1_0_0.DCPTypeType.HTTP.Get') {
       onlineResource.describeCoverage.get = desCovGetOrPost[method].onlineResource.href;
     } else {
       onlineResource.describeCoverage.post = desCovGetOrPost[method].onlineResource.href;
@@ -144,7 +144,7 @@ function parse1_0(url, capabilities, coverage) {
   }
   let getCovGetOrPost = capability.request.getCoverage.dcpType[0].http.getOrPost;
   for (let method = 0; method < getCovGetOrPost.length; method++) {
-    if (method.TYPE_NAME === 'WCS_1_0_0.DCPTypeType.HTTP.Get') {
+    if (getCovGetOrPost[method].TYPE_NAME === 'WCS_1_0_0.DCPTypeType.HTTP.Get') {
       onlineResource.getCoverage.get = getCovGetOrPost[method].onlineResource.href;
     } else {
       onlineResource.getCoverage.post = getCovGetOrPost[method].onlineResource.href;
@@ -158,17 +158,14 @@ function parse1_0(url, capabilities, coverage) {
 
     service: {
       // Title etc. are not defined in wcs layers (or jsonix isn't parsing correctly)
-      // dcpType will only ever have one entry ('http') in version 1.0.0
-      onlineResource: capability.request.getCapabilities.dcpType[0].http.getOrPost[0].onlineResource.href,
+      onlineResource: onlineResource,
       // There is only ever one access constraint in 1.0.0
       accessConstraints: service.accessConstraints[0].value,
       fees: service.fees.value,
     },
-
-    capability: {},
   };
 
-  serverConfig.layers = digForWcsLayers();
+  serverConfig.layers = digForWcsLayers(coverage);
 
   if (url !== undefined) {
     serverConfig.url = url.replace(/\?.*/g, '');
@@ -199,10 +196,13 @@ function parse1_0(url, capabilities, coverage) {
  * @return {Array}          The populated layers found
  */
 function digForWcsLayers(coverage) {
+  let cov = JSON.parse(coverage);
   let layers = [];
 
-  for (let element of coverage.elements[0].elements) {
+  for (let element of cov.elements[0].elements) {
     let layer = {};
+    let i = 0;
+
     layer.projections = [];
     for (let layerData of element.elements) {
       switch (layerData.name) {
@@ -222,23 +222,45 @@ function digForWcsLayers(coverage) {
           layer.boundingBox = populateBoundingBox(layerData);
           break;
         case 'domainSet':
+          layer.dimensions = {
+            time: {},
+          };
           for (let domain of layerData.elements) {
             if (domain.name === 'temporalDomain') {
-              layer.dimensions = {};
-              layer.dimensions.time = {};
               // TODO
               // layer.dimensions.time.default;
               layer.dimensions.time.values = [];
               for (let time of domain.elements) {
-                layer.dimensions.time.push(time.elements[0].text);
+                layer.dimensions.time.values.push(time.elements[0].text);
               }
+            } else if (domain.name === 'spatialDomain') {
+              let times = [];
+              for (let type of domain.elements) {
+                if (type.name === 'EnvelopeWithTimePeriod') {
+                  for (let boxOrTime of type.elements) {
+                    if (boxOrTime.name === 'gml:timePosition') {
+                      times.push(boxOrTime.elements[0].text);
+                    }
+                  }
+                }
+              }
+
+              layer.dimensions.time.default = times.sort()[times.length - 1];
             }
           }
+
+          if (Object.keys(layer.dimensions.time).length === 0) {
+            delete layer.dimensions.time;
+            if (Object.keys(layer.dimensions).length === 0) {
+              delete layer.dimensions;
+            }
+          }
+
           break;
       }
     }
+    layers.push(layer);
   }
-
   return layers;
 }
 
@@ -248,7 +270,11 @@ function digForWcsLayers(coverage) {
  * @return {String}     The crs in normal style, e.g. 'OGC:84'.
  */
 function convertCrs(crs) {
-  return crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+  let projection = crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+  if (projection === 'OGC:CRS84') {
+    projection = 'EPSG:4326';
+  }
+  return projection;
 }
 
 /**
@@ -260,11 +286,12 @@ function convertCrs(crs) {
 function populateBoundingBox(envelope) {
   let boundingBox;
   // Holds the two pairs of coordinates for the bounding box
-  let coordSet;
+  let coordSet = [];
   // Find the coordinates for the bounding box
   for (let element of envelope.elements) {
     if (element.name === 'gml:pos') {
-      coordSet.push(element.elements[0].text);
+      let coords = element.elements[0].text.split(' ');
+      coordSet.push(coords);
     }
   }
   // Puts the lower-value coordinates first in the array
@@ -274,6 +301,7 @@ function populateBoundingBox(envelope) {
 
   // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
   let xyOrientation = proj4(convertCrs(envelope.attributes.srsName)).oProj.axis.substr(0, 2);
+
   if (xyOrientation === 'en') {
     boundingBox = {
       minLat: coordSet[0][1],

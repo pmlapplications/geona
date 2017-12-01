@@ -546,6 +546,8 @@ function populateBoundingBox(box) {
     }
   } else {
     // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
+    console.log('box.value.crs:');
+    console.log(box.value.crs);
     let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
     if (xyOrientation === 'en') {
       boundingBox = {
