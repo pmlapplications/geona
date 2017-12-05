@@ -2,7 +2,7 @@
 
 import request from 'request';
 
-import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, TEST_CONTEXT} from '../jsonix';
+import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, WFS_CONTEXT, TEST_CONTEXT} from '../jsonix';
 
 /**
  * Download the GetCapabilities XML for the provided protocol from the provided url.
@@ -26,6 +26,9 @@ export function getCapabilities(protocol, url) {
         break;
       case 'wcs':
         cleanUrl += '?service=WCS&request=GetCapabilities' + version;
+        break;
+      case 'wfs':
+        cleanUrl += '?service=WFS&request=GetCapabilities' + version;
         break;
     }
 
@@ -69,7 +72,7 @@ export function describeCoverage(protocol, url) {
 }
 
 /**
- * Convert a GetCapabilities or DescribeCoverage XML into a JSON object.
+ * Convert a GetCapabilities XML into a JSON object.
  * @param  {String} protocol The OGC protocol/service type
  * @param  {String} xml      The XML document as a String
  * @return {Object}          The capabilities as a JSON object
@@ -88,6 +91,9 @@ export function jsonifyCapabilities(protocol, xml) {
       break;
     case 'wcs':
       unmarshaller = WCS_CONTEXT.createUnmarshaller();
+      break;
+    case 'wfs':
+      unmarshaller = WFS_CONTEXT.createUnmarshaller();
       break;
     case 'test':
       unmarshaller = TEST_CONTEXT.createUnmarshaller();

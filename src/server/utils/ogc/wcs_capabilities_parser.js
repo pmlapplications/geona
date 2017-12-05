@@ -4,6 +4,7 @@
 
 import {getCapabilities, describeCoverage, jsonifyCapabilities} from './common';
 import proj4 from 'proj4';
+// TODO try and fix the jsonix now
 let parseXml = require('xml-js');
 let fs = require('fs');
 

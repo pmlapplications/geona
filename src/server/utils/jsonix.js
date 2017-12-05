@@ -115,3 +115,20 @@ export const WCS_CONTEXT = new jsonix.Context([
   // ogcSchemas.GMLJP2_2_0,
   // ogcSchemas.WCS_WCSEO_1_0,
 ]);
+
+export const WFS_CONTEXT = new jsonix.Context([
+  xLink,
+  ogcSchemas.GML_2_1_2,
+  ogcSchemas.GML_3_1_1,
+  ogcSchemas.SMIL_2_0,
+  ogcSchemas.SMIL_2_0_Language,
+  ogcSchemas.OWS_1_0_0,
+  ogcSchemas.OWS_1_1_0,
+  ogcSchemas.WFS_1_0_0,
+  ogcSchemas.Filter_1_0_0,
+  ogcSchemas.Filter_1_1_0,
+  ogcSchemas.Filter_2_0,
+  ogcSchemas.WFS_1_1_0,
+  ogcSchemas.WFS_2_0,
+
+]);

@@ -25,7 +25,7 @@ export function parseWmsCapabilities(url) {
 }
 
 /**
- * Parse an XML WMTS capabilities document.
+ * Parse an XML WMS capabilities document.
  * @param  {String} xml The XML document as a string
  * @param  {String} url (optional) The url of the service
  * @return {Object}     A LayerServer config Object
@@ -414,34 +414,36 @@ function parseLayer1_1(layer, parentLayer = {}) {
       };
     }
 
-    for (let extent of layer.extent) {
-      let dimension = thisLayer.dimensions[extent.name];
-      dimension.default = extent._default;
-      dimension.multipleValues = extent.multipleValues === 1 || extent.multipleValues === '1';
-      dimension.nearestValue = extent.nearestValue === 1 || extent.nearestValue === '1';
-      dimension.current = extent.current === 1 || extent.current === '1';
-      dimension.values = extent.value;
+    if (layer.extent) {
+      for (let extent of layer.extent) {
+        let dimension = thisLayer.dimensions[extent.name];
+        dimension.default = extent._default;
+        dimension.multipleValues = extent.multipleValues === 1 || extent.multipleValues === '1';
+        dimension.nearestValue = extent.nearestValue === 1 || extent.nearestValue === '1';
+        dimension.current = extent.current === 1 || extent.current === '1';
+        dimension.values = extent.value;
 
-      if (dimension.values) {
-        dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
-      }
-
-      for (let value of dimension.values) {
-        if (value.includes('/')) {
-          if (!dimension.intervals) {
-            dimension.intervals = [];
-          }
-          let minMaxResolution = value.split('/');
-          dimension.intervals.push({
-            min: minMaxResolution[0],
-            max: minMaxResolution[1],
-            resolution: minMaxResolution[2],
-          });
+        if (dimension.values) {
+          dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
         }
-      }
 
-      if (dimension.intervals) {
-        dimension.values = undefined;
+        for (let value of dimension.values) {
+          if (value.includes('/')) {
+            if (!dimension.intervals) {
+              dimension.intervals = [];
+            }
+            let minMaxResolution = value.split('/');
+            dimension.intervals.push({
+              min: minMaxResolution[0],
+              max: minMaxResolution[1],
+              resolution: minMaxResolution[2],
+            });
+          }
+        }
+
+        if (dimension.intervals) {
+          dimension.values = undefined;
+        }
       }
     }
   }

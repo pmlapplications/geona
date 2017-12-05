@@ -11,11 +11,9 @@ import {parseWcsCapabilities} from '../utils/ogc/wcs_capabilities_parser';
  * @param  {Object} res Express response
  */
 export function wcsGetLayers(req, res) {
-  // TODO This is only for testing the jsonix conversion. The WCS parser hasn't been written yet.
-  // It will probably be quite similar to the WMS parser.
   // getCapabilities('wcs', req.params.url)
   //   .then((jsonCapabilities) => {
-  //     res.json(jsonCapabilities);
+  //     res.json(jsonifyCapabilities('wcs', jsonCapabilities));
   //   }).catch((err) => {
   //     res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
   //   });
@@ -27,6 +25,28 @@ export function wcsGetLayers(req, res) {
       console.log(err);
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
+}
+
+/**
+ * Get the available data layers and server details from a wcs server.
+ * @param  {Object} req Express request
+ * @param  {Object} res Express response
+ */
+export function wfsGetLayers(req, res) {
+  getCapabilities('wfs', req.params.url)
+    .then((jsonCapabilities) => {
+      res.json(jsonifyCapabilities('wfs', jsonCapabilities));
+    }).catch((err) => {
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+    });
+  // parseWcsCapabilities(req.params.url)
+  //   .then((layer) => {
+  //     res.json(layer);
+  //   // console.log(JSON.stringify(layer));
+  //   }).catch((err) => {
+  //     console.log(err);
+  //     res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+  //   });
 }
 
 /**
