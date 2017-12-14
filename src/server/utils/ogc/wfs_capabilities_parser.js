@@ -68,13 +68,11 @@ export function parseLocalWfsCapabilities(xml, url) {
  * @return {Object}              The server config
  */
 function parseCommon(url, capabilities) {
-  let capability = capabilities.capability;
-
   let serverConfig = {
     protocol: 'wfs',
     version: capabilities.version,
+    updateSequence: capabilities.updateSequence,
     url: undefined,
-    capability: {},
   };
 
   if (url) {
@@ -92,7 +90,6 @@ function parseCommon(url, capabilities) {
  */
 function parse1_1(url, capabilities) {
   // FIXME need to support multiple languages for title/abstract etc.
-  let capability = capabilities.capability;
   let serviceId = capabilities.serviceIdentification;
   let servicePr = capabilities.serviceProvider;
   let opsMeta = capabilities.operationsMetadata;
@@ -105,7 +102,6 @@ function parse1_1(url, capabilities) {
     title: {und: serviceId.title},
     abstract: {und: serviceId._abstract} || {},
     keywords: {und: []},
-    onlineResource: serviceId.onlineResource.href,
     contactInformation: {},
   };
 
@@ -115,7 +111,7 @@ function parse1_1(url, capabilities) {
     }
   }
 
-  if (Object.keys(servicePr).length > 0) {
+  if (Object.keys(servicePr).length > 1) {
     let contactInformation = {};
     contactInformation.person = servicePr.serviceContact.individualName;
     contactInformation.organization = servicePr.providerName;
@@ -134,21 +130,19 @@ function parse1_1(url, capabilities) {
     contactInformation.address.stateOrProvince = servicePr.serviceContact.contactInfo.address.administrativeArea;
     contactInformation.address.postCode = servicePr.serviceContact.contactInfo.address.postalCode;
     contactInformation.address.country = servicePr.serviceContact.contactInfo.address.country;
-    // TODO address (which is on the rhand side of the screen), the rest of the file and other parser (2.0)
 
     serverConfig.service.contactInformation = contactInformation;
   }
 
-  if (Object.keys(opsMeta).length > 0) {
+  if (Object.keys(opsMeta).length > 1) {
     let operationsMetadata = {};
-    for (let operation of opsMeta) {
+    for (let operation of opsMeta.operation) {
       operationsMetadata[operation.name] = {};
       operationsMetadata[operation.name].dcp = [];
-      for (let dcp of operationsMetadata[operation.name].dcp) {
+      if (operation.dcp) {
         let dcpObject = {};
         dcpObject.type = 'http';
-        dcpObject.getOrPost = {};
-        for (let method of operationsMetadata[operation.name].dcp[0].http.getOrPost) {
+        for (let method of operation.dcp[0].http.getOrPost) {
           if (method.name.localPart === 'Get') {
             dcpObject.get = {};
             dcpObject.get.href = method.value.href;
@@ -159,18 +153,20 @@ function parse1_1(url, capabilities) {
         }
         operationsMetadata[operation.name].dcp.push(dcpObject);
       }
-
-      for (let parameter of operationsMetadata[operation.name].parameter) {
-        operationsMetadata[operation.name].parameter[parameter.name] = {};
-        operationsMetadata[operation.name].parameter[parameter.name].values = parameter.value;
+      if (operation.parameter) {
+        operationsMetadata[operation.name].parameters = {};
+        for (let parameter of operation.parameter) {
+          operationsMetadata[operation.name].parameters[parameter.name] = {};
+          operationsMetadata[operation.name].parameters[parameter.name].values = parameter.value;
+        }
       }
     }
     serverConfig.operationsMetadata = operationsMetadata;
   }
 
-  serverConfig.featureTypes = {};
-  if (Object.keys(ftl).length > 0) {
-    let featureTypeList = {};
+  if (Object.keys(ftl).length > 1) {
+    serverConfig.featureTypes = {};
+    let featureTypeList = serverConfig.featureTypes;
     featureTypeList.operations = ftl.operations.operation;
     featureTypeList.featureTypes = [];
     for (let featureType of ftl.featureType) {
@@ -194,11 +190,12 @@ function parse1_1(url, capabilities) {
         };
         feature.boundingBoxes.push(boundingBox);
       }
+      featureTypeList.featureTypes.push(feature);
     }
   }
 
   serverConfig.filterCapabilities = {};
-  if (Object.keys(filter).length > 0) {
+  if (Object.keys(filter).length > 1) {
     let filCap = {};
     if (filter.spatialCapabilities) {
       filCap.spatialCapabilities = {};
@@ -244,22 +241,9 @@ function parse1_1(url, capabilities) {
         }
       }
     }
+    serverConfig.filterCapabilities = filCap;
   }
 
-  if (capability.request) {
-    if (capability.request.getMap) {
-      serverConfig.capability.getMap = {
-        formats: getFormats(capability.request.getMap.format),
-        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
-      };
-    }
-    if (capability.request.getFeatureInfo) {
-      serverConfig.capability.getFeatureInfo = {
-        formats: getFormats(capability.request.getFeatureInfo.format),
-        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
-      };
-    }
-  }
 
   /**
    * Extracts the supported formats from the formatArray
@@ -285,32 +269,265 @@ function parse1_1(url, capabilities) {
  */
 function parse2_0(url, capabilities) {
   // FIXME need to support multiple languages for title/abstract etc.
-  let capability = capabilities.capability;
-  let service = capabilities.serviceIdentification;
+  let serviceId = capabilities.serviceIdentification;
+  let servicePr = capabilities.serviceProvider;
+  let opsMeta = capabilities.operationsMetadata;
+  let ftl = capabilities.featureTypeList;
+  let filter = capabilities.filterCapabilities;
 
   let serverConfig = parseCommon(url, capabilities);
 
   serverConfig.service = {
-    title: {und: service.title},
-    abstract: {und: service._abstract} || {},
+    title: {und: serviceId.title[0].value},
+    abstract: {und: serviceId._abstract[0].value} || {},
     keywords: {und: []},
-    onlineResource: service.onlineResource.href,
     contactInformation: {},
   };
 
-  if (capability.request) {
-    if (capability.request.getMap) {
-      serverConfig.capability.getMap = {
-        formats: getFormats(capability.request.getMap.format),
-        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
-      };
+  // FIXME currently this just collates all the keywords of different languages into one list
+  if (serviceId.keywords) {
+    if (serviceId.keywords[0].keyword) {
+      for (let keywords of serviceId.keywords) {
+        for (let keyword of keywords.keyword) {
+          serverConfig.service.keywords.und.push(keyword.value);
+        }
+      }
     }
-    if (capability.request.getFeatureInfo) {
-      serverConfig.capability.getFeatureInfo = {
-        formats: getFormats(capability.request.getFeatureInfo.format),
-        // TODO get href here when support added in jsonix - https://github.com/highsource/ogc-schemas/issues/183
-      };
+  }
+
+  if (Object.keys(servicePr).length > 1) {
+    let contactInformation = {};
+    contactInformation.person = servicePr.serviceContact.individualName;
+    contactInformation.organization = servicePr.providerName;
+    contactInformation.position = servicePr.serviceContact.positionName;
+    contactInformation.phone = [];
+    for (let number of servicePr.serviceContact.contactInfo.phone.voice) {
+      contactInformation.phone.push(number);
     }
+    contactInformation.email = [];
+    for (let email of servicePr.serviceContact.contactInfo.address.electronicMailAddress) {
+      contactInformation.email.push(email);
+    }
+    contactInformation.address = {};
+    contactInformation.address.address = servicePr.serviceContact.contactInfo.address.deliveryPoint;
+    contactInformation.address.city = servicePr.serviceContact.contactInfo.address.city;
+    contactInformation.address.stateOrProvince = servicePr.serviceContact.contactInfo.address.administrativeArea;
+    contactInformation.address.postCode = servicePr.serviceContact.contactInfo.address.postalCode;
+    contactInformation.address.country = servicePr.serviceContact.contactInfo.address.country;
+
+    serverConfig.service.contactInformation = contactInformation;
+  }
+
+  if (Object.keys(opsMeta).length > 1) {
+    let operationsMetadata = {};
+    if (opsMeta.operation) {
+      for (let operation of opsMeta.operation) {
+        operationsMetadata[operation.name] = {};
+        operationsMetadata[operation.name].dcp = [];
+
+        let dcpObject = {};
+        dcpObject.type = 'http';
+        for (let method of operation.dcp[0].http.getOrPost) {
+          if (method.name.localPart === 'Get') {
+            dcpObject.get = {};
+            dcpObject.get.href = method.value.href;
+          } else {
+            dcpObject.post = {};
+            dcpObject.post.href = method.value.href;
+          }
+        }
+        operationsMetadata[operation.name].dcp.push(dcpObject);
+
+
+        if (operation.parameter) {
+          operationsMetadata[operation.name].parameters = {};
+          for (let parameter of operation.parameter) {
+            operationsMetadata[operation.name].parameters[parameter.name] = {};
+            operationsMetadata[operation.name].parameters[parameter.name].values = [];
+            for (let valueOrRange of parameter.allowedValues.valueOrRange) {
+              operationsMetadata[operation.name].parameters[parameter.name].values.push(valueOrRange.value);
+            }
+          }
+        }
+      }
+      serverConfig.operationsMetadata = operationsMetadata;
+    }
+
+    if (opsMeta.constraint) {
+      for (let constraint of opsMeta.constraint) {
+        operationsMetadata[constraint.name] = {};
+        // TODO I assume that it will be noValues.value
+        if (constraint.noValues) {
+          operationsMetadata[constraint.name].valuesCount = constraint.noValues.value;
+        }
+        if (constraint.defaultValue) {
+          operationsMetadata[constraint.name].default = constraint.defaultValue.value;
+        }
+        if (constraint.allowedValues) {
+          if (constraint.allowedValues.valueOrRange) {
+            operationsMetadata[constraint.name].allowedValues = [];
+            for (let valueOrRange of constraint.allowedValues.valueOrRange) {
+              operationsMetadata[constraint.name].allowedValues.push(valueOrRange.value);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (Object.keys(ftl).length > 1) {
+    serverConfig.featureTypes = {};
+    let featureTypeList = serverConfig.featureTypes;
+    if (ftl.operations) {
+      if (ftl.operations.operation) {
+        featureTypeList.operations = ftl.operations.operation;
+      }
+    }
+    featureTypeList.featureTypes = [];
+    for (let featureType of ftl.featureType) {
+      let feature = {};
+      feature.identifier = featureType.name.localPart;
+      // TODO multi-language support
+      feature.title = featureType.title[0].value;
+      feature.abstract = featureType._abstract[0].value;
+      feature.keywords = [];
+      if (featureType.keywords) {
+        if (featureType.keywords[0].keyword) {
+          for (let keywords of featureType.keywords) {
+            let keywordsList = [];
+            for (let keyword of keywords.keyword) {
+              keywordsList.push(keyword.value);
+            }
+            feature.keywords = feature.keywords.concat(keywordsList);
+          }
+        }
+      }
+      feature.projection = convertCrs(featureType.defaultCRS);
+      feature.boundingBoxes = [];
+      for (let box of featureType.wgs84BoundingBox) {
+        let boundingBox = {
+          minLat: box.lowerCorner[1],
+          minLon: box.lowerCorner[0],
+          maxLat: box.upperCorner[1],
+          maxLon: box.upperCorner[0],
+          style: 'wgs84BoundingBox',
+        };
+        feature.boundingBoxes.push(boundingBox);
+      }
+      featureTypeList.featureTypes.push(feature);
+    }
+  }
+
+  if (Object.keys(filter).length > 1) {
+    let filCap = {};
+    if (filter.spatialCapabilities) {
+      filCap.spatialCapabilities = {};
+      if (filter.spatialCapabilities.geometryOperands) {
+        filCap.spatialCapabilities.geometry = [];
+        for (let operand of filter.spatialCapabilities.geometryOperands.geometryOperand) {
+          filCap.spatialCapabilities.geometry.push(operand.name.localPart);
+        }
+      }
+      filCap.spatialCapabilities.operators = [];
+      for (let operator of filter.spatialCapabilities.spatialOperators.spatialOperator) {
+        filCap.spatialCapabilities.operators.push(operator.name);
+      }
+    }
+
+    if (filter.scalarCapabilities) {
+      filCap.scalarCapabilities = {};
+      if (filter.scalarCapabilities.logicalOperators) {
+        if (filter.scalarCapabilities.logicalOperators.logicalOperator) {
+          filCap.scalarCapabilities.logical = filter.scalarCapabilities.logicalOperators.logicalOperator;
+        }
+      }
+      if (filter.scalarCapabilities.comparisonOperators) {
+        if (filter.scalarCapabilities.comparisonOperators.comparisonOperator) {
+          filCap.scalarCapabilities.comparison = filter.scalarCapabilities.comparisonOperators.comparisonOperator.name;
+        }
+      }
+      if (filter.scalarCapabilities.arithmeticOperators) {
+        if (filter.scalarCapabilities.arithmeticOperators.arithmeticOperator) {
+          filCap.scalarCapabilities.arithmetic = [];
+          for (let op of filter.scalarCapabilities.arithmeticOperators.ops) {
+            if (op.functionNames) {
+              for (let name of op.functionNames.functionName) {
+                filCap.scalarCapabilities.arithmetic.push({
+                  name: name.value,
+                  argsCount: name.nArgs,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (filter.idCapabilities) {
+      filCap.idCapabilities = [];
+      // TODO don't just put the whole id in (need example)
+      for (let id of filter.idCapabilities.resourceIdentifier) {
+        filCap.idCapabilities.push(id.name.prefix);
+      }
+    }
+
+    if (filter.conformance) {
+      filCap.conformance = [];
+      if (filter.conformance.constraint) {
+        for (let constraint of filter.conformance.constraint) {
+          let conformance = {};
+          if (constraint.name) {
+            conformance.name = constraint.name;
+          }
+          if (constraint.noValues) {
+            conformance.valuesCount = constraint.noValues.value;
+          }
+          if (constraint.defaultValue) {
+            conformance.default = constraint.defaultValue.value;
+          }
+          filCap.conformance.push(conformance);
+        }
+      }
+    }
+
+    if (filter.temporalCapabilities) {
+      filCap.temporalCapabilities = [];
+      if (filter.temporalCapabilities.temporalOperands) {
+        for (let operand of filter.temporalCapabilities.temporalOperands.temporalOperand) {
+          filCap.temporalCapabilities.push(operand.name.localPart);
+        }
+      }
+    }
+
+    if (filter.functions) {
+      filCap.functions = [];
+      if (filter.functions.function) {
+        for (let func of filter.functions.function) {
+          let functionDescription = {
+            name: func.name,
+            returns: func.returns.localPart,
+            arguments: [],
+          };
+          if (func.arguments) {
+            if (func.arguments.argument) {
+              for (let arg of func.arguments.argument) {
+                functionDescription.arguments.push({
+                  type: arg.name,
+                  specific: arg.type.localPart,
+                });
+              }
+              filCap.functions.push(functionDescription);
+            }
+          }
+        }
+      }
+    }
+
+    if (filter.extendedCapabilities) {
+      // TODO once example found
+      filCap.extendedCapabilities = filter.extendedCapabilities;
+    }
+    serverConfig.filterCapabilities = filCap;
   }
 
   /**

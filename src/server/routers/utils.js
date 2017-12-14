@@ -11,3 +11,4 @@ router.get('/wcs/getLayers/:url', utils.wcsGetLayers);
 router.get('/wfs/getLayers/:url', utils.wfsGetLayers);
 router.get('/wms/getLayers/:url', utils.wmsGetLayers);
 router.get('/wmts/getLayers/:url', utils.wmtsGetLayers);
+router.get('/sos/getLayers/:url', utils.sosGetLayers);

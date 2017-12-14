@@ -2,7 +2,7 @@
 
 import request from 'request';
 
-import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, WFS_CONTEXT, TEST_CONTEXT} from '../jsonix';
+import {WMS_CONTEXT, WMTS_CONTEXT, WCS_CONTEXT, WFS_CONTEXT, SOS_CONTEXT, TEST_CONTEXT} from '../jsonix';
 
 /**
  * Download the GetCapabilities XML for the provided protocol from the provided url.
@@ -29,6 +29,9 @@ export function getCapabilities(protocol, url) {
         break;
       case 'wfs':
         cleanUrl += '?service=WFS&request=GetCapabilities' + version;
+        break;
+      case 'sos':
+        cleanUrl += '?service=SOS&request=GetCapabilities' + version;
         break;
     }
 
@@ -94,6 +97,9 @@ export function jsonifyCapabilities(protocol, xml) {
       break;
     case 'wfs':
       unmarshaller = WFS_CONTEXT.createUnmarshaller();
+      break;
+    case 'sos':
+      unmarshaller = SOS_CONTEXT.createUnmarshaller();
       break;
     case 'test':
       unmarshaller = TEST_CONTEXT.createUnmarshaller();

@@ -4,6 +4,7 @@ import {getCapabilities, jsonifyCapabilities} from '../utils/ogc/common';
 import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
 import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
 import {parseWcsCapabilities} from '../utils/ogc/wcs_capabilities_parser';
+import {parseWfsCapabilities} from '../utils/ogc/wfs_capabilities_parser';
 
 /**
  * Get the available data layers and server details from a wcs server.
@@ -33,20 +34,20 @@ export function wcsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wfsGetLayers(req, res) {
-  getCapabilities('wfs', req.params.url)
-    .then((jsonCapabilities) => {
-      res.json(jsonifyCapabilities('wfs', jsonCapabilities));
-    }).catch((err) => {
-      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
-    });
-  // parseWcsCapabilities(req.params.url)
-  //   .then((layer) => {
-  //     res.json(layer);
-  //   // console.log(JSON.stringify(layer));
+  // getCapabilities('wfs', req.params.url)
+  //   .then((jsonCapabilities) => {
+  //     res.json(jsonifyCapabilities('wfs', jsonCapabilities));
   //   }).catch((err) => {
-  //     console.log(err);
   //     res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
   //   });
+  parseWfsCapabilities(req.params.url)
+    .then((layer) => {
+      res.json(layer);
+    // console.log(JSON.stringify(layer));
+    }).catch((err) => {
+      console.log(err);
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+    });
 }
 
 /**
@@ -89,4 +90,26 @@ export function wmtsGetLayers(req, res) {
     }).catch((err) => {
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
+}
+
+/**
+ * Get the available data layers and server details from a sos server.
+ * @param  {Object} req Express request
+ * @param  {Object} res Express response
+ */
+export function sosGetLayers(req, res) {
+  getCapabilities('sos', req.params.url)
+    .then((jsonCapabilities) => {
+      res.json(jsonifyCapabilities('sos', jsonCapabilities));
+    }).catch((err) => {
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+    });
+  // parseWcsCapabilities(req.params.url)
+  //   .then((layer) => {
+  //     res.json(layer);
+  //   // console.log(JSON.stringify(layer));
+  //   }).catch((err) => {
+  //     console.log(err);
+  //     res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+  //   });
 }

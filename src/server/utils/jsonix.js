@@ -5,7 +5,7 @@
  */
 
 import {Jsonix as jsonix} from 'jsonix';
-import {XLink_1_0 as xLink} from 'w3c-schemas';
+import {XLink_1_0 as xLink, WS_Addr_1_0_Core as wsAddr} from 'w3c-schemas';
 import * as ogcSchemas from 'ogc-schemas';
 
 import {INSPIRE_COMMON_1_0_1} from '../vendor/jsonix_mappings/inspire_common_1_0_1';
@@ -130,5 +130,31 @@ export const WFS_CONTEXT = new jsonix.Context([
   ogcSchemas.Filter_2_0,
   ogcSchemas.WFS_1_1_0,
   ogcSchemas.WFS_2_0,
+]);
 
+export const SOS_CONTEXT = new jsonix.Context([
+  wsAddr,
+  xLink,
+  ogcSchemas.WSN_T_1,
+  ogcSchemas.SWES_2_0,
+  ogcSchemas.GML_3_1_1,
+  ogcSchemas.GML_3_2_1,
+  ogcSchemas.SMIL_2_0,
+  ogcSchemas.SMIL_2_0_Language,
+  ogcSchemas.SWE_1_0_1,
+  ogcSchemas.SWE_2_0,
+  ogcSchemas.OWS_1_1_0,
+  ogcSchemas.OM_1_0_0,
+  ogcSchemas.OM_2_0,
+  ogcSchemas.SensorML_1_0_1,
+  ogcSchemas.IC_2_0,
+  ogcSchemas.ISO19139_GMD_20070417,
+  ogcSchemas.ISO19139_GCO_20070417,
+  ogcSchemas.ISO19139_GTS_20070417,
+  ogcSchemas.ISO19139_GSS_20070417,
+  ogcSchemas.ISO19139_GSR_20070417,
+  ogcSchemas.Filter_2_0,
+  ogcSchemas.SOS_1_0_0,
+  ogcSchemas.SOS_1_0_0_Filter,
+  ogcSchemas.SOS_2_0,
 ]);
