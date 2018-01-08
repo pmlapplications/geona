@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import i18next from 'i18next';
 
-import {selectPropertyLanguage, findNearestValidTime} from '../../../src/client/js/map_common';
+import {selectPropertyLanguage, findNearestValidTime, urlToFilename, getLayers} from '../../../src/client/js/map_common';
 
 chai.use(chaiHttp);
 let expect = chai.expect;
@@ -74,6 +74,60 @@ describe('client/js/map_common', function() {
     it('should return undefined because the requested time is too far in the future', function() {
       let time = findNearestValidTime(geonaLayer, '2200-08-07T00:00:00.000Z');
       expect(time).to.be.undefined;
+    });
+  });
+
+  describe('urlToFilename', function() {
+    it('should correctly construct filenames, with correct parameter ordering', function() {
+      let wms130 = 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?service=WMS&version=1.3.0&request=GetCapabilities';
+      expect(urlToFilename(wms130)).to.equal('https__rsg.pml.ac.uk_thredds_wms_CCI_ALL-v3.1-5DAY__WMS_1.3.0_GetCapabilities');
+    });
+  });
+
+  describe('getLayers', function() {
+    // Data servers used in all respective tests
+    let testUrlWms = 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?service=WMS&version=1.3.0&request=GetCapabilities';
+    let testUrlWmts = 'http://viewer.globalland.vgt.vito.be/mapcache/wmts?service=WMTS&request=GetCapabilities';
+
+    before(function() {
+      // delete created file
+    });
+
+    describe('config retrieval without saving', function() {
+      it('should fetch some WMS layers', function() {
+
+      });
+      it('should not have saved the retrieved WMS config', function() {
+
+      });
+      it('should fetch some WMTS layers', function() {
+
+      });
+      it('should not have saved the retrieved WMTS config', function() {
+
+      });
+    });
+    describe('config retrieval with saving', function() {
+      it('should fetch some WMS layers', function() {
+
+      });
+      it('should have saved the retrieved WMS config', function() {
+
+      });
+      it('should fetch some WMTS layers', function() {
+
+      });
+      it('should have saved the retrieved WMTS config', function() {
+
+      });
+    });
+    describe('config retrieval from cache', function() {
+      it('should fetch some WMS layers from cache', function() {
+
+      });
+      it('should fetch some WMTS layers from cache', function() {
+
+      });
     });
   });
 });

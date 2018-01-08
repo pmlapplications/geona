@@ -4,7 +4,7 @@ import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
-import {getLayersFromWms, getLayersFromWmts, selectPropertyLanguage} from '../map_common';
+import {getLayersFromWms, getLayersFromWmts, selectPropertyLanguage, getLayers} from '../map_common';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -139,6 +139,25 @@ export class MainMenu {
     this._clearPreviousUrlLayers();
     let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
     getLayersFromWmts(url)
+      .then((layers) => {
+        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
+        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
+        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
+        for (let layer of layers.layers) {
+          dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
+        }
+        this.requestLayers = layers;
+      }).catch((err) => {
+        alert('No layers found. Error: ' + err);
+      });
+  }
+
+  /**
+   * Populates a dropdown list for layers found from any supported service
+   */
+  getLayers(url, service) {
+    this._clearPreviousUrlLayers();
+    getLayers(url, service)
       .then((layers) => {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');

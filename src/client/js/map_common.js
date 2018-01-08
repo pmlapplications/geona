@@ -3,6 +3,7 @@
 import i18next from 'i18next';
 import $ from 'jquery';
 
+import fs from 'fs';
 import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 
@@ -102,6 +103,111 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
   } else {
     return '';
   }
+}
+
+/**
+ * Converts a layer server request URL into a filename that can be used to cache the contents of the request.
+ * Example: url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?service=WMS&version=1.3.0&request=GetCapabilities'
+ *          filename: 'https__rsg_pml_ac_uk_thredds_wms_CCI_ALL_v3_1_5DAY__WMS_1.3.0_GetCapabilities'
+ *
+ * @param {String} url A URL for a layer server request (e.g. GetCapabilities)
+ * @return {String}    The URL converted to a Geona filename
+ */
+export function urlToFilename(url) {
+  // 1) Extract protocol, host and path
+  let mainUrl = url.replace(/\?.*/g, '');
+  // 2) Replace special characters with underscores
+  let mainFilename = mainUrl.replace(/:\/|\/|-/g, '_');
+  // 3) Extract service, version, and request parameters
+  let parameters = url.match(/service=.*?(?=[&\s])|service=.*/) + '_' +
+    url.match(/version=.*?(?=[&\s])|version=.*/) + '_' +
+    url.match(/request=.*?(?=[&\s])|request=.*/);
+  // 4) Remove service, version and request tags
+  let paramsFilename = parameters.replace(/service=|version=|request=/g, '');
+  // 5) Construct full filename
+  let filename = mainFilename + '__' + paramsFilename;
+  return filename;
+}
+
+/**
+ * Fetches layers for all supported services.
+ * @param  {String}  url        URL for service request
+ * @param  {String}  service    Explicitly-defined service type
+ * @param  {Boolean} save       Whether to save the retrieved config to cache
+ * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
+ * @return {Array}              List of layers found from the request
+ */
+export function getLayers(url, service, save = false, useCache = false) {
+  return new Promise((resolve, reject) => {
+    let protocol = service.toLocaleLowerCase();
+
+    getLayersFromCacheOrUrl(url, service, save, useCache)
+      .then((serverConfig) => {
+        // Create the appropriate LayerServer and return layers
+        let layers;
+        switch (protocol) {
+          case 'wms':
+            layers = new LayerServer(serverConfig);
+            break;
+          case 'wmts':
+            layers = new LayerServerWmts(serverConfig);
+            break;
+        }
+        resolve(layers);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
+ * Gets the server config from cache or from URL
+ * @param  {String}  url      URL for service request
+ * @param  {String}  service  Explicitly-defined service type
+ * @param  {Boolean} save     Whether to save the retrieved config to cache
+ * @param  {Boolean} useCache Whether to retrieve from cache or to fetch from the web and overwrite
+ * @return {Array}            List of layers found from the request
+ */
+function getLayersFromCacheOrUrl(url, service, save, useCache) {
+  return new Promise((resolve, reject) => {
+    let protocol = service.toLocaleLowerCase();
+
+    let cacheUri = '../../../../cache/';
+    let filename = urlToFilename(url);
+    let filepath = cacheUri + filename + '.json';
+    if (useCache === true) {
+      // Retrieve information from cache - will resolve/reject immediately
+      try {
+        resolve(fs.readFileSync(filepath, 'utf8'));
+      } catch (err) {
+        reject(err);
+      }
+    } else {
+      // Retrieve information from web server and update cache
+      let parserUrl;
+      // TODO add remaining protocols
+      switch (protocol) {
+        case 'wms':
+          parserUrl = 'http://127.0.0.1:7890/utils/wms/getLayers/' + encodeURIComponent(url);
+          break;
+        case 'wmts':
+          parserUrl = 'http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url);
+          break;
+      }
+
+      $.ajax(parserUrl)
+        .done((config) => {
+          if (save === true) {
+            fs.writeFileSync(filepath, config, 'utf8');
+          }
+          resolve(config);
+        })
+        .fail((err) => {
+          reject(err);
+        });
+    }
+  });
 }
 
 /**
@@ -476,187 +582,187 @@ export const borderLayers = [
   // },
 ];
 
-  /**
-   * {
-      identifier: 'terrain-light',
-      title: {und: 'EOX'},
-      description: 'EPSG:4326 only',
-      projections: ['EPSG:4326'],
-      protocol: 'wms',
-      isTemporal: false,
-      attribution: {
-        onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
-        title: 'EOX',
-      },
-      layerServer: {
-        url: 'https://tiles.maps.eox.at/wms/?',
-        crossOrigin: null,
+/**
+ * {
+    identifier: 'terrain-light',
+    title: {und: 'EOX'},
+    description: 'EPSG:4326 only',
+    projections: ['EPSG:4326'],
+    protocol: 'wms',
+    isTemporal: false,
+    attribution: {
+      onlineResource: 'Terrain Light { Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="http://eox.at">EOX</a> }',
+      title: 'EOX',
+    },
+    layerServer: {
+      url: 'https://tiles.maps.eox.at/wms/?',
+      crossOrigin: null,
+      version: '1.1.1',
+      params: {
         version: '1.1.1',
-        params: {
-          version: '1.1.1',
-          format: 'image/jpeg',
-          wrapDateLine: true,
-        },
-      },
-      viewSettings: {
-        maxZoom: 13,
+        format: 'image/jpeg',
+        wrapDateLine: true,
       },
     },
-    // {
-    //   id: 'eoxS2Cloudless',
-    //   title: 'EOX Sentinel-2 Cloudless',
-    //   description: 'EPSG:4326 only, Europe only',
-    //   projections: ['EPSG:4326'],
-    //   source: {
-    //     type: 'wms',
-    //     url: 'https://tiles.maps.eox.at/wms/?',
-    //     crossOrigin: null,
-    //     attributions: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
-    //     params: {
-    //       layers: 's2cloudless',
-    //       version: '1.1.1',
-    //       wrapDateLine: true,
-    //     },
-    //   },
-    //   viewSettings: {
-    //     maxZoom: 14,
-    //     fitExtent: [22.02, -33.86, 82.85, 56.12],
-    //   },
-    // },
-    {
-      identifier: 'gebco_08_grid',
-      title: {und:'GEBCO'},
-      projections: ['EPSG:4326', 'EPSG:3857'],
-      protocol: 'wms',
-      isTemporal: false,
-      attribution: {
-        onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
-        title: 'GEBCO',
-      },
-      layerServer: {
-        url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-        crossOrigin: null,
-        version: '1.1.1',
-        params: {
-          format: 'image/jpeg',
-          wrapDateLine: true},
-      },
-      viewSettings: {
-        maxZoom: 7,
-      },
+    viewSettings: {
+      maxZoom: 13,
     },
-    // {
-    //   id: 'blueMarble',
-    //   title: 'Blue Marble',
-    //   description: 'EPSG:4326 only',
-    //   projections: ['EPSG:4326'],
-    //   source: {
-    //     type: 'wms',
-    //     url: 'https://tiles.maps.eox.at/wms/?',
-    //     crossOrigin: null,
-    //     attributions: 'Blue Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
-    //     params: {
-    //       layers: 'bluemarble',
-    //       version: '1.1.1',
-    //       wrapDateLine: true,
-    //     },
-    //   },
-    //   viewSettings: {
-    //     maxZoom: 8,
-    //   },
-    // },
-    // {
-    //   id: 'blackMarble',
-    //   title: 'Black Marble',
-    //   description: 'EPSG:4326 only',
-    //   projections: ['EPSG:4326'],
-    //   source: {
-    //     type: 'wms',
-    //     url: 'https://tiles.maps.eox.at/wms/?',
-    //     crossOrigin: null,
-    //     attributions: 'Black Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
-    //     params: {
-    //       layers: 'blackmarble',
-    //       version: '1.1.1',
-    //       wrapDateLine: true,
-    //     },
-    //   },
-    //   viewSettings: {
-    //     maxZoom: 8,
-    //   },
-    // },
-    {
-      id: 'osm',
-      title: 'OSM',
-      description: 'EPSG:3857 only',
-      projections: ['EPSG:3857'],
-      source: {
-        type: 'osm',
-      },
-      viewSettings: {
-        maxZoom: 19,
-      },
+  },
+  // {
+  //   id: 'eoxS2Cloudless',
+  //   title: 'EOX Sentinel-2 Cloudless',
+  //   description: 'EPSG:4326 only, Europe only',
+  //   projections: ['EPSG:4326'],
+  //   source: {
+  //     type: 'wms',
+  //     url: 'https://tiles.maps.eox.at/wms/?',
+  //     crossOrigin: null,
+  //     attributions: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
+  //     params: {
+  //       layers: 's2cloudless',
+  //       version: '1.1.1',
+  //       wrapDateLine: true,
+  //     },
+  //   },
+  //   viewSettings: {
+  //     maxZoom: 14,
+  //     fitExtent: [22.02, -33.86, 82.85, 56.12],
+  //   },
+  // },
+  {
+    identifier: 'gebco_08_grid',
+    title: {und:'GEBCO'},
+    projections: ['EPSG:4326', 'EPSG:3857'],
+    protocol: 'wms',
+    isTemporal: false,
+    attribution: {
+      onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
+      title: 'GEBCO',
     },
-    // {
-    //   id: 'bingMapsAerial',
-    //   title: 'Bing Maps - Aerial imagery',
-    //   description: 'EPSG:3857 only',
-    //   projections: ['EPSG:3857'],
-    //   source: {
-    //     type: 'bing',
-    //     imagerySet: 'Aerial',
-    //   },
-    //   viewSettings: {
-    //     maxZoom: 19,
-    //   },
-    // },
-    // {
-    //   id: 'bingMapsAerialWithLabels',
-    //   title: 'Bing Maps - Aerial imagery with labels',
-    //   description: 'EPSG:3857 only',
-    //   projections: ['EPSG:3857'],
-    //   source: {
-    //     type: 'bing',
-    //     imagerySet: 'AerialWithLabels',
-    //   },
-    //   viewSettings: {
-    //     maxZoom: 19,
-    //   },
-    // },
-    // {
-    //   id: 'bingMapsRoad',
-    //   title: 'Bing Maps - Road',
-    //   description: 'EPSG:3857 only',
-    //   projections: ['EPSG:3857'],
-    //   source: {
-    //     type: 'bing',
-    //     imagerySet: 'Road',
-    //   },
-    //   viewSettings: {
-    //     maxZoom: 19,
-    //   },
-    // },
-    {
-      id: 'bingMapsOS',
-      title: 'Ordnance Survey',
-      description: 'EPSG:3857 only, coverage of UK only',
-      projections: ['EPSG:3857'],
-      source: {
-        type: 'bing',
-        imagerySet: 'ordnanceSurvey',
-      },
-      viewSettings: {
-        minZoom: 10,
-        maxZoom: 16,
-        center: [51.502874, -0.126704],
-        maxExtent: [49.83, -6.33, 60.87, 1.84],
-      },
+    layerServer: {
+      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+      crossOrigin: null,
+      version: '1.1.1',
+      params: {
+        format: 'image/jpeg',
+        wrapDateLine: true},
     },
-   */
+    viewSettings: {
+      maxZoom: 7,
+    },
+  },
+  // {
+  //   id: 'blueMarble',
+  //   title: 'Blue Marble',
+  //   description: 'EPSG:4326 only',
+  //   projections: ['EPSG:4326'],
+  //   source: {
+  //     type: 'wms',
+  //     url: 'https://tiles.maps.eox.at/wms/?',
+  //     crossOrigin: null,
+  //     attributions: 'Blue Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
+  //     params: {
+  //       layers: 'bluemarble',
+  //       version: '1.1.1',
+  //       wrapDateLine: true,
+  //     },
+  //   },
+  //   viewSettings: {
+  //     maxZoom: 8,
+  //   },
+  // },
+  // {
+  //   id: 'blackMarble',
+  //   title: 'Black Marble',
+  //   description: 'EPSG:4326 only',
+  //   projections: ['EPSG:4326'],
+  //   source: {
+  //     type: 'wms',
+  //     url: 'https://tiles.maps.eox.at/wms/?',
+  //     crossOrigin: null,
+  //     attributions: 'Black Marble { &copy; <a href="http://nasa.gov">NASA</a> }',
+  //     params: {
+  //       layers: 'blackmarble',
+  //       version: '1.1.1',
+  //       wrapDateLine: true,
+  //     },
+  //   },
+  //   viewSettings: {
+  //     maxZoom: 8,
+  //   },
+  // },
+  {
+    id: 'osm',
+    title: 'OSM',
+    description: 'EPSG:3857 only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'osm',
+    },
+    viewSettings: {
+      maxZoom: 19,
+    },
+  },
+  // {
+  //   id: 'bingMapsAerial',
+  //   title: 'Bing Maps - Aerial imagery',
+  //   description: 'EPSG:3857 only',
+  //   projections: ['EPSG:3857'],
+  //   source: {
+  //     type: 'bing',
+  //     imagerySet: 'Aerial',
+  //   },
+  //   viewSettings: {
+  //     maxZoom: 19,
+  //   },
+  // },
+  // {
+  //   id: 'bingMapsAerialWithLabels',
+  //   title: 'Bing Maps - Aerial imagery with labels',
+  //   description: 'EPSG:3857 only',
+  //   projections: ['EPSG:3857'],
+  //   source: {
+  //     type: 'bing',
+  //     imagerySet: 'AerialWithLabels',
+  //   },
+  //   viewSettings: {
+  //     maxZoom: 19,
+  //   },
+  // },
+  // {
+  //   id: 'bingMapsRoad',
+  //   title: 'Bing Maps - Road',
+  //   description: 'EPSG:3857 only',
+  //   projections: ['EPSG:3857'],
+  //   source: {
+  //     type: 'bing',
+  //     imagerySet: 'Road',
+  //   },
+  //   viewSettings: {
+  //     maxZoom: 19,
+  //   },
+  // },
+  {
+    id: 'bingMapsOS',
+    title: 'Ordnance Survey',
+    description: 'EPSG:3857 only, coverage of UK only',
+    projections: ['EPSG:3857'],
+    source: {
+      type: 'bing',
+      imagerySet: 'ordnanceSurvey',
+    },
+    viewSettings: {
+      minZoom: 10,
+      maxZoom: 16,
+      center: [51.502874, -0.126704],
+      maxExtent: [49.83, -6.33, 60.87, 1.84],
+    },
+  },
+ */
 
-  /**
-   * Default data layers to have available
-   */
+/**
+ * Default data layers to have available
+ */
 export const dataLayers = [];
 
 for (let dataLayer of dataLayers) {

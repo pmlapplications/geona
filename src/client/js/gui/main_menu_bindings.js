@@ -25,13 +25,9 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.displayExplorePanel', () => {
     menu.displayExplorePanel();
   });
-  // Submit WMS URL
-  eventManager.bind('mainMenu.getLayersFromWms', () => {
-    menu.getLayersFromWms();
-  });
-  // Submit WMTS URL
-  eventManager.bind('mainMenu.getLayersFromWmts', () => {
-    menu.getLayersFromWmts();
+  // Submit service URL
+  eventManager.bind('mainMenu.getLayers', ([url, service]) => {
+    menu.getLayers(url, service);
   });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', () => {
