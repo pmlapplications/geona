@@ -112,13 +112,30 @@ export function registerTriggers(eventManager, parentDiv) {
  * @param {JQuery}       parentDiv    The div which contains the current map.
  */
 function registerExploreTriggers(eventManager, parentDiv) {
+  // Scans for pre-cached URLs
+  parentDiv.find('.js-geona-explore-panel-content__layer-url').on('input', () => {
+    // The current input
+    let url = parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
+    eventManager.trigger('mainMenu.scanCache', url);
+  });
+
   // Submit layer URL
   parentDiv.find('.js-geona-explore-panel-content__add-url').click(() => {
     // The input URL
     let url = parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
     // The selected service type
     let service = parentDiv.find('.js-geona-explore-panel-content__service option:selected').text();
-    eventManager.trigger('mainMenu.getLayers', [url, service]);
+    // Whether to save the config to the cache folder
+    let save = false;
+    // Whether to load the config from the cache folder
+    let useCache = false;
+    if (parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked') ||
+    parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('hidden')) {
+      save = true;
+    } else {
+      useCache = true;
+    }
+    eventManager.trigger('mainMenu.getLayers', [url, service, save, useCache]);
   });
 
   // Add URL layer to map

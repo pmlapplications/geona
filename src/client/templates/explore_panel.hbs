@@ -3,10 +3,13 @@
     <label>You can add external layers here:</label>
     <input type="text" class="js-geona-explore-panel-content__layer-url" placeholder="URL" spellcheck="false" onClick="this.setSelectionRange(0, this.value.length)"></input>
     <select name="service" class="js-geona-explore-panel-content__service">
-        <option value="WMS" selected>WMS</option>
-        <option value="WMTS">WMTS</option>
-      </select>
+      <option value="WMS" selected>WMS</option>
+      <option value="WMTS">WMTS</option>
+    </select>
     <button type="submit" class="geona-button js-geona-explore-panel-content__add-url">Find Layers from URL</button>
+    <br>
+    <label class="js-geona-explore-panel-content__cache-notification hidden">This url has been cached previously. Check box to refresh cache.</label>
+    <input type="checkbox" class="js-geona-explore-panel-content__cache-checkbox hidden"></input>
     <br>
     <select name="layers" class="js-geona-explore-panel-content__layer-select hidden"></select>
     <button type="submit" class="geona-button js-geona-explore-panel-content__add-layer hidden">Add Layer to Map</button>

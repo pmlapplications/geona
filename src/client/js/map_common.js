@@ -2,8 +2,9 @@
 
 import i18next from 'i18next';
 import $ from 'jquery';
+import request from 'request';
 
-import fs from 'fs';
+import fs from 'browserify-fs';
 import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 
@@ -118,14 +119,32 @@ export function urlToFilename(url) {
   let mainUrl = url.replace(/\?.*/g, '');
   // 2) Replace special characters with underscores
   let mainFilename = mainUrl.replace(/:\/|\/|-/g, '_');
-  // 3) Extract service, version, and request parameters
-  let parameters = url.match(/service=.*?(?=[&\s])|service=.*/) + '_' +
-    url.match(/version=.*?(?=[&\s])|version=.*/) + '_' +
-    url.match(/request=.*?(?=[&\s])|request=.*/);
+  // 3) Extract service, version, and request parameters if they exist
+  let parameters = '';
+  let service = url.match(/service=.*?(?=[&\s])|service=.*/);
+  if (service !== null) {
+    parameters += service;
+  }
+  let version = url.match(/version=.*?(?=[&\s])|version=.*/);
+  if (version !== null && service !== null) {
+    parameters += '_' + version;
+  } else if (version !== null) {
+    parameters += version;
+  }
+  let request = url.match(/request=.*?(?=[&\s])|request=.*/);
+  if (request !== null && (service !== null || version !== null)) {
+    parameters += '_' + request;
+  } else if (request !== null) {
+    parameters += request;
+  }
+
   // 4) Remove service, version and request tags
   let paramsFilename = parameters.replace(/service=|version=|request=/g, '');
   // 5) Construct full filename
-  let filename = mainFilename + '__' + paramsFilename;
+  let filename = mainFilename;
+  if (paramsFilename.length > 0) {
+    filename += '__' + paramsFilename;
+  }
   return filename;
 }
 
@@ -211,42 +230,29 @@ function getLayersFromCacheOrUrl(url, service, save, useCache) {
 }
 
 /**
-   * Fetches WMS layers using a GetCapabilities request on a provided URL.
-   * @param {String} url The URL of a WMS server.
-   * @return {Array}     The list of layers found from the request.
-   */
-export function getLayersFromWms(url) {
+ * Checks if the url has been saved in the cache previously
+ * @param {String} url The URL to check the cache for
+ * @return {Boolean}   True if the URL has been saved previously
+ */
+export function urlInCache(url) {
   return new Promise((resolve, reject) => {
-    // Will make a request to the Geona WMS parser to get the capabilities in Geona layer form
-    let parserUrl = 'http://127.0.0.1:7890/utils/wms/getLayers/' + encodeURIComponent(url);
-    $.ajax(parserUrl)
-      .done((serverConfig) => {
-        let layers = new LayerServer(serverConfig);
-        resolve(layers);
-      })
-      .fail((err) => {
+    let searchFile = 'http://127.0.0.1:7890/map/getCache/' + encodeURIComponent(urlToFilename(url) + '.json');
+    console.log(searchFile);
+    request(searchFile, (err, response, body) => {
+      console.log(err);
+      console.log(response);
+      console.log(body);
+      if (err) {
+        console.log('error');
         reject(err);
-      });
-  });
-}
-
-/**
-   * Fetches WMTS layers using a GetCapabilities request on a provided URL.
-   * @param {String} url The URL of a WMTS server.
-   * @return {Array}     The list of layers found from the request.
-   */
-export function getLayersFromWmts(url) {
-  return new Promise((resolve, reject) => {
-    // Will make a request to the Geona WMS parser to get the capabilities in Geona layer form
-    let parserUrl = 'http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url);
-    $.ajax(parserUrl)
-      .done((serverConfig) => {
-        let layers = new LayerServerWmts(serverConfig);
-        resolve(layers);
-      })
-      .fail((err) => {
-        reject(err);
-      });
+      } else if (response.statusCode === 200) {
+        console.log('true');
+        resolve(true);
+      } else {
+        console.log('false');
+        resolve(false);
+      }
+    });
   });
 }
 

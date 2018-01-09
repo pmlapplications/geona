@@ -25,9 +25,13 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.displayExplorePanel', () => {
     menu.displayExplorePanel();
   });
+  // Scan for pre-cached URLs
+  eventManager.bind('mainMenu.scanCache', (url) => {
+    menu.scanCache(url);
+  });
   // Submit service URL
-  eventManager.bind('mainMenu.getLayers', ([url, service]) => {
-    menu.getLayers(url, service);
+  eventManager.bind('mainMenu.getLayers', ([url, service, save, useCache]) => {
+    menu.getLayers(url, service, save, useCache);
   });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', () => {

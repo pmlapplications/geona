@@ -4,6 +4,7 @@ import express from 'express';
 
 import settingsRouter from './settings';
 import utilsRouter from './utils';
+import mapRouter from './map';
 
 import * as mainController from '../controllers/main';
 
@@ -15,3 +16,4 @@ router.get('/', mainController.index);
 
 router.use('/settings', settingsRouter);
 router.use('/utils', utilsRouter);
+router.use('/map', mapRouter);

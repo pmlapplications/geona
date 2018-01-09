@@ -4,7 +4,7 @@ import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
-import {getLayersFromWms, getLayersFromWmts, selectPropertyLanguage, getLayers} from '../map_common';
+import {getLayersFromWms, getLayersFromWmts, selectPropertyLanguage, urlToFilename, getLayers, urlInCache} from '../map_common';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -112,52 +112,31 @@ export class MainMenu {
   }
 
   /**
-   * Populates a dropdown list for layers found from a WMS GetCapabilities request.
+   * If the file has been cached already, inform the user and offer ability to find layers from cached version
+   * @param {String} url The contents of the URL input box
    */
-  getLayersFromWms() {
-    this._clearPreviousUrlLayers();
-    let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
-    getLayersFromWms(url)
-      .then((layers) => {
-        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
-        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
-        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        for (let layer of layers.layers) {
-          dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
+  scanCache(url) {
+    urlInCache(url)
+      .then((urlInCache) => {
+        if (urlInCache === true) {
+          // Show the label and checkbox
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').removeClass('hidden');
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').removeClass('hidden');
+        } else {
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').addClass('hidden');
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').addClass('hidden');
         }
-        this.requestLayers = layers;
-      }).catch((err) => {
-        console.error(err);
-        alert('No layers found.');
       });
   }
 
   /**
-   * Populates a dropdown list for layers found from a WMTS GetCapabilities request.
+   * Populates a dropdown list for layers found from any supported service.
+   * @param {String} url     The URL for a server
+   * @param {String} service The type of service being used (e.g. 'WMS')
    */
-  getLayersFromWmts() {
+  getLayers(url, service, save, useCache) {
     this._clearPreviousUrlLayers();
-    let url = this.parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
-    getLayersFromWmts(url)
-      .then((layers) => {
-        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
-        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
-        let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        for (let layer of layers.layers) {
-          dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
-        }
-        this.requestLayers = layers;
-      }).catch((err) => {
-        alert('No layers found. Error: ' + err);
-      });
-  }
-
-  /**
-   * Populates a dropdown list for layers found from any supported service
-   */
-  getLayers(url, service) {
-    this._clearPreviousUrlLayers();
-    getLayers(url, service)
+    getLayers(url, service, save, useCache)
       .then((layers) => {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
@@ -269,7 +248,7 @@ export class MainMenu {
         let modifier = this.geona.map._layerGet(activeLayerKey, 'modifier');
         let zIndex = this.geona.map._layerGet(activeLayerKey, 'zIndex');
         if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
-        // Get the data in the correct format from the geona layer
+          // Get the data in the correct format from the geona layer
           let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
           // Insert layer data object at the top of the list - higher on the list means higher on the map
           this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
