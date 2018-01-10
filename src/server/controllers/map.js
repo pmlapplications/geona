@@ -5,7 +5,6 @@ import $ from 'jquery';
 import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
 import {urlToFilename} from '../../common/map';
-import {urlInCache} from '../../client/js/map_common';
 import request from 'request';
 
 
@@ -27,19 +26,25 @@ export function getCache(req, res) {
   });
 }
 
-
+// eslint-disable-next-line valid-jsdoc
 /**
- * Fetches layers for all supported services.
- * @param  {String}  url        URL for service request
- * @param  {String}  service    Explicitly-defined service type
- * @param  {Boolean} save       Whether to save the retrieved config to cache
- * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
- * @return {Array}              List of layers found from the request
+ * Fetches LayerServers for all supported services.
+ *
+ * @param  {Object} req Contains information about the HTTP request
+ *   @property {String}  req.params.url      URL for service request
+ *   @property {String}  req.params.service  Explicitly-defined service type
+ *   @property {Boolean} req.params.save     Whether to save the retrieved config to cache
+ *   @property {Boolean} req.params.useCache Whether to retrieve from cache or to fetch from the web and overwrite
+ *
+ * @param  {Object} res Express response parameter
+ *
+ * @return {Object}     Geona LayerServer returned from the request
  */
 export function getServersideLayerServer(req, res) {
-  console.log('getServersideLayerServer');
-  let protocol = req.params.service.toLocaleLowerCase();
-  getLayerServerFromCacheOrUrl(req.params.url, protocol, req.params.save, req.params.useCache)
+  console.log(res);
+  let params = resetParameterTypes([req.params.url, req.params.service, req.params.save, req.params.useCache]);
+  let protocol = params[1].toLocaleLowerCase();
+  getLayerServerFromCacheOrUrl(params[0], protocol, params[2], params[3])
     .then((layerServer) => {
       // res.sendFile(layerServer);
       res.json(JSON.parse(layerServer));
@@ -69,7 +74,7 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
     let filename = urlToFilename(url) + '.json';
     let filepath = cacheUri + filename;
     if (useCache === true) {
-      // Retrieve information from cache - will resolve/reject immediately
+      // Retrieve information from cache - will resolve/reject immediately (synchronously)
       try {
         resolve(fs.readFileSync(filepath, 'utf8'));
       } catch (err) {
@@ -88,60 +93,61 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
           break;
       }
       console.log('about to ajax parserUrl');
-      // $.ajax(parserUrl)
-      //   .done((getCapabilitiesJson) => {
-      //     console.log('done ajax');
-      //     // Create the appropriate LayerServer
-      //     let layerServer;
-      //     switch (protocol) {
-      //       case 'wms':
-      //         layerServer = new LayerServer(getCapabilitiesJson);
-      //         break;
-      //       case 'wmts':
-      //         layerServer = new LayerServerWmts(getCapabilitiesJson);
-      //         break;
-      //     }
-      //     layerServer = JSON.stringify(layerServer);
-      //     console.log('about to save');
-      //     if (save === true) {
-      //       fs.writeFileSync(filepath, layerServer, 'utf8');
-      //       console.log('saved');
-      //     }
-      //     resolve(layerServer);
-      //   })
-      //   .fail((err) => {
-      //     console.log('fail ajax');
-      //     reject(err);
-      //   });
       request(parserUrl, (err, response, body) => {
-        // console.log(err);
-        // console.log(response);
-        console.log(body);
         if (err) {
           reject(err);
           return;
         }
-        // fs.writeFileSync(filepath, body, 'utf8');
         let layerServer;
         switch (protocol) {
           case 'wms':
             layerServer = new LayerServer(JSON.parse(body));
             break;
           case 'wmts':
-            layerServer = new LayerServerWmts(body);
+            layerServer = new LayerServerWmts(JSON.parse(body));
             break;
         }
         layerServer = JSON.stringify(layerServer);
         console.log('about to save');
+        console.log(typeof(save));
         if (save === true) {
-          // fs.writeFileSync(filepath, layerServer, 'utf8');
+          console.log('abouterrr to save');
+          fs.writeFileSync(filepath, layerServer, 'utf8');
           console.log('saved');
         }
         resolve(layerServer);
-        // resolve(body);
       });
     }
   });
+}
+
+/**
+ * When parameters are passed to the server in the URL, they all get turned into strings.
+ * This function will reset them to their previous form (if they were not a String before)
+ * @param  {Array} parameters All the parameters to reset
+ * @return {Array}            The reset parameters
+ */
+function resetParameterTypes(parameters) {
+  // Doesn't support arrays or objects currently, so if you need them, you'll have to add them first
+  let convertedParameters = [];
+  for (let param of parameters) {
+    // If the param is a number
+    if (!isNaN(param)) {
+      // If the param contains a decimal point
+      if (/\./.test(param) === true) {
+        convertedParameters.push(parseFloat(param));
+      } else { // param is an int
+        convertedParameters.push(parseInt(param));
+      }
+    } else if (param === 'true') {
+      convertedParameters.push(true);
+    } else if (param === 'false') {
+      convertedParameters.push(false);
+    } else {
+      convertedParameters.push(param);
+    }
+  }
+  return convertedParameters;
 }
 
 

@@ -12,8 +12,13 @@ export default class Layer {
    */
   constructor(layerConfig, layerServer) {
     this.protocol = null;
-
-    this.layerServer = layerServer.url + layerServer.protocol + layerServer.version;
+    // TODO stop storing layerserver in layer, and pass layerservers around instead
+    // possibly we might want to store these in ID format so we know which layerServer this relates to
+    this.layerServer = {
+      url: layerServer.url,
+      protocol: layerServer.protocol,
+      version: layerServer.version,
+    };
 
     this.title = layerConfig.title;
     this.abstract = layerConfig.abstract;
