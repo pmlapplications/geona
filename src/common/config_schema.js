@@ -148,20 +148,24 @@ export let client = {
       format: String,
       default: '',
     },
+    // Takes an identifier and a style (for no borders, just set both to 'none')
     borders: {
       doc: 'Which country borders to display, or \'none\'.',
-      format: ['line-white', 'line_black', 'line', 'none'],
-      default: 'line_black',
+      format: Object,
+      default: {
+        identifier: 'rsg:full_10m_borders',
+        style: 'line_black',
+      },
     },
     bordersLayers: {
       doc: 'The Geona-style definitions of all borders layers to be made available by default',
       format: Array,
       default: [
         {
-          identifier: 'line_black',
+          identifier: 'rsg:full_10m_borders',
           protocol: 'wms',
           title: {
-            und: 'Black border lines',
+            und: 'Country border lines',
           },
           projections: ['EPSG:4326', 'EPSG:3857'],
           formats: ['image/png'],
@@ -169,6 +173,12 @@ export let client = {
           styles: [
             {
               name: 'line_black',
+            },
+            {
+              name: 'line-white',
+            },
+            {
+              name: 'line',
             },
           ],
           layerServer: {

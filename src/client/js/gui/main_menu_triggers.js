@@ -135,7 +135,7 @@ function registerExploreTriggers(eventManager, parentDiv) {
     } else {
       useCache = true;
     }
-    eventManager.trigger('mainMenu.getLayers', [url, service, save, useCache]);
+    eventManager.trigger('mainMenu.getLayerServer', [url, service, save, useCache]);
   });
 
   // Add URL layer to map

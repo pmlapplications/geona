@@ -112,8 +112,8 @@ export class LMap extends GeonaMap {
         }
       }
     }
-    if (this.config.borders !== 'none' && this.config.borders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.borders], {modifier: 'borders'});
+    if (this.config.borders.identifier !== 'none' && this.config.borders !== undefined) {
+      this.addLayer(this._availableLayers[this.config.borders.identifier], {modifier: 'borders', style: this.config.borders.style});
     }
 
 
@@ -362,11 +362,7 @@ export class LMap extends GeonaMap {
       switch (geonaLayer.protocol) {
         case 'wms':
           title = geonaLayer.title.und;
-          // FIXME this is basically only here for the border layers, but it might break if another layer has a single layer as an Object rather than a String
-          requiredLayer = geonaLayer.layerServer.layers;
-          if (geonaLayer.layerServer.layers.length !== 1) {
-            requiredLayer = geonaLayer.identifier;
-          }
+          requiredLayer = geonaLayer.identifier;
           // FIXME fix parser so this doesn't happen
           if ($.isEmptyObject(geonaLayer.styles)) {
             geonaLayer.styles = undefined;
@@ -390,7 +386,7 @@ export class LMap extends GeonaMap {
               format = geonaLayer.styles[0].legendUrl[0].format;
             }
             // Search for the requested style and set that as the style if found
-            // TODO should this throw an error or silently deal with an incorrect requestedStyle?
+            // FIXME if the requested style is not available, throw an error and print out list of available styles
             for (let layerStyle of geonaLayer.styles) {
               if (layerStyle.identifier === options.requestedStyle) {
                 style = options.requestedStyle;

@@ -13,7 +13,7 @@ export default class Layer {
   constructor(layerConfig, layerServer) {
     this.protocol = null;
 
-    this.layerServer = layerServer;
+    this.layerServer = layerServer.url + layerServer.protocol + layerServer.version;
 
     this.title = layerConfig.title;
     this.abstract = layerConfig.abstract;

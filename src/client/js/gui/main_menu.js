@@ -4,7 +4,7 @@ import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
-import {getLayersFromWms, getLayersFromWmts, selectPropertyLanguage, urlToFilename, getLayers, urlInCache} from '../map_common';
+import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -131,12 +131,14 @@ export class MainMenu {
 
   /**
    * Populates a dropdown list for layers found from any supported service.
-   * @param {String} url     The URL for a server
-   * @param {String} service The type of service being used (e.g. 'WMS')
+   * @param {String}  url      The URL for a server
+   * @param {String}  service  The type of service being used (e.g. 'WMS')
+   * @param {Boolean} save     Whether to save the LayerServer to cache
+   * @param {Boolean} useCache Whether to use a cached copy of the LayerServer
    */
-  getLayers(url, service, save, useCache) {
+  getLayerServer(url, service, save, useCache) {
     this._clearPreviousUrlLayers();
-    getLayers(url, service, save, useCache)
+    getLayerServer(url, service, save, useCache)
       .then((layers) => {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
@@ -146,7 +148,7 @@ export class MainMenu {
         }
         this.requestLayers = layers;
       }).catch((err) => {
-        alert('No layers found. Error: ' + err);
+        alert('No layers found. Error: ' + JSON.stringify(err));
       });
   }
 

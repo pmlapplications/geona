@@ -30,8 +30,8 @@ export function registerBindings(eventManager, menu) {
     menu.scanCache(url);
   });
   // Submit service URL
-  eventManager.bind('mainMenu.getLayers', ([url, service, save, useCache]) => {
-    menu.getLayers(url, service, save, useCache);
+  eventManager.bind('mainMenu.getLayerServer', ([url, service, save, useCache]) => {
+    menu.getLayerServer(url, service, save, useCache);
   });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', () => {

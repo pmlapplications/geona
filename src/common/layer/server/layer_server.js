@@ -27,11 +27,9 @@ export default class LayerServer {
       switch (serverConfig.protocol) {
         case 'wms':
           this.layers.push(new LayerWms(layer, this));
-          // layers.push(new LayerWms(layer, this));
           break;
         case 'wmts':
           this.layers.push(new LayerWmts(layer, this));
-          // layers.push(new LayerWmts(layer, this));
           break;
       }
     }

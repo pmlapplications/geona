@@ -3,10 +3,7 @@
 import i18next from 'i18next';
 import $ from 'jquery';
 import request from 'request';
-
-import fs from 'browserify-fs';
-import LayerServer from '../../common/layer/server/layer_server';
-import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
+import {urlToFilename} from '../../common/map';
 
 
 /**
@@ -107,129 +104,6 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
 }
 
 /**
- * Converts a layer server request URL into a filename that can be used to cache the contents of the request.
- * Example: url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?service=WMS&version=1.3.0&request=GetCapabilities'
- *          filename: 'https__rsg_pml_ac_uk_thredds_wms_CCI_ALL_v3_1_5DAY__WMS_1.3.0_GetCapabilities'
- *
- * @param {String} url A URL for a layer server request (e.g. GetCapabilities)
- * @return {String}    The URL converted to a Geona filename
- */
-export function urlToFilename(url) {
-  // 1) Extract protocol, host and path
-  let mainUrl = url.replace(/\?.*/g, '');
-  // 2) Replace special characters with underscores
-  let mainFilename = mainUrl.replace(/:\/|\/|-/g, '_');
-  // 3) Extract service, version, and request parameters if they exist
-  let parameters = '';
-  let service = url.match(/service=.*?(?=[&\s])|service=.*/);
-  if (service !== null) {
-    parameters += service;
-  }
-  let version = url.match(/version=.*?(?=[&\s])|version=.*/);
-  if (version !== null && service !== null) {
-    parameters += '_' + version;
-  } else if (version !== null) {
-    parameters += version;
-  }
-  let request = url.match(/request=.*?(?=[&\s])|request=.*/);
-  if (request !== null && (service !== null || version !== null)) {
-    parameters += '_' + request;
-  } else if (request !== null) {
-    parameters += request;
-  }
-
-  // 4) Remove service, version and request tags
-  let paramsFilename = parameters.replace(/service=|version=|request=/g, '');
-  // 5) Construct full filename
-  let filename = mainFilename;
-  if (paramsFilename.length > 0) {
-    filename += '__' + paramsFilename;
-  }
-  return filename;
-}
-
-/**
- * Fetches layers for all supported services.
- * @param  {String}  url        URL for service request
- * @param  {String}  service    Explicitly-defined service type
- * @param  {Boolean} save       Whether to save the retrieved config to cache
- * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
- * @return {Array}              List of layers found from the request
- */
-export function getLayers(url, service, save = false, useCache = false) {
-  return new Promise((resolve, reject) => {
-    let protocol = service.toLocaleLowerCase();
-
-    getLayersFromCacheOrUrl(url, service, save, useCache)
-      .then((serverConfig) => {
-        // Create the appropriate LayerServer and return layers
-        let layers;
-        switch (protocol) {
-          case 'wms':
-            layers = new LayerServer(serverConfig);
-            break;
-          case 'wmts':
-            layers = new LayerServerWmts(serverConfig);
-            break;
-        }
-        resolve(layers);
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  });
-}
-
-/**
- * Gets the server config from cache or from URL
- * @param  {String}  url      URL for service request
- * @param  {String}  service  Explicitly-defined service type
- * @param  {Boolean} save     Whether to save the retrieved config to cache
- * @param  {Boolean} useCache Whether to retrieve from cache or to fetch from the web and overwrite
- * @return {Array}            List of layers found from the request
- */
-function getLayersFromCacheOrUrl(url, service, save, useCache) {
-  return new Promise((resolve, reject) => {
-    let protocol = service.toLocaleLowerCase();
-
-    let cacheUri = '../../../../cache/';
-    let filename = urlToFilename(url);
-    let filepath = cacheUri + filename + '.json';
-    if (useCache === true) {
-      // Retrieve information from cache - will resolve/reject immediately
-      try {
-        resolve(fs.readFileSync(filepath, 'utf8'));
-      } catch (err) {
-        reject(err);
-      }
-    } else {
-      // Retrieve information from web server and update cache
-      let parserUrl;
-      // TODO add remaining protocols
-      switch (protocol) {
-        case 'wms':
-          parserUrl = 'http://127.0.0.1:7890/utils/wms/getLayers/' + encodeURIComponent(url);
-          break;
-        case 'wmts':
-          parserUrl = 'http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url);
-          break;
-      }
-
-      $.ajax(parserUrl)
-        .done((config) => {
-          if (save === true) {
-            fs.writeFileSync(filepath, config, 'utf8');
-          }
-          resolve(config);
-        })
-        .fail((err) => {
-          reject(err);
-        });
-    }
-  });
-}
-
-/**
  * Checks if the url has been saved in the cache previously
  * @param {String} url The URL to check the cache for
  * @return {Boolean}   True if the URL has been saved previously
@@ -253,6 +127,32 @@ export function urlInCache(url) {
         resolve(false);
       }
     });
+  });
+}
+
+/**
+ * Fetches layers for all supported services.
+ * @param  {String}  url        URL for service request
+ * @param  {String}  service    Explicitly-defined service type
+ * @param  {Boolean} save       Whether to save the retrieved config to cache
+ * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
+ * @return {Array}              List of layers found from the request
+ */
+export function getLayerServer(url, service, save = false, useCache = false) {
+  console.log(url);
+  console.log(service);
+  console.log(save);
+  console.log(useCache);
+  return new Promise((resolve, reject) => {
+  // ajax to server getLayerServer
+    let requestUrl = encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
+    $.ajax('http://127.0.0.1:7890/map/getLayerServer/' + requestUrl)
+      .done((layerServerJson) => {
+        resolve(layerServerJson);
+      })
+      .fail((err) => {
+        reject(err);
+      });
   });
 }
 
