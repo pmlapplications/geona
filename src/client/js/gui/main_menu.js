@@ -5,6 +5,7 @@ import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
 import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
+import {setTimeout} from 'timers';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -112,13 +113,47 @@ export class MainMenu {
   }
 
   /**
+   * Automatically changes the service dropdown option based on the content of the URL
+   * @param {String} url The URL currently in the input box
+   */
+  autoselectService(url) {
+    // regex for case-insensitive 'wms', 'wmts'
+    let result = /((w|W)(m|M)(s|S))|((w|W)(m|M)(t|T)(s|S))/.exec(url);
+    if (result !== null) {
+      switch (result[0].toLocaleLowerCase()) {
+        case 'wms':
+          this.parentDiv.find('.js-geona-explore-panel-content__service').val('WMS').prop('selected', true);
+          break;
+        case 'wmts':
+          this.parentDiv.find('.js-geona-explore-panel-content__service').val('WMTS').prop('selected', true);
+          break;
+      }
+    }
+  }
+
+  /**
    * If the file has been cached already, inform the user and offer ability to find layers from cached version
    * @param {String} url The contents of the URL input box
    */
   scanCache(url) {
+    // Disable button and inform user of cache scan
+    this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', true);
+    this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').removeClass('hidden');
+
+    // Timeout in case cache check takes a long time (more than 3s)
+    setTimeout(() => {
+      // Re-enable button
+      this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', false);
+      this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('hidden');
+    }, 3000);
+
     urlInCache(url)
-      .then((urlInCache) => {
-        if (urlInCache === true) {
+      .then((inCache) => {
+        // Re-enable button
+        this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', false);
+        this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('hidden');
+
+        if (inCache === true) {
           // Show the label and checkbox
           this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').removeClass('hidden');
           this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').removeClass('hidden');
@@ -227,6 +262,7 @@ export class MainMenu {
    * @param {HTMLElement} item The list element that contains the element that was clicked.
    */
   showLayer(item) {
+    // change icon to 'preview-1' instead of 'hide'
     this.geona.map.showLayer(item.dataset.identifier);
   }
 

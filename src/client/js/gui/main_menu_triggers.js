@@ -117,6 +117,7 @@ function registerExploreTriggers(eventManager, parentDiv) {
     // The current input
     let url = parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
     eventManager.trigger('mainMenu.scanCache', url);
+    eventManager.trigger('mainMenu.autoselectService', url);
   });
 
   // Submit layer URL

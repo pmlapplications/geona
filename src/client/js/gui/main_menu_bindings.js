@@ -25,6 +25,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.displayExplorePanel', () => {
     menu.displayExplorePanel();
   });
+  // Auto-select service option
+  eventManager.bind('mainMenu.autoselectService', (url) => {
+    menu.autoselectService(url);
+  });
   // Scan for pre-cached URLs
   eventManager.bind('mainMenu.scanCache', (url) => {
     menu.scanCache(url);

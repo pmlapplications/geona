@@ -41,6 +41,11 @@
   text-align: center;
   cursor: pointer;
   font-size: .875rem;
+
+  &:disabled {
+    background-color: #AAA;
+    cursor: wait;
+  }
 }
 
 /*------------------------------------*\
