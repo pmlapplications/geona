@@ -218,6 +218,7 @@ export class MainMenu {
    * @param {HTMLElement} item The list element that contains the element that was clicked.
    */
   hideLayer(item) {
+    // change icon to 'hide' instead of 'preview-1'
     this.geona.map.hideLayer(item.dataset.identifier);
   }
 

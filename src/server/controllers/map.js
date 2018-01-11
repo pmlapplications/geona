@@ -41,12 +41,12 @@ export function getCache(req, res) {
  * @return {Object}     Geona LayerServer returned from the request
  */
 export function getServersideLayerServer(req, res) {
-  console.log(res);
+  // The parameters will all be strings because of the URL, so reset them
   let params = resetParameterTypes([req.params.url, req.params.service, req.params.save, req.params.useCache]);
   let protocol = params[1].toLocaleLowerCase();
+
   getLayerServerFromCacheOrUrl(params[0], protocol, params[2], params[3])
     .then((layerServer) => {
-      // res.sendFile(layerServer);
       res.json(JSON.parse(layerServer));
     })
     .catch((err) => {
@@ -64,11 +64,6 @@ export function getServersideLayerServer(req, res) {
  * @return {Array}            List of layers found from the request
  */
 function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
-  console.log('getLayerServerFromCacheOrUrl');
-  console.log(url);
-  console.log(protocol);
-  console.log(save);
-  console.log(useCache);
   return new Promise((resolve, reject) => {
     let cacheUri = '/local1/data/scratch/git/web-development/gp2-contribution-guide/cache/';
     let filename = urlToFilename(url) + '.json';
@@ -92,7 +87,6 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
           parserUrl = 'http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url);
           break;
       }
-      console.log('about to ajax parserUrl');
       request(parserUrl, (err, response, body) => {
         if (err) {
           reject(err);
@@ -108,12 +102,8 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
             break;
         }
         layerServer = JSON.stringify(layerServer);
-        console.log('about to save');
-        console.log(typeof(save));
         if (save === true) {
-          console.log('abouterrr to save');
           fs.writeFileSync(filepath, layerServer, 'utf8');
-          console.log('saved');
         }
         resolve(layerServer);
       });

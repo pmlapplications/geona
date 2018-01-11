@@ -111,19 +111,12 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
 export function urlInCache(url) {
   return new Promise((resolve, reject) => {
     let searchFile = 'http://127.0.0.1:7890/map/getCache/' + encodeURIComponent(urlToFilename(url) + '.json');
-    console.log(searchFile);
-    request(searchFile, (err, response, body) => {
-      console.log(err);
-      console.log(response);
-      console.log(body);
+    request(searchFile, (err, response) => {
       if (err) {
-        console.log('error');
         reject(err);
       } else if (response.statusCode === 200) {
-        console.log('true');
         resolve(true);
       } else {
-        console.log('false');
         resolve(false);
       }
     });
@@ -139,10 +132,6 @@ export function urlInCache(url) {
  * @return {Array}              List of layers found from the request
  */
 export function getLayerServer(url, service, save = false, useCache = false) {
-  console.log(url);
-  console.log(service);
-  console.log(save);
-  console.log(useCache);
   return new Promise((resolve, reject) => {
   // ajax to server getLayerServer
     let requestUrl = encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
