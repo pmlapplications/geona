@@ -181,7 +181,7 @@ export class MainMenu {
         for (let layer of layers.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
         }
-        this.requestLayers = layers;
+        this.requestLayerServer = layers;
       }).catch((err) => {
         alert('No layers found. Error: ' + JSON.stringify(err));
       });
@@ -196,25 +196,25 @@ export class MainMenu {
       this.parentDiv.find('.js-geona-explore-panel-content__layer-select').empty().addClass('hidden');
       this.parentDiv.find('.js-geona-explore-panel-content__add-layer').addClass('hidden');
       // Clears the array and removes all references to its previous values
-      this.requestLayers.length = 0;
+      this.requestLayerServer = undefined;
     }
   }
 
   /**
- * Adds the layer in the 'layer-select' input box to the map.
- */
+   * Adds the layer in the 'layer-select' input box to the map.
+   */
   addUrlLayerToMap() {
     let selectedLayer = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
-    for (let layer of this.requestLayers.layers) {
+    for (let layer of this.requestLayerServer.layers) {
       if (layer.identifier === selectedLayer) {
         if (layer.dimension) {
           if (layer.dimension.time) {
-            this.geona.map.addLayer(layer, {modifier: 'hasTime'});
+            this.geona.map.addLayer(layer, this.requestLayerServer, {modifier: 'hasTime'});
           } else {
-            this.geona.map.addLayer(layer);
+            this.geona.map.addLayer(layer, this.requestLayerServer);
           }
         } else {
-          this.geona.map.addLayer(layer);
+          this.geona.map.addLayer(layer, this.requestLayerServer);
         }
       }
     }

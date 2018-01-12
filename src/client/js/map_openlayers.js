@@ -106,7 +106,9 @@ export class OlMap extends GeonaMap {
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       console.log('adding basemap');
       console.log(this.config.basemap);
-      this.addLayer(this._availableLayers[this.config.basemap], {modifier: 'basemap'});
+      let layer = this._availableLayers[this.config.basemap];
+      let layerServer = this._availableLayerServers[layer.layerServer];
+      this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
     if (this.config.data !== undefined) {
@@ -114,10 +116,12 @@ export class OlMap extends GeonaMap {
         console.log('adding data');
         console.log(this.config.data);
         for (let layerIdentifier of this.config.data) {
+          let layer = this._availableLayers[layerIdentifier];
+          let layerServer = this._availableLayerServers[layer.layerServer];
           if (this._availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(this._availableLayers[layerIdentifier], {modifier: 'hasTime'});
+            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
           } else {
-            this.addLayer(this._availableLayers[layerIdentifier]);
+            this.addLayer(layer, layerServer);
           }
         }
       }
@@ -126,7 +130,9 @@ export class OlMap extends GeonaMap {
     if (this.config.borders.identifier !== 'none' && this.config.borders !== undefined) {
       console.log('adding borders');
       console.log(this.config.borders);
-      this.addLayer(this._availableLayers[this.config.borders.identifier], {modifier: 'borders', requestedStyle: this.config.borders.style});
+      let layer = this._availableLayers[this.config.borders.identifier];
+      let layerServer = this._availableLayerServers[layer.layerServer];
+      this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
 
     this.loadConfig_();
@@ -326,30 +332,21 @@ export class OlMap extends GeonaMap {
     }
   }
 
-  /**
-   * Takes a LayerServer and adds the specified layer to the map
-   * @param {LayerServer} geonaLayerServer A LayerServer containing the layer with the layerIdentifier
-   * @param {String}      layerIdentifier  An identifier for a Layer in the LayerServer
-   * @param {Object}      [options]        A list of options that affect the layer being added
-   */
-  addLayerFromLayerServer(geonaLayerServer, layerIdentifier, options) {
-
-  }
-
   // TODO - this needs to get the layerServer from the serverside when it tries to add a layer
   // And then go and tidy up the loading layers and server methods
   /**
    * Add the specified data layer onto the map, using the specified options.
-   * Will also add a Geona layer to the _availableLayers if not already included.
+   * Will also add a Geona layer to the_availableLayers if not already included (same goes for the LayerServer).
    *
-   * @param {Layer}   geonaLayer               The Geona Layer object to be created as an OpenLayers layer on the map.
-   * @param {Object}  [options]                A list of options that affect the layers being added
-   * @param {String}    options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   * @param {String}    options.requestedTime  The time requested for this layer.
-   * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
-   * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
+   * @param {Layer}       geonaLayer       The Geona Layer object to be created as an OpenLayers layer on the map.
+   * @param {LayerServer} geonaLayerServer The Geona LayerServer object that corresponds to the Geona Layer.
+   * @param {Object}      [options]        A list of options that affect the layers being added
+   *   @param {String}  options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   *   @param {String}  options.requestedTime  The time requested for this layer.
+   *   @param {String}  options.requestedStyle The identifier of the style requested for this layer.
+   *   @param {Boolean} options.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
+  addLayer(geonaLayer, geonaLayerServer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
     console.log(geonaLayer);
     // TODO try and clean this method up - maybe split it up into separate methods.
     // Maybe have a wmsSourceFromLayer() for the list of options?
@@ -458,7 +455,7 @@ export class OlMap extends GeonaMap {
           }
 
           source = new ol.source.TileWMS({
-            url: this._availableLayerServers[geonaLayer.layerServer].url,
+            url: geonaLayerServer.url,
             projection: projection,
             attributions: attributions,
             crossOrigin: null,
@@ -469,7 +466,7 @@ export class OlMap extends GeonaMap {
               time: time,
               wrapDateLine: true,
               NUMCOLORBANDS: 255,
-              VERSION: this._availableLayerServers[geonaLayer.layerServer].version,
+              VERSION: geonaLayerServer.version,
             },
           });
           break;
@@ -490,6 +487,11 @@ export class OlMap extends GeonaMap {
       if (this._availableLayers[geonaLayer.identifier] === undefined) {
         geonaLayer.modifier = options.modifier;
         this._availableLayers[geonaLayer.identifier] = geonaLayer;
+        // Save the LayerServer if not already saved
+        if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+          delete geonaLayerServer.layers;
+          this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
+        }
       }
 
       this._activeLayers[geonaLayer.identifier] = new ol.layer.Tile({
@@ -847,7 +849,7 @@ export class OlMap extends GeonaMap {
             console.error('bingMapsApiKey is null or undefined');
           }
         } else {
-          console.error('Layer with identifier ' + layer + ' has already been added to the list of available layers');
+          console.error('Layer with identifier ' + layer.identifier + ' has already been added to the list of available layers');
         }
       }
     }
@@ -989,23 +991,24 @@ export function init(geonaServer, next) {
  * Create an openlayers WMTS source from a Geona Layer.
  * Adapted from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/source/wmts.js#L299
  * @param  {Layer}          layer         The Geona layer
+ * @param  {LayerServer}    layerServer   The corresponding LayerServer
  * @param  {String}         mapProjection The current map projection, e.g. 'EPSG:4326'
  * @return {ol.source.WMTS}               A new openlayers WMTS source
  */
-function wmtsSourceFromLayer(layer, mapProjection) {
+function wmtsSourceFromLayer(layer, layerServer, mapProjection) {
   let tileMatrixSetId;
 
   // TODO check correct - Replace with thing to search for TileMatrixSet that supports the current projection
 
   // TODO matrixLimits (get to pass through to wmtsTileGridFromMatrixSet)
   let matrixLimits;
-  for (let tileMatrixSet of Object.keys(layer.layerServer.tileMatrixSets)) {
+  for (let tileMatrixSet of Object.keys(layerServer.tileMatrixSets)) {
     for (let tileMatrixSetLink of layer.tileMatrixSetLinks) {
       // If the TileMatrixSet is one of the links for the current layer and the current map projection is
       // supported, we can use this tileMatrixSet for the layer.
       if (tileMatrixSet === tileMatrixSetLink.tileMatrixSet) {
         matrixLimits = tileMatrixSetLink.tileMatrixLimits;
-        if (layer.layerServer.tileMatrixSets[tileMatrixSet].projection === mapProjection) {
+        if (layerServer.tileMatrixSets[tileMatrixSet].projection === mapProjection) {
           tileMatrixSetId = tileMatrixSet;
         }
       }
@@ -1013,7 +1016,7 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   }
 
   // Get the tileMatrixSet object from the layer server
-  let tileMatrixSet = layer.layerServer.tileMatrixSets[tileMatrixSetId];
+  let tileMatrixSet = layerServer.tileMatrixSets[tileMatrixSetId];
 
   let format;
   if (layer.formats.includes('image/png')) {
@@ -1121,11 +1124,11 @@ function wmtsSourceFromLayer(layer, mapProjection) {
   // Even though operationsMetadata can contain REST encodings alongside URLs, these URLs are not the
   // templated form required for REST requests, so we only take KVP information from here. REST information
   // is taken from the resourceUrls section.
-  if (layer.layerServer.operationsMetadata) {
-    if (layer.layerServer.operationsMetadata.GetTile) {
+  if (layerServer.operationsMetadata) {
+    if (layerServer.operationsMetadata.GetTile) {
       // If we can use a GET operation we use it instead of a POST.
-      if (layer.layerServer.operationsMetadata.GetTile.get !== undefined) {
-        let getTile = layer.layerServer.operationsMetadata.GetTile.get;
+      if (layerServer.operationsMetadata.GetTile.get !== undefined) {
+        let getTile = layerServer.operationsMetadata.GetTile.get;
         requestEncoding = 'KVP';
         for (let tile of getTile) {
           for (let encoding of tile.encoding) {
@@ -1135,7 +1138,7 @@ function wmtsSourceFromLayer(layer, mapProjection) {
           }
         }
       } else {
-        let postTile = layer.layerServer.operationsMetadata.GetTile.post;
+        let postTile = layerServer.operationsMetadata.GetTile.post;
         requestEncoding = 'KVP';
         for (let tile of postTile) {
           for (let encoding of tile.encoding) {
