@@ -1,12 +1,9 @@
 /** @module map_openlayers */
 
 import $ from 'jquery';
-import request from 'request';
 import GeonaMap from './map';
 import {
-  basemaps as defaultBasemaps, borderLayers as defaultBorders,
-  dataLayers as defaultDataLayers,
-  latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime,
 } from './map_common';
 
 import proj4 from 'proj4';
@@ -96,16 +93,12 @@ export class OlMap extends GeonaMap {
       ],
     });
 
-    this._importDefaultLayersAndLayerServers();
-    // this._loadBasemapLayers();
-    // this._loadDataLayers();
-    // this._loadBordersLayers();
+    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config);
+    this._availableLayers = loadedServersAndLayers.availableLayers;
+    this._availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
     // Adds any defined basemap to the map
-    console.log(this._availableLayers);
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
-      console.log('adding basemap');
-      console.log(this.config.basemap);
       let layer = this._availableLayers[this.config.basemap];
       let layerServer = this._availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'basemap'});
@@ -113,8 +106,6 @@ export class OlMap extends GeonaMap {
     // Adds all defined data layers to the map
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
-        console.log('adding data');
-        console.log(this.config.data);
         for (let layerIdentifier of this.config.data) {
           let layer = this._availableLayers[layerIdentifier];
           let layerServer = this._availableLayerServers[layer.layerServer];
@@ -128,8 +119,6 @@ export class OlMap extends GeonaMap {
     }
     // Adds any defined borders layer to the map
     if (this.config.borders.identifier !== 'none' && this.config.borders !== undefined) {
-      console.log('adding borders');
-      console.log(this.config.borders);
       let layer = this._availableLayers[this.config.borders.identifier];
       let layerServer = this._availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
@@ -332,8 +321,6 @@ export class OlMap extends GeonaMap {
     }
   }
 
-  // TODO - this needs to get the layerServer from the serverside when it tries to add a layer
-  // And then go and tidy up the loading layers and server methods
   /**
    * Add the specified data layer onto the map, using the specified options.
    * Will also add a Geona layer to the_availableLayers if not already included (same goes for the LayerServer).
@@ -814,151 +801,6 @@ export class OlMap extends GeonaMap {
     } else {
       return layerIdentifier.get(key);
     }
-  }
-
-  /**
-   * Loads the default/config Geona Layers and their corresponding LayerServers
-   */
-  _importDefaultLayersAndLayerServers() {
-    let basemaps = this._getBasemapServerLayers();
-    let borders = this._getBordersServerLayers();
-    let data = this._getDataServerLayers();
-    let allLayerServers = basemaps.concat(borders, data);
-
-    // Merge duplicate servers
-    let uniqueLayerServers = {};
-    for (let layerServer of allLayerServers) {
-      if (uniqueLayerServers[layerServer.identifier] === undefined) {
-        uniqueLayerServers[layerServer.identifier] = layerServer;
-      } else { // Merge the layers from both
-        console.log('concatenating layers');
-        console.log(uniqueLayerServers[layerServer.identifier]);
-        console.log(layerServer);
-        uniqueLayerServers[layerServer.identifier].layers =
-          uniqueLayerServers[layerServer.identifier].layers.concat(layerServer.layers);
-      }
-    }
-    console.log(uniqueLayerServers);
-    // Extract the layers from all the layerServers
-    for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
-      for (let layer of uniqueLayerServers[layerServerIdentifier].layers) {
-        if (this._availableLayers[layer.identifier] === undefined) {
-          if (layer.protocol !== 'bing' || this.config.bingMapsApiKey) {
-            this._availableLayers[layer.identifier] = layer;
-          } else {
-            console.error('bingMapsApiKey is null or undefined');
-          }
-        } else {
-          console.error('Layer with identifier ' + layer.identifier + ' has already been added to the list of available layers');
-        }
-      }
-    }
-
-    // Save the non-layer information for the LayerServers
-    for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
-      let layerServer = uniqueLayerServers[layerServerIdentifier];
-      delete layerServer.layers; // Do we want to keep the identifiers?
-      this._availableLayerServers[layerServerIdentifier] = layerServer;
-    }
-  }
-
-  /**
-   * Load the default basemaps, and any defined in the config.
-   * @return {Object} The basemap layers and servers, including duplicates.
-   */
-  _getBasemapServerLayers() {
-    let basemapServers = [];
-    let basemapLayers = [];
-    for (let layerServer of defaultBasemaps) {
-      basemapServers.push(layerServer);
-      // for (let layer of layerServer.layers) {
-      // if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
-      // if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-      // layer.modifier = 'basemap';
-      // basemaps.push(layer);
-      // } else {
-      //   console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-      // }
-      // } else {
-      // console.error('bingMapsApiKey is null or undefined');
-      // }
-      // }
-    }
-    if (this.config.basemapLayers !== undefined) {
-      for (let layerServer of this.config.basemapLayers) {
-        basemapServers.push(layerServer);
-      // for (let layer of layerServer.layers) {
-        //   if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
-        //     layer.modifier = 'basemap';
-        //     basemaps.push(layer);
-        //   } else {
-        //     console.error('bingMapsApiKey is null or undefined');
-        //   }
-        // }
-      }
-    }
-    return basemapServers;
-  }
-
-  /**
-   * Load the default border layers, and any defined in the config.
-   * @return {Array} The borders, including duplicates.
-   */
-  _getBordersServerLayers() {
-    let borders = [];
-    for (let layerServer of defaultBorders) {
-      borders.push(layerServer);
-      // for (let layer of layerServer.layers) {
-      //   layer.modifier = 'borders';
-      //   borders.push(layer);
-      // }
-    }
-    if (this.config.bordersLayers !== undefined) {
-      for (let layerServer of this.config.bordersLayers) {
-        borders.push(layerServer);
-      // for (let layer of layerServer.layers) {
-        //   layer.modifier = 'borders';
-        //   borders.push(layer);
-        // }
-      }
-    }
-    return borders;
-  }
-
-  /**
-   * Load the default data layers, and any defined in the config.
-   * @return {Array} The data, including duplicates.
-   */
-  _getDataServerLayers() {
-    let data = [];
-    for (let layerServer of defaultDataLayers) {
-      data.push(layerServer);
-      // TODO for each layer, check the urls match? Would probably help users (and me)
-
-      // for (let layer of layerServer.layers) {
-      //   if (layer.dimensions !== undefined) {
-      //     if (layer.dimensions.time !== undefined) {
-      //       layer.modifier = 'hasTime';
-      //     }
-      //   }
-      //   data.push(layer);
-      // }
-    }
-
-    if (this.config.dataLayers !== undefined) {
-      for (let layerServer of this.config.dataLayers) {
-        data.push(layerServer);
-        // for (let layer of layerServer.layers) {
-        //   if (layer.dimensions !== undefined) {
-        //     if (layer.dimensions.time !== undefined) {
-        //       layer.modifier = 'hasTime';
-        //     }
-        //   }
-        //   data.push(layer);
-        // }
-      }
-    }
-    return data;
   }
 }
 

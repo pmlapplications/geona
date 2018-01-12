@@ -45,20 +45,3 @@ export function urlToFilename(url) {
 
   return filename;
 }
-
-/**
- * 
- * @param {String} filename The filename created from a URL originally
- * @return {String}         The original URL converted back from the filename
- */
-export function filenameToUrl(filename) {
-  let components = filename.split('__');
-
-  let protocol = components[0] + '://';
-
-  let body = components[1];
-
-
-  let url;
-  return url;
-}

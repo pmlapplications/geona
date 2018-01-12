@@ -187,6 +187,120 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
 }
 
 /**
+ * Loads the default/config Geona Layers and their corresponding LayerServers
+ * @param  {Object} config The config for the map
+ * @return {Object}        The availableLayers and availableLayerServers
+ */
+export function loadDefaultLayersAndLayerServers(config) {
+  let basemaps = getBasemapServerLayers(config);
+  let borders = getBordersServerLayers(config);
+  let data = getDataServerLayers(config);
+  let allLayerServers = basemaps.concat(borders, data);
+
+  let loadedServersAndLayers = {
+    availableLayers: {},
+    availableLayerServers: {},
+  };
+  // Merge duplicate servers
+  let uniqueLayerServers = {};
+  for (let layerServer of allLayerServers) {
+    if (uniqueLayerServers[layerServer.identifier] === undefined) {
+      uniqueLayerServers[layerServer.identifier] = layerServer;
+    } else { // Merge the layers from both
+      uniqueLayerServers[layerServer.identifier].layers =
+          uniqueLayerServers[layerServer.identifier].layers.concat(layerServer.layers);
+    }
+  }
+  // Extract the layers from all the layerServers
+  for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
+    let layerServer = uniqueLayerServers[layerServerIdentifier];
+    for (let layer of layerServer.layers) {
+      if (loadedServersAndLayers.availableLayers[layer.identifier] === undefined) {
+        if (layer.protocol !== 'bing' || config.bingMapsApiKey) {
+          if (layer.layerServer === layerServer.identifier) {
+            loadedServersAndLayers.availableLayers[layer.identifier] = layer;
+          } else {
+            throw new Error(
+              'Layer ' + layer.identifier + ' in LayerServer ' + layerServer.identifier +
+                ' has different LayerServer property (' + layer.layerServer +
+                '). Please ensure the Layer\'s layerServer property matches the identifier for its LayerServer.'
+            );
+          }
+        } else {
+          console.error('bingMapsApiKey is null or undefined');
+        }
+      } else {
+        console.error('Layer with identifier ' + layer.identifier + ' has already been added to the list of available layers');
+      }
+    }
+  }
+
+  // Save the non-layer information for the LayerServers
+  for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
+    let layerServer = uniqueLayerServers[layerServerIdentifier];
+    delete layerServer.layers; // Do we want to keep the identifiers?
+    loadedServersAndLayers.availableLayerServers[layerServerIdentifier] = layerServer;
+  }
+
+  return loadedServersAndLayers;
+}
+
+/**
+ * Load the default basemaps, and any defined in the config.
+ * @param  {Object} config The config for the map
+ * @return {Array}         The basemap servers, including duplicates.
+ */
+function getBasemapServerLayers(config) {
+  let basemapServers = [];
+  for (let layerServer of basemapLayers) {
+    basemapServers.push(layerServer);
+  }
+  if (config.basemapLayers !== undefined) {
+    for (let layerServer of config.basemapLayers) {
+      basemapServers.push(layerServer);
+    }
+  }
+  return basemapServers;
+}
+
+/**
+ * Load the default border layers, and any defined in the config.
+ * @param  {Object} config The config for the map
+ * @return {Array}         The borders servers, including duplicates.
+ */
+function getBordersServerLayers(config) {
+  let borderServers = [];
+  for (let layerServer of borderLayers) {
+    borderServers.push(layerServer);
+  }
+  if (config.bordersLayers !== undefined) {
+    for (let layerServer of config.bordersLayers) {
+      borderServers.push(layerServer);
+    }
+  }
+  return borderServers;
+}
+
+
+/**
+ * Load the default data layers, and any defined in the config.
+ * @param  {Object} config The config for the map
+ * @return {Array}         The data servers, including duplicates.
+ */
+function getDataServerLayers(config) {
+  let data = [];
+  for (let layerServer of dataLayers) {
+    data.push(layerServer);
+  }
+  if (config.dataLayers !== undefined) {
+    for (let layerServer of config.dataLayers) {
+      data.push(layerServer);
+    }
+  }
+  return data;
+}
+
+/**
    * Default basemaps.
    *
    * Basemap object format:
@@ -217,7 +331,7 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
    *                                Defaults to 3.
    */
 
-export const basemaps = [
+export const basemapLayers = [
   {
     identifier: 'https__www.gebco.net_data_and_products_gebco_web_services_web_map_service_mapserv__wms_1.1.1_getcapabilities',
     version: '1.1.1',
@@ -400,7 +514,7 @@ export const basemaps = [
   // },
 ];
 
-for (let basemap of basemaps) {
+for (let basemap of basemapLayers) {
   basemap = addLayerDefaults(basemap);
 }
 

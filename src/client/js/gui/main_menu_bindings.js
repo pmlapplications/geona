@@ -18,7 +18,7 @@ export function registerBindings(eventManager, menu) {
   });
 
 
-  /*
+  /**
    * Explore Panel
    */
   // Display explore panel
@@ -46,7 +46,7 @@ export function registerBindings(eventManager, menu) {
     menu.addAvailableLayerToMap(layerIdentifier);
   });
 
-  /*
+  /**
    * Layers Panel
    */
   // Display layers panel
@@ -81,7 +81,7 @@ export function registerBindings(eventManager, menu) {
   });
 
 
-  /*
+  /**
    * Login Panel
    */
   eventManager.bind('mainMenu.displayLoginPanel', () => {
@@ -89,7 +89,7 @@ export function registerBindings(eventManager, menu) {
   });
 
 
-  /*
+  /**
    * Help Panel
    */
   eventManager.bind('mainMenu.displayHelpPanel', () => {
@@ -97,7 +97,7 @@ export function registerBindings(eventManager, menu) {
   });
 
 
-  /*
+  /**
    * Share Panel
    */
   eventManager.bind('mainMenu.displaySharePanel', () => {
