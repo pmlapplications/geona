@@ -2,8 +2,7 @@
 
 import GeonaMap from './map';
 import {
-  basemaps as defaultBasemaps, borderLayers as defaultBorders,
-  dataLayers as defaultDataLayers, latLonLabelFormatter, findNearestValidTime,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, findNearestValidTime,
 } from './map_common';
 import $ from 'jquery';
 
@@ -94,28 +93,36 @@ export class LMap extends GeonaMap {
 
 
     // Load the default basemaps, borders layers, and data layers.
-    this._loadBasemapLayers();
-    this._loadDataLayers();
-    this._loadBordersLayers();
+    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config);
+    this._availableLayers = loadedServersAndLayers.availableLayers;
+    this._availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
+    // Adds any defined basemap to the map
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
-      this.addLayer(this._availableLayers[this.config.basemap], {modifier: 'basemap'});
+      let layer = this._availableLayers[this.config.basemap];
+      let layerServer = this._availableLayerServers[layer.layerServer];
+      this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
+    // Adds all defined data layers to the map
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
         for (let layerIdentifier of this.config.data) {
+          let layer = this._availableLayers[layerIdentifier];
+          let layerServer = this._availableLayerServers[layer.layerServer];
           if (this._availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(this._availableLayers[layerIdentifier], {modifier: 'hasTime'});
+            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
           } else {
-            this.addLayer(this._availableLayers[layerIdentifier]);
+            this.addLayer(layer, layerServer);
           }
         }
       }
     }
+    // Adds any defined borders layer to the map
     if (this.config.borders.identifier !== 'none' && this.config.borders !== undefined) {
-      this.addLayer(this._availableLayers[this.config.borders.identifier], {modifier: 'borders', style: this.config.borders.style});
+      let layer = this._availableLayers[this.config.borders.identifier];
+      let layerServer = this._availableLayerServers[layer.layerServer];
+      this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
-
 
     this.loadConfig_();
     // Must come last in the constructor
@@ -328,7 +335,7 @@ export class LMap extends GeonaMap {
    * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
    * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
+  addLayer(geonaLayer, geonaLayerServer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
     // Set default options if not specified
     // No need to set modifier and requestedTime
     if (options.shown === undefined) {
@@ -428,14 +435,14 @@ export class LMap extends GeonaMap {
           // This is why we have 'time', 'Time' and 'TIME' to cover all cases
           if (options.modifier === 'hasTime' && time !== undefined) {
             // eslint-disable-next-line new-cap
-            layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
+            layer = new L.tileLayer.wms(geonaLayerServer.url, {
               identifier: geonaLayer.identifier,
               layers: requiredLayer,
               styles: style || '',
               format: format || 'image/png',
               transparent: true,
               attribution: attribution,
-              version: geonaLayer.layerServer.version,
+              version: geonaLayerServer.version,
               crs: projection,
               time: time,
               Time: time,
@@ -449,14 +456,14 @@ export class LMap extends GeonaMap {
             });
           } else {
             // eslint-disable-next-line new-cap
-            layer = new L.tileLayer.wms(geonaLayer.layerServer.url, {
+            layer = new L.tileLayer.wms(geonaLayerServer.url, {
               identifier: geonaLayer.identifier,
               layers: requiredLayer,
               styles: style || '',
               format: format || 'image/png',
               transparent: true,
               attribution: attribution,
-              version: geonaLayer.layerServer.version,
+              version: geonaLayerServer.version,
               crs: projection,
               zIndex: this._mapLayers.getLayers().length,
               modifier: options.modifier,
@@ -477,6 +484,11 @@ export class LMap extends GeonaMap {
       if (this._availableLayers[geonaLayer.identifier] === undefined) {
         geonaLayer.modifier = options.modifier;
         this._availableLayers[geonaLayer.identifier] = geonaLayer;
+        // Save the LayerServer if not already saved
+        if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+          delete geonaLayerServer.layers;
+          this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
+        }
       }
 
       this._activeLayers[geonaLayer.identifier] = layer;
@@ -808,94 +820,6 @@ export class LMap extends GeonaMap {
       return this._activeLayers[layerIdentifier].options[key];
     } else {
       return layerIdentifier.options[key];
-    }
-  }
-
-  /**
-   * Load the default basemaps, and any defined in the config.
-   */
-  _loadBasemapLayers() {
-    for (let layer of defaultBasemaps) {
-      if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
-        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-          layer.modifier = 'basemap';
-          this._availableLayers[layer.identifier] = layer;
-        } else {
-          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-        }
-      } else {
-        console.error('bingMapsApiKey is null or undefined');
-      }
-    }
-    if (this.config.basemapLayers !== undefined) {
-      for (let layer of this.config.basemapLayers) {
-        if (layer.protocol !== 'bing' || (layer.protocol === 'bing' && this.config.bingMapsApiKey)) {
-          if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-            layer.modifier = 'basemap';
-            this._availableLayers[layer.identifier] = layer;
-          } else {
-            console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-          }
-        } else {
-          console.error('bingMapsApiKey is null or undefined');
-        }
-      }
-    }
-  }
-
-  /**
-   * Load the default border layers, and any defined in the config.
-   */
-  _loadBordersLayers() {
-    for (let layer of defaultBorders) {
-      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-        layer.modifier = 'borders';
-        this._availableLayers[layer.identifier] = layer;
-      } else {
-        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-      }
-    }
-    if (this.config.bordersLayers !== undefined) {
-      for (let layer of this.config.bordersLayers) {
-        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-          layer.modifier = 'borders';
-          this._availableLayers[layer.identifier] = layer;
-        } else {
-          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-        }
-      }
-    }
-  }
-
-  /**
-   * Load the default data layers, and any defined in the config.
-   */
-  _loadDataLayers() {
-    for (let layer of defaultDataLayers) {
-      if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-        if (layer.dimensions !== undefined) {
-          if (layer.dimensions.time !== undefined) {
-            layer.modifier = 'hasTime';
-          }
-        }
-        this._availableLayers[layer.identifier] = layer;
-      } else {
-        console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-      }
-    }
-    if (this.config.dataLayers !== undefined) {
-      for (let layer of this.config.dataLayers) {
-        if (!Object.keys(this._availableLayers).includes(layer.identifier)) {
-          if (layer.dimensions !== undefined) {
-            if (layer.dimensions.time !== undefined) {
-              layer.modifier = 'hasTime';
-            }
-          }
-          this._availableLayers[layer.identifier] = layer;
-        } else {
-          console.error('Layer with identifier \'' + layer.identifier + '\' has already been added to the list of available layers.');
-        }
-      }
     }
   }
 }

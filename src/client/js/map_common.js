@@ -189,9 +189,13 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
 /**
  * Loads the default/config Geona Layers and their corresponding LayerServers
  * @param  {Object} config The config for the map
- * @return {Object}        The availableLayers and availableLayerServers
+ * @return {Object}           The availableLayers and availableLayerServers
  */
 export function loadDefaultLayersAndLayerServers(config) {
+  // We will be modifying the config, so we want to clone it.
+  // This is in case we have been passed a reference to the map's config, which we do not want to alter.
+  // let config = JSON.parse(JSON.stringify(mapConfig)); // Fastest deep clone according to stackoverflow.com/a/5344074
+
   let basemaps = getBasemapServerLayers(config);
   let borders = getBordersServerLayers(config);
   let data = getDataServerLayers(config);
@@ -237,8 +241,14 @@ export function loadDefaultLayersAndLayerServers(config) {
 
   // Save the non-layer information for the LayerServers
   for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
-    let layerServer = uniqueLayerServers[layerServerIdentifier];
-    delete layerServer.layers; // Do we want to keep the identifiers?
+    let layerServer = {};
+    // delete layerServer.layers; // Do we want to keep the identifiers?
+
+    for (let property of Object.keys(uniqueLayerServers[layerServerIdentifier])) {
+      if (property !== 'layers') {
+        layerServer[property] = uniqueLayerServers[layerServerIdentifier][property];
+      }
+    }
     loadedServersAndLayers.availableLayerServers[layerServerIdentifier] = layerServer;
   }
 
