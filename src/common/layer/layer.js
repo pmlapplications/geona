@@ -6,19 +6,15 @@
 export default class Layer {
   /**
    * Instantiate a new Layer
-   * @param  {Object}      layerConfig The config for the layer
-   * @param  {LayerServer} layerServer (optional) The server that provides this layer.
-   *                                              Not all layer types require a server
+   * @param  {Object}      layerConfig   The config for the layer
+   * @param  {LayerServer} [layerServer] The server that provides this layer. Not all layer types require a server
    */
   constructor(layerConfig, layerServer) {
     this.protocol = null;
-    // TODO stop storing layerserver in layer, and pass layerservers around instead
-    // possibly we might want to store these in ID format so we know which layerServer this relates to
-    this.layerServer = {
-      url: layerServer.url,
-      protocol: layerServer.protocol,
-      version: layerServer.version,
-    };
+    if (layerServer !== undefined) {
+      this.layerServer = layerServer.identifier;
+    }
+    // this.getCapabilities = getCapabilities;
 
     this.title = layerConfig.title;
     this.abstract = layerConfig.abstract;

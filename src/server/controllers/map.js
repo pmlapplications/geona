@@ -66,8 +66,8 @@ export function getServersideLayerServer(req, res) {
 function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
   return new Promise((resolve, reject) => {
     let cacheUri = '/local1/data/scratch/git/web-development/gp2-contribution-guide/cache/';
-    let filename = urlToFilename(url) + '.json';
-    let filepath = cacheUri + filename;
+    let filename = urlToFilename(url);
+    let filepath = cacheUri + filename + '.json';
     if (useCache === true) {
       // Retrieve information from cache - will resolve/reject immediately (synchronously)
       try {
@@ -95,10 +95,10 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
         let layerServer;
         switch (protocol) {
           case 'wms':
-            layerServer = new LayerServer(JSON.parse(body));
+            layerServer = new LayerServer(JSON.parse(body), filename);
             break;
           case 'wmts':
-            layerServer = new LayerServerWmts(JSON.parse(body));
+            layerServer = new LayerServerWmts(JSON.parse(body), filename);
             break;
         }
         layerServer = JSON.stringify(layerServer);

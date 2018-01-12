@@ -133,7 +133,7 @@ export function urlInCache(url) {
  */
 export function getLayerServer(url, service, save = false, useCache = false) {
   return new Promise((resolve, reject) => {
-  // ajax to server getLayerServer
+    // ajax to server getLayerServer
     let requestUrl = encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
     $.ajax('http://127.0.0.1:7890/map/getLayerServer/' + requestUrl)
       .done((layerServerJson) => {
@@ -219,49 +219,55 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
 
 export const basemaps = [
   {
-    protocol: 'wms',
-    identifier: 'gebco_08_grid',
-    title: {
-      und: 'GEBCO',
-    },
-    attribution: {
-      title: 'GEBCO',
-      onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
-    },
-    projections: ['EPSG:4326', 'EPSG:3857'],
-    formats: ['image/jpeg'],
-    isTemporal: false,
-    layerServer: {
-      layers: ['gebco_08_grid'],
-      version: '1.1.1',
-      url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-    },
-    viewSettings: {
-      maxZoom: 7,
-    },
+    identifier: 'https__www.gebco.net_data_and_products_gebco_web_services_web_map_service_mapserv__wms_1.1.1_getcapabilities',
+    version: '1.1.1',
+    url: 'https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
+    layers: [
+      {
+        protocol: 'wms',
+        identifier: 'gebco_08_grid',
+        title: {
+          und: 'GEBCO',
+        },
+        attribution: {
+          title: 'GEBCO',
+          onlineResource: 'Imagery reproduced from the GEBCO_2014 Grid, version 20150318, www.gebco.net',
+        },
+        projections: ['EPSG:4326', 'EPSG:3857'],
+        formats: ['image/jpeg'],
+        isTemporal: false,
+        layerServer: 'https__www.gebco.net_data_and_products_gebco_web_services_web_map_service_mapserv__wms_1.1.1_getcapabilities',
+        viewSettings: {
+          maxZoom: 7,
+        },
+      },
+    ],
   },
   {
-    protocol: 'wms',
-    identifier: 's2cloudless',
-    title: {
-      und: 'EOX',
-    },
-    attribution: {
-      title: 'EOX Sentinel-2 Cloudless',
-      onlineResource: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
-    },
-    projections: ['EPSG:4326'],
-    formats: ['image/jpeg'],
-    isTemporal: false,
-    layerServer: {
-      layers: ['s2cloudless'],
-      version: '1.1.1',
-      url: 'https://tiles.maps.eox.at/wms/?',
-    },
-    viewSettings: {
-      maxZoom: 14,
-      fitExtent: [22.02, -33.86, 82.85, 56.12],
-    },
+    identifier: 'https__tiles.maps.eox.at_wms__wms_1.1.1_getcapabilities',
+    version: '1.1.1',
+    url: 'https://tiles.maps.eox.at/wms/?',
+    layers: [
+      {
+        protocol: 'wms',
+        identifier: 's2cloudless',
+        title: {
+          und: 'EOX',
+        },
+        attribution: {
+          title: 'EOX Sentinel-2 Cloudless',
+          onlineResource: '<a href="https://s2maps.eu/">Sentinel-2 cloudless</a> by <a href="https://eox.at/">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016)',
+        },
+        projections: ['EPSG:4326'],
+        formats: ['image/jpeg'],
+        isTemporal: false,
+        layerServer: 'https__tiles.maps.eox.at_wms__wms_1.1.1_getcapabilities',
+        viewSettings: {
+          maxZoom: 14,
+          fitExtent: [22.02, -33.86, 82.85, 56.12],
+        },
+      },
+    ],
   },
   // {
   //   identifier: 'gebco_08_grid',
@@ -421,60 +427,34 @@ export const borderLayers = [
   //   },
   // },
   {
-    identifier: 'line-white',
-    protocol: 'wms',
-    title: {
-      und: 'White border lines',
-    },
-    projections: ['EPSG:4326', 'EPSG:3857'],
-    formats: ['image/png'],
-    isTemporal: false,
-    styles: [
+    identifier: 'https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities',
+    version: '1.1.0',
+    url: 'https://rsg.pml.ac.uk/geoserver/wms?',
+    layers: [
       {
-        identifier: 'line-white',
+        identifier: 'rsg:full_10m_borders',
+        protocol: 'wms',
+        title: {
+          und: 'World country border lines',
+        },
+        projections: ['EPSG:4326', 'EPSG:3857'],
+        formats: ['image/png'],
+        isTemporal: false,
+        styles: [
+          {
+            identifier: 'line_black',
+          },
+          {
+            identifier: 'line-white',
+          },
+          {
+            identifier: 'line',
+          },
+        ],
+        layerServer: 'https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities',
       },
     ],
-    layerServer: {
-      layers: ['rsg:full_10m_borders'],
-      version: '1.1.0',
-      url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-    },
   },
-  {
-    identifier: 'line',
-    protocol: 'wms',
-    title: {
-      und: 'Blue border lines',
-    },
-    projections: ['EPSG:4326', 'EPSG:3857'],
-    formats: ['image/png'],
-    isTemporal: false,
-    styles: [
-      {
-        identifier: 'line',
-      },
-    ],
-    layerServer: {
-      layers: ['rsg:full_10m_borders'],
-      version: '1.1.0',
-      url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-    },
-  },
-  // {
-  //   id: 'line',
-  //   title: 'Blue border lines',
-  //   projections: ['EPSG:4326', 'EPSG:3857'],
-  //   source: {
-  //     type: 'wms',
-  //     url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-  //     crossOrigin: null,
-  //     params: {
-  //       layers: 'rsg:full_10m_borders',
-  //       version: '1.1.0',
-  //       styles: 'line',
-  //     },
-  //   },
-  // },
 ];
 
 /**

@@ -10,7 +10,7 @@ export function urlToFilename(url) {
   // 1) Extract protocol, host and path
   let mainUrl = url.replace(/\?.*/g, '');
   // 2) Replace special characters with underscores
-  let mainFilename = mainUrl.replace(/:\/|\/|-/g, '_');
+  let mainFilename = mainUrl.replace(/:\/|\//g, '_');
   // 3) Extract service, version, and request parameters if they exist
   let parameters = '';
   let service = url.match(/service=.*?(?=[&\s])|service=.*/);
@@ -37,5 +37,28 @@ export function urlToFilename(url) {
   if (paramsFilename.length > 0) {
     filename += '__' + paramsFilename;
   }
+  // 6) Cut strings of 3+ underscores down to 2
+  filename = filename.replace(/_{3,}/, '__');
+
+  // 7) Convert to all-lowercase
+  filename = filename.toLocaleLowerCase();
+
   return filename;
+}
+
+/**
+ * 
+ * @param {String} filename The filename created from a URL originally
+ * @return {String}         The original URL converted back from the filename
+ */
+export function filenameToUrl(filename) {
+  let components = filename.split('__');
+
+  let protocol = components[0] + '://';
+
+  let body = components[1];
+
+
+  let url;
+  return url;
 }
