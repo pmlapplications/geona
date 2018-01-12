@@ -203,10 +203,9 @@ export class MainMenu {
   /**
    * Adds the layer in the 'layer-select' input box to the map.
    */
-  addUrlLayerToMap() {
-    let selectedLayer = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
+  addUrlLayerToMap(layerIdentifier) {
     for (let layer of this.requestLayerServer.layers) {
-      if (layer.identifier === selectedLayer) {
+      if (layer.identifier === layerIdentifier) {
         if (layer.dimension) {
           if (layer.dimension.time) {
             this.geona.map.addLayer(layer, this.requestLayerServer, {modifier: 'hasTime'});
@@ -222,14 +221,15 @@ export class MainMenu {
 
   /**
    * Adds the layer in the 'available-layers' input box to the map.
+   * @param {String} layerIdentifier The layer identifier for a Geona layer
    */
-  addAvailableLayerToMap() {
-    let layerIdentifier = this.parentDiv.find('.js-geona-explore-panel-content__available-layers').val();
+  addAvailableLayerToMap(layerIdentifier) {
     let layer = this.geona.map._availableLayers[layerIdentifier];
+    let layerServer = this.geona.map._availableLayerServers[layer.layerServer];
     if (layer.modifier === 'hasTime') {
-      this.geona.map.addLayer(layer, {modifier: 'hasTime'});
+      this.geona.map.addLayer(layer, layerServer, {modifier: 'hasTime'});
     } else {
-      this.geona.map.addLayer(layer);
+      this.geona.map.addLayer(layer, layerServer);
     }
   }
 
@@ -253,7 +253,7 @@ export class MainMenu {
    * @param {HTMLElement} item The list element that contains the element that was clicked.
    */
   hideLayer(item) {
-    // change icon to 'hide' instead of 'preview-1'
+    // TODO change icon to 'hide' instead of 'preview-1'
     this.geona.map.hideLayer(item.dataset.identifier);
   }
 
@@ -262,7 +262,7 @@ export class MainMenu {
    * @param {HTMLElement} item The list element that contains the element that was clicked.
    */
   showLayer(item) {
-    // change icon to 'preview-1' instead of 'hide'
+    // TODO change icon to 'preview-1' instead of 'hide'
     this.geona.map.showLayer(item.dataset.identifier);
   }
 

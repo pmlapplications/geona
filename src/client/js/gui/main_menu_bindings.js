@@ -38,12 +38,12 @@ export function registerBindings(eventManager, menu) {
     menu.getLayerServer(url, service, save, useCache);
   });
   // Add layer from URL to map
-  eventManager.bind('mainMenu.addUrlLayerToMap', () => {
-    menu.addUrlLayerToMap();
+  eventManager.bind('mainMenu.addUrlLayerToMap', (layerIdentifier) => {
+    menu.addUrlLayerToMap(layerIdentifier);
   });
   // Add layer from availableLayers to map
-  eventManager.bind('mainMenu.addAvailableLayerToMap', () => {
-    menu.addAvailableLayerToMap();
+  eventManager.bind('mainMenu.addAvailableLayerToMap', (layerIdentifier) => {
+    menu.addAvailableLayerToMap(layerIdentifier);
   });
 
   /*

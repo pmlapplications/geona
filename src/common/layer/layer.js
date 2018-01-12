@@ -14,7 +14,6 @@ export default class Layer {
     if (layerServer !== undefined) {
       this.layerServer = layerServer.identifier;
     }
-    // this.getCapabilities = getCapabilities;
 
     this.title = layerConfig.title;
     this.abstract = layerConfig.abstract;

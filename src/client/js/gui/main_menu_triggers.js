@@ -141,14 +141,15 @@ function registerExploreTriggers(eventManager, parentDiv) {
 
   // Add URL layer to map
   parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
-    eventManager.trigger('mainMenu.addUrlLayerToMap');
+    let layerIdentifier = parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
+    eventManager.trigger('mainMenu.addUrlLayerToMap', layerIdentifier);
   });
 
   // Add available layer to map
   parentDiv.find('.js-geona-explore-panel-content__available-layers').change(() => {
-    // console.log(parentDiv.find('js-geona-explore-panel-content__available-layers'));
-    if (parentDiv.find('.js-geona-explore-panel-content__available-layers').val() !== 'geona-available-layers-title') {
-      eventManager.trigger('mainMenu.addAvailableLayerToMap');
+    let option = parentDiv.find('.js-geona-explore-panel-content__available-layers').val();
+    if (option !== 'geona-available-layers-title') {
+      eventManager.trigger('mainMenu.addAvailableLayerToMap', option);
     }
   });
 }
