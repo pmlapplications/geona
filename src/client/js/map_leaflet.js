@@ -173,64 +173,84 @@ export class LMap extends GeonaMap {
 
   /**
    * Set the projection, if supported by the current basemap.
-   * @param {String} projection The projection to use, such as 'EPSG:4326'
+   * @param {String}   projection The projection to use, such as 'EPSG:4326'
+   * @return {Boolean}            True if the projection changed
    */
   setProjection(projection) {
-    // TODO check the basemap supports the projection.
-    // This is a bit of a hack and isn't officially supported by Leaflet. Everything may fall over!
-    let leafletProjection = leafletizeProjection(projection);
-
-    if (this._map.options.crs !== leafletProjection) {
-      // If the map isn't already in the provided projection
-      let center = this._map.getCenter();
-      let zoom = this._map.getZoom();
-      let maxZoom = this._map.getMaxZoom();
-      let minZoom = this._map.getMinZoom();
-
-      switch (projection) {
-        case 'EPSG:3857':
-          zoom += 1;
-          maxZoom += 1;
-          minZoom += 1;
-          break;
-        case 'EPSG:4326':
-          zoom -= 1;
-          maxZoom -= 1;
-          minZoom -= 1;
-          break;
-      }
-
-      this._map.options.crs = leafletProjection;
-      this._map._resetView(center, zoom);
-
-      this._map.setMaxZoom(maxZoom);
-      this._map.setMinZoom(minZoom);
-
-      this.config.projection = projection;
-
-      this._map.eachLayer((layer) => {
-        if (layer._crs !== undefined) {
-          layer.remove();
-          this._mapLayers.removeLayer(layer);
-          // We add the same layer, but now the map projection will have changed.
-          // eslint-disable-next-line new-cap
-          let newLayer = new L.tileLayer.wms(layer._url, {
-            layers: layer.options.layers,
-            format: layer.wmsParams.format,
-            transparent: layer.options.transparent,
-            attribution: layer.options.attribution,
-            version: layer.options.version,
-            zIndex: layer.options.zIndex,
-            modifier: layer.options.modifier,
-          }).addTo(this._map);
-          this._mapLayers.addLayer(newLayer);
+    let basemapSupportsProjection = true;
+    let basemapIdentifier = '';
+    if (this.config.basemap !== 'none') {
+      for (let layer of this._mapLayers.getLayers()) {
+        if (layer.options.modifier === 'basemap') {
+          basemapIdentifier = layer.options.identifier;
+          let basemapProjections = this._availableLayers[basemapIdentifier].projections;
+          if (!basemapProjections.includes(projection)) {
+            basemapSupportsProjection = false;
+          }
         }
-      });
+      }
+    }
+
+    if (basemapSupportsProjection === true) {
+    // This is a bit of a hack and isn't officially supported by Leaflet. Everything may fall over!
+      let leafletProjection = leafletizeProjection(projection);
+
+      if (this._map.options.crs !== leafletProjection) {
+      // If the map isn't already in the provided projection
+        let center = this._map.getCenter();
+        let zoom = this._map.getZoom();
+        let maxZoom = this._map.getMaxZoom();
+        let minZoom = this._map.getMinZoom();
+
+        switch (projection) {
+          case 'EPSG:3857':
+            zoom += 1;
+            maxZoom += 1;
+            minZoom += 1;
+            break;
+          case 'EPSG:4326':
+            zoom -= 1;
+            maxZoom -= 1;
+            minZoom -= 1;
+            break;
+        }
+
+        this._map.options.crs = leafletProjection;
+        this._map._resetView(center, zoom);
+
+        this._map.setMaxZoom(maxZoom);
+        this._map.setMinZoom(minZoom);
+
+        this.config.projection = projection;
+
+        this._map.eachLayer((layer) => {
+          if (layer._crs !== undefined) {
+            layer.remove();
+            this._mapLayers.removeLayer(layer);
+            // We add the same layer, but now the map projection will have changed.
+            // eslint-disable-next-line new-cap
+            let newLayer = new L.tileLayer.wms(layer._url, {
+              layers: layer.options.layers,
+              format: layer.wmsParams.format,
+              transparent: layer.options.transparent,
+              attribution: layer.options.attribution,
+              version: layer.options.version,
+              zIndex: layer.options.zIndex,
+              modifier: layer.options.modifier,
+            }).addTo(this._map);
+            this._mapLayers.addLayer(newLayer);
+          }
+        });
+      }
+      return projection;
+    } else {
+      alert('Basemap ' + basemapIdentifier + ' does not support projection type ' + projection + '. Please select a different basemap.');
+      return this._map.options.crs.code;
     }
   }
 
   /**
-   * Set the map view with the provided options. Uses OpenLayers style zoom levels.
+   * Set the map view with the provided options. Uses OpenLayers-style zoom levels.
    * @param {Object}  options            View options. All are optional
    * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
    * @param {Object}  options.fitExtent  Extent to fit the view to, defined as

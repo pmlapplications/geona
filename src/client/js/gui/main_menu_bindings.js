@@ -88,6 +88,25 @@ export function registerBindings(eventManager, menu) {
     menu.displayLoginPanel();
   });
 
+  /**
+   * Options Panel
+   */
+  // Display options panel
+  eventManager.bind('mainMenu.displayOptionsPanel', () => {
+    menu.displayOptionsPanel();
+  });
+  // Show graticule
+  eventManager.bind('mainMenu.showGraticule', () => {
+    menu.showGraticule();
+  });
+  // Hide graticule
+  eventManager.bind('mainMenu.hideGraticule', () => {
+    menu.hideGraticule();
+  });
+  // Set projection
+  eventManager.bind('mainMenu.setProjection', (projection) => {
+    menu.setProjection(projection);
+  });
 
   /**
    * Help Panel

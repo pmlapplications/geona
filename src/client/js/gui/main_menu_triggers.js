@@ -29,10 +29,7 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
-      // if (exploreTriggers === false) {
       registerExploreTriggers(eventManager, parentDiv);
-      // exploreTriggers = true;
-      // }
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
@@ -65,9 +62,9 @@ export function registerTriggers(eventManager, parentDiv) {
     lastTabClicked = 'js-geona-menu__analysis';
   });
 
-  /* ------------------------------------*\
-      Login Panel
-  \* ------------------------------------*/
+  /**
+   * Login Panel
+   */
   // Open/close panel
   parentDiv.find('.js-geona-menu__login').click(() => {
     if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__login') {
@@ -76,6 +73,20 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('mainMenu.displayLoginPanel');
     }
     lastTabClicked = 'js-geona-menu__login';
+  });
+
+  /**
+   * Options Panel - more triggers are set in the registerOptionsTriggers() method
+   */
+  // Open/close panel
+  parentDiv.find('.js-geona-menu__options').click(() => {
+    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__options') {
+      eventManager.trigger('mainMenu.closePanel');
+    } else {
+      eventManager.trigger('mainMenu.displayOptionsPanel');
+      registerOptionsTriggers(eventManager, parentDiv);
+    }
+    lastTabClicked = 'js-geona-menu__options';
   });
 
   /* ------------------------------------*\
@@ -186,5 +197,27 @@ function registerLayersTriggers(eventManager, parentDiv) {
     // Finds the list element that contains the icon which was clicked
     let item = this.closest('li'); // eslint-disable-line no-invalid-this
     eventManager.trigger('mainMenu.removeLayer', [item]);
+  });
+}
+
+/**
+ * Used by the main registerTriggers function to register triggers for Options panel elements which are
+ * not loaded at startup.
+ * @param {EventManager} eventManager The event manager for the current instance of Geona.
+ * @param {JQuery}       parentDiv    The div which contains the current map.
+ */
+function registerOptionsTriggers(eventManager, parentDiv) {
+  // Toggle graticule
+  parentDiv.find('.js-geona-options-panel-content__graticule').click(function() {
+    if (parentDiv.find('.js-geona-options-panel-content__graticule').prop('checked') === true) {
+      eventManager.trigger('mainMenu.showGraticule');
+    } else {
+      eventManager.trigger('mainMenu.hideGraticule');
+    }
+  });
+  // Select projection
+  parentDiv.find('.js-geona-options-panel-content__projection').change(() => {
+    let option = parentDiv.find('.js-geona-options-panel-content__projection').val();
+    eventManager.trigger('mainMenu.setProjection', option);
   });
 }

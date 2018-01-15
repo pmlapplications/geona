@@ -236,7 +236,8 @@ export class OlMap extends GeonaMap {
 
   /**
    * Set the projection, if supported by the current basemap.
-   * @param {String} projection The projection to use, such as 'EPSG:4326'
+   * @param  {String}  projection The projection to use, such as 'EPSG:4326'.
+   * @return {String}             The new map projection.
    */
   setProjection(projection) {
     if (this.config.basemap !== 'none') {
@@ -244,14 +245,17 @@ export class OlMap extends GeonaMap {
       // If basemap supports new projection, we can change the view
       if (this._availableLayers[basemapId].projections.includes(projection)) {
         this.setView({projection: projection});
+        this.config.projection = projection;
+        return projection;
       } else {
-        alert('Basemap ' + this._map.getLayers().item(0).get('title') + ' does not support projection type ' + projection + '. Please select a different basemap.');
+        alert('Basemap ' + this._map.getLayers().item(0).get('identifier') + ' does not support projection type ' + projection + '. Please select a different basemap.');
+        return this._map.getView().getProjection().getCode();
       }
     } else {
       this.setView({projection: projection});
+      this.config.projection = projection;
+      return projection;
     }
-
-    this.config.projection = projection;
   }
 
   /**
@@ -334,7 +338,6 @@ export class OlMap extends GeonaMap {
    *   @param {Boolean} options.shown          Whether to show or hide the layer when it is first put on the map.
    */
   addLayer(geonaLayer, geonaLayerServer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
-    console.log(geonaLayer);
     // TODO try and clean this method up - maybe split it up into separate methods.
     // Maybe have a wmsSourceFromLayer() for the list of options?
     // Also the bit at the end where modifiers are checked and reordering happens needs tidied.
@@ -498,8 +501,10 @@ export class OlMap extends GeonaMap {
 
       // If the map layer is a unique type, we clear the old layer for that type before we add the new one.
       if (options.modifier === 'basemap') {
+        // FIXME this probably won't work
         this._clearBasemap(layer);
       } else if (options.modifier === 'borders') {
+        // FIXME this probably won't work
         this._clearBorders(layer);
       }
 

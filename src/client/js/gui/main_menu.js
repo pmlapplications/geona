@@ -208,6 +208,7 @@ export class MainMenu {
 
   /**
    * Adds the layer in the 'layer-select' input box to the map.
+   * @param {String} layerIdentifier The identifier for the layer in the input box
    */
   addUrlLayerToMap(layerIdentifier) {
     for (let layer of this.requestLayerServer.layers) {
@@ -260,6 +261,8 @@ export class MainMenu {
    */
   hideLayer(item) {
     // TODO change icon to 'hide' instead of 'preview-1'
+    // item.classList.remove('icon-preview-1');
+    // item.classList.add('icon-hide');
     this.geona.map.hideLayer(item.dataset.identifier);
   }
 
@@ -269,6 +272,8 @@ export class MainMenu {
    */
   showLayer(item) {
     // TODO change icon to 'preview-1' instead of 'hide'
+    // item.classList.remove('icon-hide');
+    // item.classList.add('icon-preview-1');
     this.geona.map.showLayer(item.dataset.identifier);
   }
 
@@ -364,6 +369,72 @@ export class MainMenu {
       .removeClass('hidden');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.login_panel());
+  }
+
+  /**
+   * Shows the Options panel (select basemaps, borders, graticule, projection)
+   */
+  displayOptionsPanel() {
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__options').addClass('geona-menu__tab--active');
+
+    this.parentDiv.find('.js-geona-panel')
+      .empty()
+      .removeClass('hidden');
+    this.parentDiv.find('.js-geona-panel').prepend(templates.options_panel());
+
+    // Populate the basemap select
+    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
+      let layer = this.geona.map._availableLayers[layerIdentifier];
+      if (layer.modifier === 'basemap') {
+        this.parentDiv.find('.js-geona-options-panel-content__basemaps').append(
+          '<option value="' + layerIdentifier + '">' + layerIdentifier + ' - ' + selectPropertyLanguage(layer.title) + '</option>'
+        );
+      }
+    }
+    // TODO Select current basemap
+
+    // Populate the borders select
+    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
+      let layer = this.geona.map._availableLayers[layerIdentifier];
+      if (layer.modifier === 'borders') {
+        for (let style of layer.styles) {
+          this.parentDiv.find('.js-geona-options-panel-content__borders').append(
+            '<option value="' + layerIdentifier + '">' + layerIdentifier + ' (' + style.identifier + ') - ' + selectPropertyLanguage(layer.title) + '</option>'
+          );
+        }
+      }
+    }
+    // TODO Select current borders
+
+    // Check graticule box if enabled
+    if (this.geona.map.config.graticule === true) {
+      this.parentDiv.find('.js-geona-options-panel-content__graticule').prop('checked', true);
+    }
+  }
+
+  /**
+   * Turn on the graticule
+   */
+  showGraticule() {
+    this.geona.map.displayGraticule(true);
+  }
+
+  /**
+   * Turn off the graticule
+   */
+  hideGraticule() {
+    this.geona.map.displayGraticule(false);
+  }
+
+  /**
+   * Changes the map projection if possible
+   * @param {String} projection The map projection to use, such as 'EPSG:4326'
+   */
+  setProjection(projection) {
+    let currentProjection = this.geona.map.setProjection(projection);
+    console.log(currentProjection);
+    this.parentDiv.find('.js-geona-options-panel-content__projection').val(currentProjection).prop('selected', true);
   }
 
   /**
