@@ -390,9 +390,12 @@ export class MainMenu {
         this.parentDiv.find('.js-geona-options-panel-content__basemaps').append(
           '<option value="' + layerIdentifier + '">' + layerIdentifier + ' - ' + selectPropertyLanguage(layer.title) + '</option>'
         );
+        // Sets the selected dropdown value to match the map's basemap
+        if (layerIdentifier === this.geona.map.config.basemap) {
+          this.parentDiv.find('.js-geona-options-panel-content__basemaps').val(layerIdentifier).prop('selected', true);
+        }
       }
     }
-    // TODO Select current basemap
 
     // Populate the borders select
     for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
@@ -400,8 +403,14 @@ export class MainMenu {
       if (layer.modifier === 'borders') {
         for (let style of layer.styles) {
           this.parentDiv.find('.js-geona-options-panel-content__borders').append(
-            '<option value="' + layerIdentifier + '">' + layerIdentifier + ' (' + style.identifier + ') - ' + selectPropertyLanguage(layer.title) + '</option>'
+            '<option value="' + layerIdentifier + '" data-style="' + style.identifier + '">' +
+            layerIdentifier + ' (' + style.identifier + ') - ' + selectPropertyLanguage(layer.title) +
+            '</option>'
           );
+          let bordersConfig = this.geona.map.config.borders;
+          if (layerIdentifier === bordersConfig.identifier && style.identifier === bordersConfig.style) {
+            this.parentDiv.find('.js-geona-options-panel-content__borders').val(layerIdentifier).prop('selected', true);
+          }
         }
       }
     }
@@ -414,26 +423,52 @@ export class MainMenu {
   }
 
   /**
-   * Turn on the graticule
+   * Set the map's basemap to the specified layer.
+   * @param {String} basemapIdentifier The identifier for the basemap we want to switch to, or 'None'.
+   */
+  setBasemap(basemapIdentifier) {
+    this.geona.map._clearBasemap();
+    if (basemapIdentifier !== 'None') {
+      let geonaLayer = this.geona.map._availableLayers[basemapIdentifier];
+      let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+      this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'basemap'});
+    }
+  }
+
+  /**
+   * Set the map's borders to the specified layer.
+   * @param {String} bordersIdentifier The identifier for the borders we want to switch to, or 'None'.
+   * @param {String} [bordersStyle]    The style for the borders we want to add.
+   */
+  setBorders(bordersIdentifier, bordersStyle) {
+    this.geona.map._clearBorders();
+    if (bordersIdentifier !== 'None') {
+      let geonaLayer = this.geona.map._availableLayers[bordersIdentifier];
+      let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+      this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'borders', requestedStyle: bordersStyle});
+    }
+  }
+
+  /**
+   * Turn on the graticule.
    */
   showGraticule() {
     this.geona.map.displayGraticule(true);
   }
 
   /**
-   * Turn off the graticule
+   * Turn off the graticule.
    */
   hideGraticule() {
     this.geona.map.displayGraticule(false);
   }
 
   /**
-   * Changes the map projection if possible
-   * @param {String} projection The map projection to use, such as 'EPSG:4326'
+   * Changes the map projection if possible.
+   * @param {String} projection The map projection to use, such as 'EPSG:4326'.
    */
   setProjection(projection) {
     let currentProjection = this.geona.map.setProjection(projection);
-    console.log(currentProjection);
     this.parentDiv.find('.js-geona-options-panel-content__projection').val(currentProjection).prop('selected', true);
   }
 

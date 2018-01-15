@@ -95,6 +95,14 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.displayOptionsPanel', () => {
     menu.displayOptionsPanel();
   });
+  // Set basemap
+  eventManager.bind('mainMenu.setBasemap', (basemapIdentifier) => {
+    menu.setBasemap(basemapIdentifier);
+  });
+  // Set borders
+  eventManager.bind('mainMenu.setBorders', ([bordersIdentifier, bordersStyle]) => {
+    menu.setBorders(bordersIdentifier, bordersStyle);
+  });
   // Show graticule
   eventManager.bind('mainMenu.showGraticule', () => {
     menu.showGraticule();

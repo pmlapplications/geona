@@ -207,6 +207,17 @@ function registerLayersTriggers(eventManager, parentDiv) {
  * @param {JQuery}       parentDiv    The div which contains the current map.
  */
 function registerOptionsTriggers(eventManager, parentDiv) {
+  // Select basemap
+  parentDiv.find('.js-geona-options-panel-content__basemaps').change(function() {
+    let option = parentDiv.find('.js-geona-options-panel-content__basemaps').val();
+    eventManager.trigger('mainMenu.setBasemap', option);
+  });
+  // Select borders
+  parentDiv.find('.js-geona-options-panel-content__borders').change(function() {
+    let option = parentDiv.find('.js-geona-options-panel-content__borders option:selected').val();
+    let style = parentDiv.find('.js-geona-options-panel-content__borders option:selected').data('style');
+    eventManager.trigger('mainMenu.setBorders', [option, style]);
+  });
   // Toggle graticule
   parentDiv.find('.js-geona-options-panel-content__graticule').click(function() {
     if (parentDiv.find('.js-geona-options-panel-content__graticule').prop('checked') === true) {

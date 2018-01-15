@@ -118,7 +118,7 @@ export class OlMap extends GeonaMap {
       }
     }
     // Adds any defined borders layer to the map
-    if (this.config.borders.identifier !== 'none' && this.config.borders !== undefined) {
+    if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
       let layer = this._availableLayers[this.config.borders.identifier];
       let layerServer = this._availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
@@ -222,7 +222,7 @@ export class OlMap extends GeonaMap {
    * Clear the country borders if active
    */
   _clearBorders() {
-    if (this._initialized === true && this.config.borders !== 'none') {
+    if (this._initialized === true && this.config.borders.identifier !== 'none') {
       // Removes the top-most layer (borders will always be on top)
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'borders') {
@@ -231,7 +231,8 @@ export class OlMap extends GeonaMap {
       }
       // this.removeLayer(this._map.getLayers().item(this._map.getLayers().getLength() - 1).get('identifier'));
     }
-    this.config.borders = 'none';
+    this.config.borders.identifier = 'none';
+    this.config.borders.style = 'none';
   }
 
   /**
@@ -523,14 +524,15 @@ export class OlMap extends GeonaMap {
         this.reorderLayers(geonaLayer.identifier, 0);
         this.config.basemap = geonaLayer.identifier;
       } else if (options.modifier === 'borders') {
-        this.config.borders = geonaLayer.identifier;
+        this.config.borders.identifier = geonaLayer.identifier;
+        this.config.borders.style = style;
       } else if (this._initialized === true) {
         this.config.data.push(geonaLayer.identifier);
       }
 
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-      if (this.config.borders !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.borders, this._map.getLayers().getArray().length - 1);
+      if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+        this.reorderLayers(this.config.borders.identifier, this._map.getLayers().getArray().length - 1);
       }
     }
   }
@@ -549,7 +551,8 @@ export class OlMap extends GeonaMap {
           layer.set('zIndex', layer.get('zIndex') - 1);
         }
       } else if (this._activeLayers[layerIdentifier].get('modifier') === 'borders') {
-        this.config.borders = 'none';
+        this.config.borders.identifier = 'none';
+        this.config.borders.style = 'none';
       } else {
         // We removed a data layer, so the layers above the removed layer should have their zIndex reduced by 1.
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
@@ -629,10 +632,10 @@ export class OlMap extends GeonaMap {
     } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.borders !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
+    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.borders === 'none' && targetIndex > maxZIndex && this._initialized === true) {
+    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this._initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -695,7 +698,7 @@ export class OlMap extends GeonaMap {
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else {
-        // We save the zIndex so we can reorder the layer to it's current position when we re-add it
+        // We save the zIndex so we can reorder the layer to its current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
         // We define the layer options so that only the time changes
         let layerOptions = {
