@@ -722,7 +722,8 @@ export class LMap extends GeonaMap {
         };
 
         this.removeLayer(layerIdentifier);
-        this.addLayer(geonaLayer, layerOptions);
+        let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+        this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
         this._activeLayers[layerIdentifier].options.timeHidden = false;
 
@@ -795,7 +796,8 @@ export class LMap extends GeonaMap {
           let zIndex = layer.options.zIndex;
 
           this.removeLayer(layerIdentifier);
-          this.addLayer(geonaLayer, layerOptions);
+          let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+          this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
           this.reorderLayers(layerIdentifier, zIndex);
         } else {
           throw new Error('Specified style ' + styleIdentifier + ' is not defined for the layer ' + layerIdentifier + '.');
