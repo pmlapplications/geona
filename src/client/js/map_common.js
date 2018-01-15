@@ -196,9 +196,9 @@ export function loadDefaultLayersAndLayerServers(config) {
   // This is in case we have been passed a reference to the map's config, which we do not want to alter.
   // let config = JSON.parse(JSON.stringify(mapConfig)); // Fastest deep clone according to stackoverflow.com/a/5344074
 
-  let basemaps = getBasemapServerLayers(config);
-  let borders = getBordersServerLayers(config);
-  let data = getDataServerLayers(config);
+  let basemaps = getBasemapLayerServers(config);
+  let borders = getBordersLayerServers(config);
+  let data = getDataLayerServers(config);
   let allLayerServers = basemaps.concat(borders, data);
 
   let loadedServersAndLayers = {
@@ -260,7 +260,7 @@ export function loadDefaultLayersAndLayerServers(config) {
  * @param  {Object} config The config for the map
  * @return {Array}         The basemap servers, including duplicates.
  */
-function getBasemapServerLayers(config) {
+function getBasemapLayerServers(config) {
   let basemapServers = [];
   for (let layerServer of basemapLayers) {
     basemapServers.push(layerServer);
@@ -278,7 +278,7 @@ function getBasemapServerLayers(config) {
  * @param  {Object} config The config for the map
  * @return {Array}         The borders servers, including duplicates.
  */
-function getBordersServerLayers(config) {
+function getBordersLayerServers(config) {
   let borderServers = [];
   for (let layerServer of borderLayers) {
     borderServers.push(layerServer);
@@ -297,7 +297,7 @@ function getBordersServerLayers(config) {
  * @param  {Object} config The config for the map
  * @return {Array}         The data servers, including duplicates.
  */
-function getDataServerLayers(config) {
+function getDataLayerServers(config) {
   let data = [];
   for (let layerServer of dataLayers) {
     data.push(layerServer);
@@ -350,6 +350,7 @@ export const basemapLayers = [
       {
         protocol: 'wms',
         identifier: 'gebco_08_grid',
+        modifier: 'basemap',
         title: {
           und: 'GEBCO',
         },
@@ -375,6 +376,7 @@ export const basemapLayers = [
       {
         protocol: 'wms',
         identifier: 's2cloudless',
+        modifier: 'basemap',
         title: {
           und: 'EOX',
         },
@@ -535,21 +537,6 @@ for (let basemap of basemapLayers) {
    * Additional border layers also need to be added to config_schema.js in client.map.borders.format.
    */
 export const borderLayers = [
-  // {
-  //   id: 'line-white',
-  //   title: 'White border lines',
-  //   projections: ['EPSG:4326', 'EPSG:3857'],
-  //   source: {
-  //     type: 'wms',
-  //     url: 'https://rsg.pml.ac.uk/geoserver/wms?',
-  //     crossOrigin: null,
-  //     params: {
-  //       layers: 'rsg:full_10m_borders',
-  //       version: '1.1.0',
-  //       styles: 'line-white',
-  //     },
-  //   },
-  // },
   {
     identifier: 'https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities',
     version: '1.1.0',
@@ -558,6 +545,7 @@ export const borderLayers = [
       {
         identifier: 'rsg:full_10m_borders',
         protocol: 'wms',
+        modifier: 'borders',
         title: {
           und: 'World country border lines',
         },

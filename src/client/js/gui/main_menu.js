@@ -98,8 +98,8 @@ export class MainMenu {
     this.parentDiv.find('.js-geona-panel')
       .empty()
       .removeClass('hidden');
-
     this.parentDiv.find('.js-geona-panel').prepend(templates.explore_panel());
+
     // Leaflet doesn't support WMTS, so we will remove it from the Leaflet options
     if (this.geona.map.config.library.toLocaleLowerCase() === 'leaflet') {
       this.parentDiv.find('.js-geona-explore-panel-content__service option[value="WMTS"]').remove();
@@ -129,7 +129,6 @@ export class MainMenu {
           this.parentDiv.find('.js-geona-explore-panel-content__service').val('WMS').prop('selected', true);
           break;
         case 'wmts':
-          console.log(this.parentDiv.find('.js-geona-explore-panel-content__service'));
           if (this.parentDiv.find('.js-geona-explore-panel-content__service option[value="WMTS"]').length === 1) {
             this.parentDiv.find('.js-geona-explore-panel-content__service').val('WMTS').prop('selected', true);
           }
