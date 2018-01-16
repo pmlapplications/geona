@@ -229,7 +229,6 @@ export class OlMap extends GeonaMap {
           this.removeLayer(currentLayer.get('identifier'));
         }
       }
-      // this.removeLayer(this._map.getLayers().item(this._map.getLayers().getLength() - 1).get('identifier'));
     }
     this.config.borders.identifier = 'none';
     this.config.borders.style = 'none';
@@ -360,7 +359,7 @@ export class OlMap extends GeonaMap {
     // TODO offer option of changing identifier.
     if (duplicate === true) {
       alert('Layer with the identifier ' + geonaLayer.identifier + ' already exists on the map.');
-    } else if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+    } else if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode()) && options.modifier !== 'basemap') {
       alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
     } else {
       let attributions;
@@ -463,7 +462,7 @@ export class OlMap extends GeonaMap {
           break;
         case 'wmts': {
           title = selectPropertyLanguage(geonaLayer.title);
-          source = wmtsSourceFromLayer(geonaLayer, this._map.getView().getProjection().getCode());
+          source = wmtsSourceFromLayer(geonaLayer, geonaLayerServer, this._map.getView().getProjection().getCode());
           break;
         }
         case 'osm':
@@ -502,11 +501,9 @@ export class OlMap extends GeonaMap {
 
       // If the map layer is a unique type, we clear the old layer for that type before we add the new one.
       if (options.modifier === 'basemap') {
-        // FIXME this probably won't work
-        this._clearBasemap(layer);
+        this._clearBasemap();
       } else if (options.modifier === 'borders') {
-        // FIXME this probably won't work
-        this._clearBorders(layer);
+        this._clearBorders();
       }
 
       // Sets the map time if this is the first layer
@@ -533,6 +530,22 @@ export class OlMap extends GeonaMap {
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
       if (this.config.borders.identifier !== 'none' && this._initialized === true) {
         this.reorderLayers(this.config.borders.identifier, this._map.getLayers().getArray().length - 1);
+      }
+
+      if (geonaLayer.viewSettings !== undefined) {
+        this.setView({
+          center: geonaLayer.viewSettings.center,
+          fitExtent: geonaLayer.viewSettings.fitExtent,
+          maxExtent: geonaLayer.viewSettings.maxExtent,
+          maxZoom: geonaLayer.viewSettings.maxZoom,
+          minZoom: geonaLayer.viewSettings.minZoom,
+          projection: projection,
+          zoom: geonaLayer.viewSettings.zoom,
+        });
+      } else {
+        this.setView({
+          projection: projection,
+        });
       }
     }
   }

@@ -211,16 +211,17 @@ export class MainMenu {
    * @param {String} layerIdentifier The identifier for the layer in the input box
    */
   addUrlLayerToMap(layerIdentifier) {
-    for (let layer of this.requestLayerServer.layers) {
+    let layerServerDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServer));
+    for (let layer of layerServerDeepCopy.layers) {
       if (layer.identifier === layerIdentifier) {
         if (layer.dimension) {
           if (layer.dimension.time) {
-            this.geona.map.addLayer(layer, this.requestLayerServer, {modifier: 'hasTime'});
+            this.geona.map.addLayer(layer, layerServerDeepCopy, {modifier: 'hasTime'});
           } else {
-            this.geona.map.addLayer(layer, this.requestLayerServer);
+            this.geona.map.addLayer(layer, layerServerDeepCopy);
           }
         } else {
-          this.geona.map.addLayer(layer, this.requestLayerServer);
+          this.geona.map.addLayer(layer, layerServerDeepCopy);
         }
       }
     }
@@ -414,7 +415,6 @@ export class MainMenu {
         }
       }
     }
-    // TODO Select current borders
 
     // Check graticule box if enabled
     if (this.geona.map.config.graticule === true) {
@@ -427,10 +427,12 @@ export class MainMenu {
    * @param {String} basemapIdentifier The identifier for the basemap we want to switch to, or 'None'.
    */
   setBasemap(basemapIdentifier) {
-    this.geona.map._clearBasemap();
-    if (basemapIdentifier !== 'None') {
+    if (basemapIdentifier === 'None') {
+      this.geona.map._clearBasemap();
+    } else {
       let geonaLayer = this.geona.map._availableLayers[basemapIdentifier];
       let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+      this.geona.map._clearBasemap();
       this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'basemap'});
     }
   }

@@ -225,20 +225,17 @@ export class LMap extends GeonaMap {
 
         this._map.eachLayer((layer) => {
           if (layer._crs !== undefined) {
-            layer.remove();
-            this._mapLayers.removeLayer(layer);
+            this.removeLayer(layer.options.identifier);
             // We add the same layer, but now the map projection will have changed.
-            // eslint-disable-next-line new-cap
-            let newLayer = new L.tileLayer.wms(layer._url, {
-              layers: layer.options.layers,
-              format: layer.wmsParams.format,
-              transparent: layer.options.transparent,
-              attribution: layer.options.attribution,
-              version: layer.options.version,
-              zIndex: layer.options.zIndex,
+            let geonaLayer = this._availableLayers[layer.options.identifier];
+            let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+            let options = {
               modifier: layer.options.modifier,
-            }).addTo(this._map);
-            this._mapLayers.addLayer(newLayer);
+              requestedTime: layer.options.layerTime,
+              requestedStyle: layer.options.styles,
+              shown: layer.options.shown,
+            };
+            this.addLayer(geonaLayer, geonaLayerServer, options);
           }
         });
       }
@@ -252,15 +249,15 @@ export class LMap extends GeonaMap {
   /**
    * Set the map view with the provided options. Uses OpenLayers-style zoom levels.
    * @param {Object}  options            View options. All are optional
-   * @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
-   * @param {Object}  options.fitExtent  Extent to fit the view to, defined as
-   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
-   * @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
-   *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
-   * @param {Number}  options.maxZoom    The maximum allowed zoom
-   * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection, such as 'EPSG:4326'
-   * @param {Number}  options.zoom       The zoom
+   *   @param {Object}  options.center     The centre as {lat: <Number>, lon: <Number>}
+   *   @param {Object}  options.fitExtent  Extent to fit the view to, defined as
+   *                                       {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   *   @param {Object}  options.maxExtent  Extent to restrict the view to, defined as
+   *                                       {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
+   *   @param {Number}  options.maxZoom    The maximum allowed zoom
+   *   @param {Number}  options.minZoom    The minimum allowed zoom
+   *   @param {String}  options.projection The projection, such as 'EPSG:4326'
+   *   @param {Number}  options.zoom       The zoom
    */
   setView(options) {
     if (options.projection) {
@@ -283,8 +280,9 @@ export class LMap extends GeonaMap {
       this.config.viewSettings.center = options.center;
     }
 
+    let projection = leafletizeProjection(options.projection) || this._map.options.crs;
     if (options.maxZoom || options.minZoom || options.zoom) {
-      let projection = leafletizeProjection(options.projection) || this._map.options.crs;
+      // let projection = leafletizeProjection(options.projection) || this._map.options.crs;
 
       if (options.maxZoom) {
         this._map.setMaxZoom(leafletizeZoom(options.maxZoom, projection));
@@ -298,6 +296,9 @@ export class LMap extends GeonaMap {
         this._map.setZoom(leafletizeZoom(options.zoom, projection));
         this.config.viewSettings.zoom = options.zoom;
       }
+    } else {
+      // Set the zoom to the current zoom
+      this._map.setZoom(leafletizeZoom(this.config.viewSettings.zoom, projection));
     }
 
     if (options.fitExtent) {
@@ -348,12 +349,13 @@ export class LMap extends GeonaMap {
    * Create a Leaflet map layer from a Geona layer definition, and add to the map.
    * Will also add a Geona layer to the _availableLayers if not already included.
    *
-   * @param {Layer}   geonaLayer               A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
-   * @param {Object}  [options]                A list of options that affect the layers being added
-   * @param {String}    options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   * @param {String}    options.requestedTime  The time requested for this layer.
-   * @param {String}    options.requestedStyle The identifier of the style requested for this layer.
-   * @param {Boolean}   options.shown          Whether to show or hide the layer when it is first put on the map.
+   * @param {Layer}       geonaLayer       A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
+   * @param {LayerServer} geonaLayerServer The LayerServer corresponding to the layer
+   * @param {Object}      [options]        A list of options that affect the layers being added
+   *   @param {String}  options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   *   @param {String}  options.requestedTime  The time requested for this layer.
+   *   @param {String}  options.requestedStyle The identifier of the style requested for this layer.
+   *   @param {Boolean} options.shown          Whether to show or hide the layer when it is first put on the map.
    */
   addLayer(geonaLayer, geonaLayerServer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
     // Set default options if not specified
@@ -545,6 +547,22 @@ export class LMap extends GeonaMap {
       // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
       if (this.config.borders.identifier !== 'none' && this._initialized === true) {
         this.reorderLayers(this.config.borders.identifier, this._mapLayers.getLayers().length - 1);
+      }
+
+      if (geonaLayer.viewSettings !== undefined) {
+        this.setView({
+          center: geonaLayer.viewSettings.center,
+          fitExtent: geonaLayer.viewSettings.fitExtent,
+          maxExtent: geonaLayer.viewSettings.maxExtent,
+          maxZoom: geonaLayer.viewSettings.maxZoom,
+          minZoom: geonaLayer.viewSettings.minZoom,
+          projection: deLeafletizeProjection(projection),
+          zoom: geonaLayer.viewSettings.zoom,
+        });
+      } else {
+        this.setView({
+          projection: deLeafletizeProjection(projection),
+        });
       }
     } else {
       alert('Cannot use this projection for this layer');
@@ -849,7 +867,7 @@ export class LMap extends GeonaMap {
 }
 
 /**
- * Adjust a provided OpenLayers style zoom level to be correct for leaflet.
+ * Adjust a provided OpenLayers style zoom level to be correct for Leaflet.
  * @param  {Number} zoom       OpenLayers style zoom level
  * @param  {L.CRS}  projection The projection that the zoom is for
  * @return {Number}            Leaflet style zoom level
