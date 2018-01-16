@@ -408,6 +408,7 @@ export class MainMenu {
             layerIdentifier + ' (' + style.identifier + ') - ' + selectPropertyLanguage(layer.title) +
             '</option>'
           );
+          // Sets the selected dropdown value to match the map's borders
           let bordersConfig = this.geona.map.config.borders;
           if (layerIdentifier === bordersConfig.identifier && style.identifier === bordersConfig.style) {
             this.parentDiv.find('.js-geona-options-panel-content__borders').val(layerIdentifier).prop('selected', true);
@@ -420,6 +421,10 @@ export class MainMenu {
     if (this.geona.map.config.graticule === true) {
       this.parentDiv.find('.js-geona-options-panel-content__graticule').prop('checked', true);
     }
+
+    // Select the correct projection dropdown option
+    let projection = this.geona.map.config.projection;
+    this.selectProjection(projection);
   }
 
   /**
@@ -430,10 +435,15 @@ export class MainMenu {
     if (basemapIdentifier === 'None') {
       this.geona.map._clearBasemap();
     } else {
+      // Clear the basemap
+      this.geona.map._clearBasemap();
+      // Add the new basemap
       let geonaLayer = this.geona.map._availableLayers[basemapIdentifier];
       let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
-      this.geona.map._clearBasemap();
       this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'basemap'});
+      // Select the correct projection dropdown option
+      let projection = this.geona.map.config.projection;
+      this.selectProjection(projection);
     }
   }
 
@@ -443,8 +453,11 @@ export class MainMenu {
    * @param {String} [bordersStyle]    The style for the borders we want to add.
    */
   setBorders(bordersIdentifier, bordersStyle) {
-    this.geona.map._clearBorders();
-    if (bordersIdentifier !== 'None') {
+    if (bordersIdentifier === 'None') {
+      this.geona.map._clearBorders();
+    } else {
+      this.geona.map._clearBorders();
+
       let geonaLayer = this.geona.map._availableLayers[bordersIdentifier];
       let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
       this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'borders', requestedStyle: bordersStyle});
@@ -472,6 +485,14 @@ export class MainMenu {
   setProjection(projection) {
     let currentProjection = this.geona.map.setProjection(projection);
     this.parentDiv.find('.js-geona-options-panel-content__projection').val(currentProjection).prop('selected', true);
+  }
+
+  /**
+   * Sets the selected projection option in the dropdown to the specified projection.
+   * @param {String} projection The projection to switch the dropdown to.
+   */
+  selectProjection(projection) {
+    this.parentDiv.find('.js-geona-options-panel-content__projection').val(projection).prop('selected', true);
   }
 
   /**
