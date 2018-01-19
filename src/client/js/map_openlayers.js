@@ -235,19 +235,18 @@ export class OlMap extends GeonaMap {
 
   /**
    * Set the projection, if supported by the current basemap.
-   * @param  {String}  projection The projection to use, such as 'EPSG:4326'.
-   * @return {String}             The new map projection.
+   * @param  {String} projection The projection to use, such as 'EPSG:4326'.
+   * @return {String}            The map projection after execution.
    */
   setProjection(projection) {
     if (this.config.basemap !== 'none') {
-      let basemapId = this._map.getLayers().item(0).get('identifier');
       // If basemap supports new projection, we can change the view
-      if (this._availableLayers[basemapId].projections.includes(projection)) {
+      if (this._availableLayers[this.config.basemap].projections.includes(projection)) {
         this.setView({projection: projection});
         this.config.projection = projection;
         return projection;
       } else {
-        alert('Basemap ' + this._map.getLayers().item(0).get('identifier') + ' does not support projection type ' + projection + '. Please select a different basemap.');
+        alert('Basemap ' + this.config.basemap + ' does not support projection type ' + projection + '. Please select a different basemap.');
         return this._map.getView().getProjection().getCode();
       }
     } else {
@@ -271,6 +270,7 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
+    console.log(options);
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
@@ -410,7 +410,6 @@ export class OlMap extends GeonaMap {
         if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
           let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
           delete layerServerCopy.layers;
-          // delete geonaLayerServer.layers;
           this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
         }
       }
@@ -483,9 +482,6 @@ export class OlMap extends GeonaMap {
     }
   }
 
-  // Add layer - has all the checking logic, actually constructs and adds the layer
-
-  // Create wms source - returns a WMS source
   /**
    * 
    * @param {*} geonaLayer 
@@ -499,10 +495,8 @@ export class OlMap extends GeonaMap {
     let projection;
     let requiredLayer;
     let style;
-    let title;
     let time;
 
-    title = geonaLayer.title.und;
     requiredLayer = geonaLayer.identifier;
     // FIXME fix parser so this doesn't happen
     if ($.isEmptyObject(geonaLayer.styles)) {
@@ -573,7 +567,8 @@ export class OlMap extends GeonaMap {
       crossOrigin: null,
       params: {
         LAYERS: requiredLayer,
-        FORMAT: geonaLayer.formats || 'image/png',
+        // FORMAT: geonaLayer.formats || 'image/png',
+        FORMAT: format,
         STYLES: style || '',
         time: time,
         wrapDateLine: true,
@@ -587,7 +582,6 @@ export class OlMap extends GeonaMap {
     return {source: source, options: settings};
   }
 
-  // Create wmts source - returns a WMTS source
   /**
    * 
    * @param {*} geonaLayer 
