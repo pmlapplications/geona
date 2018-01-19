@@ -181,6 +181,7 @@ export class MainMenu {
     this._clearPreviousUrlLayers();
     getLayerServer(url, service, save, useCache)
       .then((layers) => {
+        console.log(layers);
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');

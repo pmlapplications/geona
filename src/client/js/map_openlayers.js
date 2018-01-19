@@ -223,7 +223,6 @@ export class OlMap extends GeonaMap {
    */
   _clearBorders() {
     if (this._initialized === true && this.config.borders.identifier !== 'none') {
-      // Removes the top-most layer (borders will always be on top)
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'borders') {
           this.removeLayer(currentLayer.get('identifier'));
@@ -331,147 +330,77 @@ export class OlMap extends GeonaMap {
    *
    * @param {Layer}       geonaLayer       The Geona Layer object to be created as an OpenLayers layer on the map.
    * @param {LayerServer} geonaLayerServer The Geona LayerServer object that corresponds to the Geona Layer.
-   * @param {Object}      [options]        A list of options that affect the layers being added
-   *   @param {String}  options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   *   @param {String}  options.requestedTime  The time requested for this layer.
-   *   @param {String}  options.requestedStyle The identifier of the style requested for this layer.
-   *   @param {Boolean} options.shown          Whether to show or hide the layer when it is first put on the map.
+   * @param {Object}      [settings]       A list of settings that affect the layers being added
+   *   @param {String}  settings.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   *   @param {String}  settings.requestedTime  The time requested for this layer.
+   *   @param {String}  settings.requestedStyle The identifier of the style requested for this layer.
+   *   @param {Boolean} settings.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, geonaLayerServer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
-    // TODO try and clean this method up - maybe split it up into separate methods.
-    // Maybe have a wmsSourceFromLayer() for the list of options?
-    // Also the bit at the end where modifiers are checked and reordering happens needs tidied.
-
-    // Set default options if not specified
-    // No need to set modifier and requestedTime
-    if (options.shown === undefined) {
-      options.shown = true;
+  addLayer(geonaLayer, geonaLayerServer, settings) {
+    // Parameter checking
+    if (geonaLayer.layerServer !== geonaLayerServer.identifier && geonaLayer.layerServer !== undefined) {
+      throw new Error(
+        'layerServer identifier \'' + geonaLayer.layerServer +
+        '\' for geonaLayer \'' + geonaLayer.identifier +
+        '\' does not match identifier for geonaLayerServer\'' + geonaLayerServer.identifier + '\''
+      );
+    } else if (geonaLayer.layerServer === undefined || geonaLayerServer.identifier === undefined) {
+      throw new Error('layerServer property of geonaLayer parameter or identifier property of geonaLayerServer parameter is undefined');
     }
 
-    // Checks the map for any layers with the same identifier as the layer being added
-    let duplicate = false;
-    for (let layer of this._map.getLayers().getArray()) {
-      if (layer.get('identifier') === geonaLayer.identifier) {
-        duplicate = true;
-      }
+    // Merge custom options with defaults
+    let options = Object.assign({},
+      {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
+      settings
+    );
+    // Projection check
+    if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode()) && options.modifier !== 'basemap') {
+      // alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
+      throw new Error('The layer ' + geonaLayer.identifier +
+        ' cannot be displayed with the current ' + this._map.getView().getProjection().getCode() +
+        ' map projection.'
+      );
     }
-    // We enforce that identifiers must be unique on the map.
-    // TODO offer option of changing identifier.
-    if (duplicate === true) {
-      alert('Layer with the identifier ' + geonaLayer.identifier + ' already exists on the map.');
-    } else if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode()) && options.modifier !== 'basemap') {
-      alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
+
+    let projection; // Needs to be returned with sources
+    let source;
+    let time; // Needs to be returned with sources
+
+    let updateOptions = {options: {}};
+
+    // As the available layers have unique identifiers, a layer with the same identifier will just be updating options
+    if (this._activeLayers[geonaLayer.identifier] !== undefined) {
+    // Get a source with updated options
+      updateOptions = this.getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options);
+      source = updateOptions.source;
+      time = updateOptions.options.time;
     } else {
-      let attributions;
-      let format;
-      let projection;
-      let requiredLayer;
-      let source;
-      let style;
-      let title;
-      let time;
-
       switch (geonaLayer.protocol) {
-        case 'wms':
-          title = geonaLayer.title.und;
-          requiredLayer = geonaLayer.identifier;
-          // FIXME fix parser so this doesn't happen
-          if ($.isEmptyObject(geonaLayer.styles)) {
-            geonaLayer.styles = undefined;
-          }
-          // Select an appropriate format
-          // If a format is found in the layer style, the format is set to that instead
-          if (geonaLayer.formats !== undefined) {
-            if (geonaLayer.formats.includes('image/png')) {
-              format = 'image/png';
-            } else if (geonaLayer.formats.includes('image/jpeg')) {
-              format = 'image/jpeg';
-            } else {
-              format = geonaLayer.formats[0];
-            }
-          }
-          // Select appropriate style
-          if (geonaLayer.styles !== undefined) {
-            // Default to the first style
-            style = geonaLayer.styles[0].identifier;
-            if (geonaLayer.styles[0].legendUrl !== undefined) {
-              format = geonaLayer.styles[0].legendUrl[0].format;
-            }
-            // Search for the requested style and set that as the style if found
-            // FIXME if the requested style is not available, throw an error and print out list of available styles
-            for (let layerStyle of geonaLayer.styles) {
-              if (layerStyle.identifier === options.requestedStyle) {
-                style = options.requestedStyle;
-                if (layerStyle.legendUrl !== undefined) {
-                  format = layerStyle.legendUrl[0].format;
-                }
-              }
-            }
-          }
-
-          // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
-          if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
-            projection = this._map.getView().getProjection().getCode();
-          } else {
-            projection = geonaLayer.projections[0];
-          }
-
-          if (geonaLayer.attribution) {
-            if (geonaLayer.attribution.onlineResource) {
-              // attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
-              attributions = geonaLayer.attribution.onlineResource;
-            } else {
-              attributions = geonaLayer.attribution.title;
-            }
-          }
-          // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers
-          // Not good because 'Geona' won't be displayed without any layers, if the layer it's attached to is
-          // removed, and will be out of sequence if the layers are added in different orders
-          if (this._map.getLayers().getArray().length === 0 || options.modifier === 'basemap') {
-            attributions = 'Geona | ' + attributions;
-          }
-
-          // Selects the requested time, the closest to the map time, or the default layer time.
-          if (options.requestedTime !== undefined) {
-            time = findNearestValidTime(geonaLayer, options.requestedTime);
-          } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-            time = findNearestValidTime(geonaLayer, this._mapTime);
-          } else if (options.modifier === 'hasTime') {
-            if (geonaLayer.dimensions) {
-              if (geonaLayer.dimensions.time) {
-                time = geonaLayer.dimensions.time.default;
-              }
-            }
-          }
-
-          source = new ol.source.TileWMS({
-            url: geonaLayerServer.url,
-            projection: projection,
-            attributions: attributions,
-            crossOrigin: null,
-            params: {
-              LAYERS: requiredLayer,
-              FORMAT: geonaLayer.formats || 'image/png',
-              STYLES: style || '',
-              time: time,
-              wrapDateLine: true,
-              NUMCOLORBANDS: 255,
-              VERSION: geonaLayerServer.version,
-            },
-          });
+        case 'wms': {
+          let wmsSourceAndOptions = this._createWmsSource(geonaLayer, geonaLayerServer, options);
+          source = wmsSourceAndOptions.source;
+          time = wmsSourceAndOptions.options.time;
           break;
+        }
         case 'wmts': {
-          title = selectPropertyLanguage(geonaLayer.title);
-          source = wmtsSourceFromLayer(geonaLayer, geonaLayerServer, this._map.getView().getProjection().getCode());
+          let wmtsSourceAndOptions = this._createWmtsSource(geonaLayer, geonaLayerServer, options);
+          source = wmtsSourceAndOptions.source;
+          time = wmtsSourceAndOptions.options.time;
           break;
         }
         case 'osm':
-          source = new ol.source.OSM({
-            crossOrigin: null,
-          });
+        // TODO
           break;
-        case undefined:
-          throw new Error('Layer protocol is undefined');
+        default:
+          throw new Error('Layer protocol ' + geonaLayer.protocol + ' is not supported.');
+      }
+
+
+      // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
+      if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+        projection = this._map.getView().getProjection().getCode();
+      } else {
+        projection = geonaLayer.projections[0];
       }
 
       if (this._availableLayers[geonaLayer.identifier] === undefined) {
@@ -479,75 +408,254 @@ export class OlMap extends GeonaMap {
         this._availableLayers[geonaLayer.identifier] = geonaLayer;
         // Save the LayerServer if not already saved
         if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
-          delete geonaLayerServer.layers;
-          this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
+          let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
+          delete layerServerCopy.layers;
+          // delete geonaLayerServer.layers;
+          this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
         }
       }
+    }
 
-      this._activeLayers[geonaLayer.identifier] = new ol.layer.Tile({
-        identifier: geonaLayer.identifier,
-        viewSettings: geonaLayer.viewSettings,
-        projections: geonaLayer.projections,
-        source: source,
-        modifier: options.modifier,
-        // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
-        // This is to compensate for the fact that the layer has not been added to the map yet.
-        zIndex: this._map.getLayers().getArray().length,
-        layerTime: time,
-        shown: options.shown,
-        timeHidden: false,
-      });
-      let layer = this._activeLayers[geonaLayer.identifier];
+    let layer = new ol.layer.Tile({
+      identifier: geonaLayer.identifier,
+      viewSettings: geonaLayer.viewSettings,
+      projections: geonaLayer.projections,
+      source: source,
+      modifier: options.modifier,
+      // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
+      // This is to compensate for the fact that the layer has not been added to the map yet.
+      zIndex: updateOptions.options.zIndex || this._map.getLayers().getArray().length,
+      layerTime: time,
+      shown: updateOptions.options.shown || options.shown,
+      timeHidden: updateOptions.options.timeHidden || false,
+    });
 
-      // If the map layer is a unique type, we clear the old layer for that type before we add the new one.
-      if (options.modifier === 'basemap') {
+
+    // Sets the map time if this is the first layer
+    if (this._mapTime === undefined && time !== undefined) {
+      this._mapTime = time;
+    }
+
+    // Add the layer to the map
+    switch (options.modifier) {
+      case 'basemap':
         this._clearBasemap();
-      } else if (options.modifier === 'borders') {
-        this._clearBorders();
-      }
-
-      // Sets the map time if this is the first layer
-      if (this._mapTime === undefined && time !== undefined) {
-        this._mapTime = time;
-      }
-
-      this._map.addLayer(layer);
-
-      if (options.shown === false) {
-        layer.setVisible(false);
-      }
-
-      if (options.modifier === 'basemap') {
+        this._map.addLayer(layer);
+        this._activeLayers[geonaLayer.identifier] = layer;
         this.reorderLayers(geonaLayer.identifier, 0);
         this.config.basemap = geonaLayer.identifier;
-      } else if (options.modifier === 'borders') {
+        break;
+      case 'borders':
+        this._clearBorders();
+        this._map.addLayer(layer);
+        this._activeLayers[geonaLayer.identifier] = layer;
         this.config.borders.identifier = geonaLayer.identifier;
-        this.config.borders.style = style;
-      } else if (this._initialized === true) {
-        this.config.data.push(geonaLayer.identifier);
-      }
+        this.config.borders.style = layer.getSource().getParams().STYLES;
+        break;
+      default:
+        this.removeLayer(layer.identifier);
+        this._map.addLayer(layer);
+        this._activeLayers[geonaLayer.identifier] = layer;
+        if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+          this.reorderLayers(geonaLayer.identifier, this._map.getLayers().getArray().length - 2);
+          this.config.data.push(geonaLayer.identifier);
+        }
+    }
 
-      // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-      if (this.config.borders.identifier !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.borders.identifier, this._map.getLayers().getArray().length - 1);
-      }
+    if (options.shown === false) {
+      layer.setVisible(false);
+    }
 
-      if (geonaLayer.viewSettings !== undefined) {
-        this.setView({
-          center: geonaLayer.viewSettings.center,
-          fitExtent: geonaLayer.viewSettings.fitExtent,
-          maxExtent: geonaLayer.viewSettings.maxExtent,
-          maxZoom: geonaLayer.viewSettings.maxZoom,
-          minZoom: geonaLayer.viewSettings.minZoom,
-          projection: projection,
-          zoom: geonaLayer.viewSettings.zoom,
-        });
+    if (geonaLayer.viewSettings !== undefined) {
+      this.setView({
+        center: geonaLayer.viewSettings.center,
+        fitExtent: geonaLayer.viewSettings.fitExtent,
+        maxExtent: geonaLayer.viewSettings.maxExtent,
+        maxZoom: geonaLayer.viewSettings.maxZoom,
+        minZoom: geonaLayer.viewSettings.minZoom,
+        projection: projection,
+        zoom: geonaLayer.viewSettings.zoom,
+      });
+    } else {
+      this.setView({
+        projection: projection,
+      });
+    }
+  }
+
+  // Add layer - has all the checking logic, actually constructs and adds the layer
+
+  // Create wms source - returns a WMS source
+  /**
+   * 
+   * @param {*} geonaLayer 
+   * @param {*} geonaLayerServer 
+   * @param {*} options 
+   * @return {ol.source.TileWms}
+   */
+  _createWmsSource(geonaLayer, geonaLayerServer, options) {
+    let attributions;
+    let format;
+    let projection;
+    let requiredLayer;
+    let style;
+    let title;
+    let time;
+
+    title = geonaLayer.title.und;
+    requiredLayer = geonaLayer.identifier;
+    // FIXME fix parser so this doesn't happen
+    if ($.isEmptyObject(geonaLayer.styles)) {
+      geonaLayer.styles = undefined;
+    }
+    // Select an appropriate format
+    // If a format is found in the layer style, the format is set to that instead
+    if (geonaLayer.formats !== undefined) {
+      if (geonaLayer.formats.includes('image/png')) {
+        format = 'image/png';
+      } else if (geonaLayer.formats.includes('image/jpeg')) {
+        format = 'image/jpeg';
       } else {
-        this.setView({
-          projection: projection,
-        });
+        format = geonaLayer.formats[0];
       }
     }
+    // Select appropriate style
+    if (geonaLayer.styles !== undefined) {
+      // Default to the first style
+      style = geonaLayer.styles[0].identifier;
+      if (geonaLayer.styles[0].legendUrl !== undefined) {
+        format = geonaLayer.styles[0].legendUrl[0].format;
+      }
+      // Search for the requested style and set that as the style if found
+      // FIXME if the requested style is not available, throw an error and print out list of available styles
+      for (let layerStyle of geonaLayer.styles) {
+        if (layerStyle.identifier === options.requestedStyle) {
+          style = options.requestedStyle;
+          if (layerStyle.legendUrl !== undefined) {
+            format = layerStyle.legendUrl[0].format;
+          }
+        }
+      }
+    }
+
+    if (geonaLayer.attribution) {
+      if (geonaLayer.attribution.onlineResource) {
+        // attributions = '<a href="' + geonaLayer.attribution.onlineResource + '">' + geonaLayer.attribution.title + '</a>';
+        attributions = geonaLayer.attribution.onlineResource;
+      } else {
+        attributions = geonaLayer.attribution.title;
+      }
+    }
+    // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers
+    // Not good because 'Geona' won't be displayed without any layers, if the layer it's attached to is
+    // removed, and will be out of sequence if the layers are added in different orders
+    if (this._map.getLayers().getArray().length === 0 || options.modifier === 'basemap') {
+      attributions = 'Geona | ' + attributions;
+    }
+
+    // Selects the requested time, the closest to the map time, or the default layer time.
+    if (options.requestedTime !== undefined) {
+      time = findNearestValidTime(geonaLayer, options.requestedTime);
+    } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
+      time = findNearestValidTime(geonaLayer, this._mapTime);
+    } else if (options.modifier === 'hasTime') {
+      if (geonaLayer.dimensions) {
+        if (geonaLayer.dimensions.time) {
+          time = geonaLayer.dimensions.time.default;
+        }
+      }
+    }
+
+    let source = new ol.source.TileWMS({
+      url: geonaLayerServer.url,
+      projection: projection,
+      attributions: attributions,
+      crossOrigin: null,
+      params: {
+        LAYERS: requiredLayer,
+        FORMAT: geonaLayer.formats || 'image/png',
+        STYLES: style || '',
+        time: time,
+        wrapDateLine: true,
+        NUMCOLORBANDS: 255,
+        VERSION: geonaLayerServer.version,
+      },
+    });
+
+    let settings = {time: time};
+
+    return {source: source, options: settings};
+  }
+
+  // Create wmts source - returns a WMTS source
+  /**
+   * 
+   * @param {*} geonaLayer 
+   * @param {*} geonaLayerServer 
+   * @param {*} options 
+   * @return {*}
+   */
+  _createWmtsSource(geonaLayer, geonaLayerServer, options) {
+    let title;
+    let source;
+
+    title = selectPropertyLanguage(geonaLayer.title);
+    source = wmtsSourceFromLayer(geonaLayer, geonaLayerServer, this._map.getView().getProjection().getCode());
+    // TODO needs checking with a time layer
+    let settings = {time: source.getDimensions().time};
+    return {source: source, options: settings};
+  }
+
+  /**
+   * Copies the options for a currently-active layer, updates them with the new options, then returns a source object,
+   * along with the non-source options
+   * @param {Layer} geonaLayer 
+   * @param {LayerServer} geonaLayerServer 
+   * @param {Object} options 
+   * @return {*}
+   */
+  getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options) {
+    // Copy options from current active layer
+    let currentLayer = this._activeLayers[geonaLayer.identifier];
+    let updatedOptions = {
+      modifier: currentLayer.get('modifier'),
+      time: currentLayer.get('layerTime'),
+      style: currentLayer.getSource().getParams().STYLES,
+      shown: currentLayer.get('shown'),
+      zIndex: currentLayer.get('zIndex'),
+      timeHidden: currentLayer.get('timeHidden'),
+      opacity: currentLayer.get('opacity'),
+    };
+
+    // Update copy for newly-specified options
+    if (options.modifier !== undefined) {
+      updatedOptions.modifier = options.modifier;
+    }
+    if (options.requestedTime !== undefined) {
+      updatedOptions.requestedTime = options.requestedTime;
+    }
+    if (options.requestedStyle !== undefined) {
+      updatedOptions.requestedStyle = options.requestedStyle;
+    }
+    if (options.shown !== undefined) {
+      updatedOptions.shown = options.shown;
+    }
+
+    let sourceAndOptions;
+    switch (geonaLayer.protocol) {
+      case 'wms':
+        sourceAndOptions = this._createWmsSource(geonaLayer, geonaLayerServer, updatedOptions);
+        break;
+      case 'wmts':
+        sourceAndOptions = this._createWmtsSource(geonaLayer, geonaLayerServer, updatedOptions);
+        break;
+      case 'osm':
+        // TODO
+        break;
+      default:
+        throw new Error('Layer protocol is ' + geonaLayer.protocol);
+    }
+    return {source: sourceAndOptions.source, options: updatedOptions};
   }
 
   /**

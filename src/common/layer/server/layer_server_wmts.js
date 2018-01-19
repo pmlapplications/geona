@@ -11,8 +11,10 @@ export default class LayerServerWmts extends LayerServerOws {
    * Instantiate a new LayerServerWmts
    * @param  {Object} serverConfig The server config. See the class diagram.
    */
-  constructor(serverConfig) {
-    super(serverConfig);
+  constructor(serverConfig, identifier) {
+    super(serverConfig, identifier);
+
+    // this.identifier = identifier;
 
     this.operationsMetadata = serverConfig.operationsMetadata;
     this.tileMatrixSets = serverConfig.tileMatrixSets;

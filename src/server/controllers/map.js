@@ -101,6 +101,7 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
             layerServer = new LayerServerWmts(JSON.parse(body), filename);
             break;
         }
+        console.log(layerServer);
         layerServer = JSON.stringify(layerServer);
         if (save === true) {
           fs.writeFileSync(filepath, layerServer, 'utf8');
