@@ -362,22 +362,29 @@ export class OlMap extends GeonaMap {
       );
     }
 
-    let projection; // Needs to be returned with sources
+    let projection;
     let source;
     let time; // Needs to be returned with sources
+
+    // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
+    if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
+      projection = this._map.getView().getProjection().getCode();
+    } else {
+      projection = geonaLayer.projections[0];
+    }
 
     let updateOptions = {options: {}};
 
     // As the available layers have unique identifiers, a layer with the same identifier will just be updating options
     if (this._activeLayers[geonaLayer.identifier] !== undefined) {
     // Get a source with updated options
-      updateOptions = this.getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options);
+      updateOptions = this.getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection);
       source = updateOptions.source;
       time = updateOptions.options.time;
     } else {
       switch (geonaLayer.protocol) {
         case 'wms': {
-          let wmsSourceAndOptions = this._createWmsSource(geonaLayer, geonaLayerServer, options);
+          let wmsSourceAndOptions = this._createWmsSource(geonaLayer, geonaLayerServer, options, projection);
           source = wmsSourceAndOptions.source;
           time = wmsSourceAndOptions.options.time;
           break;
@@ -393,14 +400,6 @@ export class OlMap extends GeonaMap {
           break;
         default:
           throw new Error('Layer protocol ' + geonaLayer.protocol + ' is not supported.');
-      }
-
-
-      // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
-      if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
-        projection = this._map.getView().getProjection().getCode();
-      } else {
-        projection = geonaLayer.projections[0];
       }
 
       if (this._availableLayers[geonaLayer.identifier] === undefined) {
@@ -489,15 +488,12 @@ export class OlMap extends GeonaMap {
    * @param {*} options 
    * @return {ol.source.TileWms}
    */
-  _createWmsSource(geonaLayer, geonaLayerServer, options) {
+  _createWmsSource(geonaLayer, geonaLayerServer, options, projection) {
     let attributions;
     let format;
-    let projection;
-    let requiredLayer;
     let style;
     let time;
 
-    requiredLayer = geonaLayer.identifier;
     // FIXME fix parser so this doesn't happen
     if ($.isEmptyObject(geonaLayer.styles)) {
       geonaLayer.styles = undefined;
@@ -566,10 +562,9 @@ export class OlMap extends GeonaMap {
       attributions: attributions,
       crossOrigin: null,
       params: {
-        LAYERS: requiredLayer,
-        // FORMAT: geonaLayer.formats || 'image/png',
-        FORMAT: format,
-        STYLES: style || '',
+        LAYERS: geonaLayer.identifier,
+        FORMAT: format || geonaLayer.formats || 'image/png',
+        STYLES: style || geonaLayer.styles,
         time: time,
         wrapDateLine: true,
         NUMCOLORBANDS: 255,
@@ -608,7 +603,7 @@ export class OlMap extends GeonaMap {
    * @param {Object} options 
    * @return {*}
    */
-  getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options) {
+  getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection) {
     // Copy options from current active layer
     let currentLayer = this._activeLayers[geonaLayer.identifier];
     let updatedOptions = {
@@ -638,7 +633,7 @@ export class OlMap extends GeonaMap {
     let sourceAndOptions;
     switch (geonaLayer.protocol) {
       case 'wms':
-        sourceAndOptions = this._createWmsSource(geonaLayer, geonaLayerServer, updatedOptions);
+        sourceAndOptions = this._createWmsSource(geonaLayer, geonaLayerServer, updatedOptions, projection);
         break;
       case 'wmts':
         sourceAndOptions = this._createWmtsSource(geonaLayer, geonaLayerServer, updatedOptions);
