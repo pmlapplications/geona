@@ -270,7 +270,6 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    console.log(options);
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
@@ -302,6 +301,8 @@ export class OlMap extends GeonaMap {
     if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
       center = ol.extent.getCenter(maxExtent);
     }
+
+    // TODO check for undefined errors? Would let people know if their definitions were wrong (+ stop OL from hanging)
 
     let newView = new ol.View({
       center: center,
@@ -370,6 +371,14 @@ export class OlMap extends GeonaMap {
       projection = this._map.getView().getProjection().getCode();
     } else {
       projection = geonaLayer.projections[0];
+    }
+
+    // Check the rest of the layers support this projection
+    // TODO the different projection is just the first one - should we check if another projection is supported by all layers + basemap?
+    for (let activeLayer of this._map.getLayers().getArray()) {
+      if (!activeLayer.get('projections').includes(projection) && activeLayer.get('modifier') !== 'basemap') {
+        throw new Error('Currently active layer ' + activeLayer.get('identifier') + ' does not support the new basemap projection ' + projection);
+      }
     }
 
     let updateOptions = {options: {}};

@@ -391,7 +391,7 @@ export class LMap extends GeonaMap {
     let time;
 
     switch (geonaLayer.protocol) {
-      case 'wms':
+      case 'wms': {
         // FIXME fix parser so this doesn't happen
         if ($.isEmptyObject(geonaLayer.styles)) {
           geonaLayer.styles = undefined;
@@ -432,6 +432,16 @@ export class LMap extends GeonaMap {
         } else {
           projection = leafletizeProjection(geonaLayer.projections[0]);
         }
+
+        // Check the rest of the layers support this projection
+        // TODO the different projection is just the first one - should we check if another projection is supported by all layers + basemap?
+        let projectionCode = deLeafletizeProjection(projection);
+        for (let activeLayer of this._mapLayers.getLayers()) {
+          if (!activeLayer.options.projections.includes(projectionCode) && activeLayer.options.modifier !== 'basemap') {
+            throw new Error('Currently active layer ' + activeLayer.options.identifier + ' does not support the new basemap projection ' + projectionCode);
+          }
+        }
+
         if (geonaLayer.attribution) {
           if (geonaLayer.attribution.onlineResource) {
             attribution = geonaLayer.attribution.onlineResource;
@@ -463,6 +473,7 @@ export class LMap extends GeonaMap {
           attribution: attribution,
           version: geonaLayerServer.version,
           crs: projection,
+          projections: geonaLayer.projections,
           zIndex: this._mapLayers.getLayers().length,
           modifier: options.modifier,
           layerTime: time,
@@ -479,6 +490,7 @@ export class LMap extends GeonaMap {
           layer.options.TIME = time;
         }
         break;
+      }
       case undefined:
         throw new Error('Layer protocol is undefined');
       default:
