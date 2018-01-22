@@ -150,6 +150,16 @@ function registerExploreTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.getLayerServer', [url, service, save, useCache]);
   });
 
+  // Update text to use or refresh cache
+  parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').click(() => {
+    let checked = parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked');
+    if (checked === true) {
+      eventManager.trigger('mainMenu.changeAddUrlButtonText', true);
+    } else {
+      eventManager.trigger('mainMenu.changeAddUrlButtonText', false);
+    }
+  });
+
   // Add URL layer to map
   parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
     let layerIdentifier = parentDiv.find('.js-geona-explore-panel-content__layer-select').val();

@@ -163,11 +163,27 @@ export class MainMenu {
           // Show the label and checkbox
           this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').removeClass('hidden');
           this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').removeClass('hidden');
+          this.changeAddUrlButtonText(false);
         } else {
           this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').addClass('hidden');
           this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').addClass('hidden');
+          this.changeAddUrlButtonText(true);
         }
       });
+  }
+
+  /**
+   * Changes the Add URL button text depending on whether we will use the cache or not
+   * @param {Boolean} useUrl True to display the text to use URL
+   */
+  changeAddUrlButtonText(useUrl) {
+    switch (useUrl) {
+      case true:
+        this.parentDiv.find('.js-geona-explore-panel-content__add-url').html('Find Layers from URL');
+        break;
+      case false:
+        this.parentDiv.find('.js-geona-explore-panel-content__add-url').html('Find Layers from Cache');
+    }
   }
 
   /**

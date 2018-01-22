@@ -37,6 +37,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.getLayerServer', ([url, service, save, useCache]) => {
     menu.getLayerServer(url, service, save, useCache);
   });
+  // Change add URL text
+  eventManager.bind('mainMenu.changeAddUrlButtonText', (checked) => {
+    menu.changeAddUrlButtonText(checked);
+  });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', (layerIdentifier) => {
     menu.addUrlLayerToMap(layerIdentifier);
