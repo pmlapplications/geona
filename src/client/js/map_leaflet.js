@@ -349,7 +349,7 @@ export class LMap extends GeonaMap {
    * Create a Leaflet map layer from a Geona layer definition, and add to the map.
    * Will also add a Geona layer to the _availableLayers if not already included.
    *
-   * @param {Layer}       geonaLayer       A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
+   * @param {Layer}       geonaLayer       A Geona Layer, defined by parsing the GetCapabilities request from a server.
    * @param {LayerServer} geonaLayerServer The LayerServer corresponding to the layer
    * @param {Object}      [settings]       A list of settings that affect the layers being added
    *   @param {String}  settings.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
@@ -377,7 +377,7 @@ export class LMap extends GeonaMap {
 
     // If a layer is a basemap we might change the projection
     // anyway, so it doesn't matter if the layer supports the current projection
-    if (!geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) && options.modifier === 'basemap') {
+    if (!geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) && options.modifier !== 'basemap') {
       throw new Error('The layer ' + geonaLayer.identifier +
         ' cannot be displayed with the current ' + deLeafletizeProjection(this._map.options.crs) +
         ' map projection.'
@@ -453,47 +453,30 @@ export class LMap extends GeonaMap {
           }
         }
 
+        // eslint-disable-next-line new-cap
+        layer = new L.tileLayer.wms(geonaLayerServer.url, {
+          identifier: geonaLayer.identifier,
+          layers: geonaLayer.identifier,
+          styles: style || '',
+          format: format || 'image/png',
+          transparent: true,
+          attribution: attribution,
+          version: geonaLayerServer.version,
+          crs: projection,
+          zIndex: this._mapLayers.getLayers().length,
+          modifier: options.modifier,
+          layerTime: time,
+          shown: options.shown,
+          opacity: 1,
+          timeHidden: false,
+        });
+
         // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
         // This is why we have 'time', 'Time' and 'TIME' to cover all cases
         if (options.modifier === 'hasTime' && time !== undefined) {
-          // eslint-disable-next-line new-cap
-          layer = new L.tileLayer.wms(geonaLayerServer.url, {
-            identifier: geonaLayer.identifier,
-            layers: geonaLayer.identifier,
-            styles: style || '',
-            format: format || 'image/png',
-            transparent: true,
-            attribution: attribution,
-            version: geonaLayerServer.version,
-            crs: projection,
-            time: time,
-            Time: time,
-            TIME: time,
-            zIndex: this._mapLayers.getLayers().length,
-            modifier: options.modifier,
-            layerTime: time,
-            shown: options.shown,
-            opacity: 1,
-            timeHidden: false,
-          });
-        } else {
-          // eslint-disable-next-line new-cap
-          layer = new L.tileLayer.wms(geonaLayerServer.url, {
-            identifier: geonaLayer.identifier,
-            layers: geonaLayer.identifier,
-            styles: style || '',
-            format: format || 'image/png',
-            transparent: true,
-            attribution: attribution,
-            version: geonaLayerServer.version,
-            crs: projection,
-            zIndex: this._mapLayers.getLayers().length,
-            modifier: options.modifier,
-            layerTime: time,
-            shown: options.shown,
-            opacity: 1,
-            timeHidden: false,
-          });
+          layer.options.time = time;
+          layer.options.Time = time;
+          layer.options.TIME = time;
         }
         break;
       case undefined:
@@ -512,40 +495,41 @@ export class LMap extends GeonaMap {
       }
     }
 
-    this._activeLayers[geonaLayer.identifier] = layer;
-
-    if (options.modifier === 'basemap') {
-      this._clearBasemap(layer);
-    } else if (options.modifier === 'borders') {
-      this._clearBorders();
-    }
-
     // Sets the map time if this is the first layer
     if (this._mapTime === undefined && time !== undefined) {
       this._mapTime = time;
     }
 
-    layer.addTo(this._map);
-    this._mapLayers.addLayer(layer);
+    switch (options.modifier) {
+      case 'basemap':
+        this._clearBasemap();
+        layer.addTo(this._map);
+        this._mapLayers.addLayer(layer);
+        this._activeLayers[geonaLayer.identifier] = layer;
+        this.reorderLayers(layer.options.identifier, 0);
+        this.config.basemap = layer.options.identifier;
+        break;
+      case 'borders':
+        this._clearBorders();
+        layer.addTo(this._map);
+        this._mapLayers.addLayer(layer);
+        this._activeLayers[geonaLayer.identifier] = layer;
+        this.config.borders.identifier = layer.options.identifier;
+        this.config.borders.style = style;
+        break;
+      default:
+        this.removeLayer(layer.identifier);
+        layer.addTo(this._map);
+        this._mapLayers.addLayer(layer);
+        this._activeLayers[geonaLayer.identifier] = layer;
+        if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+          this.reorderLayers(geonaLayer.identifier, this._mapLayers.getLayers().length - 2);
+          this.config.data.push(geonaLayer.identifier);
+        }
+    }
 
     if (options.shown === false) {
-      layer.setOpacity(0);
-      layer.options.opacity = 0;
-    }
-
-    if (options.modifier === 'basemap') {
-      this.reorderLayers(layer.options.identifier, 0);
-      this.config.basemap = layer.options.identifier;
-    } else if (options.modifier === 'borders') {
-      this.config.borders.identifier = layer.options.identifier;
-      this.config.borders.style = style;
-    } else if (this._initialized === true) {
-      // this.config.data.push(layer.options.identifier);
-    }
-
-    // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-    if (this.config.borders.identifier !== 'none' && this._initialized === true) {
-      this.reorderLayers(this.config.borders.identifier, this._mapLayers.getLayers().length - 1);
+      this.hideLayer(geonaLayer.identifier);
     }
 
     if (geonaLayer.viewSettings !== undefined) {

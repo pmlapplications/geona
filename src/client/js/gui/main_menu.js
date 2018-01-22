@@ -436,8 +436,6 @@ export class MainMenu {
     if (basemapIdentifier === 'None') {
       this.geona.map._clearBasemap();
     } else {
-      // Clear the basemap
-      this.geona.map._clearBasemap();
       // Add the new basemap
       let geonaLayer = this.geona.map._availableLayers[basemapIdentifier];
       let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];

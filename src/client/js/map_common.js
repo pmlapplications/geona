@@ -390,7 +390,12 @@ export const basemapLayers = [
         layerServer: 'https__tiles.maps.eox.at_wms__wms_1.1.1_getcapabilities',
         viewSettings: {
           maxZoom: 14,
-          fitExtent: [22.02, -33.86, 82.85, 56.12],
+          fitExtent: {
+            minLat: 22.02,
+            minLon: -33.86,
+            maxLat: 82.85,
+            maxLon: 56.12,
+          },
         },
       },
     ],

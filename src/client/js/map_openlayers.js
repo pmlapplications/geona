@@ -9,10 +9,10 @@ import {
 import proj4 from 'proj4';
 
 // Lines below used for ol.debug
-// import openlayers from 'openlayers/dist/ol-debug';
-// let ol = openlayers;
+import openlayers from 'openlayers/dist/ol-debug';
+let ol = openlayers;
 
-let ol;
+// let ol;
 
 /**
  * Class for an OpenLayers map.
@@ -316,7 +316,7 @@ export class OlMap extends GeonaMap {
 
     // Fit the map in the fitExtent
     if (fitExtent) {
-      this._map.getView().fit(fitExtent, ol.extent.getSize(fitExtent));
+      this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
       if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
         this._map.getView().setZoom(zoom);
         this._map.getView().setCenter(center);
@@ -376,7 +376,7 @@ export class OlMap extends GeonaMap {
 
     // As the available layers have unique identifiers, a layer with the same identifier will just be updating options
     if (this._activeLayers[geonaLayer.identifier] !== undefined) {
-    // Get a source with updated options
+      // Get a source with updated options
       updateOptions = this.getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection);
       source = updateOptions.source;
       time = updateOptions.options.time;
@@ -432,7 +432,7 @@ export class OlMap extends GeonaMap {
     });
 
 
-    // Sets the map time if this is the first layer
+      // Sets the map time if this is the first layer
     if (this._mapTime === undefined && time !== undefined) {
       this._mapTime = time;
     }
@@ -464,7 +464,7 @@ export class OlMap extends GeonaMap {
     }
 
     if (options.shown === false) {
-      layer.setVisible(false);
+      this.hideLayer(geonaLayer.identifier);
     }
 
     if (geonaLayer.viewSettings !== undefined) {
@@ -484,11 +484,12 @@ export class OlMap extends GeonaMap {
     }
   }
 
+
   /**
    * Returns a WMS Source and the layer time to use
    * @param {Layer}             geonaLayer       A Geona Layer definition
    * @param {LayerServer}       geonaLayerServer A Geona LayerServer definition for the geonaLayer
-   * @param {Object}            options          Options for
+   * @param {Object}            options          Options for the layer (with defaults applied)
    * @param {ol.ProjectionLike} projection       Projection to use in the Source
    *
    * @return {ol.source.TileWms}
@@ -569,7 +570,7 @@ export class OlMap extends GeonaMap {
       params: {
         LAYERS: geonaLayer.identifier,
         FORMAT: format || geonaLayer.formats || 'image/png',
-        STYLES: style || geonaLayer.styles,
+        STYLES: style || geonaLayer.styles || '',
         time: time,
         wrapDateLine: true,
         NUMCOLORBANDS: 255,
@@ -583,11 +584,12 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * 
-   * @param {*} geonaLayer 
-   * @param {*} geonaLayerServer 
-   * @param {*} options 
-   * @return {*}
+   * Copies the options for a currently-active layer, updates them with the new options, then returns a source object,
+   * along with the non-source options
+   * @param {Layer}       geonaLayer       Geona Layer definition
+   * @param {LayerServer} geonaLayerServer Corresponding Geona LayerServer definition
+   * @param {Object}      options          Collection of options with defaults applied
+   * @return {Object}                      A layer source and the updated options
    */
   _createWmtsSource(geonaLayer, geonaLayerServer, options) {
     let title;
@@ -603,10 +605,11 @@ export class OlMap extends GeonaMap {
   /**
    * Copies the options for a currently-active layer, updates them with the new options, then returns a source object,
    * along with the non-source options
-   * @param {Layer} geonaLayer 
-   * @param {LayerServer} geonaLayerServer 
-   * @param {Object} options 
-   * @return {*}
+   * @param {Layer}       geonaLayer       Geona Layer definition
+   * @param {LayerServer} geonaLayerServer Corresponding Geona LayerServer definition
+   * @param {Object}      options          Collection of options with defaults applied
+   * @param {String}      projection       The projection to use (e.g. 'EPSG:4326')
+   * @return {Object}                      A layer source and the updated options
    */
   getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection) {
     // Copy options from current active layer
