@@ -351,221 +351,217 @@ export class LMap extends GeonaMap {
    *
    * @param {Layer}       geonaLayer       A Layer as defined by Geona, by parsing the GetCapabilities request from a server.
    * @param {LayerServer} geonaLayerServer The LayerServer corresponding to the layer
-   * @param {Object}      [options]        A list of options that affect the layers being added
-   *   @param {String}  options.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
-   *   @param {String}  options.requestedTime  The time requested for this layer.
-   *   @param {String}  options.requestedStyle The identifier of the style requested for this layer.
-   *   @param {Boolean} options.shown          Whether to show or hide the layer when it is first put on the map.
+   * @param {Object}      [settings]       A list of settings that affect the layers being added
+   *   @param {String}  settings.modifier       Indicates that a layer is 'basemap', 'borders' or 'hasTime'.
+   *   @param {String}  settings.requestedTime  The time requested for this layer.
+   *   @param {String}  settings.requestedStyle The identifier of the style requested for this layer.
+   *   @param {Boolean} settings.shown          Whether to show or hide the layer when it is first put on the map.
    */
-  addLayer(geonaLayer, geonaLayerServer, options = {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true}) {
-    // Set default options if not specified
-    // No need to set modifier and requestedTime
-    if (options.shown === undefined) {
-      options.shown = true;
+  addLayer(geonaLayer, geonaLayerServer, settings) {
+    // Parameter checking
+    if (geonaLayer.layerServer !== geonaLayerServer.identifier && geonaLayer.layerServer !== undefined) {
+      throw new Error(
+        'layerServer identifier \'' + geonaLayer.layerServer +
+        '\' for geonaLayer \'' + geonaLayer.identifier +
+        '\' does not match identifier for geonaLayerServer\'' + geonaLayerServer.identifier + '\''
+      );
+    } else if (geonaLayer.layerServer === undefined || geonaLayerServer.identifier === undefined) {
+      throw new Error('layerServer property of geonaLayer parameter or identifier property of geonaLayerServer parameter is undefined');
     }
 
-    // Checks the map for any layers with the same identifier as the layer being added
-    let duplicate = false;
-    for (let layer of this._mapLayers.getLayers()) {
-      if (layer.options.identifier === geonaLayer.identifier) {
-        duplicate = true;
-      }
-    }
-    // We enforce that identifiers must be unique on the map.
-    // TODO offer option of changing identifier.
-    if (duplicate === true) {
-      alert('Layer with this identifier already exists on the map.');
-    } else
+    // Merge custom options with defaults
+    let options = Object.assign({},
+      {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
+      settings
+    );
+
     // If a layer is a basemap we might change the projection
     // anyway, so it doesn't matter if the layer supports the current projection
-    if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) || options.modifier === 'basemap') {
-      let attribution;
-      let format;
-      let layer;
-      let projection;
-      let requiredLayer;
-      let style;
-      let title;
-      let time;
+    if (!geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) && options.modifier === 'basemap') {
+      throw new Error('The layer ' + geonaLayer.identifier +
+        ' cannot be displayed with the current ' + deLeafletizeProjection(this._map.options.crs) +
+        ' map projection.'
+      );
+    }
+    let attribution;
+    let format;
+    let layer;
+    let projection;
+    let style;
+    let time;
 
-      switch (geonaLayer.protocol) {
-        case 'wms':
-          title = geonaLayer.title.und;
-          requiredLayer = geonaLayer.identifier;
-          // FIXME fix parser so this doesn't happen
-          if ($.isEmptyObject(geonaLayer.styles)) {
-            geonaLayer.styles = undefined;
-          }
-          // Select an appropriate format
-          // If a format is found in the layer style, the format is set to that instead
-          if (geonaLayer.formats !== undefined) {
-            if (geonaLayer.formats.includes('image/png')) {
-              format = 'image/png';
-            } else if (geonaLayer.formats.includes('image/jpeg')) {
-              format = 'image/jpeg';
-            } else {
-              format = geonaLayer.formats[0];
-            }
-          }
-          // Select appropriate style
-          if (geonaLayer.styles !== undefined) {
-            // Default to the first style
-            style = geonaLayer.styles[0].identifier;
-            if (geonaLayer.styles[0].legendUrl !== undefined) {
-              format = geonaLayer.styles[0].legendUrl[0].format;
-            }
-            // Search for the requested style and set that as the style if found
-            // FIXME if the requested style is not available, throw an error and print out list of available styles
-            for (let layerStyle of geonaLayer.styles) {
-              if (layerStyle.identifier === options.requestedStyle) {
-                style = options.requestedStyle;
-                if (layerStyle.legendUrl !== undefined) {
-                  format = layerStyle.legendUrl[0].format;
-                }
-              }
-            }
-          }
-
-          // At this stage of the method, only basemaps might have different projections.
-          if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
-            projection = this._map.options.crs;
-          } else {
-            projection = leafletizeProjection(geonaLayer.projections[0]);
-          }
-          if (geonaLayer.attribution) {
-            if (geonaLayer.attribution.onlineResource) {
-              attribution = geonaLayer.attribution.onlineResource;
-            } else {
-              attribution = geonaLayer.attribution.title;
-            }
-          }
-
-          // Selects the requested time, the closest to the map time, or the default layer time.
-          if (options.requestedTime !== undefined) {
-            time = findNearestValidTime(geonaLayer, options.requestedTime);
-          } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-            time = findNearestValidTime(geonaLayer, this._mapTime);
-          } else if (options.modifier === 'hasTime') {
-            if (geonaLayer.dimensions) {
-              if (geonaLayer.dimensions.time) {
-                time = geonaLayer.dimensions.time.default;
-              }
-            }
-          }
-
-          // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
-          // This is why we have 'time', 'Time' and 'TIME' to cover all cases
-          if (options.modifier === 'hasTime' && time !== undefined) {
-            // eslint-disable-next-line new-cap
-            layer = new L.tileLayer.wms(geonaLayerServer.url, {
-              identifier: geonaLayer.identifier,
-              layers: requiredLayer,
-              styles: style || '',
-              format: format || 'image/png',
-              transparent: true,
-              attribution: attribution,
-              version: geonaLayerServer.version,
-              crs: projection,
-              time: time,
-              Time: time,
-              TIME: time,
-              zIndex: this._mapLayers.getLayers().length,
-              modifier: options.modifier,
-              layerTime: time,
-              shown: options.shown,
-              opacity: 1,
-              timeHidden: false,
-            });
-          } else {
-            // eslint-disable-next-line new-cap
-            layer = new L.tileLayer.wms(geonaLayerServer.url, {
-              identifier: geonaLayer.identifier,
-              layers: requiredLayer,
-              styles: style || '',
-              format: format || 'image/png',
-              transparent: true,
-              attribution: attribution,
-              version: geonaLayerServer.version,
-              crs: projection,
-              zIndex: this._mapLayers.getLayers().length,
-              modifier: options.modifier,
-              layerTime: time,
-              shown: options.shown,
-              opacity: 1,
-              timeHidden: false,
-            });
-          }
-          break;
-        case 'wmts':
-          alert('WMTS is not supported for Leaflet');
-          break;
-        case undefined:
-          throw new Error('Layer protocol is undefined');
-      }
-
-      if (this._availableLayers[geonaLayer.identifier] === undefined) {
-        geonaLayer.modifier = options.modifier;
-        this._availableLayers[geonaLayer.identifier] = geonaLayer;
-        // Save the LayerServer if not already saved
-        if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
-          delete geonaLayerServer.layers;
-          this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
+    switch (geonaLayer.protocol) {
+      case 'wms':
+        // FIXME fix parser so this doesn't happen
+        if ($.isEmptyObject(geonaLayer.styles)) {
+          geonaLayer.styles = undefined;
         }
+        // Select an appropriate format
+        // If a format is found in the layer style, the format is set to that instead
+        if (geonaLayer.formats !== undefined) {
+          if (geonaLayer.formats.includes('image/png')) {
+            format = 'image/png';
+          } else if (geonaLayer.formats.includes('image/jpeg')) {
+            format = 'image/jpeg';
+          } else {
+            format = geonaLayer.formats[0];
+          }
+        }
+        // Select appropriate style
+        if (geonaLayer.styles !== undefined) {
+          // Default to the first style
+          style = geonaLayer.styles[0].identifier;
+          if (geonaLayer.styles[0].legendUrl !== undefined) {
+            format = geonaLayer.styles[0].legendUrl[0].format;
+          }
+          // Search for the requested style and set that as the style if found
+          // FIXME if the requested style is not available, throw an error and print out list of available styles
+          for (let layerStyle of geonaLayer.styles) {
+            if (layerStyle.identifier === options.requestedStyle) {
+              style = options.requestedStyle;
+              if (layerStyle.legendUrl !== undefined) {
+                format = layerStyle.legendUrl[0].format;
+              }
+            }
+          }
+        }
+
+        // At this stage of the method, only basemaps might have different projections.
+        if (geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs))) {
+          projection = this._map.options.crs;
+        } else {
+          projection = leafletizeProjection(geonaLayer.projections[0]);
+        }
+        if (geonaLayer.attribution) {
+          if (geonaLayer.attribution.onlineResource) {
+            attribution = geonaLayer.attribution.onlineResource;
+          } else {
+            attribution = geonaLayer.attribution.title;
+          }
+        }
+
+        // Selects the requested time, the closest to the map time, or the default layer time.
+        if (options.requestedTime !== undefined) {
+          time = findNearestValidTime(geonaLayer, options.requestedTime);
+        } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
+          time = findNearestValidTime(geonaLayer, this._mapTime);
+        } else if (options.modifier === 'hasTime') {
+          if (geonaLayer.dimensions) {
+            if (geonaLayer.dimensions.time) {
+              time = geonaLayer.dimensions.time.default;
+            }
+          }
+        }
+
+        // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
+        // This is why we have 'time', 'Time' and 'TIME' to cover all cases
+        if (options.modifier === 'hasTime' && time !== undefined) {
+          // eslint-disable-next-line new-cap
+          layer = new L.tileLayer.wms(geonaLayerServer.url, {
+            identifier: geonaLayer.identifier,
+            layers: geonaLayer.identifier,
+            styles: style || '',
+            format: format || 'image/png',
+            transparent: true,
+            attribution: attribution,
+            version: geonaLayerServer.version,
+            crs: projection,
+            time: time,
+            Time: time,
+            TIME: time,
+            zIndex: this._mapLayers.getLayers().length,
+            modifier: options.modifier,
+            layerTime: time,
+            shown: options.shown,
+            opacity: 1,
+            timeHidden: false,
+          });
+        } else {
+          // eslint-disable-next-line new-cap
+          layer = new L.tileLayer.wms(geonaLayerServer.url, {
+            identifier: geonaLayer.identifier,
+            layers: geonaLayer.identifier,
+            styles: style || '',
+            format: format || 'image/png',
+            transparent: true,
+            attribution: attribution,
+            version: geonaLayerServer.version,
+            crs: projection,
+            zIndex: this._mapLayers.getLayers().length,
+            modifier: options.modifier,
+            layerTime: time,
+            shown: options.shown,
+            opacity: 1,
+            timeHidden: false,
+          });
+        }
+        break;
+      case undefined:
+        throw new Error('Layer protocol is undefined');
+      default:
+        throw new Error('Layer protocol ' + geonaLayer.protocol + ' is not supported.');
+    }
+
+    if (this._availableLayers[geonaLayer.identifier] === undefined) {
+      geonaLayer.modifier = options.modifier;
+      this._availableLayers[geonaLayer.identifier] = geonaLayer;
+      // Save the LayerServer if not already saved
+      if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+        delete geonaLayerServer.layers;
+        this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
       }
+    }
 
-      this._activeLayers[geonaLayer.identifier] = layer;
+    this._activeLayers[geonaLayer.identifier] = layer;
 
-      if (options.modifier === 'basemap') {
-        this._clearBasemap(layer);
-      } else if (options.modifier === 'borders') {
-        this._clearBorders();
-      }
+    if (options.modifier === 'basemap') {
+      this._clearBasemap(layer);
+    } else if (options.modifier === 'borders') {
+      this._clearBorders();
+    }
 
-      // Sets the map time if this is the first layer
-      if (this._mapTime === undefined && time !== undefined) {
-        this._mapTime = time;
-      }
+    // Sets the map time if this is the first layer
+    if (this._mapTime === undefined && time !== undefined) {
+      this._mapTime = time;
+    }
 
-      layer.addTo(this._map);
-      this._mapLayers.addLayer(layer);
+    layer.addTo(this._map);
+    this._mapLayers.addLayer(layer);
 
-      if (options.shown === false) {
-        layer.setOpacity(0);
-        layer.options.opacity = 0;
-      }
+    if (options.shown === false) {
+      layer.setOpacity(0);
+      layer.options.opacity = 0;
+    }
 
-      if (options.modifier === 'basemap') {
-        this.reorderLayers(layer.options.identifier, 0);
-        this.config.basemap = layer.options.identifier;
-      } else if (options.modifier === 'borders') {
-        this.config.borders.identifier = layer.options.identifier;
-        this.config.borders.style = style;
-      } else if (this._initialized === true) {
-        // this.config.data.push(layer.options.identifier);
-      }
+    if (options.modifier === 'basemap') {
+      this.reorderLayers(layer.options.identifier, 0);
+      this.config.basemap = layer.options.identifier;
+    } else if (options.modifier === 'borders') {
+      this.config.borders.identifier = layer.options.identifier;
+      this.config.borders.style = style;
+    } else if (this._initialized === true) {
+      // this.config.data.push(layer.options.identifier);
+    }
 
-      // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
-      if (this.config.borders.identifier !== 'none' && this._initialized === true) {
-        this.reorderLayers(this.config.borders.identifier, this._mapLayers.getLayers().length - 1);
-      }
+    // We always want the country borders to be on top, so we reorder them to the top each time we add a layer.
+    if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+      this.reorderLayers(this.config.borders.identifier, this._mapLayers.getLayers().length - 1);
+    }
 
-      if (geonaLayer.viewSettings !== undefined) {
-        this.setView({
-          center: geonaLayer.viewSettings.center,
-          fitExtent: geonaLayer.viewSettings.fitExtent,
-          maxExtent: geonaLayer.viewSettings.maxExtent,
-          maxZoom: geonaLayer.viewSettings.maxZoom,
-          minZoom: geonaLayer.viewSettings.minZoom,
-          projection: deLeafletizeProjection(projection),
-          zoom: geonaLayer.viewSettings.zoom,
-        });
-      } else {
-        this.setView({
-          projection: deLeafletizeProjection(projection),
-        });
-      }
+    if (geonaLayer.viewSettings !== undefined) {
+      this.setView({
+        center: geonaLayer.viewSettings.center,
+        fitExtent: geonaLayer.viewSettings.fitExtent,
+        maxExtent: geonaLayer.viewSettings.maxExtent,
+        maxZoom: geonaLayer.viewSettings.maxZoom,
+        minZoom: geonaLayer.viewSettings.minZoom,
+        projection: deLeafletizeProjection(projection),
+        zoom: geonaLayer.viewSettings.zoom,
+      });
     } else {
-      alert('Cannot use this projection for this layer');
+      this.setView({
+        projection: deLeafletizeProjection(projection),
+      });
     }
   }
 

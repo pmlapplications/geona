@@ -355,7 +355,6 @@ export class OlMap extends GeonaMap {
     );
     // Projection check
     if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode()) && options.modifier !== 'basemap') {
-      // alert('This layer cannot be displayed with the current ' + this._map.getView().getProjection().getCode() + ' map projection.');
       throw new Error('The layer ' + geonaLayer.identifier +
         ' cannot be displayed with the current ' + this._map.getView().getProjection().getCode() +
         ' map projection.'
@@ -396,8 +395,12 @@ export class OlMap extends GeonaMap {
           break;
         }
         case 'osm':
-        // TODO
+          source = new ol.source.OSM({
+            crossOrigin: null,
+          });
           break;
+        case undefined:
+          throw new Error('Layer protocol is undefined.');
         default:
           throw new Error('Layer protocol ' + geonaLayer.protocol + ' is not supported.');
       }
@@ -482,10 +485,12 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * 
-   * @param {*} geonaLayer 
-   * @param {*} geonaLayerServer 
-   * @param {*} options 
+   * Returns a WMS Source and the layer time to use
+   * @param {Layer}             geonaLayer       A Geona Layer definition
+   * @param {LayerServer}       geonaLayerServer A Geona LayerServer definition for the geonaLayer
+   * @param {Object}            options          Options for
+   * @param {ol.ProjectionLike} projection       Projection to use in the Source
+   *
    * @return {ol.source.TileWms}
    */
   _createWmsSource(geonaLayer, geonaLayerServer, options, projection) {
