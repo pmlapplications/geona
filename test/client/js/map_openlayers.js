@@ -2532,14 +2532,14 @@ describe('client/js/map_openlayers', function() {
     it('should change the projection from EPSG:4326 to EPSG:3857', function() {
       expect(function() {
         geona.map.setProjection('EPSG:3857');
-      }).to.not.throw('Basemap gebco_08_grid does not support projection type EPSG:3857. Please select a different basemap.');
+      }).to.not.throw();
       expect(geona.map.config.projection).to.equal('EPSG:3857');
       expect(geona.map._map.getView().getProjection().getCode()).to.equal('EPSG:3857');
     });
     it('should not allow the projection to change to a type unsupported by the basemap', function() {
       expect(function() {
         geona.map.setProjection('FAKEPROJ');
-      }).to.throw('Basemap gebco_08_grid does not support projection type FAKEPROJ. Please select a different basemap.');
+      }).to.throw('Layer gebco_08_grid does not support projection type FAKEPROJ.');
       expect(geona.map.config.projection).to.equal('EPSG:3857');
       expect(geona.map._map.getView().getProjection().getCode()).to.equal('EPSG:3857');
     });

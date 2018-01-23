@@ -238,32 +238,13 @@ export class OlMap extends GeonaMap {
    * @param  {String} projection The projection to use, such as 'EPSG:4326'.
    */
   setProjection(projection) {
-    if (this.config.basemap !== 'none') {
-      if (this._availableLayers[this.config.basemap].projections.includes(projection)) {
-        // Currently a bit ugly but could change in future
-        // Check each active layer for new projection support
-        let supported = true;
-        let unsupportedLayer;
-        for (let layer of this._map.getLayers().getArray()) {
-          if (!layer.get('projections').includes(projection)) {
-            supported = false;
-            unsupportedLayer = layer.get('identifier');
-          }
-        }
-
-        if (supported === true) {
-          this.setView({projection: projection});
-          this.config.projection = projection;
-        } else {
-          throw new Error('Layer ' + unsupportedLayer + ' does not support projection type ' + projection + '.');
-        }
-      } else {
-        throw new Error('Basemap ' + this.config.basemap + ' does not support projection type ' + projection + '. Please select a different basemap.');
+    for (let layer of this._map.getLayers().getArray()) {
+      if (!layer.get('projections').includes(projection)) {
+        throw new Error('Layer ' + layer.get('identifier') + ' does not support projection type ' + projection + '.');
       }
-    } else {
-      this.setView({projection: projection});
-      this.config.projection = projection;
     }
+    this.setView({projection: projection});
+    this.config.projection = projection;
   }
 
   /**
@@ -451,7 +432,7 @@ export class OlMap extends GeonaMap {
     });
 
 
-      // Sets the map time if this is the first layer
+    // Sets the map time if this is the first layer
     if (this._mapTime === undefined && time !== undefined) {
       this._mapTime = time;
     }

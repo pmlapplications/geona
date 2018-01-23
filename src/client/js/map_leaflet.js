@@ -174,75 +174,68 @@ export class LMap extends GeonaMap {
   /**
    * Set the projection, if supported by the current basemap.
    * @param {String}  projection The projection to use, such as 'EPSG:4326'
-   * @return {String}            The new map projection
    */
   setProjection(projection) {
-    let basemapSupportsProjection = true;
-    let basemapIdentifier = '';
-    if (this.config.basemap !== 'none') {
-      for (let layer of this._mapLayers.getLayers()) {
-        if (layer.options.modifier === 'basemap') {
-          basemapIdentifier = layer.options.identifier;
-          let basemapProjections = this._availableLayers[basemapIdentifier].projections;
-          if (!basemapProjections.includes(projection)) {
-            basemapSupportsProjection = false;
-          }
-        }
+    for (let layer of this._mapLayers.getLayers()) {
+      if (!layer.options.projections.includes(projection)) {
+        throw new Error('Layer ' + layer.options.identifier + ' does not support projection type ' + projection + '.');
       }
     }
+    this._leafletSetProjection(projection);
+  }
 
-    if (basemapSupportsProjection === true) {
+  /**
+   * Changes the map's projection to projection specified.
+   * @private
+   * @param {String} projection Target projection code (e.g. 'EPSG:4326')
+   */
+  _leafletSetProjection(projection) {
     // This is a bit of a hack and isn't officially supported by Leaflet. Everything may fall over!
-      let leafletProjection = leafletizeProjection(projection);
+    let leafletProjection = leafletizeProjection(projection);
 
-      if (this._map.options.crs !== leafletProjection) {
+    if (this._map.options.crs !== leafletProjection) {
       // If the map isn't already in the provided projection
-        let center = this._map.getCenter();
-        let zoom = this._map.getZoom();
-        let maxZoom = this._map.getMaxZoom();
-        let minZoom = this._map.getMinZoom();
+      let center = this._map.getCenter();
+      let zoom = this._map.getZoom();
+      let maxZoom = this._map.getMaxZoom();
+      let minZoom = this._map.getMinZoom();
 
-        switch (projection) {
-          case 'EPSG:3857':
-            zoom += 1;
-            maxZoom += 1;
-            minZoom += 1;
-            break;
-          case 'EPSG:4326':
-            zoom -= 1;
-            maxZoom -= 1;
-            minZoom -= 1;
-            break;
-        }
-
-        this._map.options.crs = leafletProjection;
-        this._map._resetView(center, zoom);
-
-        this._map.setMaxZoom(maxZoom);
-        this._map.setMinZoom(minZoom);
-
-        this.config.projection = projection;
-
-        this._map.eachLayer((layer) => {
-          if (layer._crs !== undefined) {
-            this.removeLayer(layer.options.identifier);
-            // We add the same layer, but now the map projection will have changed.
-            let geonaLayer = this._availableLayers[layer.options.identifier];
-            let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
-            let options = {
-              modifier: layer.options.modifier,
-              requestedTime: layer.options.layerTime,
-              requestedStyle: layer.options.styles,
-              shown: layer.options.shown,
-            };
-            this.addLayer(geonaLayer, geonaLayerServer, options);
-          }
-        });
+      switch (projection) {
+        case 'EPSG:3857':
+          zoom += 1;
+          maxZoom += 1;
+          minZoom += 1;
+          break;
+        case 'EPSG:4326':
+          zoom -= 1;
+          maxZoom -= 1;
+          minZoom -= 1;
+          break;
       }
-      return projection;
-    } else {
-      alert('Basemap ' + basemapIdentifier + ' does not support projection type ' + projection + '. Please select a different basemap.');
-      return this._map.options.crs.code;
+
+      this._map.options.crs = leafletProjection;
+      this._map._resetView(center, zoom);
+
+      this._map.setMaxZoom(maxZoom);
+      this._map.setMinZoom(minZoom);
+
+      this.config.projection = projection;
+
+      this._map.eachLayer((layer) => {
+        if (layer._crs !== undefined) {
+          this.removeLayer(layer.options.identifier);
+          // We add the same layer, but now the map projection will have changed.
+          let geonaLayer = this._availableLayers[layer.options.identifier];
+          let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+          let options = {
+            modifier: layer.options.modifier,
+            requestedTime: layer.options.layerTime,
+            requestedStyle: layer.options.styles,
+            shown: layer.options.shown,
+          };
+          this.addLayer(geonaLayer, geonaLayerServer, options);
+        }
+      });
     }
   }
 
@@ -881,7 +874,7 @@ function leafletizeZoom(zoom, projection) {
  * @param  {L.CRS}  projection The projection that the zoom is for
  * @return {Number}            OpenLayers style zoom level
  */
-function deLeafletizeZoom(zoom, projection) {
+export function deLeafletizeZoom(zoom, projection) {
   switch (projection) {
     case L.CRS.EPSG3857:
       return zoom;
