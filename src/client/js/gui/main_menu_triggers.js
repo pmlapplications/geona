@@ -237,8 +237,12 @@ function registerOptionsTriggers(eventManager, parentDiv) {
     }
   });
   // Select projection
-  parentDiv.find('.js-geona-options-panel-content__projection').change(() => {
-    let option = parentDiv.find('.js-geona-options-panel-content__projection').val();
-    eventManager.trigger('mainMenu.setProjection', option);
+  let previousProjection;
+  let newProjection;
+  parentDiv.find('.js-geona-options-panel-content__projection').focus(() => {
+    previousProjection = parentDiv.find('.js-geona-options-panel-content__projection').val();
+  }).change(() => {
+    newProjection = parentDiv.find('.js-geona-options-panel-content__projection').val();
+    eventManager.trigger('mainMenu.setProjection', [previousProjection, newProjection]);
   });
 }

@@ -116,8 +116,8 @@ export function registerBindings(eventManager, menu) {
     menu.hideGraticule();
   });
   // Set projection
-  eventManager.bind('mainMenu.setProjection', (projection) => {
-    menu.setProjection(projection);
+  eventManager.bind('mainMenu.setProjection', ([previousProjection, newProjection]) => {
+    menu.setProjection(previousProjection, newProjection);
   });
 
   /**

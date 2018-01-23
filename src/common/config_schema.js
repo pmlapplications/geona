@@ -200,7 +200,7 @@ export let client = {
     data: {
       doc: 'The identifier for the data layers to put on the map by default.',
       format: Array,
-      default: ['chlor_a', 'Rrs_412'],
+      default: ['Rrs_412'],
     },
     // Required parameters: 'identifier', 'protocol', 'projections', 'layerServer'
     // Required layerServer parameters: 'layers', 'version', 'url'

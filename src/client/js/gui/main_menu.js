@@ -197,7 +197,6 @@ export class MainMenu {
     this._clearPreviousUrlLayers();
     getLayerServer(url, service, save, useCache)
       .then((layers) => {
-        console.log(layers);
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
@@ -495,11 +494,15 @@ export class MainMenu {
 
   /**
    * Changes the map projection if possible.
-   * @param {String} projection The map projection to use, such as 'EPSG:4326'.
+   * @param {String} previousProjection The previously selected projection.
+   * @param {String} newProjection The map projection to use, such as 'EPSG:4326'.
    */
-  setProjection(projection) {
-    let currentProjection = this.geona.map.setProjection(projection);
-    this.parentDiv.find('.js-geona-options-panel-content__projection').val(currentProjection).prop('selected', true);
+  setProjection(previousProjection, newProjection) {
+    try {
+      this.geona.map.setProjection(newProjection);
+    } catch (err) {
+      this.parentDiv.find('.js-geona-options-panel-content__projection').val(previousProjection).prop('selected', true);
+    }
   }
 
   /**

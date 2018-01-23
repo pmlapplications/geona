@@ -9,10 +9,10 @@ import {
 import proj4 from 'proj4';
 
 // Lines below used for ol.debug
-import openlayers from 'openlayers/dist/ol-debug';
-let ol = openlayers;
+// import openlayers from 'openlayers/dist/ol-debug';
+// let ol = openlayers;
 
-// let ol;
+let ol;
 
 /**
  * Class for an OpenLayers map.
@@ -236,23 +236,33 @@ export class OlMap extends GeonaMap {
   /**
    * Set the projection, if supported by the current basemap.
    * @param  {String} projection The projection to use, such as 'EPSG:4326'.
-   * @return {String}            The map projection after execution.
    */
   setProjection(projection) {
     if (this.config.basemap !== 'none') {
-      // If basemap supports new projection, we can change the view
       if (this._availableLayers[this.config.basemap].projections.includes(projection)) {
-        this.setView({projection: projection});
-        this.config.projection = projection;
-        return projection;
+        // Currently a bit ugly but could change in future
+        // Check each active layer for new projection support
+        let supported = true;
+        let unsupportedLayer;
+        for (let layer of this._map.getLayers().getArray()) {
+          if (!layer.get('projections').includes(projection)) {
+            supported = false;
+            unsupportedLayer = layer.get('identifier');
+          }
+        }
+
+        if (supported === true) {
+          this.setView({projection: projection});
+          this.config.projection = projection;
+        } else {
+          throw new Error('Layer ' + unsupportedLayer + ' does not support projection type ' + projection + '.');
+        }
       } else {
-        alert('Basemap ' + this.config.basemap + ' does not support projection type ' + projection + '. Please select a different basemap.');
-        return this._map.getView().getProjection().getCode();
+        throw new Error('Basemap ' + this.config.basemap + ' does not support projection type ' + projection + '. Please select a different basemap.');
       }
     } else {
       this.setView({projection: projection});
       this.config.projection = projection;
-      return projection;
     }
   }
 
