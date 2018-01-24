@@ -34,6 +34,7 @@
     "buildServerDev": "nodemon -w src/server -w src/common --exec \"grunt server && npm run serve\"",
     "test": "BABEL_ENV=test karma start karma.conf.js && BABEL_ENV=test nyc mocha test/server/**/*.js test/common/**/*.js",
     "testClient": "BABEL_ENV=test karma start karma.conf.js",
+    "testServer": "BABEL_ENV=test nyc mocha test/server/**/*.js test/common/**/*.js",
     "eslint-fix": "grunt eslint:fix"
   },
   "devDependencies": {

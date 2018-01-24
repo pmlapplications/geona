@@ -2,7 +2,7 @@
 
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter, findNearestValidTime,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, findNearestValidTime, constructExtent,
 } from './map_common';
 import $ from 'jquery';
 
@@ -259,12 +259,45 @@ export class LMap extends GeonaMap {
     }
 
     if (options.maxExtent) {
-      this._map.setMaxBounds([
-        [options.maxExtent.minLat, options.maxExtent.minLon],
-        [options.maxExtent.maxLat, options.maxExtent.maxLon],
-      ]);
-      // this._map.setMaxBounds([options.maxExtent.slice(0, 2), options.maxExtent.slice(2, 4)]);
-      this.config.viewSettings.maxExtent = options.maxExtent;
+      this.config.viewSettings.maxExtent = constructExtent(options.maxExtent, this.config.viewSettings.maxExtent);
+    } else {
+      // Reset defaults
+      this.config.viewSettings.maxExtent = {
+        minLat: -90,
+        minLon: -Infinity,
+        maxLat: 90,
+        maxLon: Infinity,
+      };
+      for (let layer of this._mapLayers.getLayers()) {
+        let geonaLayer = this._availableLayers[layer.options.identifier];
+        if (geonaLayer.viewSettings) {
+          if (geonaLayer.viewSettings.maxExtent) {
+            this.config.viewSettings.maxExtent = constructExtent(
+              this.config.viewSettings.maxExtent,
+              geonaLayer.viewSettings.maxExtent
+            );
+          }
+        }
+      }
+    }
+    if (this.config.zoomToExtent === true) {
+      if (
+        this.config.viewSettings.maxExtent.minLat !== -90
+        && this.config.viewSettings.maxExtent.minLon !== -Infinity
+        && this.config.viewSettings.maxExtent.maxLat !== 90
+        && this.config.viewSettings.maxExtent.maxLon !== Infinity
+      ) {
+        this._map.setMaxBounds([
+          [
+            this.config.viewSettings.maxExtent.minLat,
+            this.config.viewSettings.maxExtent.minLon,
+          ],
+          [
+            this.config.viewSettings.maxExtent.maxLat,
+            this.config.viewSettings.maxExtent.maxLon,
+          ],
+        ]);
+      }
     }
 
     if (options.center) {
@@ -295,12 +328,45 @@ export class LMap extends GeonaMap {
     }
 
     if (options.fitExtent) {
-      this._map.setMaxBounds([
-        [options.fitExtent.minLat, options.fitExtent.minLon],
-        [options.fitExtent.maxLat, options.fitExtent.maxLon],
-      ]);
-      // this._map.fitBounds([options.fitExtent.slice(0, 2), options.fitExtent.slice(2, 4)]);
-      this.config.viewSettings.fitExtent = options.fitExtent;
+      this.config.viewSettings.fitExtent = constructExtent(options.fitExtent, this.config.viewSettings.fitExtent);
+    } else {
+      // Reset defaults
+      this.config.viewSettings.fitExtent = {
+        minLat: -90,
+        minLon: -180,
+        maxLat: 90,
+        maxLon: 180,
+      };
+      for (let layer of this._mapLayers.getLayers()) {
+        let geonaLayer = this._availableLayers[layer.options.identifier];
+        if (geonaLayer.viewSettings) {
+          if (geonaLayer.viewSettings.fitExtent) {
+            this.config.viewSettings.fitExtent = constructExtent(
+              this.config.viewSettings.fitExtent,
+              geonaLayer.viewSettings.fitExtent
+            );
+          }
+        }
+      }
+    }
+    if (this.config.zoomToExtent === true) {
+      if (
+        this.config.viewSettings.fitExtent.minLat !== -90
+        && this.config.viewSettings.fitExtent.minLon !== -180
+        && this.config.viewSettings.fitExtent.maxLat !== 90
+        && this.config.viewSettings.fitExtent.maxLon !== 180
+      ) {
+        this._map.fitBounds([
+          [
+            this.config.viewSettings.fitExtent.minLat,
+            this.config.viewSettings.fitExtent.minLon,
+          ],
+          [
+            this.config.viewSettings.fitExtent.maxLat,
+            this.config.viewSettings.fitExtent.maxLon,
+          ],
+        ]);
+      }
     }
   }
 
@@ -587,7 +653,7 @@ export class LMap extends GeonaMap {
             }
           }
         }
-        // If this was the last data layer, the map time should be reset - we will use the dataLayersCounter for this.
+        // If this was the last timed data layer, the map time should be reset - we will use the dataLayersCounter for this.
         let dataLayersCounter = 0;
         for (let dataLayer of this._mapLayers.getLayers()) {
           if (dataLayer.options.modifier === 'hasTime') {
@@ -596,6 +662,37 @@ export class LMap extends GeonaMap {
         }
         if (dataLayersCounter === 0) {
           this._mapTime = undefined;
+        }
+
+        // Update the config for the max and fit extents
+        // Reset defaults
+        this.config.viewSettings.maxExtent = {
+          minLat: -90,
+          minLon: -Infinity,
+          maxLat: 90,
+          maxLon: Infinity,
+        };
+        this.config.viewSettings.fitExtent = {
+          minLat: -90,
+          minLon: -180,
+          maxLat: 90,
+          maxLon: 180,
+        };
+        for (let activeLayer of this._mapLayers.getLayers()) {
+          if (activeLayer.options.viewSettings) {
+            if (activeLayer.options.viewSettings.maxExtent) {
+              this.config.viewSettings.maxExtent = constructExtent(
+                this.config.viewSettings.maxExtent,
+                activeLayer.options.viewSettings.maxExtent
+              );
+            }
+            if (activeLayer.options.viewSettings.fitExtent) {
+              this.config.viewSettings.fitExtent = constructExtent(
+                this.config.viewSettings.fitExtent,
+                activeLayer.options.viewSettings.fitExtent
+              );
+            }
+          }
         }
       }
     }

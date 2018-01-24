@@ -1,4 +1,4 @@
-import 'jquery';
+import $ from 'jquery';
 import dragula from 'dragula';
 
 /**
@@ -190,23 +190,23 @@ function registerLayersTriggers(eventManager, parentDiv) {
 
   // Show/hide layer
   // TODO why is 'this' invalid, and is there a better way to do it?
-  parentDiv.find('.js-geona-layers-list__item-visibility').click(function() {
+  parentDiv.find('.js-geona-layers-list__item-visibility').click(function(jQueryEvent) {
     // Finds the list element that contains the icon which was clicked
-    let item = this.closest('li'); // eslint-disable-line no-invalid-this
+    let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this
     if (this.classList.contains('layer-hidden')) {// eslint-disable-line no-invalid-this
-      eventManager.trigger('mainMenu.showLayer', [item]);
+      eventManager.trigger('mainMenu.showLayer', [item[0]]);
       this.classList.remove('layer-hidden');// eslint-disable-line no-invalid-this
     } else {
-      eventManager.trigger('mainMenu.hideLayer', [item]);
+      eventManager.trigger('mainMenu.hideLayer', [item[0]]);
       this.classList.add('layer-hidden');// eslint-disable-line no-invalid-this
     }
   });
 
   // Remove layer
-  parentDiv.find('.js-geona-layers-list__item-remove').click(function() {
+  parentDiv.find('.js-geona-layers-list__item-remove').click(function(jQueryEvent) {
     // Finds the list element that contains the icon which was clicked
-    let item = this.closest('li'); // eslint-disable-line no-invalid-this
-    eventManager.trigger('mainMenu.removeLayer', [item]);
+    let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this
+    eventManager.trigger('mainMenu.removeLayer', [item[0]]);
   });
 }
 

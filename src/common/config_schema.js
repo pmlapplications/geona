@@ -1100,5 +1100,10 @@ export let client = {
         default: 3,
       },
     },
+    zoomToExtent: {
+      doc: 'Whether to zoom and center the map on layers with defined extents/bounds.',
+      format: Boolean,
+      default: true,
+    },
   },
 };

@@ -187,6 +187,50 @@ export function findNearestValidTime(geonaLayer, requestedTime) {
 }
 
 /**
+ * Constructs an extent which encapsulates the bounds of both passed extents.
+ * @param  {Object} extent1 A Geona extent.
+ * @param  {Object} extent2 A Geona extent.
+ * @return {Object}         A Geona extent constructed from the two parameter extents.
+ */
+export function constructExtent(extent1, extent2) {
+  let newExtent = {};
+
+  if (extent1.minLat === undefined || extent1.minLon === undefined || extent1.maxLat === undefined || extent1.maxLon === undefined) { // eslint-disable-line max-len
+    throw new Error('First parameter: ' + extent1 + ' contains undefined values.');
+  }
+  if (extent2.minLat === undefined || extent2.minLon === undefined || extent2.maxLat === undefined || extent2.maxLon === undefined) { // eslint-disable-line max-len
+    throw new Error('Second parameter: ' + extent2 + ' contains undefined values.');
+  }
+
+  // minLat
+  if (extent1.minLat > extent2.minLat && extent1.minLat !== -90) {
+    newExtent.minLat = extent1.minLat;
+  } else {
+    newExtent.minLat = extent2.minLat;
+  }
+  // minLon
+  if (extent1.minLon > extent2.minLon && extent1.minLon !== -Infinity && extent1.minLon !== -180) {
+    newExtent.minLon = extent1.minLon;
+  } else {
+    newExtent.minLon = extent2.minLon;
+  }
+  // maxLat
+  if (extent1.maxLat < extent2.maxLat && extent1.maxLat !== 90) {
+    newExtent.maxLat = extent1.maxLat;
+  } else {
+    newExtent.maxLat = extent2.maxLat;
+  }
+  // maxLon
+  if (extent1.maxLon < extent2.maxLon && extent1.maxLon !== Infinity && extent1.minLon !== 180) {
+    newExtent.maxLon = extent1.maxLon;
+  } else {
+    newExtent.maxLon = extent2.maxLon;
+  }
+
+  return newExtent;
+}
+
+/**
  * Loads the default/config Geona Layers and their corresponding LayerServers
  * @param  {Object} config The config for the map
  * @return {Object}           The availableLayers and availableLayerServers

@@ -9,12 +9,11 @@ import request from 'request';
 
 
 /**
- * Render the index page
+ * Checks the cache for the requested file, and returns it if found.
  * @param  {Object} req Express request
  * @param  {Object} res Express response
  */
 export function getCache(req, res) {
-  // let cacheUri = '../../../cache/';
   let cacheUri = '/local1/data/scratch/git/web-development/gp2-contribution-guide/cache/';
   let searchFile = cacheUri + req.params.url;
   fs.readFile(searchFile, 'utf8', (err) => {
@@ -117,14 +116,15 @@ function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
  * @param  {Array} parameters All the parameters to reset
  * @return {Array}            The reset parameters
  */
-function resetParameterTypes(parameters) {
+export function resetParameterTypes(parameters) {
   // Doesn't support arrays or objects currently, so if you need them, you'll have to add them first
   let convertedParameters = [];
   for (let param of parameters) {
     // If the param is a number
+    console.log(!isNaN(param));
     if (!isNaN(param)) {
-      // If the param contains a decimal point
-      if (/\./.test(param) === true) {
+      // If the param contains a decimal point or the word 'Infinity'
+      if (/\.|Infinity/.test(param) === true ) {
         convertedParameters.push(parseFloat(param));
       } else { // param is an int
         convertedParameters.push(parseInt(param));
@@ -133,6 +133,10 @@ function resetParameterTypes(parameters) {
       convertedParameters.push(true);
     } else if (param === 'false') {
       convertedParameters.push(false);
+    } else if (param === 'undefined') {
+      convertedParameters.push(undefined);
+    } else if (param === 'null') {
+      convertedParameters.push(null);
     } else {
       convertedParameters.push(param);
     }
