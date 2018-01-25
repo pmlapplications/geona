@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime, constructExtent,
 } from './map_common';
 
 import proj4 from 'proj4';
@@ -261,10 +261,29 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
+    // Reset defaults
+    this.config.viewSettings.maxExtent = {
+      minLat: -90,
+      minLon: -Infinity,
+      maxLat: 90,
+      maxLon: Infinity,
+    };
+    for (let layer of this._map.getLayers().getArray()) {
+      let geonaLayer = this._availableLayers[layer.get('identifier')];
+      if (geonaLayer.viewSettings) {
+        if (geonaLayer.viewSettings.maxExtent) {
+          this.config.viewSettings.maxExtent = constructExtent(
+            this.config.viewSettings.maxExtent,
+            geonaLayer.viewSettings.maxExtent
+          );
+        }
+      }
+    }
+
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
-    let fitExtent = options.fitExtent;
+    let fitExtent = options.fitExtent || this.config.viewSettings.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
     let minZoom = options.minZoom || this._map.getView().getMinZoom();
@@ -278,6 +297,7 @@ export class OlMap extends GeonaMap {
     this.config.viewSettings.minZoom = minZoom;
     this.config.viewSettings.zoom = zoom;
 
+    // FIXME will currently just move to the new extent rather than zooming to fit all
     // Converts the min and max coordinates from LatLon to current projection
     maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
       .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));

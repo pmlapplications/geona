@@ -253,11 +253,13 @@ export class LMap extends GeonaMap {
    *   @param {Number}  options.zoom       The zoom
    */
   setView(options) {
+    // projection
     if (options.projection) {
       this.setProjection(options.projection);
       this.config.projection = options.projection;
     }
 
+    // maxExtent
     if (options.maxExtent) {
       this.config.viewSettings.maxExtent = constructExtent(options.maxExtent, this.config.viewSettings.maxExtent);
     } else {
@@ -300,12 +302,14 @@ export class LMap extends GeonaMap {
       }
     }
 
+    // center
     if (options.center) {
       this._map.panTo([options.center.lat, options.center.lon]);
       // this._map.panTo(options.center);
       this.config.viewSettings.center = options.center;
     }
 
+    // zoom
     let projection = leafletizeProjection(options.projection) || this._map.options.crs;
     if (options.maxZoom || options.minZoom || options.zoom) {
       // let projection = leafletizeProjection(options.projection) || this._map.options.crs;
@@ -327,6 +331,7 @@ export class LMap extends GeonaMap {
       this._map.setZoom(leafletizeZoom(this.config.viewSettings.zoom, projection));
     }
 
+    // fitExtent
     if (options.fitExtent) {
       this.config.viewSettings.fitExtent = constructExtent(options.fitExtent, this.config.viewSettings.fitExtent);
     } else {

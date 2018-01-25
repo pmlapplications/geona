@@ -2559,8 +2559,6 @@ describe('client/js/map_openlayers', function() {
     });
   });
 
-  // TODO write file caching tests (IN THE SERVER TEST FOLDER)
-
   // These tests might have too much duplication
   // (i.e. could be made to test the same number of aspects in fewer lines of code).
   // They also might not be comprehensive, as reorderLayers() deals with a variety of situations.

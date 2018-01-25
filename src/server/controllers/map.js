@@ -62,7 +62,7 @@ export function getServersideLayerServer(req, res) {
  * @param  {Boolean} useCache Whether to retrieve from cache or to fetch from the web and overwrite
  * @return {Array}            List of layers found from the request
  */
-function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
+export function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
   return new Promise((resolve, reject) => {
     let cacheUri = '/local1/data/scratch/git/web-development/gp2-contribution-guide/cache/';
     let filename = urlToFilename(url);
