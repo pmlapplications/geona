@@ -261,29 +261,29 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    // Reset defaults
-    this.config.viewSettings.maxExtent = {
-      minLat: -90,
-      minLon: -Infinity,
-      maxLat: 90,
-      maxLon: Infinity,
-    };
-    for (let layer of this._map.getLayers().getArray()) {
-      let geonaLayer = this._availableLayers[layer.get('identifier')];
-      if (geonaLayer.viewSettings) {
-        if (geonaLayer.viewSettings.maxExtent) {
-          this.config.viewSettings.maxExtent = constructExtent(
-            this.config.viewSettings.maxExtent,
-            geonaLayer.viewSettings.maxExtent
-          );
-        }
-      }
-    }
+    // TODO extent fixes
+    // this.config.viewSettings.maxExtent = {
+    //   minLat: -90,
+    //   minLon: -Infinity,
+    //   maxLat: 90,
+    //   maxLon: Infinity,
+    // };
+    // for (let layer of this._map.getLayers().getArray()) {
+    //   let geonaLayer = this._availableLayers[layer.get('identifier')];
+    //   if (geonaLayer.viewSettings) {
+    //     if (geonaLayer.viewSettings.maxExtent) {
+    //       this.config.viewSettings.maxExtent = constructExtent(
+    //         this.config.viewSettings.maxExtent,
+    //         geonaLayer.viewSettings.maxExtent
+    //       );
+    //     }
+    //   }
+    // }
 
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
-    let fitExtent = options.fitExtent || this.config.viewSettings.fitExtent;
+    let fitExtent = options.fitExtent; // || this.config.viewSettings.fitExtent; TODO extent fixes
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
     let minZoom = options.minZoom || this._map.getView().getMinZoom();
@@ -365,6 +365,13 @@ export class OlMap extends GeonaMap {
       {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
       settings
     );
+    // Add 'hasTime' modifier if it doesn't already have a modifier
+    if (options.modifier === undefined && geonaLayer.dimensions) {
+      if (geonaLayer.dimensions.time) {
+        options.modifier = 'hasTime';
+      }
+    }
+
     // Projection check
     if (!geonaLayer.projections.includes(this._map.getView().getProjection().getCode()) && options.modifier !== 'basemap') {
       throw new Error('The layer ' + geonaLayer.identifier +
@@ -835,6 +842,8 @@ export class OlMap extends GeonaMap {
         this._activeLayers[layerIdentifier].set('timeHidden', true);
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
+        // TODO throw error?? But it might stop execution of whole loadLayersToNearestValidTime() method; use try/catch in that method?
+        console.error('Time is outside the range of times for layer ' + layerIdentifier);
       } else {
         // We save the zIndex so we can reorder the layer to its current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');

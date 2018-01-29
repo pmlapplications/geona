@@ -21,4 +21,9 @@ export function registerBindings(eventManager, timeline) {
   eventManager.bind('timeline.hidePikaday', () => {
     timeline.hidePikaday();
   });
+
+  // Change time
+  eventManager.bind('timeline.changeTime', (time) => {
+    timeline.changeTime(time);
+  });
 }
