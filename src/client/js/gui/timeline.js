@@ -1,6 +1,7 @@
 import 'jquery';
 import * as templates from '../../templates/compiled';
-import Pikaday from 'pikaday';
+import Pikaday from 'pikaday-time';
+// import Pikaday from 'pikaday';
 import moment from 'moment';
 
 import {selectPropertyLanguage} from '../map_common';
@@ -35,8 +36,9 @@ export class Timeline {
     // TODO i18n for the pikaday
     this.pikaday = new Pikaday(
       {
+        field: this.parentDiv.find('.js-geona-timeline-current-date')[0],
         onSelect: (date) => {
-          this.selectPikadayDate(date);
+          this.pikadayTriggeredChangeTime(date);
         },
       }
     );
@@ -60,16 +62,31 @@ export class Timeline {
     // D3 Timeline
     let data = [];
     for (let activeLayerId of Object.keys(this.geona.map._activeLayers)) {
-      if (this.geona.map._availableLayers[activeLayerId].modifier === 'hasTime') {
-        let title = selectPropertyLanguage(this.geona.map._availableLayers[activeLayerId].title);
-        let times = this.geona.map._availableLayers[activeLayerId].dimensions.time.values;
-        data.push({
+      let layer = this.geona.map._availableLayers[activeLayerId];
+      if (layer.modifier === 'hasTime') {
+        let title = selectPropertyLanguage(layer.title);
+        let times = layer.dimensions.time.values;
+
+        let layerData = {
           label: title,
-          times: [{
-            starting_time: Math.round(new Date(times[0])),
-            ending_time: Math.round(new Date(times[times.length - 1])),
-          }],
-        });
+          markerType: 'layer',
+          times: [
+            // {
+            // starting_time: Math.round(new Date(times[0])), // Math.round() on a Date gives us the time in milliseconds
+            // ending_time: Math.round(new Date(times[times.length - 1])),
+          // }
+          ],
+        };
+        for (let time of layer.dimensions.time.values) {
+          let timeInMs = Math.round(new Date(time));
+          layerData.times.push({
+            markerType: 'time',
+            starting_time: timeInMs,
+            ending_time: timeInMs + 1,
+          });
+        }
+        console.log(layerData);
+        data.push(layerData);
       }
     }
     this.timebar = new Timebar(this, {
@@ -116,12 +133,11 @@ export class Timeline {
    * Changes current date, updates the timebar and updates the map layers
    * @param {*} date The date to set the map to
    */
-  selectPikadayDate(date) {
+  pikadayTriggeredChangeTime(date) {
     this.parentDiv.find('.js-geona-timeline-current-date')
       .val(date);
 
-    // timebar update time
-    // TODO
+    // TODO timebar update time
 
     // Update map layers
     let utcDate = moment.utc(date);
@@ -150,7 +166,7 @@ export class Timeline {
    * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
    */
   timebarTriggeredChangeTime(time) {
-    // update pikaday
+    this.pikaday.setDate(time);
     // update buttons
     this.parentDiv.find('.js-geona-timeline-current-date').val(time);
     this.mapChangeTime(time);

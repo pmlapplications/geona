@@ -17,8 +17,5 @@ export function registerTriggers(eventManager, parentDiv) {
   parentDiv.find('.js-geona-timeline-current-date')
     .click(() => {
       eventManager.trigger('timeline.showPikaday');
-    })
-    .focusout(() => {
-      eventManager.trigger('timeline.hidePikaday');
     });
 }

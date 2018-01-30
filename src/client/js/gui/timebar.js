@@ -30,8 +30,6 @@ export class Timebar {
     this.geona = timeline.gui.geona;
     this.parentDiv = timeline.parentDiv;
     this.timebar = undefined;
-    console.log(this.geona);
-    console.log(this.geona.config.config_._instance.divId);
 
     this.drawTimebar(options, this.geona.eventManager);
 
@@ -65,14 +63,15 @@ export class Timebar {
           }
           return label;
         })
-        .colors(d3.scaleOrdinal().range(['#B1A7BC', '#32253F']))
+        .colors(d3.scaleOrdinal()
+          .range(['#B1A7BC', '#111111'])
+          .domain(['layer', 'time']))
+        // .range(['#B1A7BC', '#32253F', '#111111'])
+        // .domain(['layerBar', 'layerBar', 'timeMarker']))
+        .colorProperty('markerType')
         .click(function(d, i, datum, selectedLabel, selectedRect, xVal) {
           eventManager.trigger('timeline.timebarTriggeredChangeTime', xVal.toUTCString());
         });
-      // .click(function(d, i, datum, selectedLabel, selectedRect, xVal) {
-      //   console.log(xVal.toUTCString());
-      //   console.log('timelineHover', datum.label);
-      // });
 
       // Select within the map div id
       d3.select(this.geona.config.config_._instance.divId).select('.js-geona-timeline')

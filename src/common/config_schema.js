@@ -200,10 +200,8 @@ export let client = {
     data: {
       doc: 'The identifier for the data layers to put on the map by default.',
       format: Array,
-      default: ['Rrs_412'],
+      default: ['Rrs_412', 'chlor_a'],
     },
-    // Required parameters: 'identifier', 'protocol', 'projections', 'layerServer'
-    // Required layerServer parameters: 'layers', 'version', 'url'
     dataLayers: {
       doc: 'The Geona-style definitions of all data to be made available by default.',
       format: Array,

@@ -114,6 +114,7 @@
     "openlayers": "^4.3.1",
     "pikaday": "^1.6.1",
     "pikaday-jquery": "^1.0.0",
+    "pikaday-time": "^1.6.1",
     "proj4": "^2.4.4",
     "request": "^2.81.0",
     "swagger-jsdoc": "^1.9.6",
