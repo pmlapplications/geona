@@ -561,14 +561,14 @@ export class LMap extends GeonaMap {
         throw new Error('Layer protocol ' + geonaLayer.protocol + ' is not supported.');
     }
 
-    if (this._availableLayers[geonaLayer.identifier] === undefined) {
-      geonaLayer.modifier = options.modifier;
-      this._availableLayers[geonaLayer.identifier] = geonaLayer;
-      // Save the LayerServer if not already saved
-      if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
-        delete geonaLayerServer.layers;
-        this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
-      }
+    // Save the Layer with its modifier
+    geonaLayer.modifier = options.modifier;
+    this._availableLayers[geonaLayer.identifier] = geonaLayer;
+
+    // Save the LayerServer if not already saved
+    if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+      delete geonaLayerServer.layers;
+      this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
     }
 
     // Sets the map time if this is the first layer

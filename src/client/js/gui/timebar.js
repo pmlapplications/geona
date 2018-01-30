@@ -7,6 +7,9 @@ import pikaday from 'pikaday';
 import 'pikaday-jquery';
 import * as d3Timelines from 'd3-timelines';
 
+import {registerTriggers} from './timebar_triggers';
+import {registerBindings} from './timebar_bindings';
+
 /**
  * Creates an interactive Timebar used to manipulate layer time
  */
@@ -30,19 +33,23 @@ export class Timebar {
     console.log(this.geona);
     console.log(this.geona.config.config_._instance.divId);
 
-    this.drawTimebar(options);
+    this.drawTimebar(options, this.geona.eventManager);
+
+    // registerTriggers(this.geona.eventManager, this.parentDiv, this);
+    registerBindings(this.geona.eventManager, this.timeline);
   }
 
+  // TODO ask Ben or Olly if they know of an alternative way of setting these .click() events (e.g. in the timebar_triggers.js class)
   /**
    * Constructs and draws the Timebar with the layer data on the page
-   * @param {*} options Options for the timeline
+   * @param {Object} options Options for the timeline
+   * @param {EventManager} eventManager Geona eventManager for the .click functions
    */
-  drawTimebar(options) {
-    if (options.data === undefined) {
+  drawTimebar(options, eventManager) {
+    if (options.data === undefined || options.data.length === 0) {
       throw new Error('No layer data provided. Timebar will not be rendered.');
     } else {
       let width = this.parentDiv.find('.js-geona-timeline').width();
-      console.log(width);
       this.timebar = d3Timelines.timelines()
         .width(width + 1)
         .tickFormat({
@@ -51,7 +58,17 @@ export class Timebar {
           tickSize: 4,
         })
         .stack()
-        .margin({left: 70, right: 30, top: 0, bottom: 0});
+        .margin({left: 170, right: 30, top: 0, bottom: 0})
+        .labelFormat((label) => {
+          if (label.length > 25) {
+            return label.slice(0, 22) + '...';
+          }
+          return label;
+        })
+        .colors(d3.scaleOrdinal().range(['#B1A7BC', '#32253F']))
+        .click(function(d, i, datum, selectedLabel, selectedRect, xVal) {
+          eventManager.trigger('timeline.timebarTriggeredChangeTime', xVal.toUTCString());
+        });
       // .click(function(d, i, datum, selectedLabel, selectedRect, xVal) {
       //   console.log(xVal.toUTCString());
       //   console.log('timelineHover', datum.label);

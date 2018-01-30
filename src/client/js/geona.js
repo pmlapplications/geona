@@ -8,6 +8,7 @@ import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
 import {initI18n} from './i18n';
 import {Gui} from './gui/gui';
+import {EventManager} from '../../common/event_manager';
 
 // TODO These are for testing only
 window.templates = templates;
@@ -25,6 +26,7 @@ export class Geona {
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
     this.layerNames = [];
+    this.eventManager = new EventManager();
     this.gui = new Gui(this);
     this.geonaServer = this.config.get('geonaServer');
 
@@ -41,6 +43,7 @@ export class Geona {
             console.error('Failed to call onReadyCallback: ' + e);
           }
         }
+        this.eventManager.trigger('map.initialized');
       });
     });
   }
@@ -55,13 +58,13 @@ export class Geona {
       switch (this.config.get('map.library')) {
         case 'openlayers':
           ol.init(this.geonaServer, () => {
-            this.map = new ol.OlMap(this.config.get('map'), mapDiv);
+            this.map = new ol.OlMap(this.config.get('map'), mapDiv, this);
             resolve();
           });
           break;
         case 'leaflet':
           leaflet.init(this.geonaServer, () => {
-            this.map = new leaflet.LMap(this.config.get('map'), mapDiv);
+            this.map = new leaflet.LMap(this.config.get('map'), mapDiv, this);
             resolve();
           });
           break;

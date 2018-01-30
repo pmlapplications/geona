@@ -3,6 +3,7 @@ import * as templates from '../../templates/compiled';
 import Pikaday from 'pikaday';
 import moment from 'moment';
 
+import {selectPropertyLanguage} from '../map_common';
 import {Timebar} from './timebar';
 import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
@@ -21,7 +22,6 @@ export class Timeline {
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
     this.parentDiv = gui.parentDiv;
-    this.map = gui.geona.map;
 
     this.parentDiv.append(templates.timeline());
     if (!this.config.opened) {
@@ -30,16 +30,6 @@ export class Timeline {
     if (!this.config.collapsible) {
       this.parentDiv.find('.js-geona-timeline-toggle').remove();
     }
-
-    // D3 Timeline
-    this.timebar = new Timebar(this, {
-      data: [
-        {label: 'chlor_a', times: [{'starting_time': 1325376000000, 'ending_time': 1420070400000}]},
-        {label: 'Rrs_412', times: [{'starting_time': 1356998400000, 'ending_time': 1451606400000}]},
-        {label: 'MODIS_NOBS_SUM', times: [{'starting_time': 1262304000000, 'ending_time': 1420070400000}]},
-      ],
-    });
-
 
     // Pikaday widget - instantiated blank
     // TODO i18n for the pikaday
@@ -51,8 +41,40 @@ export class Timeline {
       }
     );
 
-    registerTriggers(this.gui.eventManager, this.parentDiv, this.timebar.timebar);
-    registerBindings(this.gui.eventManager, this);
+    // If the map has loaded before the GUI we will miss the event fire, so check to see if we can draw the timebar yet
+    if (this.geona.map) {
+      if (this.geona.map.initialized) {
+        this.drawTimebar();
+      }
+    }
+
+
+    registerTriggers(this.geona.eventManager, this.parentDiv);
+    registerBindings(this.geona.eventManager, this);
+  }
+
+  /**
+   * Instantiates a new D3 Timeline object to use for the timebar.
+   */
+  drawTimebar() {
+    // D3 Timeline
+    let data = [];
+    for (let activeLayerId of Object.keys(this.geona.map._activeLayers)) {
+      if (this.geona.map._availableLayers[activeLayerId].modifier === 'hasTime') {
+        let title = selectPropertyLanguage(this.geona.map._availableLayers[activeLayerId].title);
+        let times = this.geona.map._availableLayers[activeLayerId].dimensions.time.values;
+        data.push({
+          label: title,
+          times: [{
+            starting_time: Math.round(new Date(times[0])),
+            ending_time: Math.round(new Date(times[times.length - 1])),
+          }],
+        });
+      }
+    }
+    this.timebar = new Timebar(this, {
+      data: data,
+    });
   }
 
   /**
@@ -103,7 +125,7 @@ export class Timeline {
 
     // Update map layers
     let utcDate = moment.utc(date);
-    this.map.loadLayersToNearestValidTime(utcDate);
+    this.geona.map.loadLayersToNearestValidTime(utcDate);
   }
 
   /**
@@ -119,17 +141,26 @@ export class Timeline {
 
     // Update map layers
     let utcDate = moment.utc(date);
-    this.map.loadLayersToNearestValidTime(utcDate);
+    this.geona.map.loadLayersToNearestValidTime(utcDate);
   }
 
   /**
-   * 
-   * @param {String} time Time in vis Timeline format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
+   * Called when the timebar is used to change the time.
+   * Updates the pikaday and current-date text input, then calls mapChangeTime()
+   * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
    */
-  changeTime(time) {
-    console.log('-------------time----------------');
-    console.log(time);
-    // console.log(new Date(time));
+  timebarTriggeredChangeTime(time) {
+    // update pikaday
+    // update buttons
+    this.parentDiv.find('.js-geona-timeline-current-date').val(time);
+    this.mapChangeTime(time);
+  }
+
+  /**
+   * Changes the times of the layers on the map
+   * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
+   */
+  mapChangeTime(time) {
     this.geona.map.loadLayersToNearestValidTime(time);
   }
 }

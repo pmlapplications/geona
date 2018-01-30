@@ -432,15 +432,15 @@ export class OlMap extends GeonaMap {
           throw new Error('Layer protocol ' + geonaLayer.protocol + ' is not supported.');
       }
 
-      if (this._availableLayers[geonaLayer.identifier] === undefined) {
-        geonaLayer.modifier = options.modifier;
-        this._availableLayers[geonaLayer.identifier] = geonaLayer;
-        // Save the LayerServer if not already saved
-        if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
-          let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
-          delete layerServerCopy.layers;
-          this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
-        }
+      // Save the Layer with its modifier
+      geonaLayer.modifier = options.modifier;
+      this._availableLayers[geonaLayer.identifier] = geonaLayer;
+
+      // Save the LayerServer if not already saved
+      if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+        let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
+        delete layerServerCopy.layers;
+        this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
       }
     }
 

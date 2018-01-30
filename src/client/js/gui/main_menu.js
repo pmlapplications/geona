@@ -48,8 +48,8 @@ export class MainMenu {
     }
 
     // Sets the triggers and bindings for this Menu.
-    registerTriggers(this.gui.eventManager, this.parentDiv);
-    registerBindings(this.gui.eventManager, this);
+    registerTriggers(this.geona.eventManager, this.parentDiv);
+    registerBindings(this.geona.eventManager, this);
   }
 
   /**

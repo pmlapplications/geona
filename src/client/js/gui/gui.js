@@ -11,7 +11,6 @@
 import handlebars from 'handlebars/runtime';
 import $ from 'jquery';
 
-import {EventManager} from '../../../common/event_manager';
 import {registerHelpers} from '../../../common/hbs_helpers';
 import * as templates from '../../templates/compiled';
 import {MainMenu} from './main_menu';
@@ -33,7 +32,6 @@ export class Gui {
    */
   constructor(geona) {
     this.geona = geona;
-    this.eventManager = new EventManager();
 
     // Get the parent div and add the 'geona-container' class to it
     this.parentDiv = $(this.geona.config.get('divId'));

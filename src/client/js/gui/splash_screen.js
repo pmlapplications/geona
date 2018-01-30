@@ -13,12 +13,13 @@ export class SplashScreen {
    */
   constructor(gui, config) {
     this.gui = gui;
+    this.geona = gui.geona;
 
     this.gui.parentDiv.append(templates.splash_screen({splashMessage: config.content}));
     this.gui.parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(this.gui.eventManager, this.gui.parentDiv);
-    registerBindings(this.gui.eventManager, this);
+    registerTriggers(this.geona.eventManager, this.gui.parentDiv);
+    registerBindings(this.geona.eventManager, this);
   }
 
   /**

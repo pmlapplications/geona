@@ -4,6 +4,11 @@
  * @param {TermsAndConditions} timeline The Timeline object for the current map.
  */
 export function registerBindings(eventManager, timeline) {
+  // Load timeline (trigger set in map classes)
+  eventManager.bind('map.initialized', () => {
+    timeline.drawTimebar();
+  });
+
   // Show timeline
   eventManager.bind('timeline.showTimeline', () => {
     timeline.showTimeline();
@@ -20,10 +25,5 @@ export function registerBindings(eventManager, timeline) {
   // Hide pikaday
   eventManager.bind('timeline.hidePikaday', () => {
     timeline.hidePikaday();
-  });
-
-  // Change time
-  eventManager.bind('timeline.changeTime', (time) => {
-    timeline.changeTime(time);
   });
 }
