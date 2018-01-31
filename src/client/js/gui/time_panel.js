@@ -10,9 +10,9 @@ import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
 
 /**
- * Creates the timeline section of the GUI.
+ * Creates the GUI time panel.
  */
-export class Timeline {
+export class TimePanel {
   /**
    * Creates the timeline depending on the config options.
    * @param {Gui} gui                      The Gui for this instance of Geona.
@@ -26,17 +26,17 @@ export class Timeline {
 
     this.parentDiv.append(templates.timeline());
     if (!this.config.opened) {
-      this.parentDiv.find('.js-geona-timeline').addClass('hidden');
+      this.parentDiv.find('.js-geona-time-panel').addClass('hidden');
     }
     if (!this.config.collapsible) {
-      this.parentDiv.find('.js-geona-timeline-toggle').remove();
+      this.parentDiv.find('.js-geona-time-panel-toggle').remove();
     }
 
     // Pikaday widget - instantiated blank
     // TODO i18n for the pikaday
     this.pikaday = new Pikaday(
       {
-        field: this.parentDiv.find('.js-geona-timeline-current-date')[0],
+        field: this.parentDiv.find('.js-geona-time-panel-current-date')[0],
         onSelect: (date) => {
           this.pikadayTriggeredChangeTime(date);
         },
@@ -46,7 +46,7 @@ export class Timeline {
     // If the map has loaded before the GUI we will miss the event fire, so check to see if we can draw the timebar yet
     if (this.geona.map) {
       if (this.geona.map.initialized) {
-        this.drawTimebar();
+        this.drawTimeline();
       }
     }
 
@@ -55,57 +55,22 @@ export class Timeline {
     registerBindings(this.geona.eventManager, this);
   }
 
-  /**
-   * Instantiates a new D3 Timeline object to use for the timebar.
-   */
-  drawTimebar() {
-    // D3 Timeline
-    let data = [];
-    for (let activeLayerId of Object.keys(this.geona.map._activeLayers)) {
-      let layer = this.geona.map._availableLayers[activeLayerId];
-      if (layer.modifier === 'hasTime') {
-        let title = selectPropertyLanguage(layer.title);
-        let times = layer.dimensions.time.values;
-
-        let layerData = {
-          label: title,
-          markerType: 'layer',
-          times: [
-            // {
-            // starting_time: Math.round(new Date(times[0])), // Math.round() on a Date gives us the time in milliseconds
-            // ending_time: Math.round(new Date(times[times.length - 1])),
-          // }
-          ],
-        };
-        for (let time of layer.dimensions.time.values) {
-          let timeInMs = Math.round(new Date(time));
-          layerData.times.push({
-            markerType: 'time',
-            starting_time: timeInMs,
-            ending_time: timeInMs + 1,
-          });
-        }
-        console.log(layerData);
-        data.push(layerData);
-      }
-    }
-    this.timebar = new Timebar(this, {
-      data: data,
-    });
+  drawTimeline() {
+    //
   }
 
   /**
    * Removes the timeline from view, but not from the DOM.
    */
-  hideTimeline() {
-    this.parentDiv.find('.js-geona-timeline').addClass('hidden');
+  hideTimePanel() {
+    this.parentDiv.find('.js-geona-time-panel').addClass('hidden');
   }
 
   /**
    * Shows the timeline on the GUI.
    */
-  showTimeline() {
-    this.parentDiv.find('.js-geona-timeline').removeClass('hidden');
+  showTimePanel() {
+    this.parentDiv.find('.js-geona-time-panel').removeClass('hidden');
   }
 
   /**
@@ -134,7 +99,7 @@ export class Timeline {
    * @param {*} date The date to set the map to
    */
   pikadayTriggeredChangeTime(date) {
-    this.parentDiv.find('.js-geona-timeline-current-date')
+    this.parentDiv.find('.js-geona-time-panel-current-date')
       .val(date);
 
     // TODO timebar update time
@@ -149,7 +114,7 @@ export class Timeline {
    * @param {*} date The date to set the map to
    */
   setDate(date) {
-    this.parentDiv.find('.js-geona-timeline-current-date')
+    this.parentDiv.find('.js-geona-time-panel-current-date')
       .val(date);
 
     // Update pikaday options so it displays correct time when next opened
@@ -168,7 +133,7 @@ export class Timeline {
   timebarTriggeredChangeTime(time) {
     this.pikaday.setDate(time);
     // update buttons
-    this.parentDiv.find('.js-geona-timeline-current-date').val(time);
+    this.parentDiv.find('.js-geona-time-panel-current-date').val(time);
     this.mapChangeTime(time);
   }
 

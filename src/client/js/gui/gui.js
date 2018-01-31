@@ -16,7 +16,7 @@ import * as templates from '../../templates/compiled';
 import {MainMenu} from './main_menu';
 import {SplashScreen} from './splash_screen';
 import {TermsAndConditions} from './terms_and_conditions';
-import {Timeline} from './timeline';
+import {TimePanel} from './time_panel';
 
 registerHelpers(handlebars);
 
@@ -81,7 +81,7 @@ export class Gui {
     this.mainMenu = new MainMenu(this, menuConfig);
 
     let timelineConfig = this.geona.config.get('controls.timeline');
-    this.timeline = new Timeline(this, timelineConfig);
+    this.timePanel = new TimePanel(this, timelineConfig);
 
     // When the map is ready, call the onReadyCallback
     mapPromise.then(this.onReadyCallback_);
