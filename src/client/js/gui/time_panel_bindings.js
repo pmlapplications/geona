@@ -4,9 +4,9 @@
  * @param {TermsAndConditions} timePanel The TimePanel object for the current map.
  */
 export function registerBindings(eventManager, timePanel) {
-  // Load timePanel (trigger set in map classes)
+  // Load timePanel (trigger set in Geona class)
   eventManager.bind('map.initialized', () => {
-    timePanel.drawTimebar();
+    timePanel.drawTimeline();
   });
 
   // Show timePanel

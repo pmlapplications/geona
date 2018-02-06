@@ -5,9 +5,9 @@ import Pikaday from 'pikaday-time';
 import moment from 'moment';
 
 import {selectPropertyLanguage} from '../map_common';
-import {Timebar} from './timebar';
-import {registerTriggers} from './timeline_triggers';
-import {registerBindings} from './timeline_bindings';
+import {Timeline} from './timeline';
+import {registerTriggers} from './time_panel_triggers';
+import {registerBindings} from './time_panel_bindings';
 
 /**
  * Creates the GUI time panel.
@@ -24,7 +24,9 @@ export class TimePanel {
     this.config = timelineConfigOptions;
     this.parentDiv = gui.parentDiv;
 
-    this.parentDiv.append(templates.timeline());
+    this.timeline = undefined;
+
+    this.parentDiv.append(templates.time_panel());
     if (!this.config.opened) {
       this.parentDiv.find('.js-geona-time-panel').addClass('hidden');
     }
@@ -56,7 +58,10 @@ export class TimePanel {
   }
 
   drawTimeline() {
-    //
+    // Assign ID to this instance's timeline container
+    let instanceId = this.parentDiv.attr('id');
+    this.parentDiv.find('.js-geona-time-panel-inner__timeline').attr('id', instanceId + '-timeline-container');
+    this.timeline = new Timeline(this, {element: instanceId + '-timeline-container'});
   }
 
   /**
