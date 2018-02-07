@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import * as d3 from 'd3';
+import d3xy from 'd3-xyzoom';
 // import * as selection from 'd3-selection';
 // const d3 = require('d3');
 import moment from 'moment';
@@ -10,10 +11,9 @@ import {registerTriggers} from './timebar_triggers';
 import {registerBindings} from './timebar_bindings';
 
 /**
- * Creates an interactive Timeline used to manipulate layer date
+ * Creates an interactive Timeline used to manipulate layer dates
  */
 export class Timeline {
-  // TODO remove all instances of null in favour of undefined
   /**
    * The Timeline is a chart to visualise events in date
    * @param {Timeline} timePanel  The GUI date panel element
@@ -61,20 +61,10 @@ export class Timeline {
     });
 
     /** @type {Number} TODO */
-    this.laneheight = this.options.barHeight + this.options.barMargin * 2 + 1;
+    this.laneHeight = this.options.barHeight + this.options.barMargin * 2 + 1;
 
     /** @type {D3.xyz} TODO */
-    this.colors = d3.schemeCategory10;
-
-    /** @type {xyz} TODO */
-    this.chart = d3.select('div#' + this.id)
-      .append('svg')
-      .attr('class', 'timeline')
-      .call(this.zoom())
-      .on('click', this.clickDate())
-      .on('mousedown', () => {
-        this.isDragging = false;
-      });
+    this.colors = d3.schemeCategory10; // TODO probably remove
 
     /** @type {xyz} TODO */
     this.width = undefined;
@@ -84,35 +74,21 @@ export class Timeline {
     this.recalculateHeight();
 
     /** @type {xyz} TODO */
-    this.main = this.chart.append('svg:g')
-      .attr('transform', 'translate(' + this.options.chartMargins.left + ',' + this.options.chartMargins.top + ')')
-      .attr('class', 'main');
-
-    /** @type {xyz} The area which holds the horizontal range bars */
-    this.barArea = this.main.append('svg:g');
-
-    /** @type {xyz} TODO */
-    this.dateDetailArea = this.main.append('svg:g');
-
-    /** @type {xyz} The line which marks today's date */
-    this.nowLine = this.main.append('svg:line').attr('class', 'nowLine');
-
-    /** @type {Date} The date the selectedDateLine is currently set to */
-    this.draggedDate = this.options.selectedDate;
-
-    /** @type {xyz} TODO */
-    this.selectedDateLine = this.main.append('svg:rect').attr('cursor', 'e-resize').attr('class', 'selectedDateLine')
-      .call(
-        d3.behavior.drag().origin(Object)
-          .on('drag', this.dragDate())
-          .on('dragend', this.dragDateEnd())
-      )
-      .on('mousedown', function() {
-        d3.event.stopPropagation();
-      });
-
-    /** @type {xyz} TODO */
     this.isDragging = false;
+
+    this.zoom = d3.zoom()
+      .on('zoom', () => {
+        this._zoomed();
+      })
+      .on('end', () => {
+        let params = {
+          event: 'date.zoom',
+          startDate: this.xScale.invert(0),
+          endDate: this.xScale.invert(this.width),
+          noPadding: true,
+        };
+        this.geona.eventManager.trigger('date.zoom', params);
+      });
 
     /** @type {Date} TODO */
     this.minDate = undefined; // Initialised below
@@ -142,44 +118,55 @@ export class Timeline {
     }
 
     // Initialise x and y scale
-    this.xScale = d3.date.scale.utc().domain([this.minDate, this.maxDate]).range([0, this.width]);
-    this.yScale = d3.scale.linear().domain([0, this.options.timebars.length]).range([0, this.height]);
+    this.xScale = d3.scaleUtc().domain([this.minDate, this.maxDate]).range([0, this.width]);
+    this.yScale = d3.scaleLinear().domain([0, this.options.timebars.length]).range([0, this.height]);
+
+    /** @type {xyz} TODO */
+    this.chart = d3.select('div#' + this.id)
+      .append('svg')
+      .attr('class', 'timeline')
+      .call(this.zoom)
+      .on('click', this.clickDate)
+      .on('mousedown', () => {
+        this.isDragging = false;
+      });
+
+    /** @type {xyz} TODO */
+    this.main = this.chart.append('svg:g')
+      .attr('transform', 'translate(' + this.options.chartMargins.left + ',' + this.options.chartMargins.top + ')')
+      .attr('class', 'main');
+
+    /** @type {xyz} The area which holds the horizontal range bars */
+    this.barArea = this.main.append('svg:g');
+
+    /** @type {xyz} TODO */
+    this.dateDetailArea = this.main.append('svg:g');
+
+    /** @type {xyz} The line which marks today's date */
+    this.nowLine = this.main.append('svg:line').attr('class', 'nowLine');
+
+    /** @type {Date} The date the selectedDateLine is currently set to */
+    this.draggedDate = this.options.selectedDate;
+
+    /** @type {xyz} TODO */
+    this.selectedDateLine = this.main.append('svg:rect').attr('cursor', 'e-resize').attr('class', 'selectedDateLine')
+      .call(
+        d3.drag().subject(Object)
+          .on('drag', this.dragDate)
+          .on('end', this.dragDateEnd)
+      )
+      .on('mousedown', function() {
+        d3.event.stopPropagation();
+      });
 
     // Initisalise x axis
-    d3.svg.axis().scale(this.xScale).orient('bottom').tickSize(6, 0, 0);
+    this.xAxis = d3.axisBottom().scale(this.xScale).tickSize(6, 0, 0);
     this.main.append('svg:g')
-      .attr('transform', 'translate(0,' + this.d3Round(this.height + 0.5) + ')')
+      .attr('transform', 'translate(0,' + d3Round(this.height + 0.5) + ')')
       .attr('class', 'axis');
-    // Set up xAxis date tick formats
-    // Chooses the first format that returns a non-0 (true) value
-    let customTimeFormat = d3.date.format.utc.multi([
-      ['%H:%M:%S.%L', function(d) {
-        console.log(d); // TODO rename d
-        // HH:mm:ss.sss
-        return d.getUTCMilliseconds();
-      }],
-      ['%H:%M:%S', function(d) {
-        // HH:mm:ss
-        return d.getUTCSeconds();
-      }],
-      ['%H:%M', function(d) {
-        // HH:mm
-        return d.getUTCMinutes();
-      }],
-      ['%H:%M', function(d) {
-        // HH:mm
-        return d.getUTCHours();
-      }],
-      ['%Y-%m-%d', function(d) {
-        // YYYY-MM-DD
-        return d.getUTCDate() !== 1;
-      }],
-      ['%b %Y', function() {
-        // 3 letter month YYYY
-        return true;
-      }],
-    ]);
-    this.xAxis.tickFormat(customTimeFormat);
+
+
+    this.xAxis.tickFormat(multiDateFormat);
 
     this.draw();
 
@@ -204,22 +191,28 @@ export class Timeline {
     }
   }
 
-  zoom() {
-    d3.zoom()
-      .x(this.xScale)
-      .on('zoom', () => {
-        this.isDragging = true;
-        this.draw();
-      })
-      .on('zoomend', () => {
-        let params = {
-          event: 'date.zoom',
-          startDate: this.xScale.invert(0),
-          endDate: this.xScale.invert(this.width),
-          noPadding: true,
-        };
-        this.geona.eventManager.trigger('date.zoom', params);
-      });
+  // zoom() {
+  //   return d3.zoom()
+  //     .on('zoom', () => {
+  //       this._zoomed();
+  //     })
+  //     .on('end', () => {
+  //       let params = {
+  //         event: 'date.zoom',
+  //         startDate: this.xScale.invert(0),
+  //         endDate: this.xScale.invert(this.width),
+  //         noPadding: true,
+  //       };
+  //       this.geona.eventManager.trigger('date.zoom', params);
+  //     });
+  // }
+
+  _zoomed() {
+    let transform = d3.event.transform;
+    this.xScale.domain(transform.rescaleX(this.xScale).domain());
+    // TODO this might not be working, if not check zoomed() at https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172
+    this.isDragging = true;
+    this.draw();
   }
 
   dragDate() { // TODO rename to drag selectedDateLine
@@ -237,7 +230,7 @@ export class Timeline {
 
     // Move the selectedDateLine
     this.selectedDateLine.attr('x', () => {
-      return this.d3Round(this.xScale(this.draggedDate) - 1.5);
+      return d3Round(this.xScale(this.draggedDate) - 1.5);
     });
 
     // TODO this.geona.eventManager.trigger('some event to replace the line below');
@@ -272,24 +265,24 @@ export class Timeline {
       + this.options.chartMargins.left + 'px)');
 
     // Scale the x-axis and define the x-scale label format
-    this.main.selectAll('.axis').attr('transform', 'translate(0,' + this.d3Round(this.height + 0.5) + ')').call(this.xAxis);
+    this.main.selectAll('.axis').attr('transform', 'translate(0,' + d3Round(this.height + 0.5) + ')').call(this.xAxis);
 
     // Draw the timebars
     this.bars = this.barArea.selectAll('rect').data(this.options.timebars);
     this.bars
       .enter().append('svg:rect')
       .each((timebar, index) => {
-        timebar.color = timebar.color || this.colors(index);
+        // timebar.color = timebar.color || this.colors(index);
         if (timebar.type === 'layer') {
           d3.select('rect').attr('y', ((timebar, index) => {
-            return this.d3Round(this.yScale(index) + this.barMargin + 0.5);
-          })(timebar, index))
-            .transition().duration(500)
-            .attr('height', this.d3Round(this.barHeight + 0.5))
-            .attr('stroke', ((timebar, index) => {
-              return timebar.color || this.colors(index);
-            })(timebar, index))
-            .attr('class', 'timeRange');
+            return d3Round(this.yScale(index) + this.options.barMargin + 0.5);
+          })(timebar, index));
+          // .transition().duration(500)
+          // .attr('height', d3Round(this.barHeight + 0.5))
+          // .attr('stroke', ((timebar, index) => {
+          //   return timebar.color || this.colors(index);
+          // })(timebar, index))
+          // .attr('class', 'timeRange');
         }
       });
 
@@ -299,21 +292,21 @@ export class Timeline {
     this.bars
       .attr('x', (timebar) => {
         if (timebar.startDate) {
-          let x = this.d3Round(this.xScale(new Date(timebar.startDate)) + 0.5);
+          let x = d3Round(this.xScale(new Date(timebar.startDate)) + 0.5);
           return x;
         } else {
           return 0;
         }
       }).attr('width', (timebar) => {
         if (timebar.endDate) {
-          return this.d3Round(this.xScale(new Date(timebar.endDate)) - this.xScale(new Date(timebar.startDate)));
+          return d3Round(this.xScale(new Date(timebar.endDate)) - this.xScale(new Date(timebar.startDate)));
         } else {
           return 0;
         }
       });
 
     // Position the date date details lines (if available) for each date bar
-    this.dateDetails = this.dateDetailsArea.selectAll('g').data(this.options.timebars);
+    this.dateDetails = this.dateDetailArea.selectAll('g').data(this.options.timebars);
 
     // Add new required g elements
     this.dateDetails.enter().append('svg:g');
@@ -334,10 +327,10 @@ export class Timeline {
     // Rescale the x values for all the detail lines for each date bar // TODO rename the detail lines
     this.main.selectAll('.detailLine')
       .attr('x1', (date) => {
-        return this.d3Round(this.xScale(new Date(date)) + 0.5);
+        return d3Round(this.xScale(new Date(date)) + 0.5);
       })
       .attr('x2', (date) => {
-        return this.d3Round(this.xScale(new Date(date)) + 0.5);
+        return d3Round(this.xScale(new Date(date)) + 0.5);
       });
 
     // Draw the current date-date line
@@ -345,18 +338,16 @@ export class Timeline {
     let height = this.height;
 
     this.nowLine // TODO would it be more readable to find a way of using xScale without context switching, using an arrow function?
-      .attr('x1', this.d3Round(this.xScale(now) + 0.5)).attr('y1', 0)
-      .attr('x2', this.d3Round(this.xScale(now) + 0.5)).attr('y2', height);
+      .attr('x1', d3Round(this.xScale(now) + 0.5)).attr('y1', 0)
+      .attr('x2', d3Round(this.xScale(now) + 0.5)).attr('y2', height);
 
     // Draw the selected date-date line
     this.selectedDateLine
       .attr('x', () => {
-        let xScale = this.xScale;
-        let selectedDate = this.selectedDate;
-        return this.d3Round(xScale(selectedDate) - 1.5);
+        return d3Round(this.xScale(this.options.selectedDate) - 1.5);
       }).attr('y', 2)
       .attr('width', 10).attr('height', height - 2)
-      .atr('rx', 6).attr('ry', 6);
+      .attr('rx', 6).attr('ry', 6);
 
     this.drawLabels();
 
@@ -434,7 +425,7 @@ export class Timeline {
       // Timebar
       let takenSpaces = {};
       let datetimes = timebar.dateTimes.filter((dateStr) => {
-        let x = this.d3Round(this.xScale(new Date(dateStr)) + 0.5);
+        let x = d3Round(this.xScale(new Date(dateStr)) + 0.5);
         if (takenSpaces[x] === true) {
           return false;
         }
@@ -457,7 +448,7 @@ export class Timeline {
 
       let label = $('.indicator-header[data-id="' + id + '"] > p').html();
       if (!label || label === '') {
-        label = this.options.timebars[i].label;
+        label = this.options.timebars[i].title;
       }
       // TODO finish method and figure out what it means
     }
@@ -498,27 +489,27 @@ export class Timeline {
       newStartDate = new Date(startDate);
     }
     if (endDate === undefined) {
-      newEndDate = this.addLayerBar.xScale.invert(this.width);
+      newEndDate = this.xScale.invert(this.width);
     } else {
       newEndDate = new Date(endDate);
     }
 
-    // Set padding to equal 5% of the date difference between the startDate and the endDate
-    let defaultPadding = (newEndDate.getTime() - newStartDate.getTime()) * 0.05;
+    let paddingAmount = (newEndDate.getTime() - newStartDate.getTime()) * 0.05;
 
     if (padding) {
-      // Add the padding to both ends or just one if only extending in one direction
       if (startDate !== undefined) {
-        newStartDate = newStartDate.getTime() - defaultPadding;
+        newStartDate = newStartDate.getTime() - padding;
       }
       if (endDate !== undefined) {
-        newEndDate = newEndDate.getTime() - defaultPadding;
+        newEndDate = newEndDate.getTime() + padding;
       }
     }
 
+    // let transform = d3.event.transform;
+    // this.xScale.domain(transform.rescaleX(this.xScale).domain());
+    // let transform = d3.zoomTransform();
     this.xScale.domain([newStartDate, newEndDate]).range([0, this.width]);
-    this.zoom.x(this.xScale); // This is absolutely required to programmatically zoom and retrigger internals of zoom
-    this.drawLabels();
+    this.draw();
 
     let params = {
       event: 'date.zoom',
@@ -530,11 +521,10 @@ export class Timeline {
     this.geona.eventManager.trigger('date.zoom', params);
   }
 
-  addLayerBar(name, id, label, startDate, endDate, dateTimes) {
+  addLayerBar(title, id, startDate, endDate, dateTimes) {
     let newLayerBar = {};
-    newLayerBar.name = name;
+    newLayerBar.title = title;
     newLayerBar.id = id;
-    newLayerBar.label = label;
     newLayerBar.startDate = startDate;
     newLayerBar.endDate = endDate;
     newLayerBar.dateTimes = dateTimes;
@@ -550,7 +540,12 @@ export class Timeline {
     // TODO this has a TODO attached in the current code, so what should be changed?
     // TODO complete this if block (has some gisportal stuff in it)
     // if () {
-
+    this.recalculateHeight();
+    let data = this.layerbars[0];
+    this.zoomDate(data.startDate, data.endDate);
+    if (!moment.utc(this.getDate()).isBetween(moment.utc(startDate), moment.utc(endDate))) {
+      this.setDate(endDate);
+    }
     // }
 
     if (!this.keydownListenerEnabled) {
@@ -564,12 +559,12 @@ export class Timeline {
     // Adjust panel heights // FIXME there is 0% chance that .timeline-container exists
     this.parentDiv.find('.timeline-container').css('bottom', '0px');
     let height = this.parentDiv.find('.timeline-container').height() + 10; // +10 for the padding
-    this.adjustPanelCss(height);
+    // this.adjustPanelCss(height);
   }
 
-  has(name) {
+  has(title) {
     let has = _.filter(this.options.timebars, (d) => {
-      return d.name.toLowerCase() === name.toLowerCase();
+      return d.title.toLowerCase() === title.toLowerCase();
     });
 
     if (has.length > 0) {
@@ -595,7 +590,7 @@ export class Timeline {
 
   }
 
-  adjustPanelCss(height) {
+  adjustPanelCss(height) { // FIXME find out what this does and fix
     this.parentDiv.find('.panel').css('bottom', height + 35 + 'px');
     this.parentDiv.find('.ol-attribution').css('bottom', height + 'px');
     let collabPanel = this.parentDiv.find('.collaboration-panel');
@@ -604,6 +599,7 @@ export class Timeline {
     collabPanel.toggleClass('hidden', collabHidden);
     collabPanel.css('max-height', 'calc(100% - ' + (height + top + 35) + 'px)');
   }
+
 
   setDate(date) {
     if (this.getDate().toString() === date.toString()) {
@@ -619,13 +615,11 @@ export class Timeline {
         this.zoomDate(undefined, date);
       }
       this.selectedDateLine.transition().duration(500).attr('x', (d) => {
-        let selectedDate = this.selectedDate;
-        return this.d3Round(this.xScale(selectedDate) - 1.5);
+        return d3Round(this.xScale(this.options.selectedDate) - 1.5);
       });
     }
 
     // TODO gisportal.filterLayersByTime(date)
-    this.showTime(date);
     let params = {
       event: 'date.selected',
       date: date,
@@ -641,12 +635,40 @@ export class Timeline {
     }
     return undefined;
   }
+}
 
-  d3Round(x, n) {
-    // TODO replace with d3.format and a String-to-Number conversion
-    if (n) {
-      return Math.round(x * (n = Math.pow(10, n))) / n;
-    }
-    return Math.round(x);
+function d3Round(x, n) {
+  // TODO replace with d3.format and a String-to-Number conversion
+  console.log(x);
+  console.log(n);
+  if (n) {
+    console.log(Math.round(x * (n = Math.pow(10, n))) / n);
+    return Math.round(x * (n = Math.pow(10, n))) / n;
+  }
+  console.log(Math.round(x));
+  return Math.round(x);
+}
+
+/**
+ * Selects the appropriate date format depending on the precision of the date.
+ * @param {*} date
+ */
+function multiDateFormat(date) {
+  if (d3.timeSecond(date) < date) {
+    return d3.timeFormat('%H:%M:%S.%L');
+  } else
+  if (d3.timeMinute(date) < date) {
+    return d3.timeFormat('%H:%M:%S');
+  } else
+  if (d3.timeHour(date) < date) {
+    return d3.timeFormat('%H:%M');
+  } else
+  if (d3.timeDay(date) < date) {
+    return d3.timeFormat('%H:%M');
+  } else
+  if (d3.timeMonth(date) < date) {
+    return d3.timeFormat('%Y-%m-%d');
+  } else {
+    return d3.timeFormat('%b %Y');
   }
 }
