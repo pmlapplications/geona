@@ -61,12 +61,18 @@ export class Timeline {
     };
     this.options = Object.assign({}, defaultOptions, settings);
 
-    this.LAYER_HEIGHT = 10;
-    this.X_AXIS_LABEL_HEIGHT = 25;
+    this.LAYER_HEIGHT = 10; // CONST
+    this.Y_AXIS_LABEL_WIDTH = 100; // CONST
+    this.X_AXIS_LABEL_HEIGHT = 25; // CONST
 
+    this.timelineLayers = [];
 
-    this.width = this.parentDiv.find('.js-geona-time-panel-container').width();
-    this.dataHeight = undefined; // Initial height of 25 is the height needed for the axis + axis labels
+    this.dataWidth = undefined;
+    this.fullWidth = undefined;
+    this.calculateWidths();
+    this.dataHeight = undefined; // Calculated in calculateHeights() // TODO jsdoc these
+    this.fullHeight = undefined; // Calculated in calculateHeights()
+    this.calculateHeights();
 
     // Set the scale for the xAxis to use
     this.xScale = d3.scaleTime()
@@ -74,75 +80,98 @@ export class Timeline {
         new Date(Date.parse(this.options.layers[0].startDate)),
         new Date(Date.parse(this.options.layers[0].endDate)),
       ])
-      .range([0, this.width]);
+      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
 
     this.xAxis = d3.axisBottom(this.xScale)
-      .ticks(4); // TODO set using calculation based on width
+      .ticks(Math.round(this.dataWidth / 77)); // Width-based calculation // TODO write a wiki entry explaining decisions like this
 
     this.yScale = d3.scaleBand()
-      .range([0, this.height])
+      .range([0, this.dataHeight])
       .domain(this.options.layers.map((layer) => {
-        return layer.identifier;
+        return layer.title;
       }))
-      .paddingInner(0.2); // 20% of height, i.e. 2px
+      .paddingInner(0.3); // 30% of height, i.e. 3px
 
-    this.yAxis = d3.axisLeft(this.yScale).ticks(this.options.layers.length);
+    this.yAxis = d3.axisLeft(this.yScale)
+      .ticks(this.options.layers.length);
 
     // Selects the main element to insert the timeline elements into
     this.timeline = d3.select('#' + this.options.elementId)
       .append('svg')
-      .attr('width', this.width)
-      .attr('height', this.height);
+      .attr('width', this.dataWidth)
+      .attr('height', this.dataHeight);
 
     // Add a group and draw the axis
     this.timeline.append('g')
       .attr('class', 'geona-timeline-x-axis')
-      .attr('transform', 'translate(0, ' + (this.height - 25) + ')')
+      .attr('transform', 'translate(' + (this.Y_AXIS_LABEL_WIDTH) + ', ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
       .call(this.xAxis);
     this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
-      // .attr('transform', 'translate(0, ' + (this.height - 25) + ')')
+      .attr('transform', 'translate(' + this.Y_AXIS_LABEL_WIDTH + ')')
       .call(this.yAxis);
 
-    this.layers = this.timeline.selectAll('rect')
-      .data(this.options.layers); // Bind each layer to a rect (rects not yet created)
+    // Add the currently active layers
+    for (let layer of this.options.layers) {
+      this.addTimelineLayer(layer);
+    }
+  }
 
-    this.height += 10;
-    this.yScale.range([0, this.height]);
+  /**
+   * Adds the specified layer to the timeline
+   * @param {*} layerToAdd
+   */
+  addTimelineLayer(layerToAdd) {
+    // Increase timeline height to accommodate one new layer
+    this.timelineLayers.push(layerToAdd);
+    this.calculateHeights();
+    // Update yScale range and domain
+    this.yScale.range([0, this.dataHeight])
+      .domain(this.options.layers.map((layer) => {
+        return layer.title;
+      }));
 
-    this.layers.enter().append('rect')
+    this.timelineLayerBars = this.timeline.selectAll('rect')
+      .remove()
+      .exit()
+      .data(this.timelineLayers); // Bind each layer to a rect (rects not yet created)
+
+    this.timelineLayerBars.enter().append('rect')
       .attr('x', (layer) => {
         return this.xScale(Date.parse(layer.startDate));
       })
       .attr('y', (layer) => {
-        console.log(layer);
-        console.log(this.yScale(layer));
-        return this.yScale(layer.identifier);
+        return this.yScale(layer.title);
       })
       .attr('height', 10)
       .attr('width', (layer) => {
         return this.xScale(Date.parse(layer.endDate));
       })
-      .attr('fill', '#666666');
+      .attr('fill', '#666666')
+      .attr('shape-rendering', 'crispEdges');
 
-    this.timeline.select('svg')
-      .attr('height', this.height);
+    this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
+    this.timeline.select('.geona-timeline-x-axis')
+      .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')');
+    this.timeline.select('.geona-timeline-y-axis')
+      .call(this.yAxis);
   }
 
-  addTimelineLayer(layer) {
-    // Increase timeline height to accommodate one new layer
-
-    // Update yScale range and domain
+  calculateWidths() {
+    this.dataWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
+      this.options.timelineMargins.left - this.options.timelineMargins.right -
+      this.Y_AXIS_LABEL_WIDTH;
+    this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width();
   }
 
   calculateHeights() {
-    if (this.options.layers.length > 0) {
-      this.dataHeight = this.LAYER_HEIGHT * this.options.layers.length;
-    } else {
-      this.dataHeight = this.X_AXIS_LABEL_HEIGHT; // TODO could be misleading - probably just set to 0.
-    }
+    this.dataHeight = this.LAYER_HEIGHT * this.timelineLayers.length;
     this.fullHeight = this.dataHeight +
       this.options.timelineMargins.top + this.options.timelineMargins.bottom +
       this.X_AXIS_LABEL_HEIGHT;
+  }
+
+  draw() {
+
   }
 }
