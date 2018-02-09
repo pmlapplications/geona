@@ -40,14 +40,14 @@ export class Timeline {
     };
 
     this.geona = timePanel.geona;
-    // TODO I think parentDiv is a bit misleading - maybe this.mapDiv? Or this.geonaDiv? <-- better than mapDiv imo
+    // TODO I think parentDiv is a bit misleading - maybe this.geonaDiv
     this.parentDiv = timePanel.parentDiv;
 
     /** @type {Object} Options used in construction of the map */
     this.options = Object.assign({}, defaults, options);
 
     /** @type {String} The name of the HTML element to create the timeline in */
-    this.id = options.element; // TODO this will need to be the map div id + the element name
+    this.id = options.element;
 
     /** @type {Boolean} TODO */
     this.visible = options.visible;
@@ -479,7 +479,6 @@ export class Timeline {
   }
 
   zoomDate(startDate, endDate, padding) {
-    // TODO be extremely careful, you changed 'noPadding' to 'padding' thereby completely messing everything up which already uses this
     let newStartDate;
     let newEndDate;
 
@@ -540,12 +539,12 @@ export class Timeline {
     // TODO this has a TODO attached in the current code, so what should be changed?
     // TODO complete this if block (has some gisportal stuff in it)
     // if () {
-    this.recalculateHeight();
-    let data = this.layerbars[0];
-    this.zoomDate(data.startDate, data.endDate);
-    if (!moment.utc(this.getDate()).isBetween(moment.utc(startDate), moment.utc(endDate))) {
-      this.setDate(endDate);
-    }
+    // this.recalculateHeight();
+    // let data = this.layerbars[0];
+    // this.zoomDate(data.startDate, data.endDate);
+    // if (!moment.utc(this.getDate()).isBetween(moment.utc(startDate), moment.utc(endDate))) {
+    //   this.setDate(endDate);
+    // }
     // }
 
     if (!this.keydownListenerEnabled) {
@@ -655,20 +654,20 @@ function d3Round(x, n) {
  */
 function multiDateFormat(date) {
   if (d3.timeSecond(date) < date) {
-    return d3.timeFormat('%H:%M:%S.%L');
+    return d3.timeFormat('%H:%M:%S.%L')(date);
   } else
   if (d3.timeMinute(date) < date) {
-    return d3.timeFormat('%H:%M:%S');
+    return d3.timeFormat('%H:%M:%S')(date);
   } else
   if (d3.timeHour(date) < date) {
-    return d3.timeFormat('%H:%M');
+    return d3.timeFormat('%H:%M')(date);
   } else
   if (d3.timeDay(date) < date) {
-    return d3.timeFormat('%H:%M');
+    return d3.timeFormat('%H:%M')(date);
   } else
   if (d3.timeMonth(date) < date) {
-    return d3.timeFormat('%Y-%m-%d');
+    return d3.timeFormat('%Y-%m-%d')(date);
   } else {
-    return d3.timeFormat('%b %Y');
+    return d3.timeFormat('%b %Y')(date);
   }
 }

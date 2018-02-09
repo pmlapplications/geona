@@ -5,7 +5,7 @@ import Pikaday from 'pikaday-time';
 import moment from 'moment';
 
 import {selectPropertyLanguage} from '../map_common';
-import {Timeline} from './timeline';
+import {Timeline} from './new_timeline';
 import {registerTriggers} from './time_panel_triggers';
 import {registerBindings} from './time_panel_bindings';
 
@@ -61,33 +61,37 @@ export class TimePanel {
     // Assign ID to this instance's timeline container
     let instanceId = this.parentDiv.attr('id');
     this.parentDiv.find('.js-geona-time-panel-inner__timeline').attr('id', instanceId + '-timeline-container');
+    // this.timeline = new Timeline(this, {
+    //   elementId: instanceId + '-timeline-container',
+    //   comment: 'Sample timeline data',
+    //   selectedDate: new Date(), // TODO in the current portal this is 'var date = gisportal.utils.getURLParameter('date') || "1900-01-01T00:00:00Z"'
+    //   chartMargins: {
+    //     top: 7,
+    //     right: 0,
+    //     bottom: 5,
+    //     left: 0,
+    //   },
+    //   barHeight: 10,
+    //   barMargin: 2,
+    //   timebars: [],
+    // });
+
     this.timeline = new Timeline(this, {
-      element: instanceId + '-timeline-container',
-      comment: 'Sample timeline data',
-      selectedDate: new Date(), // TODO in the current portal this is 'var date = gisportal.utils.getURLParameter('date') || "1900-01-01T00:00:00Z"'
-      chartMargins: {
-        top: 7,
-        right: 0,
-        bottom: 5,
-        left: 0,
-      },
-      barHeight: 10,
-      barMargin: 2,
-      timebars: [],
+      elementId: instanceId + '-timeline-container',
     });
 
-    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
-      if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'hasTime') {
-        let availableLayer = this.geona.map._availableLayers[layerIdentifier];
-        this.timeline.addLayerBar(
-          availableLayer.title, // title
-          layerIdentifier, // id
-          availableLayer.dimensions.time.values[0], // startDate // TODO make sure layer times are sorted so this works
-          availableLayer.dimensions.time.values[availableLayer.dimensions.time.values.length - 1], // endDate
-          availableLayer.dimensions.time.values, // dateTimes // TODO confirm these are all the layer times
-        );
-      }
-    }
+    // for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+    //   if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'hasTime') {
+    //     let availableLayer = this.geona.map._availableLayers[layerIdentifier];
+    //     this.timeline.addLayerBar(
+    //       availableLayer.title, // title
+    //       layerIdentifier, // id
+    //       availableLayer.dimensions.time.values[0], // startDate // TODO make sure layer times are sorted so this works
+    //       availableLayer.dimensions.time.values[availableLayer.dimensions.time.values.length - 1], // endDate
+    //       availableLayer.dimensions.time.values, // dateTimes // TODO confirm these are all the layer times
+    //     );
+    //   }
+    // }
   }
 
   /**
