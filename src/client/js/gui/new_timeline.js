@@ -18,10 +18,8 @@ export class Timeline {
         {
           identifier: 'chlor_a',
           title: 'chlor a title',
-          startDate: '1997-01-01',
-          endDate: '2015-01-01',
           allDates: [
-            '1998-01-01',
+            '1997-01-01',
             '2001-01-01',
             '2011-01-01',
             '2015-01-01',
@@ -30,25 +28,21 @@ export class Timeline {
         {
           identifier: 'chlor_b',
           title: 'chlor b title',
-          startDate: '1997-01-01',
-          endDate: '2012-01-01',
           allDates: [
-            '1998-01-01',
+            '1999-01-01',
             '2002-01-01',
             '2012-01-01',
-            '2015-01-01',
+            '2013-01-01',
           ],
         },
         {
           identifier: 'chlor_c',
           title: 'chlor c title',
-          startDate: '1997-01-01',
-          endDate: '2014-01-01',
           allDates: [
             '1998-01-01',
             '2003-01-01',
             '2013-01-01',
-            '2015-01-01',
+            '2014-01-01',
           ],
         },
       ],
@@ -66,10 +60,10 @@ export class Timeline {
     this.X_AXIS_LABEL_HEIGHT = 25; // CONST
     this.LAYER_PADDING = 0.3; // CONST - between 0 and 1
 
-    this.timelineLayers = [];
+    this.timelineCurrentLayers = [];
 
-    this.dataWidth = undefined;
-    this.fullWidth = undefined;
+    this.dataWidth = undefined; // Calculated in calculateWidths() // TODO jsdoc these
+    this.fullWidth = undefined; // Calculated in calculateWidths()
     this.calculateWidths();
     this.dataHeight = undefined; // Calculated in calculateHeights() // TODO jsdoc these
     this.fullHeight = undefined; // Calculated in calculateHeights()
@@ -78,23 +72,20 @@ export class Timeline {
     // Set the scale for the xAxis to use
     this.xScale = d3.scaleTime()
       .domain([
-        new Date(Date.parse(this.options.layers[0].startDate)),
-        new Date(Date.parse(this.options.layers[0].endDate)),
+        new Date(Date.parse(this.options.layers[0].allDates[0])),
+        new Date(Date.parse(this.options.layers[0].allDates[this.options.layers[0].allDates.length - 1])),
       ])
-      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // TODO dataWidth is 1px short of showing the full axis
+      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME dataWidth is 1px short of showing the full axis
 
     this.xAxis = d3.axisBottom(this.xScale)
       .ticks(Math.round(this.dataWidth / 77)); // Width-based calculation // TODO write a wiki entry explaining decisions like this
 
-    this.yScale = d3.scaleBand()
+    this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
       .range([0, this.dataHeight])
-      .domain(this.options.layers.map((layer) => {
-        return layer.title;
-      }))
       .paddingInner(this.LAYER_PADDING);
 
     this.yAxis = d3.axisLeft(this.yScale)
-      .ticks(this.options.layers.length);
+      .ticks(this.timelineCurrentLayers.length);
 
     // Selects the main element to insert the timeline elements into
     this.timeline = d3.select('#' + this.options.elementId)
@@ -113,13 +104,17 @@ export class Timeline {
       .attr('transform', 'translate(' + this.Y_AXIS_LABEL_WIDTH + ')')
       .call(this.yAxis);
     // Add a group for the layer bars
-    this.timelineLayerBars = this.timeline.append('g')
-      .attr('class', 'geona-timeline-layer-bars');
+    this.timelineLayers = this.timeline.append('g')
+      .attr('class', 'geona-timeline-layers');
 
     // Add the currently active layers
     for (let layer of this.options.layers) {
+      console.log('---');
       this.addTimelineLayer(layer);
     }
+    // this.addTimelineLayer(this.options.layers[0]);
+    // this.addTimelineLayer(this.options.layers[1]);
+    // this.addTimelineLayer(this.options.layers[2]);
   }
 
   /**
@@ -128,72 +123,77 @@ export class Timeline {
    */
   addTimelineLayer(layerToAdd) {
     // Increase timeline height to accommodate one new layer
-    this.timelineLayers.push(layerToAdd);
+    this.timelineCurrentLayers.push(layerToAdd);
     this.calculateHeights();
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
-      .domain(this.options.layers.map((layer) => {
+      .domain(this.timelineCurrentLayers.map((layer) => {
         return layer.title;
       }));
 
     // Create a g for each layer
-    // Within the g create a rect
-    // Within the g create x markers
-
-    let layerBar = this.timelineLayerBars.selectAll('.geona-timeline-layer-bar')
+    this.timelineLayerBars = this.timelineLayers.selectAll('.geona-timeline-layer')
       .remove().exit()
-      .data(this.timelineLayers)
+      .data(this.timelineCurrentLayers)
       .enter().append('g')
-      .attr('class', 'geona-timeline-layer-bar')
+      .attr('class', (layer) => {
+        return 'geona-timeline-layer geona-timeline-layer__' + layer.identifier;
+      })
       .attr('transform', (layer) => {
-        return 'translate(' + this.yScale(layer.title) + ')';
-      });
-
-      // Add a rect for each layer
-    layerBar.selectAll('rect')
-      .data(this.timelineLayers)
-      .enter().append('rect')
+        return 'translate(0, ' + this.yScale(layer.title) + ')';
+      })
+      // Within the g create a rect
+      .append('rect')
       .attr('x', (layer) => {
-        return this.xScale(Date.parse(layer.startDate));
+        return this.xScale(Date.parse(layer.allDates[0]));
       })
-      .attr('y', (layer) => {
-        return this.yScale(layer.title);
-      })
+      .attr('y', this.yScale(0)) // Alignment is relative to the group, so 0 always refers to the top position of the group.
       .attr('height', this.LAYER_HEIGHT)
       .attr('width', (layer) => {
-        return this.xScale(Date.parse(layer.endDate));
+        console.log(layer);
+        console.log(layer.allDates);
+        return this.xScale(Date.parse(layer.allDates[layer.allDates.length - 1]));
       })
-      .attr('fill', '#b1a7bc')
-      .attr('shape-rendering', 'crispEdges')
+      .attr('fill', '#b1a7bc').attr('shape-rendering', 'crispEdges')
       .attr('class', 'geona-timeline-layer-bar');
-
-    layerBar.selectAll('line')
-      .data(this.timelineLayers)
-      .enter().append('line')
-      .attr('x1', (layer, index) => {
-        return this.xScale(Date.parse(layer.allDates[index])).toString();
-      })
-      .attr('x2', (layer, index) => {
-        return this.xScale(Date.parse(layer.allDates[index])).toString();
-      })
-      .attr('y1', (layer, index) => {
-        return this.yScale(layer.title).toString();
-      })
-      .attr('y2', (layer, index) => {
-        return (this.yScale(layer.title) + this.LAYER_HEIGHT).toString();
-      })
-      .attr('stroke', '#000000')
-      .attr('stroke-width', '1')
-      .attr('shape-rendering', 'crispEdges')
-      .attr('class', 'geona-timeline-layer-time-marker');
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
     this.timeline.select('.geona-timeline-x-axis')
       .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')');
     this.timeline.select('.geona-timeline-y-axis')
       .call(this.yAxis);
+
+    for (let layer of this.timelineCurrentLayers) {
+      this.addTimeStepMarkers(layer, layer.allDates);
+    }
   }
 
+  /**
+   * Adds the time step marker elements for the specified layer.
+   * @param {Object} layer    The definition for the layer we are using.
+   * @param {Array}  allDates The collection of dates to insert markers for.
+   */
+  addTimeStepMarkers(layer, allDates) {
+    this.timelineLayers.select('.geona-timeline-layer__' + layer.identifier).selectAll('line')
+      .data(allDates)
+      .enter().append('line')
+      .attr('x1', (date) => {
+        return this.xScale(Date.parse(date));
+      })
+      .attr('x2', (date) => {
+        return this.xScale(Date.parse(date));
+      })
+      .attr('y1', 0)
+      .attr('y2', this.LAYER_HEIGHT)
+      .attr('stroke', '#000000')
+      .attr('stroke-width', '1')
+      .attr('shape-rendering', 'crispEdges')
+      .attr('class', 'geona-timeline-layer-time-marker');
+  }
+
+  /**
+   * Updates the dataWidth and fullWidth variables to keep the correct proportions for the window size.
+   */
   calculateWidths() {
     this.dataWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
       this.options.timelineMargins.left - this.options.timelineMargins.right -
@@ -201,8 +201,11 @@ export class Timeline {
     this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width();
   }
 
+  /**
+   * Updates the dataHeight and fullHeight variables to keep the correct proportions for the window size.
+   */
   calculateHeights() {
-    this.dataHeight = this.LAYER_HEIGHT * this.timelineLayers.length;
+    this.dataHeight = this.LAYER_HEIGHT * this.timelineCurrentLayers.length;
     this.fullHeight = this.dataHeight +
       this.options.timelineMargins.top + this.options.timelineMargins.bottom +
       this.X_AXIS_LABEL_HEIGHT;
