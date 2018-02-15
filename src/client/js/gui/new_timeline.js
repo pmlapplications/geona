@@ -59,6 +59,8 @@ export class Timeline {
     this.Y_AXIS_LABEL_WIDTH = 100; // CONST
     this.X_AXIS_LABEL_HEIGHT = 25; // CONST
     this.LAYER_PADDING = 0.3; // CONST - between 0 and 1
+    this.X_AXIS_TICKS = 7; // TODO explain on wiki // CONST
+    // this.X_AXIS_TICKS = Math.round(this.dataWidth / 77); // TODO explain on wiki // CONST
 
     this.timelineCurrentLayers = [];
     this.startDate = undefined;
@@ -82,10 +84,16 @@ export class Timeline {
       ])
       .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME dataWidth cuts off the axis + labels
 
-    console.log(this.xScale);
+    this.xScale2 = d3.scaleTime()
+      .domain([
+        new Date(new Date('2010-01-01')),
+        new Date(new Date('2011-01-01')),
+      ])
+      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
 
     this.xAxis = d3.axisBottom(this.xScale)
-      .ticks(Math.round(this.dataWidth / 77)); // Width-based calculation // TODO write a wiki entry explaining decisions like this
+      .ticks(this.X_AXIS_TICKS)
+      .tickFormat(getDateFormat);
 
 
     this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
@@ -94,23 +102,22 @@ export class Timeline {
 
     this.yAxis = d3.axisLeft(this.yScale)
       .ticks(this.timelineCurrentLayers.length);
-
-    console.log('---');
-    console.log(this.xScale);
-    console.log(this.xAxis);
-    console.log(this.timelineLayerBars);
-    let xScale = this.xScale;
-    let xAxis = this.xAxis;
-    let timelineLayerBars = this.timelineLayerBars;
     // Selects the main element to insert the timeline elements into
-    // let zoom = d3.zoom().on('zoom', this.zoom);
+    this.zooming = false;
+    let zoom = d3.zoom()
+      .on('zoom', () => { // Use arrow function to prevent 'this' context changing within zoom()
+        this.zoom();
+      })
+      .on('end', () => {
+        this.zooming = false;
+      });
+      // .scaleBy(d3.select('#' + this.options.elementId), 0.2);
+
     this.timeline = d3.select('#' + this.options.elementId)
       .append('svg')
       .attr('width', this.dataWidth)
       .attr('height', this.dataHeight)
-      .call(d3.zoom().on('zoom', () => { // Use arrow function to prevent 'this' context changing within zoom()
-        this.zoom();
-      }));
+      .call(zoom);
 
     // Add a group and draw the x axis
     this.timelineXAxisGroup = this.timeline.append('g')
@@ -142,18 +149,20 @@ export class Timeline {
     this.calculateHeights();
     // this.calculateTimelineExtent(layerToAdd);
 
-    // TODO
+    // TODO v make this true v
     // Update xScale domain to show first layer's full extent
-    this.xScale.domain([new Date('1996-01-01'), new Date('2018-01-01')]);
+    if (this.timelineCurrentLayers.length === 1 && this.zooming === false) {
+      this.xScale.domain([Date.parse(layerToAdd.allDates[0]), Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1])]);
+    }
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
         return layer.title;
       }));
 
-
+    this.timelineLayerSelection = this.timelineLayers.selectAll('.geona-timeline-layer');
     // Create a g for each layer
-    this.timelineLayerBars = this.timelineLayers.selectAll('.geona-timeline-layer')
+    this.timelineLayerBars = this.timelineLayerSelection
       .remove().exit()
       .data(this.timelineCurrentLayers)
       .enter().append('g')
@@ -169,7 +178,7 @@ export class Timeline {
       .attr('x', (layer) => {
         return this.xScale(Date.parse(layer.allDates[0]));
       })
-      .attr('y', this.yScale(0)) // Alignment is relative to the group, so 0 always refers to the top position of the group.
+      .attr('y', 0) // Alignment is relative to the group, so 0 always refers to the top position of the group.
       .attr('height', this.LAYER_HEIGHT)
       .attr('width', (layer) => {
         let startDateXPosition = this.xScale(Date.parse(layer.allDates[0]));
@@ -188,16 +197,20 @@ export class Timeline {
       .call(this.yAxis);
 
     for (let layer of this.timelineCurrentLayers) {
-      this.addTimeStepMarkers(layer, layer.allDates);
+      this._addTimeStepMarkers(layer, layer.allDates);
     }
+
+    console.log(this.xScale(Date.parse('2010-01-01')));
   }
 
   /**
+   * @private
+   *
    * Adds the time step marker elements for the specified layer.
    * @param {Object} layer    The definition for the layer we are using.
    * @param {Array}  allDates The collection of dates to insert markers for.
    */
-  addTimeStepMarkers(layer, allDates) {
+  _addTimeStepMarkers(layer, allDates) {
     this.timelineLayers.select('.geona-timeline-layer__' + layer.identifier).selectAll('line')
       .data(allDates)
       .enter().append('line')
@@ -248,25 +261,81 @@ export class Timeline {
    * Handles panning and zooming along the x axis. Called on 'zoom' event.
    */
   zoom() {
-    console.log('zoom triggered');
-    // let transform = d3.event.transform;
+    console.log('zoom');
+    console.log(d3.event.transform.rescaleX);
 
-    // let newXScale = transform.rescaleX(this.xScale);
-    // this.xAxis.scale(newXScale);
-    // this.timelineXAxisGroup.call(this.xAxis);
+    this.timelineLayerBars.attr('transform', d3.event.transform);
+    // this.zooming = true;
+    let newXScale = d3.event.transform.rescaleX(this.xScale);
+    // console.log(newXScale.domain());
+    // let 
+    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain());
+    // this.
+    // this.xScale = newXScale; // Update the xScale to match the newly created x scale
+    this.timelineXAxisGroup.call(this.xAxis.scale(newXScale));
 
-    // this.timeline.selectAll('timeline-layer-bar')
-    //   .attr('transform', (d) => { // FIXME rename this (and get working)
-    //     return transform.applyX(this.xScale(d));
-    //   });
+    console.log(this.xScale(Date.parse('2010-01-01')));
 
-    // let transformX = d3.event.transform.rescaleX(this.xScale);
-    console.log(this);
-    this.xAxis.call(this.xAxis.scale(d3.event.transform.rescaleX(this.xScale)));
+    // this.timelineLayers.selectAll('.geona-timeline-layer').attr('transform', (layer) => {
+    //   let transformX = d3.event.transform.rescaleX(this.xScale);
+    //   return 'translate(' + transformX(Date.parse(layer.allDates[0])) + ')';
+    // });
 
-    this.timelineLayerBars.attr('transform', (layer) => {
-      let transformX = d3.event.transform.rescaleX(this.xScale);
-      return 'translate(' + transformX(layer[1]) + ')';
-    });
+    // this.redrawLayers();
+  }
+
+  /**
+   * Redraws the layers on the timeline based on the current x and y axes.
+   */
+  redrawLayers() {
+    console.log('redrawing layers');
+    // Deep copy the currently active layers
+    let currentLayers = [];
+    for (let currentLayer of this.timelineCurrentLayers) {
+      currentLayers.push(currentLayer);
+    }
+
+    // Delete the current elements for the currently active layers
+    this.timelineLayers.selectAll('.geona-timeline-layer')
+      .remove().exit();
+
+    // Reset the timeline current layers to an empty array
+    this.timelineCurrentLayers.length = 0;
+
+    // Add the layers back again - the elements will calculate their size values based on the current axes
+    for (let currentLayer of currentLayers) {
+      this.addTimelineLayer(currentLayer);
+    }
+  }
+
+  /**
+   * I think we'll need this for when the window resizes, and we need to update tick sizes etc.
+   */
+  redrawSvg() {
+
+  }
+}
+
+/**
+ * Selects the appropriate date format depending on the precision of the date.
+ * @param {*} date
+ */
+function getDateFormat(date) {
+  if (d3.timeSecond(date) < date) {
+    return d3.timeFormat('%H:%M:%S.%L')(date);
+  } else
+  if (d3.timeMinute(date) < date) {
+    return d3.timeFormat('%H:%M:%S')(date);
+  } else
+  if (d3.timeHour(date) < date) {
+    return d3.timeFormat('%H:%M')(date);
+  } else
+  if (d3.timeDay(date) < date) {
+    return d3.timeFormat('%H:%M')(date);
+  } else
+  if (d3.timeMonth(date) < date) {
+    return d3.timeFormat('%Y-%m-%d')(date);
+  } else {
+    return d3.timeFormat('%b %Y')(date);
   }
 }
