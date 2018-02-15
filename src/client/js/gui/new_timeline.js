@@ -71,16 +71,22 @@ export class Timeline {
     this.fullHeight = undefined; // Calculated in calculateHeights()
     this.calculateHeights();
 
+    // this.xZoom = d3.zoom() // use http://bl.ocks.org/jgbos/9752277 http://emptypipes.org/2016/07/03/d3-panning-and-zooming/
+    //   .on('zoom', this.zoom);
+
     // Set the scale for the xAxis to use
     this.xScale = d3.scaleTime()
       .domain([
         new Date(new Date('2010-01-01')),
         new Date(new Date('2011-01-01')),
       ])
-      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME dataWidth is 1px short of showing the full axis
+      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME dataWidth cuts off the axis + labels
+
+    console.log(this.xScale);
 
     this.xAxis = d3.axisBottom(this.xScale)
       .ticks(Math.round(this.dataWidth / 77)); // Width-based calculation // TODO write a wiki entry explaining decisions like this
+
 
     this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
       .range([0, this.dataHeight])
@@ -89,14 +95,25 @@ export class Timeline {
     this.yAxis = d3.axisLeft(this.yScale)
       .ticks(this.timelineCurrentLayers.length);
 
+    console.log('---');
+    console.log(this.xScale);
+    console.log(this.xAxis);
+    console.log(this.timelineLayerBars);
+    let xScale = this.xScale;
+    let xAxis = this.xAxis;
+    let timelineLayerBars = this.timelineLayerBars;
     // Selects the main element to insert the timeline elements into
+    // let zoom = d3.zoom().on('zoom', this.zoom);
     this.timeline = d3.select('#' + this.options.elementId)
       .append('svg')
       .attr('width', this.dataWidth)
-      .attr('height', this.dataHeight);
+      .attr('height', this.dataHeight)
+      .call(d3.zoom().on('zoom', () => { // Use arrow function to prevent 'this' context changing within zoom()
+        this.zoom();
+      }));
 
     // Add a group and draw the x axis
-    this.timeline.append('g')
+    this.timelineXAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-x-axis')
       .attr('transform', 'translate(' + (this.Y_AXIS_LABEL_WIDTH) + ', ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
       .call(this.xAxis);
@@ -113,9 +130,6 @@ export class Timeline {
     for (let layer of this.options.layers) {
       this.addTimelineLayer(layer);
     }
-    // this.addTimelineLayer(this.options.layers[0]);
-    // this.addTimelineLayer(this.options.layers[1]);
-    // this.addTimelineLayer(this.options.layers[2]);
   }
 
   /**
@@ -230,7 +244,29 @@ export class Timeline {
 
   }
 
-  draw() {
+  /**
+   * Handles panning and zooming along the x axis. Called on 'zoom' event.
+   */
+  zoom() {
+    console.log('zoom triggered');
+    // let transform = d3.event.transform;
 
+    // let newXScale = transform.rescaleX(this.xScale);
+    // this.xAxis.scale(newXScale);
+    // this.timelineXAxisGroup.call(this.xAxis);
+
+    // this.timeline.selectAll('timeline-layer-bar')
+    //   .attr('transform', (d) => { // FIXME rename this (and get working)
+    //     return transform.applyX(this.xScale(d));
+    //   });
+
+    // let transformX = d3.event.transform.rescaleX(this.xScale);
+    console.log(this);
+    this.xAxis.call(this.xAxis.scale(d3.event.transform.rescaleX(this.xScale)));
+
+    this.timelineLayerBars.attr('transform', (layer) => {
+      let transformX = d3.event.transform.rescaleX(this.xScale);
+      return 'translate(' + transformX(layer[1]) + ')';
+    });
   }
 }
