@@ -84,6 +84,14 @@ export class Timeline {
         new Date('2011-01-01'),
       ]);
 
+    this.xScale2 = d3.scaleTime()
+      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
+      .domain([
+        new Date('2010-01-01'),
+        new Date('2011-01-01'),
+      ]);
+
+
     this.xAxis = d3.axisBottom(this.xScale)
       .ticks(this.X_AXIS_TICKS)
       .tickFormat(getDateFormat);
@@ -155,6 +163,10 @@ export class Timeline {
       // console.log(layerToAdd.allDates[layerToAdd.allDates.length - 1]);
       // console.log(Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]));
       this.xScale.domain([
+        Date.parse(layerToAdd.allDates[0]),
+        Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
+      ]);
+      this.xScale2.domain([
         Date.parse(layerToAdd.allDates[0]),
         Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
       ]);
@@ -266,26 +278,10 @@ export class Timeline {
    * Handles panning and zooming along the x axis. Called on 'zoom' event.
    */
   zoom() {
-    this.timelineLayerBars.attr('transform', d3.event.transform);
+    this.timelineLayers.attr('transform', 'translate(' + d3.event.transform.x + ', 0) scale(' + d3.event.transform.k + ', 1)');
     // this.zooming = true;
-    let newXScale = d3.event.transform.rescaleX(this.xScale);
-    // console.log(newXScale.domain());
-    // let
-    let xScaleCopy = JSON.parse(JSON.stringify(this.xScale)); // Deep copy this.xScale
-    console.log(d3.event.transform);
-    console.log(d3.event.transform.rescaleX(this.xScale).domain());
-    this.xScale.domain(d3.event.transform.rescaleX(xScaleCopy).domain());
+    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain()); // TODO see if there's a nice way of updating this.xScale2 around the place
     this.timelineXAxisGroup.call(this.xAxis);
-    // this.
-    // this.xScale = newXScale; // Update the xScale to match the newly created x scale
-    // this.timelineXAxisGroup.call(this.xAxis.scale(newXScale));
-
-    // this.timelineLayers.selectAll('.geona-timeline-layer').attr('transform', (layer) => {
-    //   let transformX = d3.event.transform.rescaleX(this.xScale);
-    //   return 'translate(' + transformX(Date.parse(layer.allDates[0])) + ')';
-    // });
-
-    // this.redrawLayers();
   }
 
   /**
