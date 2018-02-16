@@ -35,16 +35,16 @@ export class MainMenu {
     // Sets up menu
     this.parentDiv.find('.js-geona-menu-bar').append(templates.menu());
     this.parentDiv.find('.js-geona-menu')
-      .addClass('hidden')
+      .addClass('removed')
       .append(templates.panel());
-    this.parentDiv.find('.js-geona-panel').addClass('hidden');
+    this.parentDiv.find('.js-geona-panel').addClass('removed');
     if (this.config.opened) {
-      this.parentDiv.find('.js-geona-menu').removeClass('hidden');
+      this.parentDiv.find('.js-geona-menu').removeClass('removed');
       this.parentDiv.find('.js-geona-menu-toggle__icon')
         .removeClass('icon-arrow-65')
         .addClass('icon-arrow-66');
-      this.parentDiv.find('.js-geona-menu-toggle__text-open').addClass('hidden');
-      this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('hidden');
+      this.parentDiv.find('.js-geona-menu-toggle__text-open').addClass('removed');
+      this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('removed');
     }
 
     // Sets the triggers and bindings for this Menu.
@@ -56,24 +56,24 @@ export class MainMenu {
    * Makes menu visible.
    */
   openMenu() {
-    this.parentDiv.find('.js-geona-menu').removeClass('hidden');
+    this.parentDiv.find('.js-geona-menu').removeClass('removed');
     this.parentDiv.find('.js-geona-menu-toggle__icon')
       .removeClass('icon-arrow-65')
       .addClass('icon-arrow-66');
-    this.parentDiv.find('.js-geona-menu-toggle__text-open').addClass('hidden');
-    this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('hidden');
+    this.parentDiv.find('.js-geona-menu-toggle__text-open').addClass('removed');
+    this.parentDiv.find('.js-geona-menu-toggle__text-close').removeClass('removed');
   }
 
   /**
    * Removes menu from the GUI, but not from the DOM.
    */
   closeMenu() {
-    this.parentDiv.find('.js-geona-menu').addClass('hidden');
+    this.parentDiv.find('.js-geona-menu').addClass('removed');
     this.parentDiv.find('.js-geona-menu-toggle__icon')
       .removeClass('icon-arrow-66')
       .addClass('icon-arrow-65');
-    this.parentDiv.find('.js-geona-menu-toggle__text-close').addClass('hidden');
-    this.parentDiv.find('.js-geona-menu-toggle__text-open').removeClass('hidden');
+    this.parentDiv.find('.js-geona-menu-toggle__text-close').addClass('removed');
+    this.parentDiv.find('.js-geona-menu-toggle__text-open').removeClass('removed');
   }
 
   /**
@@ -81,7 +81,7 @@ export class MainMenu {
    */
   closePanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
-    this.parentDiv.find('.js-geona-panel').addClass('hidden');
+    this.parentDiv.find('.js-geona-panel').addClass('removed');
   }
 
   /* ------------------------------------*\
@@ -97,7 +97,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
     this.parentDiv.find('.js-geona-panel').prepend(templates.explore_panel());
 
     // Leaflet doesn't support WMTS, so we will remove it from the Leaflet options
@@ -144,29 +144,29 @@ export class MainMenu {
   scanCache(url) {
     // Disable button and inform user of cache scan
     this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', true);
-    this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').removeClass('hidden');
+    this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').removeClass('removed');
 
     // Timeout in case cache check takes a long time (more than 3s)
     setTimeout(() => {
       // Re-enable button
       this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', false);
-      this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('hidden');
+      this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('removed');
     }, 3000);
 
     urlInCache(url)
       .then((inCache) => {
         // Re-enable button
         this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', false);
-        this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('hidden');
+        this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('removed');
 
         if (inCache === true) {
           // Show the label and checkbox
-          this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').removeClass('hidden');
-          this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').removeClass('hidden');
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').removeClass('removed');
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').removeClass('removed');
           this.changeAddUrlButtonText(false);
         } else {
-          this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').addClass('hidden');
-          this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').addClass('hidden');
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-notification').addClass('removed');
+          this.parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').addClass('removed');
           this.changeAddUrlButtonText(true);
         }
       });
@@ -197,8 +197,8 @@ export class MainMenu {
     this._clearPreviousUrlLayers();
     getLayerServer(url, service, save, useCache)
       .then((layers) => {
-        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('hidden');
-        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('hidden');
+        this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('removed');
+        this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('removed');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
         for (let layer of layers.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
@@ -215,8 +215,8 @@ export class MainMenu {
   _clearPreviousUrlLayers() {
     let previousUrlLayersFound = this.parentDiv.find('.js-geona-explore-panel-content__layer-select').contents().length > 0;
     if (previousUrlLayersFound === true) {
-      this.parentDiv.find('.js-geona-explore-panel-content__layer-select').empty().addClass('hidden');
-      this.parentDiv.find('.js-geona-explore-panel-content__add-layer').addClass('hidden');
+      this.parentDiv.find('.js-geona-explore-panel-content__layer-select').empty().addClass('removed');
+      this.parentDiv.find('.js-geona-explore-panel-content__add-layer').addClass('removed');
       // Clears the array and removes all references to its previous values
       this.requestLayerServer = undefined;
     }
@@ -303,7 +303,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.layers_panel());
 
@@ -369,7 +369,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.analysis_panel());
   }
@@ -383,7 +383,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.login_panel());
   }
@@ -397,7 +397,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
     this.parentDiv.find('.js-geona-panel').prepend(templates.options_panel());
 
     // Populate the basemap select
@@ -522,7 +522,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.help_panel());
   }
@@ -536,7 +536,7 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel')
       .empty()
-      .removeClass('hidden');
+      .removeClass('removed');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.share_panel());
   }

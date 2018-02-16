@@ -59,37 +59,30 @@ export class Timeline {
     this.Y_AXIS_LABEL_WIDTH = 100; // CONST
     this.X_AXIS_LABEL_HEIGHT = 25; // CONST
     this.LAYER_PADDING = 0.3; // CONST - between 0 and 1
-    this.X_AXIS_TICKS = 7; // TODO explain on wiki // CONST
-    // this.X_AXIS_TICKS = Math.round(this.dataWidth / 77); // TODO explain on wiki // CONST
 
     this.timelineCurrentLayers = [];
     this.startDate = undefined;
     this.endDate = undefined;
 
-    this.dataWidth = undefined; // Calculated in calculateWidths() // TODO jsdoc these
+    this.dataWidth = undefined; // Calculated in calculateWidths() // TODO jsdoc these // FIXME dataWidth cuts off the axis + labels
     this.fullWidth = undefined; // Calculated in calculateWidths()
     this.calculateWidths();
     this.dataHeight = undefined; // Calculated in calculateHeights() // TODO jsdoc these
     this.fullHeight = undefined; // Calculated in calculateHeights()
     this.calculateHeights();
 
+    this.X_AXIS_TICKS = this.dataWidth / 160; // CONST - more information can be found on the Geona wiki
+
     // this.xZoom = d3.zoom() // use http://bl.ocks.org/jgbos/9752277 http://emptypipes.org/2016/07/03/d3-panning-and-zooming/
     //   .on('zoom', this.zoom);
 
     // Set the scale for the xAxis to use
     this.xScale = d3.scaleTime()
+      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
       .domain([
-        new Date(new Date('2010-01-01')),
-        new Date(new Date('2011-01-01')),
-      ])
-      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME dataWidth cuts off the axis + labels
-
-    this.xScale2 = d3.scaleTime()
-      .domain([
-        new Date(new Date('2010-01-01')),
-        new Date(new Date('2011-01-01')),
-      ])
-      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
+        new Date('2010-01-01'),
+        new Date('2011-01-01'),
+      ]);
 
     this.xAxis = d3.axisBottom(this.xScale)
       .ticks(this.X_AXIS_TICKS)
@@ -105,6 +98,9 @@ export class Timeline {
     // Selects the main element to insert the timeline elements into
     this.zooming = false;
     let zoom = d3.zoom()
+      .scaleExtent([0, Infinity])
+      .translateExtent([[this.xScale(Date.parse('1500-01-01')), 0], [Infinity, this.dataHeight]])
+      // .extent([[this.xScale(Date.parse('1500-01-01')), 0], [Infinity, this.dataHeight]])
       .on('zoom', () => { // Use arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       })
@@ -125,10 +121,12 @@ export class Timeline {
       .attr('transform', 'translate(' + (this.Y_AXIS_LABEL_WIDTH) + ', ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
       .call(this.xAxis);
     // Add a group and draw the y axis
-    this.timeline.append('g')
+    this.timelineYAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
       .attr('transform', 'translate(' + this.Y_AXIS_LABEL_WIDTH + ')')
       .call(this.yAxis);
+    this.timelineYAxisGroup.select('path.domain')
+      .style('display', 'none');
     // Add a group for the layer bars
     this.timelineLayers = this.timeline.append('g')
       .attr('class', 'geona-timeline-layers');
@@ -152,7 +150,14 @@ export class Timeline {
     // TODO v make this true v
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1 && this.zooming === false) {
-      this.xScale.domain([Date.parse(layerToAdd.allDates[0]), Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1])]);
+      // console.log(layerToAdd.allDates[0]);
+      // console.log(Date.parse(layerToAdd.allDates[0]));
+      // console.log(layerToAdd.allDates[layerToAdd.allDates.length - 1]);
+      // console.log(Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]));
+      this.xScale.domain([
+        Date.parse(layerToAdd.allDates[0]),
+        Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
+      ]);
     }
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
@@ -261,20 +266,19 @@ export class Timeline {
    * Handles panning and zooming along the x axis. Called on 'zoom' event.
    */
   zoom() {
-    console.log('zoom');
-    console.log(d3.event.transform.rescaleX);
-
     this.timelineLayerBars.attr('transform', d3.event.transform);
     // this.zooming = true;
     let newXScale = d3.event.transform.rescaleX(this.xScale);
     // console.log(newXScale.domain());
-    // let 
-    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain());
+    // let
+    let xScaleCopy = JSON.parse(JSON.stringify(this.xScale)); // Deep copy this.xScale
+    console.log(d3.event.transform);
+    console.log(d3.event.transform.rescaleX(this.xScale).domain());
+    this.xScale.domain(d3.event.transform.rescaleX(xScaleCopy).domain());
+    this.timelineXAxisGroup.call(this.xAxis);
     // this.
     // this.xScale = newXScale; // Update the xScale to match the newly created x scale
-    this.timelineXAxisGroup.call(this.xAxis.scale(newXScale));
-
-    console.log(this.xScale(Date.parse('2010-01-01')));
+    // this.timelineXAxisGroup.call(this.xAxis.scale(newXScale));
 
     // this.timelineLayers.selectAll('.geona-timeline-layer').attr('transform', (layer) => {
     //   let transformX = d3.event.transform.rescaleX(this.xScale);
@@ -282,30 +286,6 @@ export class Timeline {
     // });
 
     // this.redrawLayers();
-  }
-
-  /**
-   * Redraws the layers on the timeline based on the current x and y axes.
-   */
-  redrawLayers() {
-    console.log('redrawing layers');
-    // Deep copy the currently active layers
-    let currentLayers = [];
-    for (let currentLayer of this.timelineCurrentLayers) {
-      currentLayers.push(currentLayer);
-    }
-
-    // Delete the current elements for the currently active layers
-    this.timelineLayers.selectAll('.geona-timeline-layer')
-      .remove().exit();
-
-    // Reset the timeline current layers to an empty array
-    this.timelineCurrentLayers.length = 0;
-
-    // Add the layers back again - the elements will calculate their size values based on the current axes
-    for (let currentLayer of currentLayers) {
-      this.addTimelineLayer(currentLayer);
-    }
   }
 
   /**

@@ -6,7 +6,7 @@
 export function registerTriggers(eventManager, parentDiv) {
   // Toggle timePanel visibility
   parentDiv.find('.js-geona-time-panel-toggle').click(() => {
-    if (parentDiv.find('.js-geona-time-panel').hasClass('hidden')) {
+    if (parentDiv.find('.js-geona-time-panel').hasClass('removed')) {
       eventManager.trigger('timePanel.showTimeline');
     } else {
       eventManager.trigger('timePanel.hideTimeline');

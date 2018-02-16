@@ -12,7 +12,7 @@ export function registerTriggers(eventManager, parentDiv) {
 
   // Open/close menu
   parentDiv.find('.js-geona-menu-toggle').click(() => {
-    if (parentDiv.find('.js-geona-menu').hasClass('hidden')) {
+    if (parentDiv.find('.js-geona-menu').hasClass('removed')) {
       eventManager.trigger('mainMenu.openMenu');
     } else {
       eventManager.trigger('mainMenu.closeMenu');
@@ -25,7 +25,7 @@ export function registerTriggers(eventManager, parentDiv) {
    */
   // Open/close panel
   parentDiv.find('.js-geona-menu__explore').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__explore') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__explore') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
@@ -40,7 +40,7 @@ export function registerTriggers(eventManager, parentDiv) {
   \* ------------------------------------*/
   // Open/close panel
   parentDiv.find('.js-geona-menu__layers').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__layers') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__layers') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLayersPanel');
@@ -54,7 +54,7 @@ export function registerTriggers(eventManager, parentDiv) {
   \* ------------------------------------*/
   // Open/close panel
   parentDiv.find('.js-geona-menu__analysis').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__analysis') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__analysis') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayAnalysisPanel');
@@ -67,7 +67,7 @@ export function registerTriggers(eventManager, parentDiv) {
    */
   // Open/close panel
   parentDiv.find('.js-geona-menu__login').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__login') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__login') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLoginPanel');
@@ -80,7 +80,7 @@ export function registerTriggers(eventManager, parentDiv) {
    */
   // Open/close panel
   parentDiv.find('.js-geona-menu__options').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__options') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__options') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayOptionsPanel');
@@ -94,7 +94,7 @@ export function registerTriggers(eventManager, parentDiv) {
   \* ------------------------------------*/
   // Open/close panel
   parentDiv.find('.js-geona-menu__help').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__help') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__help') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayHelpPanel');
@@ -107,7 +107,7 @@ export function registerTriggers(eventManager, parentDiv) {
   \* ------------------------------------*/
   // Open/close panel
   parentDiv.find('.js-geona-menu__share').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('hidden') && lastTabClicked === 'js-geona-menu__share') {
+    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__share') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displaySharePanel');
@@ -142,7 +142,7 @@ function registerExploreTriggers(eventManager, parentDiv) {
     // Whether to load the config from the cache folder
     let useCache = false;
     if (parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked') ||
-    parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('hidden')) {
+    parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('removed')) {
       save = true;
     } else {
       useCache = true;

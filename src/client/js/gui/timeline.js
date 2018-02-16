@@ -593,9 +593,9 @@ export class Timeline {
     this.parentDiv.find('.panel').css('bottom', height + 35 + 'px');
     this.parentDiv.find('.ol-attribution').css('bottom', height + 'px');
     let collabPanel = this.parentDiv.find('.collaboration-panel');
-    let collabHidden = collabPanel.hasClass('hidden');
-    let top = collabPanel.toggleClass('hidden', false).position().top;
-    collabPanel.toggleClass('hidden', collabHidden);
+    let collabHidden = collabPanel.hasClass('removed');
+    let top = collabPanel.toggleClass('removed', false).position().top;
+    collabPanel.toggleClass('removed', collabHidden);
     collabPanel.css('max-height', 'calc(100% - ' + (height + top + 35) + 'px)');
   }
 

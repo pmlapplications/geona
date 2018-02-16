@@ -28,7 +28,7 @@ export class TimePanel {
 
     this.parentDiv.append(templates.time_panel());
     if (!this.config.opened) {
-      this.parentDiv.find('.js-geona-time-panel').addClass('hidden');
+      this.parentDiv.find('.js-geona-time-panel').addClass('removed');
     }
     if (!this.config.collapsible) {
       this.parentDiv.find('.js-geona-time-panel-toggle').remove();
@@ -98,14 +98,14 @@ export class TimePanel {
    * Removes the timeline from view, but not from the DOM.
    */
   hideTimePanel() {
-    this.parentDiv.find('.js-geona-time-panel').addClass('hidden');
+    this.parentDiv.find('.js-geona-time-panel').addClass('removed');
   }
 
   /**
    * Shows the timeline on the GUI.
    */
   showTimePanel() {
-    this.parentDiv.find('.js-geona-time-panel').removeClass('hidden');
+    this.parentDiv.find('.js-geona-time-panel').removeClass('removed');
   }
 
   /**
