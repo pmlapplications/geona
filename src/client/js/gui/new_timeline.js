@@ -2,7 +2,7 @@ import 'jquery';
 import * as d3 from 'd3';
 
 /**
- * 
+ *
  */
 export class Timeline {
   /**
@@ -27,7 +27,7 @@ export class Timeline {
         },
         {
           identifier: 'chlor_b',
-          title: 'chlor b title',
+          title: 'chlor b very long title',
           allDates: [
             '1999-01-01',
             '2002-01-01',
@@ -53,28 +53,38 @@ export class Timeline {
         bottom: 0,
       },
     };
-    this.options = Object.assign({}, defaultOptions, settings);
+    /** @type {Object} Default options with custom settings if defined */
+    this.options = Object.assign({}, defaultOptions, settings); // TODO write full list of options that can be passed in
 
-    this.LAYER_HEIGHT = 10; // CONST
-    this.Y_AXIS_LABEL_WIDTH = 100; // CONST
-    this.X_AXIS_LABEL_HEIGHT = 25; // CONST
-    this.LAYER_PADDING = 0.3; // CONST - between 0 and 1
+    /** @type {Number} CONST - The pixel height for a layer on the timeline */
+    this.LAYER_HEIGHT = 10;
+    /** @type {Number} CONST - The pixel height for the padding between layers */
+    this.LAYER_PADDING = 0.25;
+    /** @type {Number} CONST - The pixel width needed to make room for the y-axis */
+    this.Y_AXIS_LABEL_WIDTH = 100;
+    /** @type {Number} CONST - The pixel height needed to make room for the x-axis */
+    this.X_AXIS_LABEL_HEIGHT = 25;
 
+    /** @type {Array} The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
+
     this.startDate = undefined;
     this.endDate = undefined;
 
-    this.dataWidth = undefined; // Calculated in calculateWidths() // TODO jsdoc these // FIXME dataWidth cuts off the axis + labels
-    this.fullWidth = undefined; // Calculated in calculateWidths()
-    this.calculateWidths();
-    this.dataHeight = undefined; // Calculated in calculateHeights() // TODO jsdoc these
-    this.fullHeight = undefined; // Calculated in calculateHeights()
-    this.calculateHeights();
+    /** The width of the whole svg element created for the timeline */
+    this.fullWidth = undefined;
+    /** The width of only the section of the svg which contains the layers */
+    this.dataWidth = undefined; // FIXME dataWidth cuts off the axis + labels
+    this._calculateWidths();
+    /** The height of the whole svg element created for the timeline */
+    this.fullHeight = undefined;
+    /** The height of only the section of the svg which contains the layers */
+    this.dataHeight = undefined;
+    this._calculateHeights();
 
-    this.X_AXIS_TICKS = this.dataWidth / 160; // CONST - more information can be found on the Geona wiki
-
-    // this.xZoom = d3.zoom() // use http://bl.ocks.org/jgbos/9752277 http://emptypipes.org/2016/07/03/d3-panning-and-zooming/
-    //   .on('zoom', this.zoom);
+    /** @type {Number} The minimum spacing ratio between x-axis labels */
+    this.xAxisTicks = this.dataWidth / 160; // More information can be found on the Geona wiki
+    // TODO could the extra width needed to display the full x-axis be calculated from xAxisTicks?
 
     // Set the scale for the xAxis to use
     this.xScale = d3.scaleTime()
@@ -93,7 +103,7 @@ export class Timeline {
 
 
     this.xAxis = d3.axisBottom(this.xScale)
-      .ticks(this.X_AXIS_TICKS)
+      .ticks(this.xAxisTicks)
       .tickFormat(getDateFormat);
 
 
@@ -152,16 +162,11 @@ export class Timeline {
   addTimelineLayer(layerToAdd) {
     // Increase timeline height to accommodate one new layer
     this.timelineCurrentLayers.push(layerToAdd);
-    this.calculateHeights();
+    this._calculateHeights();
     // this.calculateTimelineExtent(layerToAdd);
 
-    // TODO v make this true v
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1 && this.zooming === false) {
-      // console.log(layerToAdd.allDates[0]);
-      // console.log(Date.parse(layerToAdd.allDates[0]));
-      // console.log(layerToAdd.allDates[layerToAdd.allDates.length - 1]);
-      // console.log(Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]));
       this.xScale.domain([
         Date.parse(layerToAdd.allDates[0]),
         Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
@@ -216,26 +221,43 @@ export class Timeline {
     for (let layer of this.timelineCurrentLayers) {
       this._addTimeStepMarkers(layer, layer.allDates);
     }
-
-    console.log(this.xScale(Date.parse('2010-01-01')));
   }
 
   /**
    * @private
    *
-   * Adds the time step marker elements for the specified layer.
+   * Adds the time step marker elements for the specified layer. Filters the dates used so only one line is drawn for
+   * a particular pixel (prevents overlapping lines).
    * @param {Object} layer    The definition for the layer we are using.
    * @param {Array}  allDates The collection of dates to insert markers for.
    */
   _addTimeStepMarkers(layer, allDates) {
+    // Holds x pixels which have been used by another date in allDates
+    let uniquePixels = new Set();
+    // Only holds dates which will be drawn on different x pixels
+    let filteredDates = [];
+
+    // We will check each date to see if it would be drawn on the same x pixel as another date
+    for (let date of allDates) {
+      let xPixel = Math.floor(this.xScale(Date.parse(date)));
+      if (!uniquePixels.has(xPixel)) {
+        // This pixel is currently free, so we will draw a line for this date
+        uniquePixels.add(xPixel);
+        filteredDates.push(date);
+      }
+    }
+
+    // We will append a line to the layer bar for each date remaining after being filtered
     this.timelineLayers.select('.geona-timeline-layer__' + layer.identifier).selectAll('line')
-      .data(allDates)
+      .data(filteredDates)
       .enter().append('line')
       .attr('x1', (date) => {
-        return this.xScale(Date.parse(date));
+        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        return xPosition;
       })
       .attr('x2', (date) => {
-        return this.xScale(Date.parse(date));
+        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        return xPosition;
       })
       .attr('y1', 0)
       .attr('y2', this.LAYER_HEIGHT)
@@ -246,9 +268,10 @@ export class Timeline {
   }
 
   /**
+   * @private
    * Updates the dataWidth and fullWidth variables to keep the correct proportions for the window size.
    */
-  calculateWidths() {
+  _calculateWidths() {
     this.dataWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
       this.options.timelineMargins.left - this.options.timelineMargins.right -
       this.Y_AXIS_LABEL_WIDTH;
@@ -256,9 +279,10 @@ export class Timeline {
   }
 
   /**
+   * @private
    * Updates the dataHeight and fullHeight variables to keep the correct proportions for the window size.
    */
-  calculateHeights() {
+  _calculateHeights() {
     this.dataHeight = this.LAYER_HEIGHT * this.timelineCurrentLayers.length;
     this.fullHeight = this.dataHeight +
       this.options.timelineMargins.top + this.options.timelineMargins.bottom +
@@ -278,17 +302,32 @@ export class Timeline {
    * Handles panning and zooming along the x axis. Called on 'zoom' event.
    */
   zoom() {
-    this.timelineLayers.attr('transform', 'translate(' + d3.event.transform.x + ', 0) scale(' + d3.event.transform.k + ', 1)');
-    // this.zooming = true;
+    // We translate each layer along the x axis, and scale each layer horizontally
+    // Update the domain based on the newly-transformed scale
     this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain()); // TODO see if there's a nice way of updating this.xScale2 around the place
+    // Update the x-axis display
     this.timelineXAxisGroup.call(this.xAxis);
-  }
 
-  /**
-   * I think we'll need this for when the window resizes, and we need to update tick sizes etc.
-   */
-  redrawSvg() {
+    // Adjust the positioning of the layer bars
+    this.timelineLayers.selectAll('.geona-timeline-layer-bar')
+      .attr('x', (layer) => {
+        let startDate = layer.allDates[0];
+        return this.xScale(Date.parse(startDate));
+      })
+      .attr('width', (layer) => {
+        let startDate = layer.allDates[0];
+        let endDate = layer.allDates[layer.allDates.length - 1];
+        return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
+      });
 
+    // TODO make it only redraw if the zoom level changed, rather than if it was purely a pan
+    // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
+    this.timelineLayers.selectAll('.geona-timeline-layer-time-marker')
+      .remove().exit();
+    // Add time markers back
+    for (let layer of this.timelineCurrentLayers) {
+      this._addTimeStepMarkers(layer, layer.allDates);
+    }
   }
 }
 
