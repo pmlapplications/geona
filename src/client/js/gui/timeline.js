@@ -202,15 +202,16 @@ export class Timeline {
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1) {
       let allDates = layerToAdd.dimensions.time.values;
-      this.xScale.domain([
-        Date.parse(allDates[0]),
-        Date.parse(allDates[allDates.length - 1]),
-      ]);
-      this.xScale2.domain([
-        Date.parse(allDates[0]),
-        Date.parse(allDates[allDates.length - 1]),
-      ]);
-
+      if (allDates.length > 1) {
+        this.xScale.domain([
+          Date.parse(allDates[0]),
+          Date.parse(allDates[allDates.length - 1]),
+        ]);
+        this.xScale2.domain([
+          Date.parse(allDates[0]),
+          Date.parse(allDates[allDates.length - 1]),
+        ]);
+      }
       if (layerToAdd.dimensions.time.default) {
         this.selectorDate = layerToAdd.dimensions.time.default;
       }
@@ -418,6 +419,7 @@ export class Timeline {
     } else if (date > this.layerDateExtent.max) {
       validDate = this.layerDateExtent.max;
     }
+    console.log(new Date(validDate));
     // TODO is trigger in correct way?
     this.eventManager.trigger('timePanel.timelineChangeTime', new Date(validDate));
   }
@@ -433,6 +435,7 @@ export class Timeline {
     } else if (date > this.layerDateExtent.max) {
       this.selectorDate = this.layerDateExtent.max;
     }
+    // TODO add this.options.animateSelector option (from GISPortal)
     this.timelineLayers.select('.geona-timeline-selector-tool')
       .transition().duration(500).attr('x', () => {
         return this.xScale(new Date(this.selectorDate));

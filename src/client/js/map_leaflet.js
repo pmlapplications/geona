@@ -523,6 +523,7 @@ export class LMap extends GeonaMap {
           if (geonaLayer.dimensions) {
             if (geonaLayer.dimensions.time) {
               time = geonaLayer.dimensions.time.default;
+              geonaLayer.dimensions.time.values.sort();
             }
           }
         }

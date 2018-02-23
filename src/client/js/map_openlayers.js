@@ -337,8 +337,8 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Add the specified data layer onto the map, using the specified options.
-   * Will also add a Geona layer to the_availableLayers if not already included (same goes for the LayerServer).
+   * Add the specified layer onto the map, using the specified options.
+   * Will also add a Geona layer to the_availableLayers if not already included (and also with the LayerServer).
    *
    * @param {Layer}       geonaLayer       The Geona Layer object to be created as an OpenLayers layer on the map.
    * @param {LayerServer} geonaLayerServer The Geona LayerServer object that corresponds to the Geona Layer.
@@ -585,6 +585,7 @@ export class OlMap extends GeonaMap {
       if (geonaLayer.dimensions) {
         if (geonaLayer.dimensions.time) {
           time = geonaLayer.dimensions.time.default;
+          geonaLayer.dimensions.time.values.sort();
         }
       }
     }
