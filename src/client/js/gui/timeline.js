@@ -140,8 +140,6 @@ export class Timeline {
         this.clickDate(this.timeline.node());
       });
 
-    this.isDragging = false;
-
     // Add a group and draw the x axis
     this.timelineXAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-x-axis')
@@ -177,7 +175,7 @@ export class Timeline {
             this.dragDate();
           })
           .on('end', () => {
-            this.dragDateEnd();
+            this.triggerMapDateChange(this.selectorDate);
           })
       );
 
@@ -196,7 +194,6 @@ export class Timeline {
    * @param {Object} layerToAdd
    */
   addTimelineLayer(layerToAdd) {
-    console.log(layerToAdd);
     // Increase timeline height to accommodate one new layer
     this.timelineCurrentLayers.push(layerToAdd);
     this._calculateHeights();
@@ -221,7 +218,7 @@ export class Timeline {
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        // TODO select correct language
+        // FIXME select correct language
         return layer.title.und;
       }));
 
@@ -235,7 +232,7 @@ export class Timeline {
         return 'geona-timeline-layer geona-timeline-layer__' + layer.identifier;
       })
       .attr('transform', (layer) => {
-        // TODO select correct title language
+        // FIXME select correct title language
         return 'translate(0, ' + this.yScale(layer.title.und) + ')';
       })
 
@@ -388,12 +385,10 @@ export class Timeline {
    * @param {HTMLElement} container 
    */
   clickDate(container) {
-    if (!this.isDragging) {
-      let clickXPosition = d3.mouse(container)[0];
-      this.selectorDate = this.xScale.invert(clickXPosition);
-      this.triggerMapDateChange(this.selectorDate);
-      this.moveSelectorToDate(this.selectorDate);
-    }
+    let clickXPosition = d3.mouse(container)[0];
+    this.selectorDate = this.xScale.invert(clickXPosition);
+    this.triggerMapDateChange(this.selectorDate);
+    this.moveSelectorToDate(this.selectorDate);
   }
 
   /**
@@ -423,9 +418,8 @@ export class Timeline {
     } else if (date > this.layerDateExtent.max) {
       validDate = this.layerDateExtent.max;
     }
-    // TODO trigger
+    // TODO is trigger in correct way?
     this.eventManager.trigger('timePanel.timelineChangeTime', new Date(validDate));
-    // console.log(new Date(validDate));
   }
 
   /**
@@ -443,6 +437,27 @@ export class Timeline {
       .transition().duration(500).attr('x', () => {
         return this.xScale(new Date(this.selectorDate));
       });
+  }
+
+  /**
+   * 
+   */
+  dragDate() {
+    let dragXPosition = this.xScale(new Date(this.selectorDate)) + d3.event.dx;
+    let dragXDate = this.xScale.invert(dragXPosition);
+    if (dragXDate < this.layerDateExtent.min) {
+      dragXDate = this.layerDateExtent.min;
+    } else if (dragXDate > this.layerDateExtent.max) {
+      dragXDate = this.layerDateExtent.max;
+    }
+
+    this.selectorDate = new Date(dragXDate);
+
+    this.selectorTool.attr('x', () => {
+      return this.xScale(new Date(this.selectorDate));
+    });
+
+    // TODO update current date box as we drag
   }
 }
 
