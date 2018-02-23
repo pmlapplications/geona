@@ -5,7 +5,7 @@
  */
 export function registerBindings(eventManager, timePanel) {
   // Change time
-  eventManager.bind('timePanel.timebarTriggeredChangeTime', (time) => {
-    timePanel.timebarTriggeredChangeTime(time);
+  eventManager.bind('timePanel.timelineChangeTime', (time) => {
+    timePanel.timelineChangeTime(time);
   });
 }

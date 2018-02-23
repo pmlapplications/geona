@@ -5,7 +5,7 @@ import Pikaday from 'pikaday-time';
 import moment from 'moment';
 
 import {selectPropertyLanguage} from '../map_common';
-import {Timeline} from './new_timeline';
+import {Timeline} from './timeline';
 import {registerTriggers} from './time_panel_triggers';
 import {registerBindings} from './time_panel_bindings';
 
@@ -40,7 +40,7 @@ export class TimePanel {
       {
         field: this.parentDiv.find('.js-geona-time-panel-current-date')[0],
         onSelect: (date) => {
-          this.pikadayTriggeredChangeTime(date);
+          this.pikadayChangeTime(date);
         },
       }
     );
@@ -57,6 +57,9 @@ export class TimePanel {
     registerBindings(this.geona.eventManager, this);
   }
 
+  /**
+   *
+   */
   drawTimeline() {
     // Assign ID to this instance's timeline container
     let instanceId = this.parentDiv.attr('id');
@@ -80,18 +83,12 @@ export class TimePanel {
       elementId: instanceId + '-timeline-container',
     });
 
-    // for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
-    //   if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'hasTime') {
-    //     let availableLayer = this.geona.map._availableLayers[layerIdentifier];
-    //     this.timeline.addLayerBar(
-    //       availableLayer.title, // title
-    //       layerIdentifier, // id
-    //       availableLayer.dimensions.time.values[0], // startDate // TODO make sure layer times are sorted so this works
-    //       availableLayer.dimensions.time.values[availableLayer.dimensions.time.values.length - 1], // endDate
-    //       availableLayer.dimensions.time.values, // dateTimes // TODO confirm these are all the layer times
-    //     );
-    //   }
-    // }
+    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+      if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'hasTime') {
+        let availableLayer = this.geona.map._availableLayers[layerIdentifier];
+        this.timeline.addTimelineLayer(availableLayer);
+      }
+    }
   }
 
   /**
@@ -130,10 +127,10 @@ export class TimePanel {
   }
 
   /**
-   * Changes current date, updates the timebar and updates the map layers
+   * Changes current date, updates the timeline and updates the map layers
    * @param {*} date The date to set the map to
    */
-  pikadayTriggeredChangeTime(date) {
+  pikadayChangeTime(date) {
     this.parentDiv.find('.js-geona-time-panel-current-date')
       .val(date);
 
@@ -161,11 +158,11 @@ export class TimePanel {
   }
 
   /**
-   * Called when the timebar is used to change the time.
+   * Called when the timeline is used to change the time.
    * Updates the pikaday and current-date text input, then calls mapChangeTime()
    * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
    */
-  timebarTriggeredChangeTime(time) {
+  timelineChangeTime(time) {
     this.pikaday.setDate(time);
     // update buttons
     this.parentDiv.find('.js-geona-time-panel-current-date').val(time);

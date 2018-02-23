@@ -1,6 +1,9 @@
 import 'jquery';
 import * as d3 from 'd3';
 
+import {registerTriggers} from './timeline_triggers';
+import {registerBindings} from './timeline_bindings';
+
 /**
  *
  */
@@ -12,7 +15,9 @@ export class Timeline {
    * @param {*} settings 
    */
   constructor(timePanel, settings) {
+    this.timePanel = timePanel;
     this.parentDiv = timePanel.parentDiv;
+    this.eventManager = timePanel.geona.eventManager;
 
     let defaultOptions = {
       layers: [
@@ -176,10 +181,14 @@ export class Timeline {
           })
       );
 
-    // Add the currently active layers
-    for (let layer of this.options.layers) {
-      this.addTimelineLayer(layer);
-    }
+    // // Add the currently active layers
+    // for (let layer of this.options.layers) {
+    //   this.addTimelineLayer(layer);
+    // }
+
+    // Set triggers and bindings
+    registerTriggers();
+    registerBindings(this.eventManager, this.timePanel);
   }
 
   /**
@@ -187,6 +196,7 @@ export class Timeline {
    * @param {Object} layerToAdd
    */
   addTimelineLayer(layerToAdd) {
+    console.log(layerToAdd);
     // Increase timeline height to accommodate one new layer
     this.timelineCurrentLayers.push(layerToAdd);
     this._calculateHeights();
@@ -194,19 +204,25 @@ export class Timeline {
 
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1) {
+      let allDates = layerToAdd.dimensions.time.values;
       this.xScale.domain([
-        Date.parse(layerToAdd.allDates[0]),
-        Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
+        Date.parse(allDates[0]),
+        Date.parse(allDates[allDates.length - 1]),
       ]);
       this.xScale2.domain([
-        Date.parse(layerToAdd.allDates[0]),
-        Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
+        Date.parse(allDates[0]),
+        Date.parse(allDates[allDates.length - 1]),
       ]);
+
+      if (layerToAdd.dimensions.time.default) {
+        this.selectorDate = layerToAdd.dimensions.time.default;
+      }
     }
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        return layer.title;
+        // TODO select correct language
+        return layer.title.und;
       }));
 
     this.timelineLayerSelection = this.timelineLayers.selectAll('.geona-timeline-layer');
@@ -219,19 +235,22 @@ export class Timeline {
         return 'geona-timeline-layer geona-timeline-layer__' + layer.identifier;
       })
       .attr('transform', (layer) => {
-        return 'translate(0, ' + this.yScale(layer.title) + ')';
+        // TODO select correct title language
+        return 'translate(0, ' + this.yScale(layer.title.und) + ')';
       })
 
       // Within the g create a rect
       .append('rect')
       .attr('x', (layer) => {
-        return this.xScale(Date.parse(layer.allDates[0]));
+        let allDates = layer.dimensions.time.values;
+        return this.xScale(Date.parse(allDates[0]));
       })
       .attr('y', 0) // Alignment is relative to the group, so 0 always refers to the top position of the group.
       .attr('height', this.LAYER_HEIGHT)
       .attr('width', (layer) => {
-        let startDateXPosition = this.xScale(Date.parse(layer.allDates[0]));
-        let endDateXPosition = this.xScale(Date.parse(layer.allDates[layer.allDates.length - 1]));
+        let allDates = layer.dimensions.time.values;
+        let startDateXPosition = this.xScale(Date.parse(allDates[0]));
+        let endDateXPosition = this.xScale(Date.parse(allDates[allDates.length - 1]));
         return endDateXPosition - startDateXPosition;
       })
       .attr('fill', '#b1a7bc').attr('shape-rendering', 'crispEdges')
@@ -254,7 +273,7 @@ export class Timeline {
       .raise();
 
     for (let layer of this.timelineCurrentLayers) {
-      this._addTimeStepMarkers(layer, layer.allDates);
+      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
     }
   }
 
@@ -337,12 +356,14 @@ export class Timeline {
     // Adjust the positioning of the layer bars
     this.timelineLayers.selectAll('.geona-timeline-layer-bar')
       .attr('x', (layer) => {
-        let startDate = layer.allDates[0];
+        let allDates = layer.dimensions.time.values;
+        let startDate = allDates[0];
         return this.xScale(Date.parse(startDate));
       })
       .attr('width', (layer) => {
-        let startDate = layer.allDates[0];
-        let endDate = layer.allDates[layer.allDates.length - 1];
+        let allDates = layer.dimensions.time.values;
+        let startDate = allDates[0];
+        let endDate = allDates[allDates.length - 1];
         return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
       });
 
@@ -352,15 +373,12 @@ export class Timeline {
       .remove().exit();
     // Add time markers back
     for (let layer of this.timelineCurrentLayers) {
-      this._addTimeStepMarkers(layer, layer.allDates);
+      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
     }
 
     // Adjust positioning of the selector tool
     this.timelineLayers.select('.geona-timeline-selector-tool')
       .attr('x', () => {
-        console.log(this.selectorDate);
-        console.log(new Date(this.selectorDate));
-        console.log(this.xScale(new Date(this.selectorDate)));
         return this.xScale(new Date(this.selectorDate));
       });
   }
@@ -373,7 +391,7 @@ export class Timeline {
     if (!this.isDragging) {
       let clickXPosition = d3.mouse(container)[0];
       this.selectorDate = this.xScale.invert(clickXPosition);
-      this.triggerTimelineDateChange(this.selectorDate);
+      this.triggerMapDateChange(this.selectorDate);
       this.moveSelectorToDate(this.selectorDate);
     }
   }
@@ -383,11 +401,12 @@ export class Timeline {
    */
   updateLayerDateExtent() {
     for (let layer of this.timelineCurrentLayers) {
-      if (new Date(layer.allDates[0]) < this.layerDateExtent.min) {
-        this.layerDateExtent.min = new Date(layer.allDates[0]);
+      let allDates = layer.dimensions.time.values;
+      if (new Date(allDates[0]) < this.layerDateExtent.min) {
+        this.layerDateExtent.min = new Date(allDates[0]);
       }
-      if (new Date(layer.allDates[layer.allDates.length - 1]) > this.layerDateExtent.max) {
-        this.layerDateExtent.max = new Date(layer.allDates[layer.allDates.length - 1]);
+      if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max) {
+        this.layerDateExtent.max = new Date(allDates[allDates.length - 1]);
       }
     }
   }
@@ -397,7 +416,7 @@ export class Timeline {
    * layerDateExtent min or max.
    * @param {String|Date} date 
    */
-  triggerTimelineDateChange(date) {
+  triggerMapDateChange(date) {
     let validDate = date;
     if (date < this.layerDateExtent.min) {
       validDate = this.layerDateExtent.min;
@@ -405,7 +424,8 @@ export class Timeline {
       validDate = this.layerDateExtent.max;
     }
     // TODO trigger
-    console.log(new Date(validDate));
+    this.eventManager.trigger('timePanel.timelineChangeTime', new Date(validDate));
+    // console.log(new Date(validDate));
   }
 
   /**
