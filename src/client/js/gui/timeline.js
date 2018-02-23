@@ -5,6 +5,7 @@ import * as d3 from 'd3';
  *
  */
 export class Timeline {
+  // TODO transfer all css (e.g. colours) into other file
   /**
    * 
    * @param {*} timePanel 
@@ -75,11 +76,12 @@ export class Timeline {
     this.fullWidth = undefined;
     /** The width of only the section of the svg which contains the layers */
     this.dataWidth = undefined; // FIXME dataWidth cuts off the axis + labels
-    this._calculateWidths();
     /** The height of the whole svg element created for the timeline */
     this.fullHeight = undefined;
     /** The height of only the section of the svg which contains the layers */
     this.dataHeight = undefined;
+
+    this._calculateWidths();
     this._calculateHeights();
 
     /** @type {Number} The minimum spacing ratio between x-axis labels */
@@ -93,19 +95,16 @@ export class Timeline {
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
-
-    this.xScale2 = d3.scaleTime()
+    this.xScale2 = d3.scaleTime() // TODO is there any alternative to this? Maybe just make it in the zoom bit? But how would it update?
       .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
       .domain([
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
 
-
     this.xAxis = d3.axisBottom(this.xScale)
       .ticks(this.xAxisTicks)
       .tickFormat(getDateFormat);
-
 
     this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
       .range([0, this.dataHeight])
@@ -113,25 +112,30 @@ export class Timeline {
 
     this.yAxis = d3.axisLeft(this.yScale)
       .ticks(this.timelineCurrentLayers.length);
-    // Selects the main element to insert the timeline elements into
-    this.zooming = false;
+
     let zoom = d3.zoom()
       .scaleExtent([0, Infinity])
-      .translateExtent([[this.xScale(Date.parse('1500-01-01')), 0], [Infinity, this.dataHeight]])
-      // .extent([[this.xScale(Date.parse('1500-01-01')), 0], [Infinity, this.dataHeight]])
-      .on('zoom', () => { // Use arrow function to prevent 'this' context changing within zoom()
+      .translateExtent([[this.xScale(Date.parse('1500-01-01')), 0], [Infinity, this.dataHeight]]) // TODO does this do anything, especially 1500-01-01
+      .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
-      })
-      .on('end', () => {
-        this.zooming = false;
       });
-      // .scaleBy(d3.select('#' + this.options.elementId), 0.2);
 
+    this.layerDateExtent = { // Set to the domain for default
+      min: this.xScale.domain()[0], // TODO make everything either a string or a date in storage
+      max: this.xScale.domain()[1],
+    };
+
+    // Selects the main element to insert the timeline elements into
     this.timeline = d3.select('#' + this.options.elementId)
       .append('svg')
       .attr('width', this.dataWidth)
       .attr('height', this.dataHeight)
-      .call(zoom);
+      .call(zoom)
+      .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
+        this.clickDate(this.timeline.node());
+      });
+
+    this.isDragging = false;
 
     // Add a group and draw the x axis
     this.timelineXAxisGroup = this.timeline.append('g')
@@ -149,6 +153,29 @@ export class Timeline {
     this.timelineLayers = this.timeline.append('g')
       .attr('class', 'geona-timeline-layers');
 
+    this.selectorDate = '2010-06-01';
+
+    this.selectorTool = this.timelineLayers.append('rect')
+      .attr('cursor', 'e-resize')
+      .attr('class', 'geona-timeline-selector-tool')
+      .attr('x', () => {
+        return this.xScale(new Date(this.selectorDate));
+      })
+      .attr('y', 2) // todo Make const
+      .attr('width', 10) // todo Make const
+      .attr('height', this.dataHeight)
+      .attr('rx', 6) // todo Make const
+      .attr('ry', 6) // todo Make const
+      .call(
+        d3.drag()
+          .on('drag', () => {
+            this.dragDate();
+          })
+          .on('end', () => {
+            this.dragDateEnd();
+          })
+      );
+
     // Add the currently active layers
     for (let layer of this.options.layers) {
       this.addTimelineLayer(layer);
@@ -157,16 +184,16 @@ export class Timeline {
 
   /**
    * Adds the specified layer to the timeline
-   * @param {*} layerToAdd
+   * @param {Object} layerToAdd
    */
   addTimelineLayer(layerToAdd) {
     // Increase timeline height to accommodate one new layer
     this.timelineCurrentLayers.push(layerToAdd);
     this._calculateHeights();
-    // this.calculateTimelineExtent(layerToAdd);
+    this.updateLayerDateExtent();
 
     // Update xScale domain to show first layer's full extent
-    if (this.timelineCurrentLayers.length === 1 && this.zooming === false) {
+    if (this.timelineCurrentLayers.length === 1) {
       this.xScale.domain([
         Date.parse(layerToAdd.allDates[0]),
         Date.parse(layerToAdd.allDates[layerToAdd.allDates.length - 1]),
@@ -217,6 +244,14 @@ export class Timeline {
       .call(this.xAxis);
     this.timeline.select('.geona-timeline-y-axis')
       .call(this.yAxis);
+
+    // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
+    this.timelineLayers.select('.geona-timeline-selector-tool')
+      .attr('height', this.dataHeight)
+      .attr('x', () => { // Change x position in case domain has changed
+        return this.xScale(new Date(this.selectorDate));
+      })
+      .raise();
 
     for (let layer of this.timelineCurrentLayers) {
       this._addTimeStepMarkers(layer, layer.allDates);
@@ -290,15 +325,6 @@ export class Timeline {
   }
 
   /**
-   * Sets the startDate and endDate to the
-   * @param {Array}   times 
-   * @param {Boolean} [padding]
-   */
-  calculateTimelineExtent(times, padding) {
-
-  }
-
-  /**
    * Handles panning and zooming along the x axis. Called on 'zoom' event.
    */
   zoom() {
@@ -328,12 +354,82 @@ export class Timeline {
     for (let layer of this.timelineCurrentLayers) {
       this._addTimeStepMarkers(layer, layer.allDates);
     }
+
+    // Adjust positioning of the selector tool
+    this.timelineLayers.select('.geona-timeline-selector-tool')
+      .attr('x', () => {
+        console.log(this.selectorDate);
+        console.log(new Date(this.selectorDate));
+        console.log(this.xScale(new Date(this.selectorDate)));
+        return this.xScale(new Date(this.selectorDate));
+      });
+  }
+
+  /**
+   * 
+   * @param {HTMLElement} container 
+   */
+  clickDate(container) {
+    if (!this.isDragging) {
+      let clickXPosition = d3.mouse(container)[0];
+      this.selectorDate = this.xScale.invert(clickXPosition);
+      this.triggerTimelineDateChange(this.selectorDate);
+      this.moveSelectorToDate(this.selectorDate);
+    }
+  }
+
+  /**
+   * Sets the layerDateExtent to the minimum and maximum dates of all timeline layers.
+   */
+  updateLayerDateExtent() {
+    for (let layer of this.timelineCurrentLayers) {
+      if (new Date(layer.allDates[0]) < this.layerDateExtent.min) {
+        this.layerDateExtent.min = new Date(layer.allDates[0]);
+      }
+      if (new Date(layer.allDates[layer.allDates.length - 1]) > this.layerDateExtent.max) {
+        this.layerDateExtent.max = new Date(layer.allDates[layer.allDates.length - 1]);
+      }
+    }
+  }
+
+  /**
+   * Sets the timeline date to the specified date. If date is outside the layerDateExtent then it will be capped at the
+   * layerDateExtent min or max.
+   * @param {String|Date} date 
+   */
+  triggerTimelineDateChange(date) {
+    let validDate = date;
+    if (date < this.layerDateExtent.min) {
+      validDate = this.layerDateExtent.min;
+    } else if (date > this.layerDateExtent.max) {
+      validDate = this.layerDateExtent.max;
+    }
+    // TODO trigger
+    console.log(new Date(validDate));
+  }
+
+  /**
+   * 
+   * @param {*} date 
+   */
+  moveSelectorToDate(date) {
+    this.selectorDate = date;
+    if (date < this.layerDateExtent.min) {
+      this.selectorDate = this.layerDateExtent.min;
+    } else if (date > this.layerDateExtent.max) {
+      this.selectorDate = this.layerDateExtent.max;
+    }
+    this.timelineLayers.select('.geona-timeline-selector-tool')
+      .transition().duration(500).attr('x', () => {
+        return this.xScale(new Date(this.selectorDate));
+      });
   }
 }
 
 /**
  * Selects the appropriate date format depending on the precision of the date.
- * @param {*} date
+ * @param {*} date String/Date?
+ * @return {d3.timeFormat} The time format to use on the timeline
  */
 function getDateFormat(date) {
   if (d3.timeSecond(date) < date) {
