@@ -10,12 +10,12 @@ export function registerBindings(eventManager, timePanel) {
   });
 
   // Show timePanel
-  eventManager.bind('timePanel.showTimeline', () => {
-    timePanel.showTimeline();
+  eventManager.bind('timePanel.showTimePanel', () => {
+    timePanel.showTimePanel();
   });
   // Hide timePanel
-  eventManager.bind('timePanel.hideTimeline', () => {
-    timePanel.hideTimeline();
+  eventManager.bind('timePanel.hideTimePanel', () => {
+    timePanel.hideTimePanel();
   });
 
   // Show pikaday
