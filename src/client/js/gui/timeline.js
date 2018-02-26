@@ -150,8 +150,14 @@ export class Timeline {
     this.timelineYAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
       .call(this.yAxis);
-    this.timelineYAxisGroup.select('path.domain')
+    this.timelineYAxisGroup.select('path.domain') // Styling for labels
       .style('display', 'none');
+    this.timelineYAxisGroup // Adds white background to go behind labels
+      .append('rect')
+      .attr('class', 'geona-timeline-y-axis-background')
+      .attr('width', this.Y_AXIS_LABEL_WIDTH)
+      .attr('height', this.fullHeight)
+      .attr('fill', '#FFFFFF');
     // Add a group for the layer bars
     this.timelineLayers = this.timeline.append('g')
       .attr('class', 'geona-timeline-layers');
@@ -258,11 +264,13 @@ export class Timeline {
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
     this.timeline.select('.geona-timeline-x-axis')
       .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')');
-    this.timeline.select('.geona-timeline-x-axis')
+    this.timelineXAxisGroup
       .call(this.xAxis);
-    this.timeline.select('.geona-timeline-y-axis')
+    this.timelineYAxisGroup
       .call(this.yAxis)
-      .raise();
+      .raise()
+      .select('.geona-timeline-y-axis-background')
+      .attr('height', this.fullHeight);
 
     // Trim the visible title to prevent overspill onto the layer bars
     this.timelineYAxisGroup.selectAll('text')
@@ -369,11 +377,13 @@ export class Timeline {
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
     this.timeline.select('.geona-timeline-x-axis')
       .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')');
-    this.timeline.select('.geona-timeline-x-axis')
+    this.timelineXAxisGroup
       .call(this.xAxis);
-    this.timeline.select('.geona-timeline-y-axis')
+    this.timelineYAxisGroup
       .call(this.yAxis)
-      .raise();
+      .raise()
+      .select('.geona-timeline-y-axis-background')
+      .attr('height', this.fullHeight);
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
     this.timelineLayers.select('.geona-timeline-selector-tool')
