@@ -229,8 +229,9 @@ export class Timeline {
       .remove().exit()
       .data(this.timelineCurrentLayers)
       .enter().append('g')
-      .attr('class', (layer) => {
-        return 'geona-timeline-layer geona-timeline-layer__' + layer.identifier;
+      .attr('class', 'geona-timeline-layer')
+      .attr('data-layer-identifier', (layer) => { // Adds the identifier as a data attribute
+        return layer.identifier;
       })
       .attr('transform', (layer) => {
         // FIXME select correct title language
@@ -260,7 +261,8 @@ export class Timeline {
     this.timeline.select('.geona-timeline-x-axis')
       .call(this.xAxis);
     this.timeline.select('.geona-timeline-y-axis')
-      .call(this.yAxis);
+      .call(this.yAxis)
+      .raise();
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
     this.timelineLayers.select('.geona-timeline-selector-tool')
@@ -300,7 +302,7 @@ export class Timeline {
     }
 
     // We will append a line to the layer bar for each date remaining after being filtered
-    this.timelineLayers.select('.geona-timeline-layer__' + layer.identifier).selectAll('line')
+    this.timelineLayers.select('[data-layer-identifier = ' + layer.identifier + ']').selectAll('line')
       .data(filteredDates)
       .enter().append('line')
       .attr('x1', (date) => {
@@ -317,6 +319,48 @@ export class Timeline {
       .attr('stroke-width', '1')
       .attr('shape-rendering', 'crispEdges')
       .attr('class', 'geona-timeline-layer-time-marker');
+  }
+
+  /**
+   * Removes the layer with the specified identifier from the timeline.
+   * @param {String} layerIdentifier The identifier for the layer to remove.
+   */
+  removeTimelineLayer(layerIdentifier) {
+    // Remove the element from the SVG
+    this.timelineLayers.select('[data-layer-identifier = ' + layerIdentifier + ']')
+      .remove().exit();
+
+    // Remove the layer from the current layers array
+    let layerToRemove = this._findActiveLayerDefinition(layerIdentifier);
+    let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
+    this.timelineCurrentLayers.splice(layerIndex, 1);
+
+    this._calculateHeights();
+    this.updateLayerDateExtent();
+
+    // Update yScale range and domain
+    this.yScale.range([0, this.dataHeight])
+      .domain(this.timelineCurrentLayers.map((layer) => {
+        // FIXME select correct language
+        return layer.title.und;
+      }));
+
+    this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
+    this.timeline.select('.geona-timeline-x-axis')
+      .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')');
+    this.timeline.select('.geona-timeline-x-axis')
+      .call(this.xAxis);
+    this.timeline.select('.geona-timeline-y-axis')
+      .call(this.yAxis)
+      .raise();
+
+    // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
+    this.timelineLayers.select('.geona-timeline-selector-tool')
+      .attr('height', this.dataHeight)
+      .attr('x', () => { // Change x position in case domain has changed
+        return this.xScale(new Date(this.selectorDate));
+      })
+      .raise();
   }
 
   /**
@@ -461,6 +505,20 @@ export class Timeline {
     });
 
     // TODO update current date box as we drag
+  }
+
+  /**
+   * Returns the layer in this.timelineCurrentLayers with the specified identifier, or undefined if not found.
+   * @param {String} layerIdentifier The identifier for the currentLayer.
+   * @return {Object|undefined} A layer from this.timelineCurrentLayers
+   */
+  _findActiveLayerDefinition(layerIdentifier) {
+    for (let layer of this.timelineCurrentLayers) {
+      if (layer.identifier === layerIdentifier) {
+        return layer;
+      }
+    }
+    return undefined;
   }
 }
 
