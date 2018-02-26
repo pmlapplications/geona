@@ -66,10 +66,10 @@ export class Timeline {
     this.LAYER_HEIGHT = 10;
     /** @type {Number} CONST - The pixel height for the padding between layers */
     this.LAYER_PADDING = 0.25;
-    /** @type {Number} CONST - The pixel width needed to make room for the y-axis */
-    this.Y_AXIS_LABEL_WIDTH = 100;
     /** @type {Number} CONST - The pixel height needed to make room for the x-axis */
     this.X_AXIS_LABEL_HEIGHT = 25;
+    /** @type {Number} CONST - The pixel width needed to make room for the y-axis */
+    this.Y_AXIS_LABEL_WIDTH = 138;
 
     /** @type {Array} The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
@@ -115,8 +115,9 @@ export class Timeline {
       .range([0, this.dataHeight])
       .paddingInner(this.LAYER_PADDING);
 
-    this.yAxis = d3.axisLeft(this.yScale)
-      .ticks(this.timelineCurrentLayers.length);
+    this.yAxis = d3.axisRight(this.yScale)
+      .ticks(this.timelineCurrentLayers.length)
+      .tickSize(0);
 
     let zoom = d3.zoom()
       .scaleExtent([0, Infinity])
@@ -148,7 +149,6 @@ export class Timeline {
     // Add a group and draw the y axis
     this.timelineYAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
-      .attr('transform', 'translate(' + this.Y_AXIS_LABEL_WIDTH + ')')
       .call(this.yAxis);
     this.timelineYAxisGroup.select('path.domain')
       .style('display', 'none');
@@ -263,6 +263,27 @@ export class Timeline {
     this.timeline.select('.geona-timeline-y-axis')
       .call(this.yAxis)
       .raise();
+
+    // Trim the visible title to prevent overspill onto the layer bars
+    this.timelineYAxisGroup.selectAll('text')
+      .call((yAxisLabels) => {
+        for (let textElement of yAxisLabels.nodes()) {
+          if (textElement.getComputedTextLength() > this.Y_AXIS_LABEL_WIDTH) {
+            // Gives us the percentage of text which is contained within the label area
+            let trimProportion = this.Y_AXIS_LABEL_WIDTH / textElement.getComputedTextLength();
+            // Gives us the number of characters we can fit into the label area from the full title
+            let trimLength = Math.floor(textElement.innerHTML.length * trimProportion) - 3; // - 3 makes space for '...'
+            // Gives us the trimmed title, with ellipsis at end to indicate cutoff
+            let trimmedLabel = textElement.innerHTML.slice(0, trimLength) + '...';
+
+            textElement.innerHTML = trimmedLabel;
+          }
+        }
+      })
+      .on('mouseover', (label) => {
+        // TODO display full label (parameter) in popup bubble (the popup might interfere with panning the layerbars)
+        console.log(label);
+      });
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
     this.timelineLayers.select('.geona-timeline-selector-tool')
@@ -433,7 +454,7 @@ export class Timeline {
     let clickXPosition = d3.mouse(container)[0];
     this.selectorDate = this.xScale.invert(clickXPosition);
     this.triggerMapDateChange(this.selectorDate);
-    this.moveSelectorToDate(this.selectorDate);
+    this._moveSelectorToDate(this.selectorDate);
   }
 
   /**
@@ -469,10 +490,10 @@ export class Timeline {
   }
 
   /**
-   * 
-   * @param {*} date 
+   * Moves the selector tool to the date position on the x-axis.
+   * @param {String} date The date to move the selector tool to.
    */
-  moveSelectorToDate(date) {
+  _moveSelectorToDate(date) {
     this.selectorDate = date;
     if (date < this.layerDateExtent.min) {
       this.selectorDate = this.layerDateExtent.min;
@@ -508,6 +529,8 @@ export class Timeline {
   }
 
   /**
+   * @private
+   *
    * Returns the layer in this.timelineCurrentLayers with the specified identifier, or undefined if not found.
    * @param {String} layerIdentifier The identifier for the currentLayer.
    * @return {Object|undefined} A layer from this.timelineCurrentLayers
