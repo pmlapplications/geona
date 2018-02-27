@@ -1,6 +1,8 @@
 import 'jquery';
 import * as d3 from 'd3';
 
+import {selectPropertyLanguage} from '../map_common';
+
 import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
 
@@ -70,20 +72,25 @@ export class Timeline {
     this.X_AXIS_LABEL_HEIGHT = 25;
     /** @type {Number} CONST - The pixel width needed to make room for the y-axis */
     this.Y_AXIS_LABEL_WIDTH = 138;
+    /** @type {Number} CONST - The vertical positioning of the selector tool */
+    this.SELECTOR_TOOL_Y = 1;
+    /** @type {Number} CONST - The width of the selector tool */
+    this.SELECTOR_TOOL_WIDTH = 10;
+    /** @type {Number} CONST - The x-axis radius of the ellipse used to round the edges of the selector tool */
+    this.SELECTOR_TOOL_RX = 6;
+    /** @type {Number} CONST - The y-axis radius of the ellipse used to round the edges of the selector tool */
+    this.SELECTOR_TOOL_RY = 6;
 
     /** @type {Array} The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
 
-    this.startDate = undefined;
-    this.endDate = undefined;
-
-    /** The width of the whole svg element created for the timeline */
+    /** @type {Number} The width of the whole svg element created for the timeline */
     this.fullWidth = undefined;
-    /** The width of only the section of the svg which contains the layers */
-    this.dataWidth = undefined; // FIXME dataWidth cuts off the axis + labels
-    /** The height of the whole svg element created for the timeline */
+    /** @type {Number} The width of only the section of the svg which contains the layers */
+    this.dataWidth = undefined; // FIXME dataWidth cuts off the axis + labels (sort of, the padding would fix it too)
+    /** @type {Number} The height of the whole svg element created for the timeline */
     this.fullHeight = undefined;
-    /** The height of only the section of the svg which contains the layers */
+    /** @type {Number} The height of only the section of the svg which contains the layers */
     this.dataHeight = undefined;
 
     this._calculateWidths();
@@ -120,8 +127,6 @@ export class Timeline {
       .tickSize(0);
 
     let zoom = d3.zoom()
-      .scaleExtent([0, Infinity])
-      .translateExtent([[this.xScale(Date.parse('1500-01-01')), 0], [Infinity, this.dataHeight]]) // TODO does this do anything, especially 1500-01-01
       .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       });
@@ -168,13 +173,13 @@ export class Timeline {
       .attr('cursor', 'e-resize')
       .attr('class', 'geona-timeline-selector-tool')
       .attr('x', () => {
-        return this.xScale(new Date(this.selectorDate));
+        return this.xScale(new Date(this.selectorDate)) - (this.SELECTOR_TOOL_WIDTH / 2);
       })
-      .attr('y', 2) // todo Make const
-      .attr('width', 10) // todo Make const
+      .attr('y', this.SELECTOR_TOOL_Y)
+      .attr('width', this.SELECTOR_TOOL_WIDTH)
       .attr('height', this.dataHeight)
-      .attr('rx', 6) // todo Make const
-      .attr('ry', 6) // todo Make const
+      .attr('rx', this.SELECTOR_TOOL_RX)
+      .attr('ry', this.SELECTOR_TOOL_RY)
       .call(
         d3.drag()
           .on('drag', () => {
@@ -185,11 +190,6 @@ export class Timeline {
           })
       );
 
-    // // Add the currently active layers
-    // for (let layer of this.options.layers) {
-    //   this.addTimelineLayer(layer);
-    // }
-
     // Set triggers and bindings
     registerTriggers();
     registerBindings(this.eventManager, this.timePanel);
@@ -197,7 +197,7 @@ export class Timeline {
 
   /**
    * Adds the specified layer to the timeline
-   * @param {Object} layerToAdd
+   * @param {Layer} layerToAdd A Geona layer definition
    */
   addTimelineLayer(layerToAdd) {
     // Increase timeline height to accommodate one new layer
@@ -225,8 +225,7 @@ export class Timeline {
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        // FIXME select correct language
-        return layer.title.und;
+        return selectPropertyLanguage(layer.title);
       }));
 
     this.timelineLayerSelection = this.timelineLayers.selectAll('.geona-timeline-layer');
@@ -240,8 +239,8 @@ export class Timeline {
         return layer.identifier;
       })
       .attr('transform', (layer) => {
-        // FIXME select correct title language
-        return 'translate(0, ' + this.yScale(layer.title.und) + ')';
+        let title = selectPropertyLanguage(layer.title);
+        return 'translate(0, ' + this.yScale(title) + ')';
       })
 
       // Within the g create a rect
@@ -294,10 +293,10 @@ export class Timeline {
       });
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
-    this.timelineLayers.select('.geona-timeline-selector-tool')
+    this.selectorTool
       .attr('height', this.dataHeight)
       .attr('x', () => { // Change x position in case domain has changed
-        return this.xScale(new Date(this.selectorDate));
+        return this.xScale(new Date(this.selectorDate)) - (this.SELECTOR_TOOL_WIDTH / 2);
       })
       .raise();
 
@@ -370,8 +369,7 @@ export class Timeline {
     // Update yScale range and domain
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        // FIXME select correct language
-        return layer.title.und;
+        return selectPropertyLanguage(layer.title);
       }));
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
@@ -386,10 +384,10 @@ export class Timeline {
       .attr('height', this.fullHeight);
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
-    this.timelineLayers.select('.geona-timeline-selector-tool')
+    this.selectorTool
       .attr('height', this.dataHeight)
       .attr('x', () => { // Change x position in case domain has changed
-        return this.xScale(new Date(this.selectorDate));
+        return this.xScale(new Date(this.selectorDate)) - (this.SELECTOR_TOOL_WIDTH / 2);
       })
       .raise();
   }
@@ -450,9 +448,9 @@ export class Timeline {
     }
 
     // Adjust positioning of the selector tool
-    this.timelineLayers.select('.geona-timeline-selector-tool')
+    this.selectorTool
       .attr('x', () => {
-        return this.xScale(new Date(this.selectorDate));
+        return this.xScale(new Date(this.selectorDate)) - (this.SELECTOR_TOOL_WIDTH / 2);
       });
   }
 
@@ -511,9 +509,9 @@ export class Timeline {
       this.selectorDate = this.layerDateExtent.max;
     }
     // TODO add this.options.animateSelector option (from GISPortal)
-    this.timelineLayers.select('.geona-timeline-selector-tool')
+    this.selectorTool
       .transition().duration(500).attr('x', () => {
-        return this.xScale(new Date(this.selectorDate));
+        return this.xScale(new Date(this.selectorDate)) - (this.SELECTOR_TOOL_WIDTH / 2);
       });
   }
 
@@ -532,7 +530,7 @@ export class Timeline {
     this.selectorDate = new Date(dragXDate);
 
     this.selectorTool.attr('x', () => {
-      return this.xScale(new Date(this.selectorDate));
+      return this.xScale(new Date(this.selectorDate)) - (this.SELECTOR_TOOL_WIDTH / 2);
     });
 
     // TODO update current date box as we drag
