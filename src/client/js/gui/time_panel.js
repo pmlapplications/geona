@@ -4,7 +4,6 @@ import Pikaday from 'pikaday-time';
 // import Pikaday from 'pikaday';
 import moment from 'moment';
 
-import {selectPropertyLanguage} from '../map_common';
 import {Timeline} from './timeline';
 import {registerTriggers} from './time_panel_triggers';
 import {registerBindings} from './time_panel_bindings';
@@ -64,20 +63,6 @@ export class TimePanel {
     // Assign ID to this instance's timeline container
     let instanceId = this.parentDiv.attr('id');
     this.parentDiv.find('.js-geona-time-panel-inner__timeline').attr('id', instanceId + '-timeline-container');
-    // this.timeline = new Timeline(this, {
-    //   elementId: instanceId + '-timeline-container',
-    //   comment: 'Sample timeline data',
-    //   selectedDate: new Date(), // TODO in the current portal this is 'var date = gisportal.utils.getURLParameter('date') || "1900-01-01T00:00:00Z"'
-    //   chartMargins: {
-    //     top: 7,
-    //     right: 0,
-    //     bottom: 5,
-    //     left: 0,
-    //   },
-    //   barHeight: 10,
-    //   barMargin: 2,
-    //   timebars: [],
-    // });
 
     this.timeline = new Timeline(this, {
       elementId: instanceId + '-timeline-container',
@@ -134,11 +119,12 @@ export class TimePanel {
     this.parentDiv.find('.js-geona-time-panel-current-date')
       .val(date);
 
-    // TODO timebar update time
-
     // Update map layers
     let utcDate = moment.utc(date);
     this.geona.map.loadLayersToNearestValidTime(utcDate);
+
+    // Update timeline display
+    this.timeline._moveSelectorToDate(utcDate);
   }
 
   /**
@@ -159,21 +145,21 @@ export class TimePanel {
 
   /**
    * Called when the timeline is used to change the time.
-   * Updates the pikaday and current-date text input, then calls mapChangeTime()
+   * Updates the pikaday and current-date text input, then calls mapUpdateTime()
    * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
    */
   timelineChangeTime(time) {
     this.pikaday.setDate(time);
     // update buttons
     this.parentDiv.find('.js-geona-time-panel-current-date').val(time);
-    this.mapChangeTime(time);
+    this.mapUpdateTime(time);
   }
 
   /**
    * Changes the times of the layers on the map
    * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
    */
-  mapChangeTime(time) {
+  mapUpdateTime(time) {
     this.geona.map.loadLayersToNearestValidTime(time);
   }
 }

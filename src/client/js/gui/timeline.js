@@ -274,23 +274,18 @@ export class Timeline {
     // Trim the visible title to prevent overspill onto the layer bars
     this.timelineYAxisGroup.selectAll('text')
       .call((yAxisLabels) => {
-        for (let textElement of yAxisLabels.nodes()) {
-          if (textElement.getComputedTextLength() > this.Y_AXIS_LABEL_WIDTH) {
-            // Gives us the percentage of text which is contained within the label area
-            let trimProportion = this.Y_AXIS_LABEL_WIDTH / textElement.getComputedTextLength();
-            // Gives us the number of characters we can fit into the label area from the full title
-            let trimLength = Math.floor(textElement.innerHTML.length * trimProportion) - 3; // - 3 makes space for '...'
-            // Gives us the trimmed title, with ellipsis at end to indicate cutoff
-            let trimmedLabel = textElement.innerHTML.slice(0, trimLength) + '...';
-
-            textElement.innerHTML = trimmedLabel;
-          }
-        }
+        this._trimYAxisLabels(yAxisLabels);
       })
       .on('mouseover', (label) => {
         // TODO display full label (parameter) in popup bubble (the popup might interfere with panning the layerbars)
         console.log(label);
       });
+
+    // // Update the extent in case the new layer has changed the domain
+    // this.layerDateExtent = { // Set to the domain for default
+    //   min: this.xScale.domain()[0], // TODO make everything either a string or a date in storage
+    //   max: this.xScale.domain()[1],
+    // };
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
     this.selectorTool
@@ -362,6 +357,7 @@ export class Timeline {
     let layerToRemove = this._findActiveLayerDefinition(layerIdentifier);
     let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
     this.timelineCurrentLayers.splice(layerIndex, 1);
+    console.log(this.timelineCurrentLayers);
 
     this._calculateHeights();
     this.updateLayerDateExtent();
@@ -383,7 +379,25 @@ export class Timeline {
       .select('.geona-timeline-y-axis-background')
       .attr('height', this.fullHeight);
 
+    this.timelineLayers.selectAll('.geona-timeline-layer')
+      .attr('transform', (layer) => {
+        // console.log(layer);
+        let title = selectPropertyLanguage(layer.title);
+        return 'translate(0, ' + this.yScale(title) + ')';
+      });
+
+    // Trim the visible title to prevent overspill onto the layer bars
+    this.timelineYAxisGroup.selectAll('text')
+      .call((yAxisLabels) => {
+        this._trimYAxisLabels(yAxisLabels);
+      })
+      .on('mouseover', (label) => {
+        // TODO display full label (parameter) in popup bubble (the popup might interfere with panning the layerbars)
+        console.log(label);
+      });
+
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
+    // FIXME Domain is wrong after removal (domain doesn't update for shorter remaining layer)
     this.selectorTool
       .attr('height', this.dataHeight)
       .attr('x', () => { // Change x position in case domain has changed
@@ -469,12 +483,13 @@ export class Timeline {
    * Sets the layerDateExtent to the minimum and maximum dates of all timeline layers.
    */
   updateLayerDateExtent() {
+    this.layerDateExtent = {};
     for (let layer of this.timelineCurrentLayers) {
       let allDates = layer.dimensions.time.values;
-      if (new Date(allDates[0]) < this.layerDateExtent.min) {
+      if (new Date(allDates[0]) < this.layerDateExtent.min || this.layerDateExtent.min === undefined) {
         this.layerDateExtent.min = new Date(allDates[0]);
       }
-      if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max) {
+      if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max || this.layerDateExtent.max === undefined) { // eslint-disable-line max-len
         this.layerDateExtent.max = new Date(allDates[allDates.length - 1]);
       }
     }
@@ -550,6 +565,25 @@ export class Timeline {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Edits the text of the y-axis labels to prevent overspill onto the layer bars.
+   * @param {*} yAxisLabels 
+   */
+  _trimYAxisLabels(yAxisLabels) {
+    for (let textElement of yAxisLabels.nodes()) {
+      if (textElement.getComputedTextLength() > this.Y_AXIS_LABEL_WIDTH) {
+        // Gives us the percentage of text which is contained within the label area
+        let trimProportion = this.Y_AXIS_LABEL_WIDTH / textElement.getComputedTextLength();
+        // Gives us the number of characters we can fit into the label area from the full title
+        let trimLength = Math.floor(textElement.innerHTML.length * trimProportion) - 3; // - 3 makes space for '...'
+        // Gives us the trimmed title, with ellipsis at end to indicate cutoff
+        let trimmedLabel = textElement.innerHTML.slice(0, trimLength) + '...';
+
+        textElement.innerHTML = trimmedLabel;
+      }
+    }
   }
 }
 

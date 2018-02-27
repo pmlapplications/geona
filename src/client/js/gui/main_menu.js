@@ -230,12 +230,8 @@ export class MainMenu {
     let layerServerDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServer));
     for (let layer of layerServerDeepCopy.layers) {
       if (layer.identifier === layerIdentifier) {
-        if (layer.dimension) {
-          if (layer.dimension.time) {
-            this.geona.map.addLayer(layer, layerServerDeepCopy, {modifier: 'hasTime'});
-          } else {
-            this.geona.map.addLayer(layer, layerServerDeepCopy);
-          }
+        if (layer.dimension && layer.dimension.time) {
+          this.geona.map.addLayer(layer, layerServerDeepCopy, {modifier: 'hasTime'});
         } else {
           this.geona.map.addLayer(layer, layerServerDeepCopy);
         }
@@ -264,8 +260,8 @@ export class MainMenu {
   removeLayer(item) {
     this.geona.map.removeLayer(item.dataset.identifier);
     // Returns true if browser is Internet Explorer 11
-    let isIE11 = Boolean(window.MSInputMethodContext) && Boolean(document.documentMode);
-    if (isIE11 === true) {
+    let isIe11 = Boolean(window.MSInputMethodContext) && Boolean(document.documentMode);
+    if (isIe11 === true) {
       item.removeNode(true);
     } else {
       item.remove();
