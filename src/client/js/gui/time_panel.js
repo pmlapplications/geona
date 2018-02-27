@@ -124,24 +124,31 @@ export class TimePanel {
     this.geona.map.loadLayersToNearestValidTime(utcDate);
 
     // Update timeline display
-    this.timeline._moveSelectorToDate(utcDate);
   }
 
   /**
-   * Changes current date and updates the map layers
-   * @param {*} date The date to set the map to
+   * Changes the pikaday date without changing the map layers.
+   * @param {*} time 
    */
-  setDate(date) {
-    this.parentDiv.find('.js-geona-time-panel-current-date')
-      .val(date);
-
-    // Update pikaday options so it displays correct time when next opened
-    this.pikaday.setDate(date);
-
-    // Update map layers
-    let utcDate = moment.utc(date);
-    this.geona.map.loadLayersToNearestValidTime(utcDate);
+  pikadayUpdateTime(time) {
+    this.pikaday.setDate(time, true); // true parameter prevents 'onSelect' action on pikaday from triggering
   }
+
+  // /**
+  //  * Changes current date and updates the map layers
+  //  * @param {*} date The date to set the map to
+  //  */
+  // setDate(date) {
+  //   this.parentDiv.find('.js-geona-time-panel-current-date')
+  //     .val(date);
+
+  //   // Update pikaday options so it displays correct time when next opened
+  //   this.pikaday.setDate(date);
+
+  //   // Update map layers
+  //   let utcDate = moment.utc(date);
+  //   this.geona.map.loadLayersToNearestValidTime(utcDate);
+  // }
 
   /**
    * Called when the timeline is used to change the time.
@@ -149,10 +156,14 @@ export class TimePanel {
    * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
    */
   timelineChangeTime(time) {
-    this.pikaday.setDate(time);
+    this.pikadayUpdateTime(time);
     // update buttons
     this.parentDiv.find('.js-geona-time-panel-current-date').val(time);
     this.mapUpdateTime(time);
+  }
+
+  timelineUpdateTime(time) {
+    this.timeline._moveSelectorToDate(time);
   }
 
   /**
