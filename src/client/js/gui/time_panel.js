@@ -124,6 +124,7 @@ export class TimePanel {
     this.geona.map.loadLayersToNearestValidTime(utcDate);
 
     // Update timeline display
+    this.timelineUpdateTime(date); // todo rename timelineUpdateDisplay
   }
 
   /**

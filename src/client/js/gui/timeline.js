@@ -87,7 +87,7 @@ export class Timeline {
     /** @type {Number} The width of the whole svg element created for the timeline */
     this.fullWidth = undefined;
     /** @type {Number} The width of only the section of the svg which contains the layers */
-    this.dataWidth = undefined; // FIXME dataWidth cuts off the axis + labels (sort of, the padding would fix it too)
+    this.dataWidth = undefined;
     /** @type {Number} The height of the whole svg element created for the timeline */
     this.fullHeight = undefined;
     /** @type {Number} The height of only the section of the svg which contains the layers */
@@ -98,7 +98,6 @@ export class Timeline {
 
     /** @type {Number} The minimum spacing ratio between x-axis labels */
     this.xAxisTicks = this.dataWidth / 160; // More information can be found on the Geona wiki
-    // TODO could the extra width needed to display the full x-axis be calculated from xAxisTicks?
 
     // Set the scale for the xAxis to use
     this.xScale = d3.scaleTime()
@@ -139,7 +138,7 @@ export class Timeline {
     // Selects the main element to insert the timeline elements into
     this.timeline = d3.select('#' + this.options.elementId)
       .append('svg')
-      .attr('width', this.dataWidth)
+      .attr('width', this.dataWidth + 1) // + 1 because the containing svg needs to be 1 px longer than inner elements
       .attr('height', this.dataHeight)
       .call(zoom)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
@@ -164,12 +163,12 @@ export class Timeline {
       .attr('height', this.fullHeight)
       .attr('fill', '#FFFFFF');
     // Add a group for the layer bars
-    this.timelineLayers = this.timeline.append('g')
-      .attr('class', 'geona-timeline-layers');
+    this.timelineData = this.timeline.append('g')
+      .attr('class', 'geona-timeline-data');
 
     this.selectorDate = '2010-06-01';
 
-    this.selectorTool = this.timelineLayers.append('rect')
+    this.selectorTool = this.timelineData.append('rect')
       .attr('cursor', 'e-resize')
       .attr('class', 'geona-timeline-selector-tool')
       .attr('x', () => {
@@ -189,6 +188,16 @@ export class Timeline {
             this.triggerMapDateChange(this.selectorDate);
           })
       );
+
+    // Set initial options for the todayLine
+    this.todayLine = this.timelineData
+      .append('line')
+      .attr('y1', 0)
+      .attr('stroke', '#0000FF')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', 2, 2);
+
+    this.todayDate = new Date();
 
     // Set triggers and bindings
     registerTriggers();
@@ -228,7 +237,7 @@ export class Timeline {
         return selectPropertyLanguage(layer.title);
       }));
 
-    this.timelineLayerSelection = this.timelineLayers.selectAll('.geona-timeline-layer');
+    this.timelineLayerSelection = this.timelineData.selectAll('.geona-timeline-layer');
     // Create a g for each layer
     this.timelineLayerBars = this.timelineLayerSelection
       .remove().exit()
@@ -281,11 +290,14 @@ export class Timeline {
         console.log(label);
       });
 
-    // // Update the extent in case the new layer has changed the domain
-    // this.layerDateExtent = { // Set to the domain for default
-    //   min: this.xScale.domain()[0], // TODO make everything either a string or a date in storage
-    //   max: this.xScale.domain()[1],
-    // };
+    this.todayLine
+      .attr('y2', this.dataHeight)
+      .attr('x1', () => {
+        return this.xScale(this.todayDate);
+      })
+      .attr('x2', () => {
+        return this.xScale(this.todayDate);
+      });
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
     this.selectorTool
@@ -325,7 +337,7 @@ export class Timeline {
     }
 
     // We will append a line to the layer bar for each date remaining after being filtered
-    this.timelineLayers.select('[data-layer-identifier = ' + layer.identifier + ']').selectAll('line')
+    this.timelineData.select('[data-layer-identifier = ' + layer.identifier + ']').selectAll('line')
       .data(filteredDates)
       .enter().append('line')
       .attr('x1', (date) => {
@@ -350,14 +362,13 @@ export class Timeline {
    */
   removeTimelineLayer(layerIdentifier) {
     // Remove the element from the SVG
-    this.timelineLayers.select('[data-layer-identifier = ' + layerIdentifier + ']')
+    this.timelineData.select('[data-layer-identifier = ' + layerIdentifier + ']')
       .remove().exit();
 
     // Remove the layer from the current layers array
     let layerToRemove = this._findActiveLayerDefinition(layerIdentifier);
     let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
     this.timelineCurrentLayers.splice(layerIndex, 1);
-    console.log(this.timelineCurrentLayers);
 
     this._calculateHeights();
     this.updateLayerDateExtent();
@@ -379,7 +390,7 @@ export class Timeline {
       .select('.geona-timeline-y-axis-background')
       .attr('height', this.fullHeight);
 
-    this.timelineLayers.selectAll('.geona-timeline-layer')
+    this.timelineData.selectAll('.geona-timeline-layer')
       .attr('transform', (layer) => {
         // console.log(layer);
         let title = selectPropertyLanguage(layer.title);
@@ -396,8 +407,10 @@ export class Timeline {
         console.log(label);
       });
 
+    // Adjust the height of the today line
+    this.todayLine.attr('y2', this.dataHeight);
+
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
-    // FIXME Domain is wrong after removal (domain doesn't update for shorter remaining layer)
     this.selectorTool
       .attr('height', this.dataHeight)
       .attr('x', () => { // Change x position in case domain has changed
@@ -439,7 +452,7 @@ export class Timeline {
     this.timelineXAxisGroup.call(this.xAxis);
 
     // Adjust the positioning of the layer bars
-    this.timelineLayers.selectAll('.geona-timeline-layer-bar')
+    this.timelineData.selectAll('.geona-timeline-layer-bar')
       .attr('x', (layer) => {
         let allDates = layer.dimensions.time.values;
         let startDate = allDates[0];
@@ -454,12 +467,20 @@ export class Timeline {
 
     // TODO make it only redraw if the zoom level changed, rather than if it was purely a pan
     // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-    this.timelineLayers.selectAll('.geona-timeline-layer-time-marker')
+    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
       .remove().exit();
     // Add time markers back
     for (let layer of this.timelineCurrentLayers) {
       this._addTimeStepMarkers(layer, layer.dimensions.time.values);
     }
+
+    this.todayLine // TODO do we want it to constantly update - if so, I think we should do a setInterval()
+      .attr('x1', () => {
+        return this.xScale(this.todayDate);
+      })
+      .attr('x2', () => {
+        return this.xScale(this.todayDate);
+      });
 
     // Adjust positioning of the selector tool
     this.selectorTool
