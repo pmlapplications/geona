@@ -8,15 +8,19 @@ import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
 
 /**
- *
+ * An SVG timeline, built using D3 version 4.
+ * Used to select times for layers on the map.
  */
 export class Timeline {
   // TODO transfer all css (e.g. colours) into other file
-  // TODO comments
   /**
+   * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
-   * @param {*} timePanel
-   * @param {*} settings
+   * @param {TimePanel} timePanel An instance of a TimePanel which the Timeline will be displayed within.
+   * @param {Object}    settings  A collection of settings which affect the Timeline.
+   *   @param {String}  settings.elementId         The id of the element into which the Timeline will be inserted.
+   *   @param {Object}  [settings.timelineMargins] The margins in px (top, right, bottom, left) around the timeline.
+   *   @param {Boolean} [settings.animateSelector] If true, the selector will animate between positions on the timeline.
    */
   constructor(timePanel, settings) {
     this.timePanel = timePanel;
@@ -63,82 +67,87 @@ export class Timeline {
         bottom: 0,
       },
     };
-    /** @type {Object} Default options with custom settings if defined */
-    this.options = Object.assign({}, defaultOptions, settings); // TODO write full list of options that can be passed in
+    /** @type {Object} @desc Default options with custom settings if defined */
+    this.options = Object.assign({}, defaultOptions, settings);
 
-    /** @type {Number} CONST - The pixel height for a layer on the timeline */
+    /** @type {Number} @desc CONST - The pixel height for a layer on the timeline */
     this.LAYER_HEIGHT = 10;
-    /** @type {Number} CONST - The pixel height for the padding between layers */
+    /** @type {Number} @desc CONST - The pixel height for the padding between layers */
     this.LAYER_PADDING = 0.25;
-    /** @type {Number} CONST - The pixel height needed to make room for the x-axis */
+    /** @type {Number} @desc CONST - The pixel height needed to make room for the x-axis */
     this.X_AXIS_LABEL_HEIGHT = 25;
-    /** @type {Number} CONST - The pixel width needed to make room for the y-axis */
+    /** @type {Number} @desc CONST - The pixel width needed to make room for the y-axis */
     this.Y_AXIS_LABEL_WIDTH = 138;
-    /** @type {Number} CONST - The vertical positioning of the selector tool */
+    /** @type {Number} @desc CONST - The vertical positioning of the selector tool */
     this.SELECTOR_TOOL_Y = 1;
-    /** @type {Number} CONST - The width of the selector tool */
+    /** @type {Number} @desc CONST - The width of the selector tool */
     this.SELECTOR_TOOL_WIDTH = 10;
-    /** @type {Number} CONST - The x-axis radius of the ellipse used to round the edges of the selector tool */
+    /** @type {Number} @desc CONST - The x-axis radius of the ellipse used to round the edges of the selector tool */
     this.SELECTOR_TOOL_RX = 6;
-    /** @type {Number} CONST - The y-axis radius of the ellipse used to round the edges of the selector tool */
+    /** @type {Number} @desc CONST - The y-axis radius of the ellipse used to round the edges of the selector tool */
     this.SELECTOR_TOOL_RY = 6;
 
-    /** @type {Array} The currently active layer definitions shown on the timeline */
+    /** @type {Array} @desc The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
 
-    /** @type {Number} The width of the whole svg element created for the timeline */
+    /** @type {Number} @desc The width of the whole svg element created for the timeline */
     this.fullWidth = undefined;
-    /** @type {Number} The width of only the section of the svg which contains the layers */
+    /** @type {Number} @desc The width of only the section of the svg which contains the layers */
     this.dataWidth = undefined;
-    /** @type {Number} The height of the whole svg element created for the timeline */
+    /** @type {Number} @desc The height of the whole svg element created for the timeline */
     this.fullHeight = undefined;
-    /** @type {Number} The height of only the section of the svg which contains the layers */
+    /** @type {Number} @desc The height of only the section of the svg which contains the layers */
     this.dataHeight = undefined;
 
     this._calculateWidths();
     this._calculateHeights();
 
-    /** @type {Number} The minimum spacing ratio between x-axis labels */
+    /** @type {Number} @desc The minimum spacing ratio between x-axis labels */
     this.xAxisTicks = this.dataWidth / 160; // More information can be found on the Geona wiki
 
-    // Set the scale for the xAxis to use
+    /** @type {d3.scaleTime} @desc The scale to use for the x-axis - translates px to date */
     this.xScale = d3.scaleTime()
       .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
       .domain([
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
-    this.xScale2 = d3.scaleTime() // TODO is there any alternative to this? Maybe just make it in the zoom bit? But how would it update?
+    this.xScale2 = d3.scaleTime() // TODO is there any alternative to this? Maybe create a new one in zoom, with the properties taken from this one (using getters etc.)?
       .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
       .domain([
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
 
+    /** @type {d3.axisBottom} @desc The x-axis which is displayed underneath the timeline data */
     this.xAxis = d3.axisBottom(this.xScale) // TODO clickable timeline labels
       .ticks(this.xAxisTicks)
       .tickFormat(getDateFormat);
 
+    /** @type {d3.scaleBand} @desc The scale to use for the y-axis - translates px to layer title */
     this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
       .range([0, this.dataHeight])
       .paddingInner(this.LAYER_PADDING);
 
+    /** @type {d3.axisBottom} @desc The y-axis which is displayed to the left of the timeline data */
     this.yAxis = d3.axisRight(this.yScale)
       .ticks(this.timelineCurrentLayers.length)
       .tickSize(0);
 
-    let zoom = d3.zoom()
-      .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
-        this.zoom();
-      });
-
+    /** @type {Object} @desc The minimum and maximum dates after checking every layer on the timeline */
     this.layerDateExtent = { // Set to the domain for default
       min: this.xScale.domain()[0], // TODO make everything either a string or a date in storage
       max: this.xScale.domain()[1],
     };
 
-    // Selects the main element to insert the timeline elements into
-    this.timeline = d3.select('#' + this.options.elementId)
+    /** @type {d3.zoom} @desc The zoom behaviour to be used for panning and zooming the timeline data */
+    let zoom = d3.zoom()
+      .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
+        this.zoom();
+      });
+
+    /** @type {SVGElement} @desc The main SVG element used for the timeline */
+    this.timeline = d3.select('#' + this.options.elementId) // Selects the main element to insert the timeline into
       .append('svg')
       .attr('width', this.dataWidth + 1) // + 1 because the containing svg needs to be 1 px longer than inner elements
       .attr('height', this.dataHeight)
@@ -147,7 +156,7 @@ export class Timeline {
         this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
       });
 
-    // Add a group and draw the x axis
+    /** @type {SVGElement} @desc The SVG g element which holds the x-axis elements */
     this.timelineXAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-x-axis')
       .attr('transform', 'translate(' + (this.Y_AXIS_LABEL_WIDTH) + ', ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
@@ -159,24 +168,33 @@ export class Timeline {
         this._moveSelectorToDate(this.selectorDate); // FIXME the clickDate overrides this (maybe x-axis should be on top?)
       });
 
-    // Add a group and draw the y axis
+    /** @type {SVGElement} @desc The SVG g element which holds the y-axis elements */
     this.timelineYAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
       .call(this.yAxis);
-    this.timelineYAxisGroup.select('path.domain') // Styling for labels
+    this.timelineYAxisGroup.select('path.domain') // Removes y-axis line (for styling purposes)
       .style('display', 'none');
     this.timelineYAxisGroup // Adds white background to go behind labels
       .append('rect')
       .attr('class', 'geona-timeline-y-axis-background')
       .attr('width', this.Y_AXIS_LABEL_WIDTH)
-      .attr('height', this.fullHeight)
-      .attr('fill', '#FFFFFF');
-    // Add a group for the layer bars
+      .attr('height', this.fullHeight);
+
+    /** @type {SVGElement} @desc The SVG g element which holds the timeline data (layers) */
     this.timelineData = this.timeline.append('g')
       .attr('class', 'geona-timeline-data');
 
+    /** @type {d3.drag} @desc The drag behaviour to be used for dragging the selector tool */
+    let drag = d3.drag()
+      .on('drag', () => {
+        this.dragDate();
+      })
+      .on('end', () => {
+        this.triggerMapDateChange(this.selectorDate);
+      });
+    /** @type {String} @desc The date that the selector tool should be set to */
     this.selectorDate = '2010-06-01';
-
+    /** @type {SVGElement} @desc The SVG rect element which moves to show the currently selected date */
     this.selectorTool = this.timelineData.append('rect')
       .attr('cursor', 'e-resize')
       .attr('class', 'geona-timeline-selector-tool')
@@ -188,28 +206,19 @@ export class Timeline {
       .attr('height', this.dataHeight)
       .attr('rx', this.SELECTOR_TOOL_RX)
       .attr('ry', this.SELECTOR_TOOL_RY)
-      .call(
-        d3.drag()
-          .on('drag', () => {
-            this.dragDate();
-          })
-          .on('end', () => {
-            this.triggerMapDateChange(this.selectorDate);
-          })
-      );
+      .call(drag);
 
-    // Set initial options for the todayLine
+    /** @type {SVGElement} @desc The SVG line element which marks today's date */
     this.todayLine = this.timelineData
       .append('line')
       .attr('class', 'geona-timeline-today-line')
-      .attr('y1', 0)
-      .attr('stroke-width', 2)
-      .attr('stroke-dasharray', 2, 2);
+      .attr('y1', 0); // y2, x1, x2 are set when the first layer is added
 
-    this.todayDate = new Date();
+    /** @type {Date} @desc Today's date - only changes on page reload */
+    this.todayDate = new Date(); // TODO Make string?
 
     // Set triggers and bindings
-    registerTriggers();
+    // registerTriggers();
     registerBindings(this.eventManager, this.timePanel);
   }
 
@@ -298,7 +307,7 @@ export class Timeline {
         this._trimYAxisLabels(yAxisLabels);
       })
       .attr('class', 'tippy')
-      .on('mouseover', () => {
+      .on('mouseover', () => { // Set a tooltip to appear with the full title if we mouseover the trimmed title
         tippy('.tippy', {
           arrow: true,
           placement: 'top-start',
@@ -310,9 +319,10 @@ export class Timeline {
         });
       });
 
+    // Update the height and position of the todayLine
     this.todayLine
       .attr('y2', this.dataHeight)
-      .attr('x1', () => {
+      .attr('x1', () => { // x1 and x2 are updated in case the xScale domain has been updated
         return this.xScale(this.todayDate);
       })
       .attr('x2', () => {
@@ -498,7 +508,7 @@ export class Timeline {
       this._addTimeStepMarkers(layer, layer.dimensions.time.values);
     }
 
-    this.todayLine // TODO do we want it to constantly update - if so, I think we should do a setInterval()
+    this.todayLine
       .attr('x1', () => {
         return this.xScale(this.todayDate);
       })
@@ -514,8 +524,8 @@ export class Timeline {
   }
 
   /**
-   *
-   * @param {HTMLElement} container
+   * Gets the date that was clicked, and calls the methods which update the time.
+   * @param {SVGElement} container The element which was clicked.
    */
   clickDate(container) {
     let clickXPosition = d3.mouse(container)[0];
@@ -525,7 +535,7 @@ export class Timeline {
   }
 
   /**
-   * Sets the layerDateExtent to the minimum and maximum dates of all timeline layers.
+   * Sets the layerDateExtent to the minimum and maximum dates after checking every timeline layer.
    */
   updateLayerDateExtent() {
     this.layerDateExtent = {};
@@ -543,7 +553,7 @@ export class Timeline {
   /**
    * Sets the timeline date to the specified date. If date is outside the layerDateExtent then it will be capped at the
    * layerDateExtent min or max.
-   * @param {String|Date} date
+   * @param {String|Date} date // TODO make definitely string
    */
   triggerMapDateChange(date) {
     let validDate = date;
@@ -576,7 +586,7 @@ export class Timeline {
   }
 
   /**
-   *
+   * Updates the position of the selector tool as it is dragged around.
    */
   dragDate() {
     let dragXPosition = this.xScale(new Date(this.selectorDate)) + d3.event.dx;

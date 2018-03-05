@@ -262,6 +262,8 @@
 
 .geona-timeline-today-line {
   stroke: #add8e6;
+  stroke-width: 2;
+  stroke-dasharray: 2, 2;
 }
 
 .geona-timeline-layer {
@@ -270,6 +272,10 @@
 
 .geona-timeline-layer-time-marker {
   stroke: $timeline-time-marker;
+}
+
+.geona-timeline-y-axis-background {
+  fill: #ffffff;
 }
 
 /*------------------------------------*\

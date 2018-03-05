@@ -30,10 +30,10 @@ export function getCache(req, res) {
  * Fetches LayerServers for all supported services.
  *
  * @param  {Object} req Contains information about the HTTP request
- *   @property {String}  req.params.url      URL for service request
- *   @property {String}  req.params.service  Explicitly-defined service type
- *   @property {Boolean} req.params.save     Whether to save the retrieved config to cache
- *   @property {Boolean} req.params.useCache Whether to retrieve from cache or to fetch from the web and overwrite
+ *   @param {String}  req.params.url      URL for service request
+ *   @param {String}  req.params.service  Explicitly-defined service type
+ *   @param {Boolean} req.params.save     Whether to save the retrieved config to cache
+ *   @param {Boolean} req.params.useCache Whether to retrieve from cache or to fetch from the web and overwrite
  *
  * @param  {Object} res Express response parameter
  *
