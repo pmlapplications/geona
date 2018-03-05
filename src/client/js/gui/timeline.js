@@ -1,5 +1,6 @@
 import 'jquery';
 import * as d3 from 'd3';
+import tippy from 'tippy.js';
 
 import {selectPropertyLanguage} from '../map_common';
 
@@ -11,10 +12,11 @@ import {registerBindings} from './timeline_bindings';
  */
 export class Timeline {
   // TODO transfer all css (e.g. colours) into other file
+  // TODO comments
   /**
-   * 
-   * @param {*} timePanel 
-   * @param {*} settings 
+   *
+   * @param {*} timePanel
+   * @param {*} settings
    */
   constructor(timePanel, settings) {
     this.timePanel = timePanel;
@@ -113,7 +115,7 @@ export class Timeline {
         new Date('2011-01-01'),
       ]);
 
-    this.xAxis = d3.axisBottom(this.xScale)
+    this.xAxis = d3.axisBottom(this.xScale) // TODO clickable timeline labels
       .ticks(this.xAxisTicks)
       .tickFormat(getDateFormat);
 
@@ -142,7 +144,7 @@ export class Timeline {
       .attr('height', this.dataHeight)
       .call(zoom)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
-        this.clickDate(this.timeline.node());
+        this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
       });
 
     // Add a group and draw the x axis
@@ -150,6 +152,13 @@ export class Timeline {
       .attr('class', 'geona-timeline-x-axis')
       .attr('transform', 'translate(' + (this.Y_AXIS_LABEL_WIDTH) + ', ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
       .call(this.xAxis);
+    this.timelineXAxisGroup.selectAll('.tick')
+      .on('click', (dateLabel) => {
+        this.selectorDate = dateLabel;
+        this.triggerMapDateChange(this.selectorDate);
+        this._moveSelectorToDate(this.selectorDate); // FIXME the clickDate overrides this (maybe x-axis should be on top?)
+      });
+
     // Add a group and draw the y axis
     this.timelineYAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
@@ -192,8 +201,8 @@ export class Timeline {
     // Set initial options for the todayLine
     this.todayLine = this.timelineData
       .append('line')
+      .attr('class', 'geona-timeline-today-line')
       .attr('y1', 0)
-      .attr('stroke', '#0000FF')
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', 2, 2);
 
@@ -266,7 +275,7 @@ export class Timeline {
         let endDateXPosition = this.xScale(Date.parse(allDates[allDates.length - 1]));
         return endDateXPosition - startDateXPosition;
       })
-      .attr('fill', '#b1a7bc').attr('shape-rendering', 'crispEdges')
+      .attr('shape-rendering', 'crispEdges')
       .attr('class', 'geona-timeline-layer-bar');
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
@@ -282,12 +291,23 @@ export class Timeline {
 
     // Trim the visible title to prevent overspill onto the layer bars
     this.timelineYAxisGroup.selectAll('text')
+      .attr('title', (title) => {
+        return title;
+      })
       .call((yAxisLabels) => {
         this._trimYAxisLabels(yAxisLabels);
       })
-      .on('mouseover', (label) => {
-        // TODO display full label (parameter) in popup bubble (the popup might interfere with panning the layerbars)
-        console.log(label);
+      .attr('class', 'tippy')
+      .on('mouseover', () => {
+        tippy('.tippy', {
+          arrow: true,
+          placement: 'top-start',
+          animation: 'fade',
+          duration: 100,
+          maxWidth: this.fullWidth + 'px',
+          size: 'small',
+          interactive: true,
+        });
       });
 
     this.todayLine
@@ -350,7 +370,6 @@ export class Timeline {
       })
       .attr('y1', 0)
       .attr('y2', this.LAYER_HEIGHT)
-      .attr('stroke', '#000000')
       .attr('stroke-width', '1')
       .attr('shape-rendering', 'crispEdges')
       .attr('class', 'geona-timeline-layer-time-marker');
@@ -402,9 +421,14 @@ export class Timeline {
       .call((yAxisLabels) => {
         this._trimYAxisLabels(yAxisLabels);
       })
-      .on('mouseover', (label) => {
-        // TODO display full label (parameter) in popup bubble (the popup might interfere with panning the layerbars)
-        console.log(label);
+      .on('mouseover', () => { // Refresh the full title tooltips
+        tippy('.tippy', {
+          arrow: true,
+          placement: 'top-start',
+          animation: 'fade',
+          duration: 100,
+          maxWidth: this.fullWidth + 'px',
+        });
       });
 
     // Adjust the height of the today line
@@ -490,8 +514,8 @@ export class Timeline {
   }
 
   /**
-   * 
-   * @param {HTMLElement} container 
+   *
+   * @param {HTMLElement} container
    */
   clickDate(container) {
     let clickXPosition = d3.mouse(container)[0];
@@ -519,7 +543,7 @@ export class Timeline {
   /**
    * Sets the timeline date to the specified date. If date is outside the layerDateExtent then it will be capped at the
    * layerDateExtent min or max.
-   * @param {String|Date} date 
+   * @param {String|Date} date
    */
   triggerMapDateChange(date) {
     let validDate = date;
@@ -552,7 +576,7 @@ export class Timeline {
   }
 
   /**
-   * 
+   *
    */
   dragDate() {
     let dragXPosition = this.xScale(new Date(this.selectorDate)) + d3.event.dx;
@@ -590,7 +614,7 @@ export class Timeline {
 
   /**
    * Edits the text of the y-axis labels to prevent overspill onto the layer bars.
-   * @param {*} yAxisLabels 
+   * @param {*} yAxisLabels
    */
   _trimYAxisLabels(yAxisLabels) {
     for (let textElement of yAxisLabels.nodes()) {

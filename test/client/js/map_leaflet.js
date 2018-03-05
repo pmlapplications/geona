@@ -143,9 +143,9 @@ describe('client/js/map_leaflet', function() {
         ],
         'dataLayers': [
           {
-            'identifier': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities',
+            'identifier': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
             'version': '1.3.0',
-            'url': 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
+            'url': 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
             'layers': [
               {
                 'identifier': 'Rrs_412',
@@ -846,7 +846,7 @@ describe('client/js/map_leaflet', function() {
                     ],
                   },
                 },
-                'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities',
+                'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
               },
               {
                 'identifier': 'Rrs_443',
@@ -1548,7 +1548,7 @@ describe('client/js/map_leaflet', function() {
                     ],
                   },
                 },
-                'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities',
+                'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
               },
               {
                 'identifier': 'Rrs_490',
@@ -2250,7 +2250,7 @@ describe('client/js/map_leaflet', function() {
                     ],
                   },
                 },
-                'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities',
+                'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
               },
             ],
           },
@@ -2355,9 +2355,9 @@ describe('client/js/map_leaflet', function() {
       let availableLayersArray = Object.keys(geona.map._availableLayers);
       expect(availableLayersArray.length).to.equal(8);
     });
-    it('should find five layerServers in _availableLayerServers', function() {
+    it('should find four layerServers in _availableLayerServers', function() {
       let availableLayerServersArray = Object.keys(geona.map._availableLayerServers);
-      expect(availableLayerServersArray.length).to.equal(5);
+      expect(availableLayerServersArray.length).to.equal(4);
     });
     it('should find attribution prefix', function() {
       expect(geona.map._map.attributionControl.options.prefix).to.equal('<a href="http://leafletjs.com/"> <img border="0" width="10px" height="10px" target="_blank" alt="Leaflet" src="https://raw.githubusercontent.com/Leaflet/Leaflet/master/docs/docs/images/favicon.ico"></a> Geona');
@@ -2383,7 +2383,7 @@ describe('client/js/map_leaflet', function() {
       // Borders
       rsgGeoserver = geona.map._availableLayerServers['https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities'];
       // Data
-      rsgCci = geona.map._availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities'];
+      rsgCci = geona.map._availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities'];
       rsgCci315 = geona.map._availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities'];
     });
   });
@@ -3196,9 +3196,10 @@ describe('client/js/map_leaflet', function() {
     let wmsLayers;
     before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      getLayerServer('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY', 'wms', false, false)
+      getLayerServer('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY', 'wms', false, false)
         .then(function(layers) {
           wmsLayers = layers;
+          console.log(wmsLayers);
           done();
         })
         .catch(function(err) {
@@ -3208,11 +3209,12 @@ describe('client/js/map_leaflet', function() {
     });
 
     it('should have found some layers', function() {
+      console.log(wmsLayers);
       expect(wmsLayers.layers.length).to.be.above(0);
     });
 
     it('should add one of the retrieved layers to the map', function() {
-      console.log(geona.map._mapLayers.getLayers());
+      console.log(wmsLayers);
       geona.map.addLayer(wmsLayers.layers[0], wmsLayers);
 
       let firstMapLayer = geona.map._mapLayers.getLayers()[0];

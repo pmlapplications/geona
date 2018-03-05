@@ -568,8 +568,9 @@ export class LMap extends GeonaMap {
 
     // Save the LayerServer if not already saved
     if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
-      delete geonaLayerServer.layers;
-      this._availableLayerServers[geonaLayerServer.identifier] = geonaLayerServer;
+      let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
+      delete layerServerCopy.layers;
+      this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
     }
 
     // Sets the map time if this is the first layer

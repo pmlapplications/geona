@@ -118,7 +118,7 @@ function parse1_0(url, capabilities) {
             if (provAddress.country) {
               serverConfig.service.contactInformation.address.country = provAddress.country;
             }
-            // Due to the way unmarshalling works, some undefined values do not return as falsy. 
+            // Due to the way unmarshalling works, some undefined values do not return as falsy.
             if (Object.keys(serverConfig.service.contactInformation.address).length === 0) {
               serverConfig.service.contactInformation.address = undefined;
             }
@@ -312,12 +312,12 @@ function parse1_0(url, capabilities) {
 
   let layerMatrix = capabilities.contents.tileMatrixSet;
   if (layerMatrix) {
-    // Sometimes the bounding box data is stored in the TileMatrixSet, so we need to populate the bounding box 
-    // of the layers here instead 
+    // Sometimes the bounding box data is stored in the TileMatrixSet, so we need to populate the bounding box
+    // of the layers here instead
     if (!serverConfig.layers[0].boundingBox) {
       for (let layer of serverConfig.layers) {
         for (let tileMatrixSet of layer.tileMatrixSetLinks) {
-          // TODO If the layer has a link to the current tile matrix set AND there isn't already a bounding box, add the bounding box to the layer 
+          // TODO If the layer has a link to the current tile matrix set AND there isn't already a bounding box, add the bounding box to the layer
           for (let tileMatrixSetId of layerMatrix) {
             if (tileMatrixSet.tileMatrixSet === tileMatrixSetId.identifier.value) {
               console.log('Match');
@@ -479,7 +479,7 @@ function parseDimensions(dimensions) {
   if (dimensions !== undefined) {
     if (dimensions !== []) {
       for (let dimension of dimensions) {
-        // Contains all the information for one dimension 
+        // Contains all the information for one dimension
         let dimensionObject = {identifier: dimension.identifier.value};
         if (dimension.title) {
           dimensionObject.title = parseTitles(dimension.title);
@@ -497,7 +497,7 @@ function parseDimensions(dimensions) {
           dimensionObject.unitSymbol = dimension.unitSymbol;
         }
 
-        // Default is a mandatory property 
+        // Default is a mandatory property
         let dimDefault = dimension._default || dimension.default;
         dimensionObject.default = dimDefault;
 
@@ -505,7 +505,7 @@ function parseDimensions(dimensions) {
           dimensionObject.current = dimension.current;
         }
 
-        // Value is a mandatory property 
+        // Value is a mandatory property
         dimensionObject.value = dimension.value;
 
         dimensionsArray.push(dimensionObject);

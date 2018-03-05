@@ -29,8 +29,8 @@ export function parseWcsCapabilities(url) {
 
 /**
  * Parse a WCS DescribeCoverage from a url
- * @param {*} url 
- * @param {*} capabilities 
+ * @param {*} url
+ * @param {*} capabilities
  */
 function _parseWcsCoverage(url, capabilitiesXml) {
   return new Promise((resolve, reject) => {

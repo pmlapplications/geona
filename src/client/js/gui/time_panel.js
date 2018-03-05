@@ -129,27 +129,11 @@ export class TimePanel {
 
   /**
    * Changes the pikaday date without changing the map layers.
-   * @param {*} time 
+   * @param {*} time
    */
   pikadayUpdateTime(time) {
     this.pikaday.setDate(time, true); // true parameter prevents 'onSelect' action on pikaday from triggering
   }
-
-  // /**
-  //  * Changes current date and updates the map layers
-  //  * @param {*} date The date to set the map to
-  //  */
-  // setDate(date) {
-  //   this.parentDiv.find('.js-geona-time-panel-current-date')
-  //     .val(date);
-
-  //   // Update pikaday options so it displays correct time when next opened
-  //   this.pikaday.setDate(date);
-
-  //   // Update map layers
-  //   let utcDate = moment.utc(date);
-  //   this.geona.map.loadLayersToNearestValidTime(utcDate);
-  // }
 
   /**
    * Called when the timeline is used to change the time.

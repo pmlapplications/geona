@@ -271,9 +271,9 @@ export let client = {
           ],
         },
         {
-          identifier: 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities',
+          identifier: 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
           version: '1.3.0',
-          url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY',
+          url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
           layers: [
             {
               'identifier': 'Rrs_412',
@@ -968,7 +968,7 @@ export let client = {
                   ],
                 },
               },
-              'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.0-5day__wms_1.3.0_getcapabilities',
+              'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
             },
           ],
         },

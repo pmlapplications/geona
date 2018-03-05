@@ -86,26 +86,35 @@ export function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
           parserUrl = 'http://127.0.0.1:7890/utils/wmts/getLayers/' + encodeURIComponent(url);
           break;
       }
-      request(parserUrl, (err, response, body) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        let layerServer;
-        switch (protocol) {
-          case 'wms':
-            layerServer = new LayerServer(JSON.parse(body), filename);
-            break;
-          case 'wmts':
-            layerServer = new LayerServerWmts(JSON.parse(body), filename);
-            break;
-        }
-        layerServer = JSON.stringify(layerServer);
-        if (save === true) {
-          fs.writeFileSync(filepath, layerServer, 'utf8');
-        }
-        resolve(layerServer);
-      });
+      try {
+        request(parserUrl, (err, response, body) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          console.log('-----LOOK HERE-----');
+          // console.log(err);
+          // console.log(response);
+          console.log(body);
+          console.log(body.error);
+          let layerServer;
+          switch (protocol) {
+            case 'wms':
+              layerServer = new LayerServer(JSON.parse(body), filename);
+              break;
+            case 'wmts':
+              layerServer = new LayerServerWmts(JSON.parse(body), filename);
+              break;
+          }
+          layerServer = JSON.stringify(layerServer);
+          if (save === true) {
+            fs.writeFileSync(filepath, layerServer, 'utf8');
+          }
+          resolve(layerServer);
+        });
+      } catch (e) {
+        console.log(e);
+      }
     }
   });
 }
