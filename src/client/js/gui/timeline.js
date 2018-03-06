@@ -116,7 +116,7 @@ export class Timeline {
 
 
     /** @type {d3.zoom} @desc The zoom behaviour to be used for panning and zooming the timeline data */
-    this.d3zoom = d3.zoom()
+    let zoom = d3.zoom()
       .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       });
@@ -125,7 +125,7 @@ export class Timeline {
       .append('svg')
       .attr('width', this.dataWidth + 1) // + 1 because the containing svg needs to be 1 px longer than inner elements
       .attr('height', this.dataHeight)
-      .call(this.d3zoom)
+      .call(zoom)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
         this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
       });
@@ -458,28 +458,10 @@ export class Timeline {
    * Handles panning and zooming along the x axis. Called on 'zoom' event.
    */
   zoom() {
-    console.log('zzzzz');
-    console.log('domain');
-    console.log(this.xScale.domain());
-    console.log('points');
-    console.log(this.xScale(this.xScale.domain()[0]));
-    console.log(this.xScale(this.xScale.domain()[1]));
-    this.timelineData.selectAll('.geona-timeline-layer-bar')
-      .attr('x', (layer) => {
-        let allDates = layer.dimensions.time.values;
-        let startDate = allDates[0];
-        console.log('startDate');
-        console.log(this.xScale(Date.parse(startDate)));
-        return this.xScale(Date.parse(startDate));
-      });
     // We translate each layer along the x axis, and scale each layer horizontally
     // Update the domain based on the newly-transformed scale
     this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain()); // TODO see if there's a nice way of updating this.xScale2 around the place
-    console.log('domain');
-    console.log(this.xScale.domain());
-    console.log('points');
-    console.log(this.xScale(this.xScale.domain()[0]));
-    console.log(this.xScale(this.xScale.domain()[1]));
+
     // Update the x-axis display
     this.timelineXAxisGroup.call(this.xAxis);
 
@@ -488,8 +470,6 @@ export class Timeline {
       .attr('x', (layer) => {
         let allDates = layer.dimensions.time.values;
         let startDate = allDates[0];
-        console.log('startDate');
-        console.log(this.xScale(Date.parse(startDate)));
         return this.xScale(Date.parse(startDate));
       })
       .attr('width', (layer) => {
@@ -667,7 +647,7 @@ export class Timeline {
       .attr('width', this.dataWidth + 1); // + 1 because the containing svg needs to be 1 px longer than inner elements
 
     this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
-    this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
+    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // This line fixes the zoom alignment bug, but introduces the axis warping backwards in time bug (or, the layers warping forwards in time bug)
 
     this.xAxis.ticks(this.xAxisTicks);
     this.timelineXAxisGroup
@@ -709,8 +689,6 @@ export class Timeline {
       .attr('x', () => {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
       });
-
-    console.log(this.xScale.domain());
   }
 }
 
