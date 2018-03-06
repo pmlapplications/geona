@@ -272,6 +272,8 @@
 
 .geona-timeline-layer-time-marker {
   stroke: $timeline-time-marker;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
 }
 
 .geona-timeline-y-axis-background {
