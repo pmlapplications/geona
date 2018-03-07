@@ -37,7 +37,8 @@ export class TimePanel {
     // TODO i18n for the pikaday
     this.pikaday = new Pikaday(
       {
-        field: this.parentDiv.find('.js-geona-time-panel-current-date')[0],
+        field: this.parentDiv.find('.js-geona-time-panel-options-current-date')[0],
+        format: 'YYYY-MM-DD HH-mm', // FIXME
         onSelect: (date) => {
           this.pikadayChangeTime(date);
         },
@@ -51,7 +52,6 @@ export class TimePanel {
       }
     }
 
-
     registerTriggers(this.geona.eventManager, this.parentDiv);
     registerBindings(this.geona.eventManager, this);
   }
@@ -62,7 +62,7 @@ export class TimePanel {
   drawTimeline() {
     // Assign ID to this instance's timeline container
     let instanceId = this.parentDiv.attr('id');
-    this.parentDiv.find('.js-geona-time-panel-inner__timeline').attr('id', instanceId + '-timeline-container');
+    this.parentDiv.find('.js-geona-time-panel-timeline').attr('id', instanceId + '-timeline-container');
 
     this.timeline = new Timeline(this, {
       elementId: instanceId + '-timeline-container',
@@ -105,18 +105,21 @@ export class TimePanel {
   }
 
   /**
-   * Sets the min and max dates for the pikaday based on the timebar min and max
+   * Sets the min and max dates for the pikaday based on the active layers min and max.
+   * @param {String|Date} startDate The date to set as the minimum.
+   * @param {String|Date} endDate   The date to set as the maximum.
    */
-  setPikadayRange() {
-    // TODO read description and do it
+  setPikadayRange(startDate, endDate) {
+    this.pikaday.setMinDate(new Date(startDate));
+    this.pikaday.setMaxDate(new Date(endDate));
   }
 
   /**
-   * Changes current date, updates the timeline and updates the map layers
-   * @param {*} date The date to set the map to
+   * Changes current date, updates the timeline and updates the map layers.
+   * @param {String|Date} date The date to set the map to.
    */
   pikadayChangeTime(date) {
-    this.parentDiv.find('.js-geona-time-panel-current-date')
+    this.parentDiv.find('.js-geona-time-panel-options-current-date')
       .val(date);
 
     // Update map layers
@@ -129,7 +132,7 @@ export class TimePanel {
 
   /**
    * Changes the pikaday date without changing the map layers.
-   * @param {*} time
+   * @param {String|Date} time
    */
   pikadayUpdateTime(time) {
     this.pikaday.setDate(time, true); // true parameter prevents 'onSelect' action on pikaday from triggering
@@ -143,7 +146,7 @@ export class TimePanel {
   timelineChangeTime(time) {
     this.pikadayUpdateTime(time);
     // update buttons
-    this.parentDiv.find('.js-geona-time-panel-current-date').val(time);
+    this.parentDiv.find('.js-geona-time-panel-options-current-date').val(time);
     this.mapUpdateTime(time);
   }
 

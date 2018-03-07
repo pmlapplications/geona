@@ -13,9 +13,6 @@ import {registerBindings} from './timeline_bindings';
  */
 export class Timeline {
   // TODO redraw on window resize
-  // TODO set initial zoom to have optional padding using this.options
-  // TODO move duplicated code into a 'redrawLayers' method or something
-  // FIXME change all Date.parse() to .getTime()
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -29,14 +26,16 @@ export class Timeline {
   constructor(timePanel, settings) {
     this.timePanel = timePanel;
     this.parentDiv = timePanel.parentDiv;
+    this.geona = timePanel.geona;
     this.eventManager = timePanel.geona.eventManager;
 
+    // Default options will be merged with the settings parameter
     let defaultOptions = {
       animateSelector: true,
       timelineMargins: {
         top: 5,
         left: 0,
-        right: 0,
+        right: 200,
         bottom: 0,
       },
       initialPaddingPercentage: {
@@ -53,6 +52,8 @@ export class Timeline {
     this.LAYER_PADDING = 0.25;
     /** @type {Number} @desc CONST - The pixel height needed to make room for the x-axis */
     this.X_AXIS_LABEL_HEIGHT = 25;
+    /** @type {Number} @desc CONST - The pixel spacing between the layers and the x-axis */
+    this.X_AXIS_SEPARATION = 5;
     /** @type {Number} @desc CONST - The pixel width needed to make room for the y-axis */
     this.Y_AXIS_LABEL_WIDTH = 138;
     /** @type {Number} @desc CONST - The vertical positioning of the selector tool */
@@ -86,13 +87,13 @@ export class Timeline {
 
     /** @type {d3.scaleTime} @desc The scale to use for the x-axis - translates px to date */
     this.xScale = d3.scaleTime()
-      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
+      .range([this.Y_AXIS_LABEL_WIDTH, this.fullWidth])
       .domain([
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
     this.xScale2 = d3.scaleTime() // TODO is there any alternative to this? Maybe create a new one in zoom, with the properties taken from this one (using getters etc.)?
-      .range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth])
+      .range([this.Y_AXIS_LABEL_WIDTH, this.fullWidth])
       .domain([
         new Date('2010-01-01'),
         new Date('2011-01-01'),
@@ -134,8 +135,12 @@ export class Timeline {
     /** @type {SVGElement} @desc The main SVG element used for the timeline */
     this.timeline = d3.select('#' + this.options.elementId) // Selects the main element to insert the timeline into
       .append('svg')
-      .attr('width', this.dataWidth + 1) // + 1 because the containing svg needs to be 1 px longer than inner elements
-      .attr('height', this.dataHeight)
+      .attr('width', this.fullWidth + 1) // +1 because the containing svg needs to be 1 px longer than inner elements
+      .attr('height', this.fullHeight)
+      .attr('transform', 'translate(' +
+        this.options.timelineMargins.left + ', ' +
+        this.options.timelineMargins.top +
+      ')')
       .call(zoom)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
         this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
@@ -145,7 +150,10 @@ export class Timeline {
     /** @type {SVGElement} @desc The SVG g element which holds the x-axis elements */
     this.timelineXAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-x-axis')
-      .attr('transform', 'translate(' + (this.Y_AXIS_LABEL_WIDTH) + ', ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
+      .attr('transform', 'translate(' +
+        (this.Y_AXIS_LABEL_WIDTH) + ', ' +
+        (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) +
+      ')')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
       .on('click', (dateLabel) => {
@@ -212,7 +220,7 @@ export class Timeline {
     });
 
     // registerTriggers(); // TODO move all triggers into here
-    registerBindings(this.eventManager, this.timePanel);
+    registerBindings(this.eventManager, this);
   }
 
   /**
@@ -260,20 +268,20 @@ export class Timeline {
       .attr('class', 'geona-timeline-layer-bar')
       .attr('x', (layer) => {
         let allDates = layer.dimensions.time.values;
-        return this.xScale(Date.parse(allDates[0]));
+        return this.xScale(new Date(allDates[0]).getTime());
       })
       .attr('y', 0) // Alignment is relative to the group, so 0 always refers to the top position of the group.
       .attr('height', this.LAYER_HEIGHT)
       .attr('width', (layer) => {
         let allDates = layer.dimensions.time.values;
-        let startDateXPosition = this.xScale(Date.parse(allDates[0]));
-        let endDateXPosition = this.xScale(Date.parse(allDates[allDates.length - 1]));
+        let startDateXPosition = this.xScale(new Date(allDates[0]).getTime());
+        let endDateXPosition = this.xScale(new Date(allDates[allDates.length - 1]).getTime());
         return endDateXPosition - startDateXPosition;
       });
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
     this.timelineXAxisGroup
-      .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
+      .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
     this.timelineYAxisGroup
       .call(this.yAxis)
@@ -342,7 +350,7 @@ export class Timeline {
 
     // We will check each date to see if it would be drawn on the same x pixel as another date
     for (let date of allDates) {
-      let xPixel = Math.floor(this.xScale(Date.parse(date)));
+      let xPixel = Math.floor(this.xScale(new Date(date).getTime()));
       if (!uniquePixels.has(xPixel)) {
         // This pixel is currently free, so we will draw a line for this date
         uniquePixels.add(xPixel);
@@ -356,11 +364,11 @@ export class Timeline {
       .enter().append('line')
       .attr('class', 'geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
-        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
       })
       .attr('x2', (date) => {
-        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
       })
       .attr('y1', 0)
@@ -392,7 +400,7 @@ export class Timeline {
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
     this.timelineXAxisGroup
-      .attr('transform', 'translate(0, ' + (this.fullHeight - this.X_AXIS_LABEL_HEIGHT) + ')')
+      .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
     this.timelineYAxisGroup
       .call(this.yAxis)
@@ -457,12 +465,12 @@ export class Timeline {
 
     // Update the domain
     this.xScale.domain([
-      Date.parse(allDates[0]) - leftPadding,
-      Date.parse(allDates[allDates.length - 1]) + rightPadding,
+      new Date(allDates[0]).getTime() - leftPadding,
+      new Date(allDates[allDates.length - 1]).getTime() + rightPadding,
     ]);
     this.xScale2.domain([
-      Date.parse(allDates[0]) - leftPadding,
-      Date.parse(allDates[allDates.length - 1]) + rightPadding,
+      new Date(allDates[0]).getTime() - leftPadding,
+      new Date(allDates[allDates.length - 1]).getTime() + rightPadding,
     ]);
   }
 
@@ -471,10 +479,10 @@ export class Timeline {
    * Updates the dataWidth and fullWidth variables to keep the correct proportions for the window size.
    */
   _calculateWidths() {
-    this.dataWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
-      this.options.timelineMargins.left - this.options.timelineMargins.right -
-      this.Y_AXIS_LABEL_WIDTH;
-    this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width();
+    this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
+      this.options.timelineMargins.left - this.options.timelineMargins.right;
+
+    this.dataWidth = this.fullWidth - this.Y_AXIS_LABEL_WIDTH;
 
     this.xAxisTicks = this.dataWidth / 160; // More information can be found on the Geona wiki
   }
@@ -485,9 +493,7 @@ export class Timeline {
    */
   _calculateHeights() {
     this.dataHeight = this.LAYER_HEIGHT * this.timelineCurrentLayers.length;
-    this.fullHeight = this.dataHeight +
-      this.options.timelineMargins.top + this.options.timelineMargins.bottom +
-      this.X_AXIS_LABEL_HEIGHT;
+    this.fullHeight = this.dataHeight + this.X_AXIS_LABEL_HEIGHT;
   }
 
   /**
@@ -506,13 +512,13 @@ export class Timeline {
       .attr('x', (layer) => {
         let allDates = layer.dimensions.time.values;
         let startDate = allDates[0];
-        return this.xScale(Date.parse(startDate));
+        return this.xScale(new Date(startDate).getTime());
       })
       .attr('width', (layer) => {
         let allDates = layer.dimensions.time.values;
         let startDate = allDates[0];
         let endDate = allDates[allDates.length - 1];
-        return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
+        return this.xScale(new Date(endDate).getTime()) - this.xScale(new Date(startDate).getTime());
       });
 
     // Check if we have zoomed - if we have we must redraw the time markers
@@ -622,7 +628,8 @@ export class Timeline {
       return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
     });
 
-    // TODO update current date box as we drag
+    // Update current date box as we drag
+    this.eventManager.trigger('timePanel.pikadayUpdateTime', new Date(dragXDate));
   }
 
   /**
@@ -666,13 +673,13 @@ export class Timeline {
       .attr('x', (layer) => {
         let allDates = layer.dimensions.time.values;
         let startDate = allDates[0];
-        return this.xScale(Date.parse(startDate));
+        return this.xScale(new Date(startDate).getTime());
       })
       .attr('width', (layer) => {
         let allDates = layer.dimensions.time.values;
         let startDate = allDates[0];
         let endDate = allDates[allDates.length - 1];
-        return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
+        return this.xScale(new Date(endDate).getTime()) - this.xScale(new Date(startDate).getTime());
       });
   }
 
@@ -697,11 +704,11 @@ export class Timeline {
   _translateTimeMarkers() {
     this.timelineData.selectAll('.geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
-        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
       })
       .attr('x2', (date) => {
-        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
       });
   }
@@ -778,7 +785,7 @@ export class Timeline {
     this._calculateWidths();
 
     this.timeline
-      .attr('width', this.dataWidth + 1); // + 1 because the containing svg needs to be 1 px longer than inner elements
+      .attr('width', this.fullWidth + 1); // +1 because the containing svg needs to be 1 px longer than inner elements
 
     this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
     // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME This line fixes the zoom alignment bug, but introduces the axis warping backwards in time bug (or, the layers warping forwards in time bug)
@@ -818,4 +825,19 @@ function getDateFormat(date) {
   } else {
     return d3.timeFormat('%b %Y')(date);
   }
+}
+
+/**
+ * Deeply assigns two objects into a new object, with the second object taking priority.
+ * Deep assignment means that nested objects will be combined as well, instead of the default
+ * Object.assign() behaviour where only the top-level properties are combined.
+ * @param {*} object1
+ * @param {*} object2
+ * @return {Object} Combined object
+ */
+function deepAssign(object1, object2) {
+  // TODO finish me
+  let newObject = object1;
+
+  return newObject;
 }

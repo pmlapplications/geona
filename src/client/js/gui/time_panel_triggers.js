@@ -14,7 +14,7 @@ export function registerTriggers(eventManager, parentDiv) {
   });
 
   // Show Pikaday widget
-  parentDiv.find('.js-geona-time-panel-current-date')
+  parentDiv.find('.js-geona-time-panel-options-current-date')
     .click(() => {
       eventManager.trigger('timePanel.showPikaday');
     });

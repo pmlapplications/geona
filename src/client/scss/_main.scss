@@ -203,35 +203,30 @@
   width: 100%;
   height: auto;
   background-color: #fff;
+  padding: 5px;
 }
 
-.geona-time-panel-heading{
+.geona-time-panel__heading{
   font-size: 15px;
 }
 
-.geona-time-panel-description{
+.geona-time-panel__description{
   font-size: 13px;
 }
 
-.geona-time-panel-inner__labels{
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: inline-block;
-  width: 150px;
-}
-
-.geona-time-panel-inner__timebar{
-  width: calc(100% - 300px);
-}
-
-.geona-time-panel-inner__options{
+.geona-time-panel-options{
   width: 180px;
   top: -19px;
   right: -5px;
+  display: inline-block;
 }
 
-.geona-time-panel-control{
+.geona-time-panel-timeline {
+  width: auto;
+  display: inline-block;
+}
+
+.geona-time-panel-options-next-prev-control{
   background-color: #b1a7bc;
   color: #fff;
   cursor: pointer;
@@ -241,7 +236,7 @@
   display: inline-block;
 }
 
-.geona-time-panel-current-date{
+.geona-time-panel-options-current-date{
   padding-left: 10px;
   width: 100%;
   height: 35px;

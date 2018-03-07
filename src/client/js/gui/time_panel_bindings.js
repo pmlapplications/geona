@@ -26,4 +26,14 @@ export function registerBindings(eventManager, timePanel) {
   eventManager.bind('timePanel.hidePikaday', () => {
     timePanel.hidePikaday();
   });
+
+  // Change the non-timeline elements
+  eventManager.bind('timePanel.timelineChangeTime', (time) => {
+    timePanel.timelineChangeTime(time);
+  });
+
+  // Update the pikaday display
+  eventManager.bind('timePanel.pikadayUpdateTime', (time) => {
+    timePanel.pikadayUpdateTime(time);
+  });
 }
