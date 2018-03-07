@@ -24,6 +24,7 @@ export class Timeline {
    *   @param {Object}  [settings.initialPaddingPercentage] The % to pad each side of the first layer bar.
    */
   constructor(timePanel, settings) {
+    window.deepAssign = deepAssign;
     this.timePanel = timePanel;
     this.parentDiv = timePanel.parentDiv;
     this.geona = timePanel.geona;
@@ -832,12 +833,43 @@ function getDateFormat(date) {
  * Deep assignment means that nested objects will be combined as well, instead of the default
  * Object.assign() behaviour where only the top-level properties are combined.
  * @param {*} object1
- * @param {*} object2
+ * @param {*} args
  * @return {Object} Combined object
  */
-function deepAssign(object1, object2) {
-  // TODO finish me
+function deepAssign(object1, ...args) {
+  // Check for circular references
+  for (let arg of args) {
+    try {
+      JSON.stringify(arg);
+    } catch (e) {
+      if (e instanceof TypeError) {
+        throw new Error('Cannot deep assign object with circular reference!');
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  // Objects are safe, we can proceed
+  // 
   let newObject = object1;
+
+  let object2 = args[0];
+
+  // Check to see if we need to recurse
+  if (args.length > 1) {
+    object2 = deepAssign(args);
+  }
+
+  //
+  for (let key of Object.keys(object2)) {
+    if (typeof key === 'object' && key !== null && key.length === undefined && !(key instanceof Date)) {
+      // Probably a normal object - recurse
+      object1.key = deepAssign(object1.key, object2.key);
+    } else {
+      object1.key = object2.key;
+    }
+  }
 
   return newObject;
 }
