@@ -127,6 +127,10 @@ export class Timeline {
       .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       });
+
+    /** @type {Number} @desc Used in this.zoom() to determine whether we should redraw time markers */
+    this.previousZoomScale = 1;
+
     /** @type {SVGElement} @desc The main SVG element used for the timeline */
     this.timeline = d3.select('#' + this.options.elementId) // Selects the main element to insert the timeline into
       .append('svg')
@@ -175,8 +179,10 @@ export class Timeline {
       .on('end', () => {
         this.triggerMapDateChange(this.selectorDate);
       });
+
     /** @type {String} @desc The date that the selector tool should be set to */
     this.selectorDate = '2010-06-01';
+
     /** @type {SVGElement} @desc The SVG rect element which moves to show the currently selected date */
     this.selectorTool = this.timelineData.append('rect')
       .attr('class', 'geona-timeline-selector-tool')
@@ -196,11 +202,12 @@ export class Timeline {
       .append('line')
       .attr('class', 'geona-timeline-today-line')
       .attr('y1', 0); // y2, x1, x2 are set when the first layer is added
+
     /** @type {Date} @desc Today's date - only changes on page reload */
     this.todayDate = new Date(); // TODO Make string?
 
     // Set triggers and bindings
-    $(window).resize(() => {
+    $(window).resize(() => { // TODO move into triggers?
       this.resizeTimeline();
     });
 
@@ -508,28 +515,19 @@ export class Timeline {
         return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
       });
 
-    // TODO make it only redraw if the zoom level changed, rather than if it was purely a pan
-    // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
-      .remove().exit();
-    // Add time markers back
-    for (let layer of this.timelineCurrentLayers) {
-      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
+    // Check if we have zoomed - if we have we must redraw the time markers
+    if (d3.event.transform.k !== this.previousZoomScale) {
+      // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
+      this._redrawTimeMarkers();
+      // Save the zoom scale
+      this.previousZoomScale = d3.event.transform.k;
+    } else { // We only need to translate the markers
+      this._translateTimeMarkers();
     }
 
-    this.todayLine
-      .attr('x1', () => {
-        return this.xScale(this.todayDate);
-      })
-      .attr('x2', () => {
-        return this.xScale(this.todayDate);
-      });
-
-    // Adjust positioning of the selector tool
-    this.selectorTool
-      .attr('x', () => {
-        return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
-      });
+    // Adjust positioning of today line and selector tool
+    this._translateTodayLine();
+    this._translateSelectorTool();
   }
 
   /**
@@ -632,9 +630,37 @@ export class Timeline {
    * @param {String[]} dates Contains two or more dates, sorted from least-to-most recent, that the view will be set to.
    */
   setView(dates) {
+    // The difference, in ms, between the current xScale domain dates
+    let previousDateSpacing = this.xScale.domain()[1].getTime() - this.xScale.domain()[0].getTime();
+    // The difference, in ms, between the new min and max dates
+    let newDateSpacing = new Date(dates[dates.length - 1]).getTime() - new Date(dates[0]).getTime();
+
     // Update domain
     this._updateXScaleDomain(dates, false);
 
+    // Update the x-axis
+    this.timelineXAxisGroup.call(this.xAxis);
+
+    // Adjust layer bars
+    this._resizeLayerBars();
+
+    // If the spacing is different, then the scale has changed, and we must redraw the time markers
+    if (newDateSpacing !== previousDateSpacing) {
+      this._redrawTimeMarkers();
+    } else { // We can just move the markers on the x-axis
+      this._translateTimeMarkers();
+    }
+
+    // Reposition today line and selector tool
+    this._translateTodayLine();
+    this._translateSelectorTool();
+  }
+
+  /**
+   * @private
+   * Resizes the layer bars. Used when the xScale changes (e.g. on zoom).
+   */
+  _resizeLayerBars() {
     // Adjust the positioning of the layer bars
     this.timelineData.selectAll('.geona-timeline-layer-bar')
       .attr('x', (layer) => {
@@ -648,7 +674,13 @@ export class Timeline {
         let endDate = allDates[allDates.length - 1];
         return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
       });
+  }
 
+  /**
+   * @private
+   * Redraws the time markers. Used when the xScale has zoomed in or out.
+   */
+  _redrawTimeMarkers() {
     // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
     this.timelineData.selectAll('.geona-timeline-layer-time-marker')
       .remove().exit();
@@ -656,7 +688,29 @@ export class Timeline {
     for (let layer of this.timelineCurrentLayers) {
       this._addTimeStepMarkers(layer, layer.dimensions.time.values);
     }
+  }
 
+  /**
+   * @private
+   * Moves the time markers on the x-axis. Used when the xScale has panned, and not zoomed.
+   */
+  _translateTimeMarkers() {
+    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
+      .attr('x1', (date) => {
+        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        return xPosition;
+      })
+      .attr('x2', (date) => {
+        let xPosition = Math.floor(this.xScale(Date.parse(date)));
+        return xPosition;
+      });
+  }
+
+  /**
+   * @private
+   * Moves the today line on the x-axis. Used when the xScale changes.
+   */
+  _translateTodayLine() {
     // Adjust positioning of the today line
     this.todayLine
       .attr('x1', () => {
@@ -665,15 +719,18 @@ export class Timeline {
       .attr('x2', () => {
         return this.xScale(this.todayDate);
       });
+  }
 
-    // Adjust positioning of the selector tool
+  /**
+   * @private
+   * Moves the selector tool on the x-axis. Used when the xScale changes.
+   */
+  _translateSelectorTool() {
+  // Adjust positioning of the selector tool
     this.selectorTool
       .attr('x', () => {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
       });
-
-    // Update the x-axis
-    this.timelineXAxisGroup.call(this.xAxis);
   }
 
   /**
@@ -730,42 +787,11 @@ export class Timeline {
     this.timelineXAxisGroup
       .call(this.xAxis);
 
-    // Adjust the positioning of the layer bars
-    this.timelineData.selectAll('.geona-timeline-layer-bar')
-      .attr('x', (layer) => {
-        let allDates = layer.dimensions.time.values;
-        let startDate = allDates[0];
-        return this.xScale(Date.parse(startDate));
-      })
-      .attr('width', (layer) => {
-        let allDates = layer.dimensions.time.values;
-        let startDate = allDates[0];
-        let endDate = allDates[allDates.length - 1];
-        return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
-      });
-
-    // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
-      .remove().exit();
-    // Add time markers back
-    for (let layer of this.timelineCurrentLayers) {
-      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
-    }
-
-    // Adjust positioning of the today line
-    this.todayLine
-      .attr('x1', () => {
-        return this.xScale(this.todayDate);
-      })
-      .attr('x2', () => {
-        return this.xScale(this.todayDate);
-      });
-
-    // Adjust positioning of the selector tool
-    this.selectorTool
-      .attr('x', () => {
-        return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
-      });
+    // Reposition data elements
+    this._resizeLayerBars();
+    this._redrawTimeMarkers();
+    this._translateTodayLine();
+    this._translateSelectorTool();
   }
 }
 
