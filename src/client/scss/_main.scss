@@ -258,6 +258,7 @@
 
 .geona-timeline-selector-tool {
   fill: $button-background;
+  cursor: e-resize;
 }
 
 .geona-timeline-today-line {
@@ -268,6 +269,10 @@
 
 .geona-timeline-layer {
   fill: $timeline-layer;
+}
+
+.geona-timeline-layer-bar {
+  shape-rendering: crispEdges;
 }
 
 .geona-timeline-layer-time-marker {

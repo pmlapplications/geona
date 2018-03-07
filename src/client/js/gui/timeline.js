@@ -12,8 +12,10 @@ import {registerBindings} from './timeline_bindings';
  * Used to select times for layers on the map.
  */
 export class Timeline {
-  // TODO transfer all css (e.g. colours) into other file
   // TODO redraw on window resize
+  // TODO set initial zoom to have optional padding using this.options
+  // TODO move duplicated code into a 'redrawLayers' method or something
+  // FIXME change all Date.parse() to .getTime()
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -22,6 +24,7 @@ export class Timeline {
    *   @param {String}  settings.elementId         The id of the element into which the Timeline will be inserted.
    *   @param {Object}  [settings.timelineMargins] The margins in px (top, left, right, bottom) around the timeline.
    *   @param {Boolean} [settings.animateSelector] If true, the selector will animate between positions on the timeline.
+   *   @param {Object}  [settings.initialPaddingPercentage] The % to pad each side of the first layer bar.
    */
   constructor(timePanel, settings) {
     this.timePanel = timePanel;
@@ -35,6 +38,10 @@ export class Timeline {
         left: 0,
         right: 0,
         bottom: 0,
+      },
+      initialPaddingPercentage: {
+        left: 10,
+        right: 10,
       },
     };
     /** @type {Object} @desc Default options with custom settings if defined */
@@ -172,7 +179,6 @@ export class Timeline {
     this.selectorDate = '2010-06-01';
     /** @type {SVGElement} @desc The SVG rect element which moves to show the currently selected date */
     this.selectorTool = this.timelineData.append('rect')
-      .attr('cursor', 'e-resize')
       .attr('class', 'geona-timeline-selector-tool')
       .attr('x', () => {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
@@ -180,7 +186,7 @@ export class Timeline {
       .attr('y', this.SELECTOR_TOOL_Y)
       .attr('width', this.SELECTOR_TOOL_WIDTH)
       .attr('height', this.dataHeight)
-      .attr('rx', this.SELECTOR_TOOL_RX)
+      .attr('rx', this.SELECTOR_TOOL_RX) // TODO move to css?
       .attr('ry', this.SELECTOR_TOOL_RY)
       .call(drag);
 
@@ -197,6 +203,7 @@ export class Timeline {
     $(window).resize(() => {
       this.resizeTimeline();
     });
+
     // registerTriggers(); // TODO move all triggers into here
     registerBindings(this.eventManager, this.timePanel);
   }
@@ -212,17 +219,10 @@ export class Timeline {
     this.updateLayerDateExtent();
 
     // Update xScale domain to show first layer's full extent
-    if (this.timelineCurrentLayers.length === 1) {
+    if (this.timelineCurrentLayers.length === 1) { // FIXME set to the layerdateextent if that's undefined thing
       let allDates = layerToAdd.dimensions.time.values;
       if (allDates.length > 1) {
-        this.xScale.domain([
-          Date.parse(allDates[0]),
-          Date.parse(allDates[allDates.length - 1]),
-        ]);
-        this.xScale2.domain([
-          Date.parse(allDates[0]),
-          Date.parse(allDates[allDates.length - 1]),
-        ]);
+        this._updateXScaleDomain(allDates);
       }
       if (layerToAdd.dimensions.time.default) {
         this.selectorDate = layerToAdd.dimensions.time.default;
@@ -248,9 +248,9 @@ export class Timeline {
         let title = selectPropertyLanguage(layer.title);
         return 'translate(0, ' + this.yScale(title) + ')';
       })
-
       // Within the g create a rect
       .append('rect')
+      .attr('class', 'geona-timeline-layer-bar')
       .attr('x', (layer) => {
         let allDates = layer.dimensions.time.values;
         return this.xScale(Date.parse(allDates[0]));
@@ -262,9 +262,7 @@ export class Timeline {
         let startDateXPosition = this.xScale(Date.parse(allDates[0]));
         let endDateXPosition = this.xScale(Date.parse(allDates[allDates.length - 1]));
         return endDateXPosition - startDateXPosition;
-      })
-      .attr('shape-rendering', 'crispEdges')
-      .attr('class', 'geona-timeline-layer-bar');
+      });
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
     this.timelineXAxisGroup
@@ -349,6 +347,7 @@ export class Timeline {
     this.timelineData.select('[data-layer-identifier = ' + layer.identifier + ']').selectAll('line')
       .data(filteredDates)
       .enter().append('line')
+      .attr('class', 'geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
         let xPosition = Math.floor(this.xScale(Date.parse(date)));
         return xPosition;
@@ -358,8 +357,7 @@ export class Timeline {
         return xPosition;
       })
       .attr('y1', 0)
-      .attr('y2', this.LAYER_HEIGHT)
-      .attr('class', 'geona-timeline-layer-time-marker');
+      .attr('y2', this.LAYER_HEIGHT);
   }
 
   /**
@@ -428,6 +426,37 @@ export class Timeline {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
       })
       .raise();
+  }
+
+  /**
+   * @private
+   *
+   * Sets the xScale domain based on the minimum and maximum (min index and max index) dates supplied.
+   * @param {Array}   allDates  Contains all dates, sorted from least-to-most recent, that we will use to set the view.
+   * @param {Boolean} [padding] If true, try to add the left and right padding from the options.
+   */
+  _updateXScaleDomain(allDates, padding = true) {
+    let leftPadding = 0;
+    let rightPadding = 0;
+
+    // Calculate the padding amount for each side
+    let paddingPercent = this.options.initialPaddingPercentage;
+    if (padding === true && (paddingPercent.left || paddingPercent.right)) {
+      let startDateMs = new Date(allDates[0]).getTime();
+      let endDateMs = new Date(allDates[allDates.length - 1]).getTime();
+      leftPadding = (endDateMs - startDateMs) * (paddingPercent.left / 100); // divide by 100 for percentage
+      rightPadding = (endDateMs - startDateMs) * (paddingPercent.right / 100);
+    }
+
+    // Update the domain
+    this.xScale.domain([
+      Date.parse(allDates[0]) - leftPadding,
+      Date.parse(allDates[allDates.length - 1]) + rightPadding,
+    ]);
+    this.xScale2.domain([
+      Date.parse(allDates[0]) - leftPadding,
+      Date.parse(allDates[allDates.length - 1]) + rightPadding,
+    ]);
   }
 
   /**
@@ -550,6 +579,8 @@ export class Timeline {
   }
 
   /**
+   * @private
+   *
    * Moves the selector tool to the date position on the x-axis.
    * @param {String} date The date to move the selector tool to.
    */
@@ -597,6 +628,55 @@ export class Timeline {
   }
 
   /**
+   * Programmatically zooms or pans so that the timeline view is set between the specified dates.
+   * @param {String[]} dates Contains two or more dates, sorted from least-to-most recent, that the view will be set to.
+   */
+  setView(dates) {
+    // Update domain
+    this._updateXScaleDomain(dates, false);
+
+    // Adjust the positioning of the layer bars
+    this.timelineData.selectAll('.geona-timeline-layer-bar')
+      .attr('x', (layer) => {
+        let allDates = layer.dimensions.time.values;
+        let startDate = allDates[0];
+        return this.xScale(Date.parse(startDate));
+      })
+      .attr('width', (layer) => {
+        let allDates = layer.dimensions.time.values;
+        let startDate = allDates[0];
+        let endDate = allDates[allDates.length - 1];
+        return this.xScale(Date.parse(endDate)) - this.xScale(Date.parse(startDate));
+      });
+
+    // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
+    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
+      .remove().exit();
+    // Add time markers back
+    for (let layer of this.timelineCurrentLayers) {
+      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
+    }
+
+    // Adjust positioning of the today line
+    this.todayLine
+      .attr('x1', () => {
+        return this.xScale(this.todayDate);
+      })
+      .attr('x2', () => {
+        return this.xScale(this.todayDate);
+      });
+
+    // Adjust positioning of the selector tool
+    this.selectorTool
+      .attr('x', () => {
+        return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
+      });
+
+    // Update the x-axis
+    this.timelineXAxisGroup.call(this.xAxis);
+  }
+
+  /**
    * @private
    *
    * Returns the layer in this.timelineCurrentLayers with the specified identifier, or undefined if not found.
@@ -638,22 +718,18 @@ export class Timeline {
    * Redraws the Timeline elements for a new window width. Called when the window resizes.
    */
   resizeTimeline() {
-    console.log('rrrrr');
-    console.log(this.xScale.domain());
-
     this._calculateWidths();
 
     this.timeline
       .attr('width', this.dataWidth + 1); // + 1 because the containing svg needs to be 1 px longer than inner elements
 
     this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
-    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // This line fixes the zoom alignment bug, but introduces the axis warping backwards in time bug (or, the layers warping forwards in time bug)
+    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME This line fixes the zoom alignment bug, but introduces the axis warping backwards in time bug (or, the layers warping forwards in time bug)
 
     this.xAxis.ticks(this.xAxisTicks);
     this.timelineXAxisGroup
       .call(this.xAxis);
 
-    // this.zoom();
     // Adjust the positioning of the layer bars
     this.timelineData.selectAll('.geona-timeline-layer-bar')
       .attr('x', (layer) => {
@@ -676,6 +752,7 @@ export class Timeline {
       this._addTimeStepMarkers(layer, layer.dimensions.time.values);
     }
 
+    // Adjust positioning of the today line
     this.todayLine
       .attr('x1', () => {
         return this.xScale(this.todayDate);
