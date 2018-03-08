@@ -14,6 +14,8 @@ import {registerBindings} from './timeline_bindings';
 export class Timeline {
   // TODO redraw on window resize
   // TODO write full list of controls - scroll, drag, click, tickClick, programmatic, keydown (and mention that the buttons and pikaday are in timepanel)
+  // TODO on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip (not in current portal)
+  // TODO x-axis line needs to be crispEdges (see firefox)
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -158,10 +160,8 @@ export class Timeline {
       ')')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
-      .on('click', (dateLabel) => {
+      .on('click', (dateLabel) => { // TODO check all of these and remove one at a time to see if it actually breaks (i.e. which click assignments are actually needed)
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
-        console.log('x-axis clicked');
-        console.log(dateLabel);
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
         this._moveSelectorToDate(this.selectorDate);
@@ -803,6 +803,7 @@ export class Timeline {
    * Redraws the Timeline elements for a new window width. Called when the window resizes.
    */
   resizeTimeline() {
+    // FIXME problem with margin after resize
     this._calculateWidths();
 
     this.timeline
