@@ -13,6 +13,7 @@ import {registerBindings} from './timeline_bindings';
  */
 export class Timeline {
   // TODO redraw on window resize
+  // TODO write full list of controls - scroll, drag, click, tickClick, programmatic, keydown (and mention that the buttons and pikaday are in timepanel)
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -101,7 +102,7 @@ export class Timeline {
       ]);
 
     /** @type {d3.axisBottom} @desc The x-axis which is displayed underneath the timeline data */
-    this.xAxis = d3.axisBottom(this.xScale) // TODO clickable timeline labels
+    this.xAxis = d3.axisBottom(this.xScale)
       .ticks(this.xAxisTicks)
       .tickFormat(getDateFormat);
 
@@ -158,9 +159,12 @@ export class Timeline {
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
       .on('click', (dateLabel) => {
+        d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
+        console.log('x-axis clicked');
+        console.log(dateLabel);
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate); // FIXME the clickDate overrides this (maybe x-axis should be on top?)
+        this._moveSelectorToDate(this.selectorDate);
       });
 
 
@@ -284,6 +288,14 @@ export class Timeline {
     this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
+    this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
+      .on('click', (dateLabel) => {
+        d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
+        this.selectorDate = dateLabel;
+        this.triggerMapDateChange(this.selectorDate);
+        this._moveSelectorToDate(this.selectorDate);
+      });
+
     this.timelineYAxisGroup
       .call(this.yAxis)
       .raise()
@@ -313,7 +325,7 @@ export class Timeline {
 
     // Update the height and position of the todayLine
     this.todayLine
-      .attr('y2', this.dataHeight)
+      .attr('y2', this.dataHeight + this.X_AXIS_SEPARATION) // Add the x-axis separation so we reach the axis
       .attr('x1', () => { // x1 and x2 are updated in case the xScale domain has been updated
         return this.xScale(this.todayDate);
       })
@@ -400,7 +412,7 @@ export class Timeline {
       }));
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
-    this.timelineXAxisGroup
+    this.timelineXAxisGroup // TODO should this go in its own method? (i.e. is it duplicated elsewhere?)
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
     this.timelineYAxisGroup
@@ -433,7 +445,7 @@ export class Timeline {
       });
 
     // Adjust the height of the today line
-    this.todayLine.attr('y2', this.dataHeight);
+    this.todayLine.attr('y2', this.dataHeight + this.X_AXIS_SEPARATION); // Add the separation so we reach the axis
 
     // Adjust the height of the selector tool for the new dataHeight and reorder to be in front of the new layer
     this.selectorTool
@@ -535,6 +547,15 @@ export class Timeline {
     // Adjust positioning of today line and selector tool
     this._translateTodayLine();
     this._translateSelectorTool();
+
+    // Reapply x-axis click event for any new label elements
+    this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
+      .on('click', (dateLabel) => {
+        d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
+        this.selectorDate = dateLabel;
+        this.triggerMapDateChange(this.selectorDate);
+        this._moveSelectorToDate(this.selectorDate);
+      });
   }
 
   /**
@@ -578,7 +599,6 @@ export class Timeline {
     } else if (date > this.layerDateExtent.max) {
       validDate = this.layerDateExtent.max;
     }
-    console.log(new Date(validDate));
     // TODO is trigger in correct way?
     this.eventManager.trigger('timePanel.timelineChangeTime', new Date(validDate));
   }
