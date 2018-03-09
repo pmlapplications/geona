@@ -2,7 +2,7 @@ import $ from 'jquery';
 import * as d3 from 'd3';
 import tippy from 'tippy.js';
 
-import {selectPropertyLanguage} from '../map_common';
+import {selectPropertyLanguage, findNearestValidTime} from '../map_common';
 
 // import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
@@ -16,6 +16,8 @@ export class Timeline {
   // TODO write full list of controls - scroll, drag, click, tickClick, programmatic, keydown (and mention that the buttons and pikaday are in timepanel)
   // TODO on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip (not in current portal)
   // TODO x-axis line needs to be crispEdges (see firefox)
+  // TODO should layers reorder if layers are reordered on GUI?
+  // TODO timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -171,7 +173,10 @@ export class Timeline {
     /** @type {SVGElement} @desc The SVG g element which holds the y-axis elements */
     this.timelineYAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-y-axis')
-      .call(this.yAxis);
+      .call(this.yAxis)
+      .on('click', () => { // Prevents the click functions from being triggered when y-axis is clicked
+        d3.event.stopPropagation();
+      });
     this.timelineYAxisGroup // Adds plain background to go behind labels
       .append('rect')
       .attr('class', 'geona-timeline-y-axis-background')
@@ -219,6 +224,8 @@ export class Timeline {
     /** @type {Date} @desc Today's date - only changes on page reload */
     this.todayDate = new Date(); // TODO Make string?
 
+    this._allLayerDates = new Set();
+
     // Set triggers and bindings
     $(window).resize(() => { // TODO move into triggers?
       this.resizeTimeline();
@@ -233,10 +240,20 @@ export class Timeline {
    * @param {Layer} layerToAdd A Geona layer definition
    */
   addTimelineLayer(layerToAdd) {
+    // Add this layer's times to the Set of all layer times
+    for (let date of layerToAdd.dimensions.time.values) {
+      this._allLayerDates.add(date);
+    }
+    // Sort the Set
+    let setCopy = Array.from(this._allLayerDates).sort();
+    this._allLayerDates = new Set(setCopy);
+
+
     // Increase timeline height to accommodate one new layer
     this.timelineCurrentLayers.push(layerToAdd);
     this._calculateHeights();
     this.updateLayerDateExtent();
+
 
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1) { // FIXME set to the layerdateextent if that's undefined thing
@@ -253,6 +270,7 @@ export class Timeline {
       .domain(this.timelineCurrentLayers.map((layer) => {
         return selectPropertyLanguage(layer.title);
       }));
+
 
     this.timelineLayerSelection = this.timelineData.selectAll('.geona-timeline-layer');
     // Create a g for each layer
@@ -319,7 +337,6 @@ export class Timeline {
           duration: 100,
           maxWidth: this.fullWidth + 'px',
           size: 'small',
-          interactive: true,
         });
       });
 
@@ -402,6 +419,16 @@ export class Timeline {
     let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
     this.timelineCurrentLayers.splice(layerIndex, 1);
 
+
+    // Regenerate the Set of layer times
+    let regeneratedSetDates = [];
+    for (let layer of this.timelineCurrentLayers) {
+      regeneratedSetDates = regeneratedSetDates.concat(layer.dimensions.time.values);
+    }
+    regeneratedSetDates.sort();
+    this._allLayerDates = new Set(regeneratedSetDates);
+
+
     this._calculateHeights();
     this.updateLayerDateExtent();
 
@@ -440,7 +467,7 @@ export class Timeline {
           animation: 'fade',
           duration: 100,
           maxWidth: this.fullWidth + 'px',
-          interactive: true,
+          size: 'small',
         });
       });
 
@@ -822,8 +849,192 @@ export class Timeline {
     this._translateTodayLine();
     this._translateSelectorTool();
   }
-}
 
+  /**
+   * @summary
+   * Traverses forward along the dates for the layers on the timeline, or of just one layer if specified, and
+   * returns the date found after the specified number of intervals, along with the titles for the layers which
+   * will change at that date.
+   *
+   * @description
+   * This method is used to find dates in the future. The method will look ahead from the current time by the amount of
+   * intervals specified - i.e. if the number of intervals was 1, the method would find the next time; if the number
+   * of intervals was 2, the method would find the time after next. The dates searched are usually the dates for all
+   * layers, but optionally a layer identifier can be specified, which means that only the times for that layer would
+   * be considered. Examples for these two behaviours can be found on the Geona wiki.
+   *
+   * Usually the method will return an Object containing a date property {String} and a layers property {String[]}. The
+   * date property contains the date in ISO 8601 format. The layers property contains the titles for all the layers
+   * whose times will be updated if the loadNearestValidTime method is called - for example, if two layers had a time
+   * value of '2015-01-01T00:00:00.000Z' then both those layers' titles would be in the layers property. However, if the
+   * current time is the maximum time in the list of dates, then the method will return undefined instead of an Object.
+   *
+   * @param  {Number} intervals         Number of times to traverse forwards before returning.
+   * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
+   * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
+   */
+  getFutureDate(intervals, layerIdentifier) {
+    // TODO write tests for this
+    let listOfDates = Array.from(this._allLayerDates);
+    // Only used if layerIdentifier has been specified
+    let layerTitle;
+
+    // If a layer has been supplied, we only want to traverse the times for that layer
+    if (layerIdentifier) {
+      // TODO find this function and import it (also move this sort of thing to a generic utils file)
+      for (let layer of this.timelineCurrentLayers) {
+        if (layer.identifier === layerIdentifier) {
+          layerTitle = selectPropertyLanguage(layer.title);
+          listOfDates = layer.dimensions.time.values;
+        }
+      }
+    }
+
+    let startingDate = findNearestValidTime(listOfDates, this.selectorDate);
+    let startingIndex;
+
+    // If the current time is greater than or equal to the maximum time in the list, there isn't a time to move to
+    if (startingDate >= listOfDates[listOfDates.length - 1] || startingDate === undefined) {
+      return undefined;
+    } else if (startingDate < listOfDates[0]) { // Will only occur with a selected layer
+      startingIndex = -1; // If the starting date is before the first time, we will increment to the 0th index upwards.
+    } else {
+      startingIndex = listOfDates.indexOf(startingDate);
+    }
+
+    // Find the date we will move to
+    let futureDate;
+    // Check that we can move by the number of intervals
+    if (listOfDates.length - 1 >= startingIndex + intervals) { // -1 so we are comparing the indices
+      futureDate = listOfDates[startingIndex + intervals];
+    } else { // Else, just set to the max date
+      futureDate = listOfDates[listOfDates.length - 1];
+    }
+
+    // Find the layers which will change
+    let changingLayers = [];
+
+    if (layerIdentifier) { // If we selected a layer we can just use the title we found earlier
+      changingLayers.push(layerTitle);
+    } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
+      for (let layer of this.timelineCurrentLayers) {
+        let values = layer.dimensions.time.values;
+        let dateIndex = values.findIndex((value) => {
+          // Required to avoid problems with date representation comparisons
+          return new Date(futureDate).getTime() === new Date(value).getTime();
+        });
+        if (dateIndex !== -1) {
+          let title = selectPropertyLanguage(layer.title);
+          changingLayers.push(title);
+        }
+      }
+    }
+
+    return {
+      date: futureDate,
+      layers: changingLayers,
+    };
+  }
+
+  /**
+   * @summary
+   * Traverses backwards along the dates for the layers on the timeline, or of just one layer if specified, and
+   * returns the date found after the specified number of intervals, along with the titles for the layers which
+   * will change at that date.
+   *
+   * @description
+   * This method is used to find dates in the past. The method will look back from the current time by the amount of
+   * intervals specified - i.e. if the number of intervals was 1, the method would find the previous time; if the number
+   * of intervals was 2, the method would find the time before that. The dates searched are usually the dates for all
+   * layers, but optionally a layer identifier can be specified, which means that only the times for that layer would
+   * be considered. Examples for these two behaviours can be found on the Geona wiki.
+   *
+   * Usually the method will return an Object containing a date property {String} and a layers property {String[]}. The
+   * date property contains the date in ISO 8601 format. The layers property contains the titles for all the layers
+   * whose times will be updated if the loadNearestValidTime method is called - for example, if two layers had a time
+   * value of '2015-01-01T00:00:00.000Z' then both those layers' titles would be in the layers property. However, if the
+   * current time is the maximum time in the list of dates, then the method will return undefined instead of an Object.
+   *
+   * @param  {Number} intervals         Number of times to traverse forwards before returning.
+   * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
+   *
+   * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
+   */
+  getPastDate(intervals, layerIdentifier) {
+    // TODO write tests for this
+    let listOfDates = Array.from(this._allLayerDates);
+    // Only used if layerIdentifier has been specified
+    let layerTitle;
+
+    // If a layer has been supplied, we only want to traverse the times for that layer
+    if (layerIdentifier) {
+      // TODO find this function and import it (also move this sort of thing to a generic utils file)
+      for (let layer of this.timelineCurrentLayers) {
+        if (layer.identifier === layerIdentifier) {
+          layerTitle = selectPropertyLanguage(layer.title);
+          listOfDates = layer.dimensions.time.values;
+        }
+      }
+    }
+    let startingDate;
+    // if (this.selectorDate > listOfDates[listOfDates.length - 1]) {
+    // startingDate =
+    // } else {
+    startingDate = findNearestValidTime(listOfDates, this.selectorDate);
+    // }
+    let startingIndex;
+
+    // If the current time is less than or equal to the minimum time in the list, there isn't a time to move to
+    if (startingDate <= listOfDates[0]) {
+      return undefined;
+    } else if (startingDate > listOfDates[listOfDates.length - 1]) { // Will only occur with a selected layer
+      startingIndex = listOfDates.length + 1; // If starting date is after the last time, we decrement to the last index downwards.
+    } else {
+      startingIndex = listOfDates.indexOf(startingDate);
+    }
+
+    // Find the date we will move to
+    let pastDate;
+    // Check that we can move by the number of intervals
+    if (startingIndex - intervals >= 0) {
+      pastDate = listOfDates[startingIndex - intervals];
+    } else { // Else, just set to the min date
+      pastDate = listOfDates[0];
+    }
+
+    // Find the layers which will change
+    let changingLayers = [];
+
+    if (layerIdentifier) { // If we selected a layer we can just use the title we found earlier
+      changingLayers.push(layerTitle);
+    } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
+      for (let layer of this.timelineCurrentLayers) {
+        let values = layer.dimensions.time.values;
+        // Functions required to avoid problems with date representation comparisons
+        let valueIndex = values.findIndex((value) => {
+          return new Date(pastDate).getTime() === new Date(value).getTime();
+        });
+        let setIndex = listOfDates.findIndex((value) => {
+          return new Date(pastDate).getTime() === new Date(value).getTime();
+        });
+        console.log(values);
+        console.log(valueIndex);
+        console.log(values[valueIndex + 1]);
+        console.log(this.selectorDate);
+        // If the past date is in the layer's time values AND this time value is not the closest one currently loaded
+        if (valueIndex !== -1 && new Date([setIndex + 1]) <= new Date(this.selectorDate)) {
+          let title = selectPropertyLanguage(layer.title);
+          changingLayers.push(title);
+        }
+      }
+    }
+
+    return {
+      date: pastDate,
+      layers: changingLayers,
+    };
+  }
+}
 /**
  * Selects the appropriate date format depending on the precision of the date.
  * @param {*} date String/Date?
