@@ -13,7 +13,7 @@ import proj4 from 'proj4';
 // let ol = openlayers;
 
 let ol;
-
+// FIXME I think that the whole map will fail to load if one layer fails, and the same if it stalls (e.g. EOX basemap will not load if CCI data is bad)
 /**
  * Class for an OpenLayers map.
  *
@@ -578,9 +578,9 @@ export class OlMap extends GeonaMap {
 
     // Selects the requested time, the closest to the map time, or the default layer time.
     if (options.requestedTime !== undefined) {
-      time = findNearestValidTime(geonaLayer, options.requestedTime);
+      time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
     } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-      time = findNearestValidTime(geonaLayer, this._mapTime);
+      time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
     } else if (options.modifier === 'hasTime') {
       if (geonaLayer.dimensions) {
         if (geonaLayer.dimensions.time) {
@@ -835,7 +835,7 @@ export class OlMap extends GeonaMap {
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
-      let time = findNearestValidTime(geonaLayer, requestedTime);
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, requestedTime);
       if (time === undefined) {
         // If the requested time is invalid for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
@@ -845,7 +845,7 @@ export class OlMap extends GeonaMap {
         this._mapTime = requestedTime;
         // TODO throw error?? But it might stop execution of whole loadLayersToNearestValidTime() method; use try/catch in that method?
         console.error('Time is outside the range of times for layer ' + layerIdentifier);
-      } else {
+      } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to its current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
         // We define the layer options so that only the time changes

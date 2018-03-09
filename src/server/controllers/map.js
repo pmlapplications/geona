@@ -92,11 +92,6 @@ export function getLayerServerFromCacheOrUrl(url, protocol, save, useCache) {
             reject(err);
             return;
           }
-          console.log('-----LOOK HERE-----');
-          // console.log(err);
-          // console.log(response);
-          console.log(body);
-          console.log(body.error);
           let layerServer;
           switch (protocol) {
             case 'wms':

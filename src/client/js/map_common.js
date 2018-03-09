@@ -147,42 +147,36 @@ export function getLayerServer(url, service, save = false, useCache = false) {
 
 /**
  * Gets the nearest possible time prior to or matching the requested time.
- * @param  {Layer}  geonaLayer    The Geona layer for the layer being changed.
- * @param  {String} requestedTime The requested time in ISO 8601 format.
- * @return {String}               The nearest valid time to the requested time.
+ * @param  {String[]} times         The list of times to get the time from.
+ * @param  {String}   requestedTime The requested time in ISO 8601 format.
+ *
+ * @return {String|undefined}       The nearest valid time to the requested time.
  */
-export function findNearestValidTime(geonaLayer, requestedTime) {
-  if (geonaLayer.dimensions !== undefined) {
-    if (geonaLayer.dimensions.time !== undefined) {
-      // We use Date objects for easy comparison
-      let sortedTimes = geonaLayer.dimensions.time.values.sort();
-      // We set this to the earliest as a starting point
-      let nearestValidTime = sortedTimes[0];
-      let dateNearestValidTime = new Date(sortedTimes[0]);
-      let dateLatestValidTime = new Date(sortedTimes[sortedTimes.length - 1]);
-      let dateRequestedTime = new Date(requestedTime);
+export function findNearestValidTime(times, requestedTime) {
+  // TODO remove the sort - map_libraries should sort instead
+  let sortedTimes = times.sort();
+  // We set this to the earliest as a starting point
+  let nearestValidTime = sortedTimes[0];
+  // We use Date objects for easy comparison
+  let dateNearestValidTime = new Date(sortedTimes[0]);
+  let dateLatestValidTime = new Date(sortedTimes[sortedTimes.length - 1]);
+  let dateRequestedTime = new Date(requestedTime);
 
-      // If the requested time is earlier than the earliest possible or latest possible
-      // time for this layer, return undefined
-      if (dateRequestedTime < dateNearestValidTime || dateRequestedTime > dateLatestValidTime) {
-        return undefined;
-      } else {
-        for (let currentTime of geonaLayer.dimensions.time.values) {
-          let dateCurrentTime = new Date(currentTime);
-          // Must match or be earlier than the requested time
-          if (dateCurrentTime <= dateRequestedTime && dateCurrentTime > dateNearestValidTime) {
-            nearestValidTime = currentTime;
-            dateNearestValidTime = new Date(currentTime);
-          }
-        }
-
-        return nearestValidTime;
-      }
-    } else {
-      throw new Error('Layer has no time dimension defined.');
-    }
+  // If the requested time is earlier than the earliest possible or later than the latest possible
+  // time for this layer, return undefined
+  if (dateRequestedTime < dateNearestValidTime || dateRequestedTime > dateLatestValidTime) {
+    return undefined;
   } else {
-    throw new Error('Layer has no dimension defined.');
+    for (let currentTime of times) {
+      let dateCurrentTime = new Date(currentTime);
+      // Must match or be earlier than the requested time
+      if (dateCurrentTime <= dateRequestedTime && dateCurrentTime > dateNearestValidTime) {
+        nearestValidTime = currentTime;
+        dateNearestValidTime = new Date(currentTime);
+      }
+    }
+
+    return nearestValidTime;
   }
 }
 

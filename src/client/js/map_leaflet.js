@@ -516,15 +516,13 @@ export class LMap extends GeonaMap {
 
         // Selects the requested time, the closest to the map time, or the default layer time.
         if (options.requestedTime !== undefined) {
-          time = findNearestValidTime(geonaLayer, options.requestedTime);
+          time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
         } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-          time = findNearestValidTime(geonaLayer, this._mapTime);
+          time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
         } else if (options.modifier === 'hasTime') {
-          if (geonaLayer.dimensions) {
-            if (geonaLayer.dimensions.time) {
-              time = geonaLayer.dimensions.time.default;
-              geonaLayer.dimensions.time.values.sort();
-            }
+          if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
+            time = geonaLayer.dimensions.time.default;
+            geonaLayer.dimensions.time.values.sort();
           }
         }
 
@@ -828,7 +826,7 @@ export class LMap extends GeonaMap {
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
-      let time = findNearestValidTime(geonaLayer, requestedTime);
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, requestedTime);
       if (time === undefined) {
         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
@@ -837,7 +835,7 @@ export class LMap extends GeonaMap {
         this._activeLayers[layerIdentifier].options.timeHidden = true;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
-      } else {
+      } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].options.zIndex;
 

@@ -3199,7 +3199,6 @@ describe('client/js/map_leaflet', function() {
       getLayerServer('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY', 'wms', false, false)
         .then(function(layers) {
           wmsLayers = layers;
-          console.log(wmsLayers);
           done();
         })
         .catch(function(err) {
@@ -3209,12 +3208,10 @@ describe('client/js/map_leaflet', function() {
     });
 
     it('should have found some layers', function() {
-      console.log(wmsLayers);
       expect(wmsLayers.layers.length).to.be.above(0);
     });
 
     it('should add one of the retrieved layers to the map', function() {
-      console.log(wmsLayers);
       geona.map.addLayer(wmsLayers.layers[0], wmsLayers);
 
       let firstMapLayer = geona.map._mapLayers.getLayers()[0];

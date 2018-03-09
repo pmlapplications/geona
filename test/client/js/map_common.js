@@ -54,25 +54,25 @@ describe('client/js/map_common', function() {
 
     it('should return 2015-03-03T00:00:00.000Z', function() {
       // Find exact time
-      let time = findNearestValidTime(geonaLayer, '2015-03-03T00:00:00.000Z');
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, '2015-03-03T00:00:00.000Z');
       expect(time).to.equal('2015-03-03T00:00:00.000Z');
     });
     it('should return 1997-01-01T00:00:00.000Z', function() {
       // Find nearest time below
-      let time = findNearestValidTime(geonaLayer, '1998-03-03T00:00:00.000Z');
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, '1998-03-03T00:00:00.000Z');
       expect(time).to.equal('1997-01-01T00:00:00.000Z');
     });
     it('should return 2001-05-05T00:00:00.000Z', function() {
       // Not go forwards in time, even when bordering a valid time
-      let time = findNearestValidTime(geonaLayer, '2008-08-07T00:00:00.000Z');
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, '2008-08-07T00:00:00.000Z');
       expect(time).to.equal('2001-05-05T00:00:00.000Z');
     });
     it('should return undefined because the requested time is too far in the past', function() {
-      let time = findNearestValidTime(geonaLayer, '1996-08-07T00:00:00.000Z');
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, '1996-08-07T00:00:00.000Z');
       expect(time).to.be.undefined;
     });
     it('should return undefined because the requested time is too far in the future', function() {
-      let time = findNearestValidTime(geonaLayer, '2200-08-07T00:00:00.000Z');
+      let time = findNearestValidTime(geonaLayer.dimensions.time.values, '2200-08-07T00:00:00.000Z');
       expect(time).to.be.undefined;
     });
   });
