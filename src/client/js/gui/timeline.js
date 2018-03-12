@@ -832,6 +832,7 @@ export class Timeline {
    * Redraws the Timeline elements for a new window width. Called when the window resizes.
    */
   resizeTimeline() {
+    // resources https://stackoverflow.com/questions/25875316/d3-preserve-scale-translate-after-resetting-range http://jsfiddle.net/xf3fk8hu/9/ https://stackoverflow.com/questions/32959056/responsive-d3-zoom-behavior
     // FIXME problem with margin after resize
     this._calculateWidths();
 
