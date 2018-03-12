@@ -815,6 +815,7 @@ export class LMap extends GeonaMap {
      * @param {String} requestedTime   The target time in ISO 8601 format.
      */
   loadNearestValidTime(layerIdentifier, requestedTime) {
+    // TODO set the layertime to undefined if out of bounds
     // We use time values from the Geona layer object
     let geonaLayer = this._availableLayers[layerIdentifier];
     if (geonaLayer === undefined) {
