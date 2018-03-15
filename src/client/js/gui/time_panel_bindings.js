@@ -38,30 +38,12 @@ export function registerBindings(eventManager, timePanel) {
   });
 
   // Show the tooltip for prev/next buttons
-  eventManager.bind('timePanel.buttonPrevFarPreviewTime', () => {
-    timePanel.buttonPrevFarPreviewTime();
-  });
-  eventManager.bind('timePanel.buttonPrevShortPreviewTime', () => {
-    timePanel.buttonPrevShortPreviewTime();
-  });
-  eventManager.bind('timePanel.buttonNextShortPreviewTime', () => {
-    timePanel.buttonNextShortPreviewTime();
-  });
-  eventManager.bind('timePanel.buttonNextFarPreviewTime', () => {
-    timePanel.buttonNextFarPreviewTime();
+  eventManager.bind('timePanel.buttonPreviewTime', (button) => {
+    timePanel.buttonPreviewTime(button);
   });
 
-  // Change the non-button elements
-  eventManager.bind('timePanel.buttonPrevFarChangeTime', () => {
-    timePanel.buttonPrevFarChangeTime();
-  });
-  eventManager.bind('timePanel.buttonPrevShortChangeTime', () => {
-    timePanel.buttonPrevShortChangeTime();
-  });
-  eventManager.bind('timePanel.buttonNextShortChangeTime', () => {
-    timePanel.buttonNextShortChangeTime();
-  });
-  eventManager.bind('timePanel.buttonNextFarChangeTime', () => {
-    timePanel.buttonNextFarChangeTime();
+  // Change the map layers and other elements, triggered by the buttons
+  eventManager.bind('timePanel.buttonChangeTime', (button) => {
+    timePanel.buttonChangeTime(button);
   });
 }

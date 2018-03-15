@@ -6,7 +6,6 @@ import {selectPropertyLanguage, findNearestValidTime} from '../map_common';
 
 // import {registerTriggers} from './timeline_triggers';
 import {registerBindings} from './timeline_bindings';
-import {start} from 'repl';
 
 /**
  * An SVG timeline, built using D3 version 4.
@@ -20,6 +19,7 @@ export class Timeline {
   // TODO should layers reorder if layers are reordered on GUI?
   // TODO timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
   // TODO classes do not have 'js' at the beginning
+  // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -225,7 +225,7 @@ export class Timeline {
     /** @type {Date} @desc Today's date - only changes on page reload */
     this.todayDate = new Date(); // TODO Make string?
 
-    // TODO write comment
+    /** @type {Set} @desc A Set of the dates from all layers, used for findFutureDate() and findPastDate() */
     this._allLayerDates = new Set();
 
     // Set triggers and bindings
@@ -233,7 +233,7 @@ export class Timeline {
       this.resizeTimeline();
     });
 
-    // registerTriggers(); // TODO move all triggers into here
+    // registerTriggers(); // TODO move all triggers into here?
     registerBindings(this.eventManager, this);
   }
 
@@ -876,7 +876,7 @@ export class Timeline {
    * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
    * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
    */
-  getFutureDate(intervals, layerIdentifier) {
+  findFutureDate(intervals, layerIdentifier) {
     // TODO write tests for this
     let listOfDates = Array.from(this._allLayerDates);
     // Only used if layerIdentifier has been specified
@@ -964,7 +964,7 @@ export class Timeline {
    *
    * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
    */
-  getPastDate(intervals, layerIdentifier) {
+  findPastDate(intervals, layerIdentifier) {
     // TODO write tests for this
     let listOfDates = Array.from(this._allLayerDates);
     // Only used if layerIdentifier has been specified
@@ -1050,22 +1050,6 @@ export class Timeline {
       date: pastDate,
       layers: changingLayers,
     };
-  }
-
-  loadFutureDate(intervals, layerIdentifier) {
-    let target = this.getFutureDate(intervals, layerIdentifier);
-    if (target !== undefined) {
-      this.selectorDate = target.date;
-      this._moveSelectorToDate(this.selectorDate);
-    }
-  }
-
-  loadPastDate(intervals, layerIdentifier) {
-    let target = this.getPastDate(intervals, layerIdentifier);
-    if (target !== undefined) {
-      this.selectorDate = target.date;
-      this._moveSelectorToDate(this.selectorDate);
-    }
   }
 }
 

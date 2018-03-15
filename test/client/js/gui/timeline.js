@@ -4,7 +4,7 @@ import i18next from 'i18next';
 
 import {load} from '../../../../src/client_loader/loader.js';
 
-import {getFutureDate, getPastDate} from '../../../../src/client/js/gui/timeline';
+import {findFutureDate, findPastDate} from '../../../../src/client/js/gui/timeline';
 
 chai.use(chaiHttp);
 let expect = chai.expect;
@@ -2328,7 +2328,7 @@ describe('client/js/test/gui/timeline', function() {
       done();
     });
   });
-  describe('getFutureDate', function() {
+  describe('findFutureDate', function() {
     before(function() {
 
     });

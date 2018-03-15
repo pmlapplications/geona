@@ -22,36 +22,36 @@ export function registerTriggers(eventManager, parentDiv) {
   // wreitme
   parentDiv.find('.js-geona-time-panel-options-prev-next__prev-far')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonPrevFarPreviewTime');
+      eventManager.trigger('timePanel.buttonPreviewTime', 'prev-far');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonPrevFarChangeTime');
+      eventManager.trigger('timePanel.buttonChangeTime', 'prev-far');
     });
 
   // wreitme
   parentDiv.find('.js-geona-time-panel-options-prev-next__prev-short')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonPrevShortPreviewTime');
+      eventManager.trigger('timePanel.buttonPreviewTime', 'prev-short');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonPrevShortChangeTime');
+      eventManager.trigger('timePanel.buttonChangeTime', 'prev-short');
     });
 
   // wreitme
   parentDiv.find('.js-geona-time-panel-options-prev-next__next-short')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonNextShortPreviewTime');
+      eventManager.trigger('timePanel.buttonPreviewTime', 'next-short');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonNextShortChangeTime');
+      eventManager.trigger('timePanel.buttonChangeTime', 'next-short');
     });
 
   // wreitme
   parentDiv.find('.js-geona-time-panel-options-prev-next__next-far')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonNextFarPreviewTime');
+      eventManager.trigger('timePanel.buttonPreviewTime', 'next-far');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonNextFarChangeTime');
+      eventManager.trigger('timePanel.buttonChangeTime', 'next-far');
     });
 }

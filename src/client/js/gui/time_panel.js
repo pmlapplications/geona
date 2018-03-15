@@ -14,7 +14,7 @@ import {registerBindings} from './time_panel_bindings';
  * Creates the GUI time panel.
  */
 export class TimePanel {
-  // TODO buton dates don't change when other methods change the timeline
+  // TODO keydown listeners
   /**
    * Creates the timeline depending on the config options.
    * @param {Gui} gui                      The Gui for this instance of Geona.
@@ -166,6 +166,10 @@ export class TimePanel {
     this.mapChangeTime(time);
   }
 
+  /**
+   * Changes the display of the timeline without changing the map layers or any other components.
+   * @param {String|Date} time
+   */
   timelineUpdateGraphic(time) {
     this.timeline._moveSelectorToDate(time);
   }
@@ -176,22 +180,72 @@ export class TimePanel {
    */
   mapChangeTime(time) {
     this.geona.map.loadLayersToNearestValidTime(time);
+    this._resetButtonTimes();
+  }
+
+  /**
+   * @private
+   * Resets the button step times so they will be recalculated.
+   */
+  _resetButtonTimes() {
+    this.dataPrevFar = undefined;
+    this.dataPrevShort = undefined;
+    this.dataNextShort = undefined;
+    this.dataNextFar = undefined;
+  }
+
+  /**
+   * @private
+   *
+   * Finds the time for the specified button, sets the corresponding class variable, and returns the data
+   * @param {*} button 
+   */
+  _setButtonTime(button) {
+    let data;
+    switch (button) {
+      case 'prev-far':
+        if (this.dataPrevFar === undefined) {
+          this.dataPrevFar = this.timeline.findPastDate(this.FAR_INTERVALS, this.activeLayer);
+        }
+        data = this.dataPrevFar;
+        break;
+      case 'prev-short':
+        if (this.dataPrevShort === undefined) {
+          this.dataPrevShort = this.timeline.findPastDate(this.SHORT_INTERVALS, this.activeLayer);
+        }
+        data = this.dataPrevShort;
+        break;
+      case 'next-short':
+        if (this.dataNextShort === undefined) {
+          this.dataNextShort = this.timeline.findFutureDate(this.SHORT_INTERVALS, this.activeLayer);
+        }
+        data = this.dataNextShort;
+        break;
+      case 'next-far':
+        if (this.dataNextFar === undefined) {
+          this.dataNextFar = this.timeline.findFutureDate(this.FAR_INTERVALS, this.activeLayer);
+        }
+        data = this.dataNextFar;
+        break;
+    }
+
+    return data;
   }
 
   /**
    * writeme
+   * @param {String} button The button we are using ('prev-far', 'prev-short', 'next-short', 'next-far')
    */
-  buttonPrevFarPreviewTime() {
-    if (this.dataPrevFar === undefined) {
-      this.dataPrevFar = this.timeline.getPastDate(this.FAR_INTERVALS, this.activeLayer);
-    }
+  buttonPreviewTime(button) {
+    let data = this._setButtonTime(button);
+
     let tooltipContent;
-    if (this.dataPrevFar !== undefined) {
+    if (data !== undefined) {
       let innerTableHtml = '';
-      for (let i = 0; i < this.dataPrevFar.layers.length; i++) {
-        let td = '<td>' + this.dataPrevFar.layers[i] + '</td>';
+      for (let i = 0; i < data.layers.length; i++) {
+        let td = '<td>' + data.layers[i] + '</td>';
         if (i === 0) {
-          td = td.concat('<td>' + this.dataPrevFar.date + '</td>');
+          td = td.concat('<td>' + data.date + '</td>');
         }
         let tr = '<tr>' + td + '</tr>';
         innerTableHtml = innerTableHtml.concat(tr);
@@ -201,220 +255,44 @@ export class TimePanel {
       tooltipContent = 'No data';
     }
 
-    this.parentDiv.find('.js-geona-time-panel-options-prev-next__prev-far')
+    this.parentDiv.find('.js-geona-time-panel-options-prev-next__' + button)
       .attr('title', tooltipContent);
 
-    tippy('.js-geona-time-panel-options-prev-next__prev-far', {
+    tippy('.js-geona-time-panel-options-prev-next__' + button, {
       arrow: true,
       placement: 'top',
       animation: 'fade',
       duration: 100,
       maxWidth: this.fullWidth + 'px',
       size: 'small',
+      dynamicTitle: true,
     });
   }
 
   /**
    * writeme
    */
-  buttonPrevFarChangeTime() {
-    if (this.dataPrevFar === undefined) {
-      this.dataPrevFar = this.timeline.getPastDate(this.FAR_INTERVALS, this.activeLayer);
+  buttonChangeTime(button) {
+    let data = this._setButtonTime(button);
+
+    if (data !== undefined) {
+      // update timeline
+      this.timelineUpdateGraphic(data.date);
+      // update pikaday
+      this.pikadayUpdateGraphic(data.date);
+      // update current date box
+      this.parentDiv.find('.js-geona-time-panel-options-current-date').val(data.date);
+      this.mapChangeTime(data.date);
+
+      // Time has changed so no longer valid
+      this._resetButtonTimes();
     }
-
-    // update timeline
-    this.timelineUpdateGraphic(this.dataPrevFar.date);
-    // update pikaday
-    this.pikadayUpdateGraphic(this.dataPrevFar.date);
-    // update current date box
-    this.parentDiv.find('.js-geona-time-panel-options-current-date').val(this.dataPrevFar.date);
-    this.mapChangeTime(this.dataPrevFar.date);
-
-    // Time has changed so no longer valid
-    this.dataPrevFar = undefined;
-    this.dataPrevShort = undefined;
-    this.dataNextShort = undefined;
-    this.dataNextFar = undefined;
   }
 
   /**
-   * writeme
+   * Sets the active timeline layer. Undefined means there is no active layer.
+   * @param {String|undefined} layerIdentifier The ID for the layer (maybe should be title)
    */
-  buttonPrevShortPreviewTime() {
-    if (this.dataPrevShort === undefined) {
-      this.dataPrevShort = this.timeline.getPastDate(this.SHORT_INTERVALS, this.activeLayer);
-    }
-    let tooltipContent;
-    if (this.dataPrevShort !== undefined) {
-      let innerTableHtml = '';
-      for (let i = 0; i < this.dataPrevShort.layers.length; i++) {
-        let td = '<td>' + this.dataPrevShort.layers[i] + '</td>';
-        if (i === 0) {
-          td = td.concat('<td>' + this.dataPrevShort.date + '</td>');
-        }
-        let tr = '<tr>' + td + '</tr>';
-        innerTableHtml = innerTableHtml.concat(tr);
-      }
-      tooltipContent = '<table>' + innerTableHtml + '</table>';
-    } else {
-      tooltipContent = 'No data';
-    }
-
-    this.parentDiv.find('.js-geona-time-panel-options-prev-next__prev-short')
-      .attr('title', tooltipContent);
-
-    tippy('.js-geona-time-panel-options-prev-next__prev-short', {
-      arrow: true,
-      placement: 'top',
-      animation: 'fade',
-      duration: 100,
-      maxWidth: this.fullWidth + 'px',
-      size: 'small',
-    });
-  }
-
-  /**
-   * writeme
-   */
-  buttonPrevShortChangeTime() {
-    if (this.dataPrevShort === undefined) {
-      this.dataPrevShort = this.timeline.getPastDate(this.SHORT_INTERVALS, this.activeLayer);
-    }
-
-    // update timeline
-    this.timelineUpdateGraphic(this.dataPrevShort.date);
-    // update pikaday
-    this.pikadayUpdateGraphic(this.dataPrevShort.date);
-    // update current date box
-    this.parentDiv.find('.js-geona-time-panel-options-current-date').val(this.dataPrevShort.date);
-    this.mapChangeTime(this.dataPrevShort.date);
-
-    // Time has changed so no longer valid
-    this.dataPrevFar = undefined;
-    this.dataPrevShort = undefined;
-    this.dataNextShort = undefined;
-    this.dataNextFar = undefined;
-  }
-
-  /**
-   * writeme
-   */
-  buttonNextShortPreviewTime() {
-    if (this.dataNextShort === undefined) {
-      this.dataNextShort = this.timeline.getFutureDate(this.SHORT_INTERVALS, this.activeLayer);
-    }
-    let tooltipContent;
-    if (this.dataNextShort !== undefined) {
-      let innerTableHtml = '';
-      for (let i = 0; i < this.dataNextShort.layers.length; i++) {
-        let td = '<td>' + this.dataNextShort.layers[i] + '</td>';
-        if (i === 0) {
-          td = td.concat('<td>' + this.dataNextShort.date + '</td>');
-        }
-        let tr = '<tr>' + td + '</tr>';
-        innerTableHtml = innerTableHtml.concat(tr);
-      }
-      tooltipContent = '<table>' + innerTableHtml + '</table>';
-    } else {
-      tooltipContent = 'No data';
-    }
-
-    this.parentDiv.find('.js-geona-time-panel-options-prev-next__next-short')
-      .attr('title', tooltipContent);
-
-    tippy('.js-geona-time-panel-options-prev-next__next-short', {
-      arrow: true,
-      placement: 'top',
-      animation: 'fade',
-      duration: 100,
-      maxWidth: this.fullWidth + 'px',
-      size: 'small',
-    });
-  }
-
-  /**
-   * writeme
-   */
-  buttonNextShortChangeTime() {
-    if (this.dataNextShort === undefined) {
-      this.dataNextShort = this.timeline.getFutureDate(this.SHORT_INTERVALS, this.activeLayer);
-    }
-
-    // update timeline
-    this.timelineUpdateGraphic(this.dataNextShort.date);
-    // update pikaday
-    this.pikadayUpdateGraphic(this.dataNextShort.date);
-    // update current date box
-    this.parentDiv.find('.js-geona-time-panel-options-current-date').val(this.dataNextShort.date);
-    this.mapChangeTime(this.dataNextShort.date);
-
-    // Time has changed so no longer valid
-    this.dataPrevFar = undefined;
-    this.dataPrevShort = undefined;
-    this.dataNextShort = undefined;
-    this.dataNextFar = undefined;
-  }
-
-  /**
-   * writeme
-   */
-  buttonNextFarPreviewTime() {
-    if (this.dataNextFar === undefined) {
-      this.dataNextFar = this.timeline.getFutureDate(this.FAR_INTERVALS, this.activeLayer);
-    }
-    let tooltipContent;
-    if (this.dataNextFar !== undefined) {
-      let innerTableHtml = '';
-      for (let i = 0; i < this.dataNextFar.layers.length; i++) {
-        let td = '<td>' + this.dataNextFar.layers[i] + '</td>';
-        if (i === 0) {
-          td = td.concat('<td>' + this.dataNextFar.date + '</td>');
-        }
-        let tr = '<tr>' + td + '</tr>';
-        innerTableHtml = innerTableHtml.concat(tr);
-      }
-      tooltipContent = '<table>' + innerTableHtml + '</table>';
-    } else {
-      tooltipContent = 'No data';
-    }
-
-    this.parentDiv.find('.js-geona-time-panel-options-prev-next__next-far')
-      .attr('title', tooltipContent);
-
-    tippy('.js-geona-time-panel-options-prev-next__next-far', {
-      arrow: true,
-      placement: 'top',
-      animation: 'fade',
-      duration: 100,
-      maxWidth: this.fullWidth + 'px',
-      size: 'small',
-    });
-  }
-
-  /**
-   * writeme
-   */
-  buttonNextFarChangeTime() {
-    if (this.dataNextFar === undefined) {
-      this.dataNextFar = this.timeline.getFutureDate(this.FAR_INTERVALS, this.activeLayer);
-    }
-
-    // update timeline
-    this.timelineUpdateGraphic(this.dataNextFar.date);
-    // update pikaday
-    this.pikadayUpdateGraphic(this.dataNextFar.date);
-    // update current date box
-    this.parentDiv.find('.js-geona-time-panel-options-current-date').val(this.dataNextFar.date);
-    this.mapChangeTime(this.dataNextFar.date);
-
-    // Time has changed so no longer valid
-    this.dataPrevFar = undefined;
-    this.dataPrevShort = undefined;
-    this.dataNextShort = undefined;
-    this.dataNextFar = undefined;
-  }
-
-
   setActiveLayer(layerIdentifier = undefined) {
     this.activeLayer = layerIdentifier;
     this.timePrevFar = undefined;
