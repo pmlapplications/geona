@@ -16,6 +16,11 @@ export default class Layer {
     }
 
     this.title = layerConfig.title;
+    if (layerServer) {
+      for (let key of Object.keys(this.title)) {
+        this.title[key] = this.title[key] + ' from server ' + layerServer.identifier;
+      }
+    }
     this.abstract = layerConfig.abstract;
     this.keywords = layerConfig.keywords;
     this.contactInformation = layerConfig.contactInformation;
