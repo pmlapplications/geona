@@ -121,7 +121,7 @@ export class MainMenu {
    * @param {String} url The URL currently in the input box
    */
   autoselectService(url) {
-    // Regex for case-insensitive 'wms', 'wmts'
+    // Regex for case-insensitive 'wms' or 'wmts'
     let result = /((w|W)(m|M)(s|S))|((w|W)(m|M)(t|T)(s|S))/.exec(url);
     if (result !== null) {
       switch (result[0].toLocaleLowerCase()) {

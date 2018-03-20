@@ -73,6 +73,8 @@ export class Timeline {
     this.SELECTOR_TOOL_RY = 6;
     /** @type {Number} @desc CONST - The correction on the x-axis needed to center the selector tool */
     this.SELECTOR_TOOL_CORRECTION = this.SELECTOR_TOOL_WIDTH / 2;
+    /** @type {Number} @desc CONST - The amount of pixels off the edge of the timeline before markers are not drawn */
+    this.TIME_MARKER_DRAW_MARGIN = 5;
 
     /** @type {Array} @desc The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = []; // TODO store identifiers instead of whole layers
@@ -131,7 +133,7 @@ export class Timeline {
 
 
     /** @type {d3.zoom} @desc The zoom behaviour to be used for panning and zooming the timeline data */
-    let zoom = d3.zoom()
+    this.zoomBehavior = d3.zoom()
       .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       });
@@ -148,7 +150,7 @@ export class Timeline {
         this.options.timelineMargins.left + ', ' +
         this.options.timelineMargins.top +
       ')')
-      .call(zoom)
+      .call(this.zoomBehavior)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
         this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
       });
@@ -376,7 +378,7 @@ export class Timeline {
    * @private
    *
    * Adds the time step marker elements for the specified layer. Filters the dates used so only one line is drawn for
-   * a particular pixel (prevents overlapping lines).
+   * a particular pixel (prevents overlapping lines). Only draws time markers which are visible to improve performance.
    * @param {Object} layer    The definition for the layer we are using.
    * @param {Array}  allDates The collection of dates to insert markers for.
    */
@@ -386,13 +388,20 @@ export class Timeline {
     // Only holds dates which will be drawn on different x pixels
     let filteredDates = [];
 
-    // We will check each date to see if it would be drawn on the same x pixel as another date
+    // Sets the cutoff points - only dates for pixels between these cutoffs will be drawn
+    let minimumCutoff = this.Y_AXIS_LABEL_WIDTH - this.TIME_MARKER_DRAW_MARGIN;
+    let maximumCutoff = this.Y_AXIS_LABEL_WIDTH + this.dataWidth + this.TIME_MARKER_DRAW_MARGIN;
+
     for (let date of allDates) {
-      let xPixel = Math.floor(this.xScale(new Date(date).getTime()));
-      if (!uniquePixels.has(xPixel)) {
+      // Check that the marker should be drawn
+      if (this.xScale(new Date(date)) > minimumCutoff && this.xScale(new Date(date)) < maximumCutoff) {
+        // We will check each date to see if it would be drawn on the same x pixel as another date
+        let xPixel = Math.floor(this.xScale(new Date(date).getTime()));
+        if (!uniquePixels.has(xPixel)) {
         // This pixel is currently free, so we will draw a line for this date
-        uniquePixels.add(xPixel);
-        filteredDates.push(date);
+          uniquePixels.add(xPixel);
+          filteredDates.push(date);
+        }
       }
     }
 
@@ -572,14 +581,14 @@ export class Timeline {
       });
 
     // Check if we have zoomed - if we have we must redraw the time markers
-    if (d3.event.transform.k !== this.previousZoomScale) {
-      // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-      this._redrawTimeMarkers();
-      // Save the zoom scale
-      this.previousZoomScale = d3.event.transform.k;
-    } else { // We only need to translate the markers
-      this._translateTimeMarkers();
-    }
+    // if (d3.event.transform.k !== this.previousZoomScale) {
+    // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
+    this._redrawTimeMarkers();
+    // Save the zoom scale
+    // this.previousZoomScale = d3.event.transform.k;
+    // } else { // We only need to translate the markers
+    // this._translateTimeMarkers();
+    // }
 
     // Adjust positioning of today line and selector tool
     this._translateTodayLine();
@@ -666,6 +675,12 @@ export class Timeline {
           return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
         });
     }
+
+    // FIXME Pan the timeline if the selector has moved offscreen
+    // if (this.xScale(new Date(this.selectorDate)) < 0 || this.xScale(new Date(this.selectorDate)) > this.dataWidth) {
+    //   this.setView([this.xScale.invert(0), this.xScale.invert(this.dataWidth)]);
+    //   this._translateSelectorTool();
+    // }
   }
 
   /**
@@ -695,30 +710,38 @@ export class Timeline {
    * @param {String[]} dates Contains two or more dates, sorted from least-to-most recent, that the view will be set to.
    */
   setView(dates) {
-    // The difference, in ms, between the current xScale domain dates
-    let previousDateSpacing = this.xScale.domain()[1].getTime() - this.xScale.domain()[0].getTime();
-    // The difference, in ms, between the new min and max dates
-    let newDateSpacing = new Date(dates[dates.length - 1]).getTime() - new Date(dates[0]).getTime();
+    // // The difference, in ms, between the current xScale domain dates
+    // let previousDateSpacing = this.xScale.domain()[1].getTime() - this.xScale.domain()[0].getTime();
+    // // The difference, in ms, between the new min and max dates
+    // let newDateSpacing = new Date(dates[dates.length - 1]).getTime() - new Date(dates[0]).getTime();
 
-    // Update domain
-    this._updateXScaleDomain(dates, false);
+    // // Update domain
+    // this._updateXScaleDomain(dates, false);
 
-    // Update the x-axis
-    this.timelineXAxisGroup.call(this.xAxis);
+    // // Update the x-axis
+    // this.timelineXAxisGroup.call(this.xAxis);
 
-    // Adjust layer bars
-    this._resizeLayerBars();
+    // // Adjust layer bars
+    // this._resizeLayerBars();
 
-    // If the spacing is different, then the scale has changed, and we must redraw the time markers
-    if (newDateSpacing !== previousDateSpacing) {
-      this._redrawTimeMarkers();
-    } else { // We can just move the markers on the x-axis
-      this._translateTimeMarkers();
-    }
+    // // If the spacing is different, then the scale has changed, and we must redraw the time markers
+    // if (newDateSpacing !== previousDateSpacing) {
+    //   this._redrawTimeMarkers();
+    // } else { // We can just move the markers on the x-axis
+    //   this._translateTimeMarkers();
+    // }
 
-    // Reposition today line and selector tool
-    this._translateTodayLine();
-    this._translateSelectorTool();
+    // // Reposition today line and selector tool
+    // this._translateTodayLine();
+    // this._translateSelectorTool();
+
+    // TODO I don't exactly understand this - I copied it from https://bl.ocks.org/mbostock/431a331294d2b5ddd33f947cf4c81319
+    // It also doesn't work, but neither did the code above
+    this.timeline.call(this.zoomBehavior)
+      .call(this.zoomBehavior.transform,
+        d3.zoomIdentity
+          .scale(this.dataWidth / (this.xScale(new Date(dates[dates.length - 1]) - this.xScale(new Date(dates[0])))))
+          .translate(-this.xScale(new Date(dates[0])), 0));
   }
 
   /**
@@ -743,7 +766,7 @@ export class Timeline {
 
   /**
    * @private
-   * Redraws the time markers. Used when the xScale has zoomed in or out.
+   * Redraws the time markers. Used when the xScale has zoomed or panned.
    */
   _redrawTimeMarkers() {
     // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)

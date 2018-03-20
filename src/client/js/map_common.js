@@ -130,7 +130,7 @@ export function urlInCache(url) {
  * Fetches layers for all supported services.
  * @param  {String}  url        URL for service request
  * @param  {String}  service    Explicitly-defined service type
- * @param  {Boolean} save       Whether to save the retrieved config to cache
+ * @param  {Boolean} [save]     Whether to save the retrieved config to cache
  * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
  * @return {Array}              List of layers found from the request
  */
@@ -269,7 +269,6 @@ export function generateDatetimesFromIntervals(geonaLayer) {
     // Sort from least-to-most recent
     datetimes.sort();
   }
-  console.log(datetimes);
   return datetimes;
 }
 
