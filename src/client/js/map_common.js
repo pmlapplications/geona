@@ -3,6 +3,9 @@
 import i18next from 'i18next';
 import $ from 'jquery';
 import request from 'request';
+import moment from 'moment';
+import _ from 'lodash';
+
 import {urlToFilename} from '../../common/map';
 
 
@@ -222,6 +225,52 @@ export function constructExtent(extent1, extent2) {
   }
 
   return newExtent;
+}
+
+/**
+ * Generates an array of datetimes from 'start/end/interval' definitions
+ * @param  {Layer}    geonaLayer A Geona Layer definition.
+ * @return {String[]}            The newly-generated datetime values based on the data in the geonaLayer.
+ */
+export function generateDatetimesFromIntervals(geonaLayer) {
+  // Some servers will represent time as 'startDate/endDate/period' so we will have to generate that data
+  let datetimes = [];
+
+  // Generate any dates if necessary
+  if (geonaLayer.dimensions.time.intervals) {
+    let allGeneratedTimes = [];
+    let times = geonaLayer.dimensions.time.intervals;
+    for (let i = 0; i < times.length; i++) {
+      let startDate = times[i].min;
+      let endDate = times[i].max;
+      let duration = moment.duration(times[i].resolution);
+
+      let generatedTimes = [startDate];
+      let nextTime = moment(startDate).add(duration);
+
+      // use moment
+      while (nextTime < moment(endDate)) {
+        generatedTimes.push(nextTime.toISOString());
+        nextTime.add(duration);
+      }
+      generatedTimes.push(endDate);
+
+      // Store the generated times to be added outside of the loop
+      allGeneratedTimes.push(generatedTimes);
+    }
+
+    // Concatenate all the generated times with any other values
+    for (let generatedTimes of allGeneratedTimes) {
+      datetimes = datetimes.concat(generatedTimes);
+    }
+
+    // Remove duplicate times
+    datetimes = _.uniq(datetimes);
+    // Sort from least-to-most recent
+    datetimes.sort();
+  }
+  console.log(datetimes);
+  return datetimes;
 }
 
 /**
