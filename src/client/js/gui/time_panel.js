@@ -88,6 +88,8 @@ export class TimePanel {
         this.timeline.addTimelineLayer(availableLayer);
       }
     }
+
+    this.pikadayUpdateGraphic(this.timeline.selectorDate);
   }
 
   /**
