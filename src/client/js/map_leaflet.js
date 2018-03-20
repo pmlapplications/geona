@@ -2,7 +2,8 @@
 
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter, findNearestValidTime, constructExtent,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter,
+  findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
 import $ from 'jquery';
 
@@ -14,6 +15,7 @@ let L;
  * @implements {GeonaMap}
  */
 export class LMap extends GeonaMap {
+  // TODO generateDatetimesFromIntervals on add
   /**
    * Instantiate a new LMap and create a new Leaflet map.
    * @param  {Object} config The map config to load
@@ -28,6 +30,7 @@ export class LMap extends GeonaMap {
     /**  @type {L.featureGroup} The layers on the map */
     this._mapLayers = L.featureGroup();
     this._activeLayers = {};
+    this._activeLayerGeneratedTimes = {};
     /** @type {String} The time the map is set to */
     this._mapTime = undefined;
     /**  @type {L.latlngGraticule} The map graticule */
@@ -514,15 +517,37 @@ export class LMap extends GeonaMap {
           }
         }
 
-        // Selects the requested time, the closest to the map time, or the default layer time.
-        if (options.requestedTime !== undefined) {
-          time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
-        } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-          time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
-        } else if (options.modifier === 'hasTime') {
-          if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
-            time = geonaLayer.dimensions.time.default;
-            geonaLayer.dimensions.time.values.sort();
+        if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
+          // We might need to generate datetimes for this layer (TODO more information on wiki)
+          let timeValues = geonaLayer.dimensions.time.values;
+          if (geonaLayer.dimensions.time.intervals) {
+            // We only want to generate the datetimes once
+            if (!this._activeLayerGeneratedTimes[geonaLayer.identifier]) {
+              let generatedDatetimes = generateDatetimesFromIntervals(geonaLayer);
+
+              if (timeValues !== undefined) {
+                timeValues = timeValues.concat(generatedDatetimes);
+              } else {
+                timeValues = generatedDatetimes;
+              }
+              timeValues.sort();
+              this._activeLayerGeneratedTimes[geonaLayer.identifier] = timeValues;
+            } else { // If they've been generated we just assign them
+              timeValues = this._activeLayerGeneratedTimes[geonaLayer.identifier];
+            }
+          }
+
+
+          // Selects the requested time, the closest to the map time, or the default layer time.
+          if (options.requestedTime !== undefined) {
+            time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
+          } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
+            time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
+          } else if (options.modifier === 'hasTime') {
+            if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
+              time = geonaLayer.dimensions.time.default;
+              geonaLayer.dimensions.time.values.sort();
+            }
           }
         }
 
@@ -628,13 +653,17 @@ export class LMap extends GeonaMap {
   /**
    * Removes the layer from the map.
    * @param {String} layerIdentifier The identifier of the layer being removed.
+   * @param {Boolean} [retainTimes]   If True, we will keep the generated times in memory for this layer.
    */
-  removeLayer(layerIdentifier) {
+  removeLayer(layerIdentifier, retainTimes = false) {
     for (let layer of this._mapLayers.getLayers()) {
       if (layer.options.identifier === layerIdentifier) {
         this._mapLayers.removeLayer(layer);
         layer.remove();
         delete this._activeLayers[layerIdentifier];
+        if (!retainTimes) {
+          delete this._activeLayerGeneratedTimes[layerIdentifier];
+        }
         if (layer.options.modifier === 'basemap') {
           this.config.basemap = 'none';
           // As we have removed the basemap, the zIndices should all be reduced by 1
@@ -827,7 +856,7 @@ export class LMap extends GeonaMap {
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
-      let time = findNearestValidTime(geonaLayer.dimensions.time.values, requestedTime);
+      let time = findNearestValidTime(this.getActiveLayerDatetimes(layerIdentifier), requestedTime);
       if (time === undefined) {
         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
@@ -849,7 +878,7 @@ export class LMap extends GeonaMap {
           requestedTime: time,
         };
 
-        this.removeLayer(layerIdentifier);
+        this.removeLayer(layerIdentifier, true);
         let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
         this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
@@ -950,6 +979,22 @@ export class LMap extends GeonaMap {
       return this._activeLayers[layerIdentifier].options[key];
     } else {
       return layerIdentifier.options[key];
+    }
+  }
+
+  /**
+   * Returns a single array containing all the datetimes for the specified layer, including normal values and values
+   * generated from intervals.
+   * @param  {String}   layerIdentifier The identifier for the layer whose datetimes we want to get.
+   * @return {String[]}                 An Array containing all of this layer's datetimes as Strings.
+   */
+  getActiveLayerDatetimes(layerIdentifier) {
+    // If there are only normal values return them
+    if (!this._activeLayerGeneratedTimes[layerIdentifier]) {
+      return this._availableLayers[layerIdentifier].dimensions.time.values;
+    } else {
+      // Return the merged and sorted array that was created when the layer was added.
+      return this._activeLayerGeneratedTimes[layerIdentifier];
     }
   }
 }

@@ -3,7 +3,8 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime, constructExtent,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage,
+  findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
 
 import proj4 from 'proj4';
@@ -37,6 +38,8 @@ export class OlMap extends GeonaMap {
     this._availableLayerServers = {};
     /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
     this._activeLayers = {};
+    /** @private @type {Object} @desc The generated times for the active layers */
+    this._activeLayerGeneratedTimes = {};
     /** @private @type {String} The latest time that the active map layers are set to */
     this._mapTime = undefined;
     /** @private @type {ol.Graticule} The map graticule */
@@ -382,7 +385,7 @@ export class OlMap extends GeonaMap {
 
     let projection;
     let source;
-    let time; // Needs to be returned with sources
+    let time;
 
     // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
     if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
@@ -569,24 +572,40 @@ export class OlMap extends GeonaMap {
         attributions = geonaLayer.attribution.title;
       }
     }
-    // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers
-    // Not good because 'Geona' won't be displayed without any layers, if the layer it's attached to is
+    // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers - not good
+    // because 'Geona' won't be displayed without any layers, if the layer it's attached to is
     // removed, and will be out of sequence if the layers are added in different orders
     if (this._map.getLayers().getArray().length === 0 || options.modifier === 'basemap') {
       attributions = 'Geona | ' + attributions;
     }
 
-    // Selects the requested time, the closest to the map time, or the default layer time.
-    if (options.requestedTime !== undefined) {
-      time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
-    } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-      time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
-    } else if (options.modifier === 'hasTime') {
-      if (geonaLayer.dimensions) {
-        if (geonaLayer.dimensions.time) {
-          time = geonaLayer.dimensions.time.default;
-          geonaLayer.dimensions.time.values.sort();
+    if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
+      // We might need to generate datetimes for this layer (TODO more information on wiki)
+      let timeValues = geonaLayer.dimensions.time.values;
+      if (geonaLayer.dimensions.time.intervals) {
+        // We only want to generate the datetimes once
+        if (!this._activeLayerGeneratedTimes[geonaLayer.identifier]) {
+          let generatedDatetimes = generateDatetimesFromIntervals(geonaLayer);
+
+          if (timeValues !== undefined) {
+            timeValues = timeValues.concat(generatedDatetimes);
+          } else {
+            timeValues = generatedDatetimes;
+          }
+          timeValues.sort();
+          this._activeLayerGeneratedTimes[geonaLayer.identifier] = timeValues;
+        } else { // If they've been generated we just assign them
+          timeValues = this._activeLayerGeneratedTimes[geonaLayer.identifier];
         }
+      }
+
+      // Selects the requested time, the closest to the map time, or the default layer time.
+      if (options.requestedTime !== undefined) {
+        time = findNearestValidTime(timeValues, options.requestedTime);
+      } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
+        time = findNearestValidTime(timeValues, this._mapTime);
+      } else if (options.modifier === 'hasTime') {
+        time = geonaLayer.dimensions.time.default;
       }
     }
 
@@ -684,10 +703,11 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Remove the specified data layer from the map
-   * @param {String} layerIdentifier The id of the data layer being removed
+   * Remove the specified data layer from the map.
+   * @param {String}  layerIdentifier The id of the data layer being removed.
+   * @param {Boolean} [retainTimes]   If True, we will keep the generated times in memory for this layer.
    */
-  removeLayer(layerIdentifier) {
+  removeLayer(layerIdentifier, retainTimes = false) {
     if (this._map.getLayers().getArray().includes(this._activeLayers[layerIdentifier])) {
       this._map.removeLayer(this._activeLayers[layerIdentifier]);
       if (this._activeLayers[layerIdentifier].get('modifier') === 'basemap') {
@@ -725,6 +745,9 @@ export class OlMap extends GeonaMap {
         this._mapTime = undefined;
       }
       delete this._activeLayers[layerIdentifier];
+      if (!retainTimes) {
+        delete this._activeLayerGeneratedTimes[layerIdentifier];
+      }
     }
   }
 
@@ -836,7 +859,7 @@ export class OlMap extends GeonaMap {
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
-      let time = findNearestValidTime(geonaLayer.dimensions.time.values, requestedTime);
+      let time = findNearestValidTime(this.getActiveLayerDatetimes(layerIdentifier), requestedTime);
       if (time === undefined) {
         // If the requested time is invalid for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
@@ -858,7 +881,7 @@ export class OlMap extends GeonaMap {
           requestedTime: time,
         };
 
-        this.removeLayer(layerIdentifier);
+        this.removeLayer(layerIdentifier, true); // We use the optional true parameter so any generated times are kept
         let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
         this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
@@ -959,6 +982,22 @@ export class OlMap extends GeonaMap {
       return this._activeLayers[layerIdentifier].get(key);
     } else {
       return layerIdentifier.get(key);
+    }
+  }
+
+  /**
+   * Returns a single array containing all the datetimes for the specified layer, including normal values and values
+   * generated from intervals.
+   * @param  {String}   layerIdentifier The identifier for the layer whose datetimes we want to get.
+   * @return {String[]}                 An Array containing all of this layer's datetimes as Strings.
+   */
+  getActiveLayerDatetimes(layerIdentifier) {
+    // If there are only normal values return them
+    if (!this._activeLayerGeneratedTimes[layerIdentifier]) {
+      return this._availableLayers[layerIdentifier].dimensions.time.values;
+    } else {
+      // Return the merged and sorted array that was created when the layer was added.
+      return this._activeLayerGeneratedTimes[layerIdentifier];
     }
   }
 }

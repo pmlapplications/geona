@@ -62,10 +62,8 @@ export class TimePanel {
     );
 
     // If the map has loaded before the GUI we will miss the event fire, so check to see if we can draw the timebar yet
-    if (this.geona.map) {
-      if (this.geona.map.initialized) {
-        this.drawTimeline();
-      }
+    if (this.geona.map && this.geona.map.initialized) {
+      this.drawTimeline();
     }
 
     registerTriggers(this.geona.eventManager, this.parentDiv);

@@ -559,7 +559,7 @@ function _compileLayerInformation(geonaLayer) {
     };
   }
   if (geonaLayer.dimensions !== undefined) {
-    if (geonaLayer.dimensions.time) {
+    if (geonaLayer.dimensions.time && geonaLayer.dimensions.time.values) { // TODO needs to support intervals too
       let sortedDates = geonaLayer.dimensions.time.values.sort();
       layerInformation.dateRange = {
         start: moment.utc(sortedDates[0]).format('YYYY-MM-DD'),

@@ -34,9 +34,8 @@ export default class Layer {
 
     this.dimensions = layerConfig.dimensions;
     if (this.dimensions && this.dimensions.time) {
-      console.log(this.dimensions.time.intervals);
       // There is no need to sort if we still have times to generate
-      if (this.dimensions.time.values) {
+      if (!this.dimensions.time.intervals ) {
         this.dimensions.time.values.sort();
       }
     }
