@@ -34,7 +34,11 @@ export default class Layer {
 
     this.dimensions = layerConfig.dimensions;
     if (this.dimensions && this.dimensions.time) {
-      this.dimensions.time.values.sort();
+      console.log(this.dimensions.time.intervals);
+      // There is no need to sort if we still have times to generate
+      if (this.dimensions.time.values) {
+        this.dimensions.time.values.sort();
+      }
     }
 
     // this.crs = ['EPSG:4326', 'CRS:84', 'EPSG:41001', 'EPSG:27700', 'EPSG:3408',
