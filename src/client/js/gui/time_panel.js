@@ -85,7 +85,7 @@ export class TimePanel {
     });
 
     for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
-      if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'hasTime') {
+      if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'hasTime') {
         let availableLayer = this.geona.map._availableLayers[layerIdentifier];
         this.timeline.addTimelineLayer(availableLayer);
       }

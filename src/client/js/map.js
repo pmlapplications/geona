@@ -134,7 +134,7 @@ export default class GeonaMap {
    * @param  {String}               key             The key that we want to find the value of.
    * @return {*}                                    The value for the requested key.
    */
-  _layerGet(layerIdentifier, key) { }
+  layerGet(layerIdentifier, key) { }
 
   /**
    * Load the default basemaps, and any defined in the config.

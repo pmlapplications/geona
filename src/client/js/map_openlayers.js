@@ -54,8 +54,8 @@ export class OlMap extends GeonaMap {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
-    /** @private @type {Boolean} Tracks whether the map has been initialized */
-    this._initialized = false;
+    /** @type {Boolean} Tracks whether the map has been initialized */
+    this.initialized = false;
 
     /** @private @type {ol.Map} The OpenLayers map */
     this._map = new ol.Map({
@@ -127,7 +127,7 @@ export class OlMap extends GeonaMap {
     this.loadConfig_();
 
     // Must come last in the method
-    this._initialized = true;
+    this.initialized = true;
 
     // wms
     // https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?service=WMS&request=GetCapabilities
@@ -205,7 +205,7 @@ export class OlMap extends GeonaMap {
    * @param {ol.Layer.Tile} [layer] Optional layer created in addLayer(), used for setting a new projection
    */
   _clearBasemap(layer = undefined) {
-    if (this._initialized === true && this.config.basemap !== 'none') {
+    if (this.initialized === true && this.config.basemap !== 'none') {
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'basemap') {
           this.removeLayer(currentLayer.get('identifier'));
@@ -222,7 +222,7 @@ export class OlMap extends GeonaMap {
    * Clear the country borders if active
    */
   _clearBorders() {
-    if (this._initialized === true && this.config.borders.identifier !== 'none') {
+    if (this.initialized === true && this.config.borders.identifier !== 'none') {
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'borders') {
           this.removeLayer(currentLayer.get('identifier'));
@@ -484,7 +484,7 @@ export class OlMap extends GeonaMap {
         this.removeLayer(layer.identifier);
         this._map.addLayer(layer);
         this._activeLayers[geonaLayer.identifier] = layer;
-        if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+        if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._map.getLayers().getArray().length - 2);
           this.config.data.push(geonaLayer.identifier);
         }
@@ -772,16 +772,16 @@ export class OlMap extends GeonaMap {
     let layerModifier = this._activeLayers[layerIdentifier].get('modifier');
     let maxZIndex = this._map.getLayers().getArray().length - 1;
 
-    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
+    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this.initialized === true) {
       // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
       throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
-    } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
+    } else if (this.config.basemap === 'none' && targetIndex < 0 && this.initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
+    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this.initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this._initialized === true) {
+    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this.initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -953,7 +953,7 @@ export class OlMap extends GeonaMap {
    * @param  {String}               key             The key that we want to find the value of.
    * @return {*}                                    The value for the requested key.
    */
-  _layerGet(layerIdentifier, key) {
+  layerGet(layerIdentifier, key) {
     // Determine whether we've received a String or a Layer.Tile
     if (typeof layerIdentifier === 'string') {
       return this._activeLayers[layerIdentifier].get(key);

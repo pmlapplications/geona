@@ -3166,23 +3166,23 @@ describe('client/js/map_leaflet', function() {
     });
   });
 
-  describe('_layerGet', function() {
+  describe('layerGet', function() {
     before(function() {
       geona.map.addLayer(rrs412, rsgCci, {modifier: 'hasTime'});
     });
 
     it('should return a zIndex of 0 from the layer identifier', function() {
-      let zIndex = geona.map._layerGet('Rrs_412', 'zIndex');
+      let zIndex = geona.map.layerGet('Rrs_412', 'zIndex');
       expect(zIndex).to.equal(0);
     });
     it('should return a zIndex of 0 from the layer object', function() {
       let layer = geona.map._activeLayers.Rrs_412;
-      let zIndex = geona.map._layerGet(layer, 'zIndex');
+      let zIndex = geona.map.layerGet(layer, 'zIndex');
       expect(zIndex).to.equal(0);
     });
     it('should throw an undefined error from the layer identifier', function() {
       expect(function() {
-        geona.map._layerGet('', 'zIndex');
+        geona.map.layerGet('', 'zIndex');
       }).to.throw(TypeError);
     });
 

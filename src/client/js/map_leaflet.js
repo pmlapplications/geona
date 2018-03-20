@@ -59,7 +59,7 @@ export class LMap extends GeonaMap {
 
     // TODO sort these when finished
     /** @private @type {Boolean} Tracks whether the map has been initialized */
-    this._initialized = false;
+    this.initialized = false;
 
     /**  @type {L.map} The Leaflet map */
     this._map = L.map(mapDiv, {
@@ -126,7 +126,7 @@ export class LMap extends GeonaMap {
 
     this.loadConfig_();
     // Must come last in the constructor
-    this._initialized = true;
+    this.initialized = true;
   }
 
   /**
@@ -598,7 +598,7 @@ export class LMap extends GeonaMap {
         layer.addTo(this._map);
         this._mapLayers.addLayer(layer);
         this._activeLayers[geonaLayer.identifier] = layer;
-        if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+        if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._mapLayers.getLayers().length - 2);
           this.config.data.push(geonaLayer.identifier);
         }
@@ -761,16 +761,16 @@ export class LMap extends GeonaMap {
     }
     let maxZIndex = this._mapLayers.getLayers().length - 1;
 
-    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
+    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this.initialized === true) {
       // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
       throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
-    } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
+    } else if (this.config.basemap === 'none' && targetIndex < 0 && this.initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
+    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this.initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this._initialized === true) {
+    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this.initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -944,7 +944,7 @@ export class LMap extends GeonaMap {
    * @param  {String}                 key             The key that we want to find the value of.
    * @return {*}                                      The value for the requested key.
    */
-  _layerGet(layerIdentifier, key) {
+  layerGet(layerIdentifier, key) {
     // Determine whether we've received a String or a tileLayer.wms
     if (typeof layerIdentifier === 'string') {
       return this._activeLayers[layerIdentifier].options[key];

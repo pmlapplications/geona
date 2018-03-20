@@ -308,8 +308,8 @@ export class MainMenu {
     for (let index = 0; index < activeLayersKeys.length; index++) {
       // Loop through the active layers on the map and populate the layers list
       for (let activeLayerKey of activeLayersKeys) {
-        let modifier = this.geona.map._layerGet(activeLayerKey, 'modifier');
-        let zIndex = this.geona.map._layerGet(activeLayerKey, 'zIndex');
+        let modifier = this.geona.map.layerGet(activeLayerKey, 'modifier');
+        let zIndex = this.geona.map.layerGet(activeLayerKey, 'zIndex');
         if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
           // Get the data in the correct format from the geona layer
           let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
@@ -339,7 +339,7 @@ export class MainMenu {
 
     let basemapActive = false;
     for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
-      if (this.geona.map._layerGet(layerIdentifier, 'modifier') === 'basemap') {
+      if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'basemap') {
         basemapActive = true;
       }
     }
