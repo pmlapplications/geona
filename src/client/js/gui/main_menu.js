@@ -5,7 +5,8 @@ import {registerTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
 import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
-import {setTimeout} from 'timers';
+import LayerWms from '../../../common/layer/layer_wms';
+import LayerWmts from '../../../common/layer/layer_wmts';
 
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -230,10 +231,21 @@ export class MainMenu {
     let layerServerDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServer));
     for (let layer of layerServerDeepCopy.layers) {
       if (layer.identifier === layerIdentifier) {
+        let geonaLayer;
+        switch (layer.protocol.toLowerCase()) {
+          case 'wms':
+            geonaLayer = new LayerWms(layer, layerServerDeepCopy);
+            break;
+          case 'wmts':
+            geonaLayer = new LayerWmts(layer, layerServerDeepCopy);
+            break;
+          default:
+            throw new Error('Unsupported layer protocol: ' + layer.protocol.toLowerCase());
+        }
         if (layer.dimension && layer.dimension.time) {
-          this.geona.map.addLayer(layer, layerServerDeepCopy, {modifier: 'hasTime'});
+          this.geona.map.addLayer(geonaLayer, layerServerDeepCopy, {modifier: 'hasTime'});
         } else {
-          this.geona.map.addLayer(layer, layerServerDeepCopy);
+          this.geona.map.addLayer(geonaLayer, layerServerDeepCopy);
         }
       }
     }

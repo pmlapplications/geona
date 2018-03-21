@@ -7,6 +7,8 @@ import moment from 'moment';
 import _ from 'lodash';
 
 import {urlToFilename} from '../../common/map';
+import LayerWms from '../../common/layer/layer_wms';
+import LayerWmts from '../../common/layer/layer_wmts';
 
 
 /**
@@ -278,6 +280,8 @@ export function generateDatetimesFromIntervals(geonaLayer) {
  * @return {Object}           The availableLayers and availableLayerServers
  */
 export function loadDefaultLayersAndLayerServers(config) {
+  // TODO actually instantiate some layer servers instead of just using the Objects
+
   // We will be modifying the config, so we want to clone it.
   // This is in case we have been passed a reference to the map's config, which we do not want to alter.
   // let config = JSON.parse(JSON.stringify(mapConfig)); // Fastest deep clone according to stackoverflow.com/a/5344074
@@ -308,7 +312,18 @@ export function loadDefaultLayersAndLayerServers(config) {
       if (loadedServersAndLayers.availableLayers[layer.identifier] === undefined) {
         if (layer.protocol !== 'bing' || config.bingMapsApiKey) {
           if (layer.layerServer === layerServer.identifier) {
-            loadedServersAndLayers.availableLayers[layer.identifier] = layer;
+            let geonaLayer;
+            switch (layer.protocol.toLowerCase()) {
+              case 'wms':
+                geonaLayer = new LayerWms(layer, layerServer);
+                break;
+              case 'wmts':
+                geonaLayer = new LayerWmts(layer, layerServer);
+                break;
+              default:
+                throw new Error('Unsupported layer protocol: ' + layer.protocol.toLowerCase());
+            }
+            loadedServersAndLayers.availableLayers[layer.identifier] = geonaLayer;
           } else {
             throw new Error(
               'Layer ' + layer.identifier + ' in LayerServer ' + layerServer.identifier +
@@ -328,7 +343,6 @@ export function loadDefaultLayersAndLayerServers(config) {
   // Save the non-layer information for the LayerServers
   for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
     let layerServer = {};
-    // delete layerServer.layers; // Do we want to keep the identifiers?
 
     for (let property of Object.keys(uniqueLayerServers[layerServerIdentifier])) {
       if (property !== 'layers') {
