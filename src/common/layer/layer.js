@@ -33,11 +33,17 @@ export default class Layer {
     this.firstTime = layerConfig.firstTime;
     this.lastTime = layerConfig.lastTime;
 
+    this.modifier = layerConfig.modifier;
+
     this.dimensions = layerConfig.dimensions;
     if (this.dimensions && this.dimensions.time) {
       // There is no need to sort if we still have times to generate
       if (!this.dimensions.time.intervals ) {
         this.dimensions.time.values.sort();
+      }
+      // We set the modifier here, unless it has been specified already
+      if (!this.modifier) {
+        this.modifier = 'hasTime';
       }
     }
 
