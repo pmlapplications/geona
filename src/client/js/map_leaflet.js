@@ -442,6 +442,11 @@ export class LMap extends GeonaMap {
       settings
     );
 
+    // Add 'hasTime' modifier if it doesn't already have a modifier
+    if (options.modifier === undefined && geonaLayer.dimensions && geonaLayer.dimensions.time) {
+      options.modifier = 'hasTime';
+    }
+
     // If a layer is a basemap we might change the projection
     // anyway, so it doesn't matter if the layer supports the current projection
     if (!geonaLayer.projections.includes(deLeafletizeProjection(this._map.options.crs)) && options.modifier !== 'basemap') {
