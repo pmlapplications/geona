@@ -125,7 +125,6 @@ export function resetParameterTypes(parameters) {
   let convertedParameters = [];
   for (let param of parameters) {
     // If the param is a number
-    console.log(!isNaN(param));
     if (!isNaN(param)) {
       // If the param contains a decimal point or the word 'Infinity'
       if (/\.|Infinity/.test(param) === true ) {

@@ -16,11 +16,7 @@ export default class Layer {
     }
 
     this.title = layerConfig.title;
-    if (layerServer) {
-      for (let key of Object.keys(this.title)) {
-        this.title[key] = this.title[key] + ' from server ' + layerServer.identifier;
-      }
-    }
+    this.displayName = undefined;
     this.abstract = layerConfig.abstract;
     this.keywords = layerConfig.keywords;
     this.contactInformation = layerConfig.contactInformation;
@@ -47,5 +43,18 @@ export default class Layer {
 
     // this.crs = ['EPSG:4326', 'CRS:84', 'EPSG:41001', 'EPSG:27700', 'EPSG:3408',
     // 'EPSG:3409', 'EPSG:3857', 'EPSG:900913', 'EPSG:32661', 'EPSG:32761'];
+  }
+
+  /**
+   * Returns either the title, or if set, the display name.
+   * @return {Object} The title or display name.
+   */
+  getTitleOrDisplayName() {
+    // Always chooses the display name if it exists
+    if (this.displayName) {
+      return this.displayName;
+    } else {
+      return this.title;
+    }
   }
 }
