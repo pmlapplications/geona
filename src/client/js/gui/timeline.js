@@ -114,8 +114,8 @@ export class Timeline {
       .tickFormat(getDateFormat);
 
 
-    /** @type {d3.scaleBand} @desc The scale to use for the y-axis - translates px to layer title */
-    this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
+    /** @type {d3.scaleBand} @desc The scale to use for the y-axis - translates px to layer title/display name */
+    this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added and removed
       .range([0, this.dataHeight])
       .paddingInner(this.LAYER_PADDING);
 
@@ -123,6 +123,9 @@ export class Timeline {
     this.yAxis = d3.axisRight(this.yScale)
       .ticks(this.timelineCurrentLayers.length)
       .tickSize(0);
+
+    /** @type {Object} @desc The full labels for the current layers - used so we don't get display name, server again */
+    this.yAxisFullLabels = {};
 
 
     /** @type {Object} @desc The minimum and maximum dates after checking every layer on the timeline */
@@ -271,11 +274,36 @@ export class Timeline {
         this.selectorDate = layerToAdd.dimensions.time.default;
       }
     }
+
+
     // Update yScale range and domain
+    // We need to check if any of the y-axis labels will be the same - if they are, we need to display the server too
+    let allLayerLabels = [];
+    for (let layer of this.timelineCurrentLayers) {
+      allLayerLabels.push(selectPropertyLanguage(layer.getTitleOrDisplayName()));
+    }
+    let duplicateLayerLabels = new Set(); // We will put any elements which occur more than once in here
+    for (let i = 0; i < allLayerLabels.length; i++) {
+      let label = allLayerLabels[i];
+      if (allLayerLabels.lastIndexOf(label) !== i) {
+        duplicateLayerLabels.add(label);
+      }
+    }
+
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
         // TODO will need to get the title from the identifier
-        return selectPropertyLanguage(layer.title);
+        let label = selectPropertyLanguage(layer.getTitleOrDisplayName());
+        // If this was found to be a duplicate, we want to get the label with source appended
+        if (duplicateLayerLabels.has(label)) {
+          if (layer.layerServer) {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.layerServer;
+          } else {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier;
+          }
+        }
+        this.yAxisFullLabels[layer.identifier] = label;
+        return label;
       }));
 
 
@@ -291,8 +319,8 @@ export class Timeline {
       })
       .attr('transform', (layer) => {
         // TODO will need to get the title from the identifier
-        let title = selectPropertyLanguage(layer.title);
-        return 'translate(0, ' + this.yScale(title) + ')';
+        let label = this.yAxisFullLabels[layer.identifier];
+        return 'translate(0, ' + this.yScale(label) + ')';
       })
       // Within the g create a rect
       .append('rect')
@@ -436,6 +464,9 @@ export class Timeline {
     let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove); // TODO wou;ld jst be an identifier
     this.timelineCurrentLayers.splice(layerIndex, 1);
 
+    // Remove the title from the yAxisFullLabels
+    delete this.yAxisFullLabels[layerIdentifier];
+
 
     // Regenerate the Set of layer times
     let regeneratedSetDates = [];
@@ -451,10 +482,32 @@ export class Timeline {
     this.updateLayerDateExtent();
 
     // Update yScale range and domain
+    // We need to check if any of the y-axis labels will be the same - if they are, we need to display the server too
+    let allLayerLabels = [];
+    for (let layer of this.timelineCurrentLayers) {
+      allLayerLabels.push(selectPropertyLanguage(layer.getTitleOrDisplayName()));
+    }
+    let duplicateLayerLabels = new Set(); // We will put any elements which occur more than once in here
+    for (let i = 0; i < allLayerLabels.length; i++) {
+      let label = allLayerLabels[i];
+      if (allLayerLabels.lastIndexOf(label) !== i) {
+        duplicateLayerLabels.add(label);
+      }
+    }
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        // TODO get title from, identifier
-        return selectPropertyLanguage(layer.title);
+        // TODO will need to get the title from the identifier
+        let label = selectPropertyLanguage(layer.getTitleOrDisplayName());
+        // If this was found to be a duplicate, we want to get the label with source appended
+        if (duplicateLayerLabels.has(label)) {
+          if (layer.layerServer) {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.layerServer;
+          } else {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier;
+          }
+        }
+        this.yAxisFullLabels[layer.identifier] = label;
+        return label;
       }));
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
@@ -470,8 +523,9 @@ export class Timeline {
     // Vertically-align each layer bar with its title on the y-axis
     this.timelineData.selectAll('.geona-timeline-layer')
       .attr('transform', (layer) => {
-        let title = selectPropertyLanguage(layer.title);
-        return 'translate(0, ' + this.yScale(title) + ')';
+        // TODO change to be just identifier
+        let label = this.yAxisFullLabels[layer.identifier];
+        return 'translate(0, ' + this.yScale(label) + ')';
       });
 
     // Trim the visible title to prevent overspill onto the layer bars
