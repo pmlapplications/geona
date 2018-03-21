@@ -180,14 +180,14 @@ export class TimePanel {
    */
   mapChangeTime(time) {
     this.geona.map.loadLayersToNearestValidTime(time);
-    this._resetButtonTimes();
+    this._resetStepTimes();
   }
 
   /**
    * @private
    * Resets the button step times so they will be recalculated.
    */
-  _resetButtonTimes() {
+  _resetStepTimes() {
     this.dataPrevFar = undefined;
     this.dataPrevShort = undefined;
     this.dataNextShort = undefined;
@@ -197,12 +197,13 @@ export class TimePanel {
   /**
    * @private
    *
-   * Finds the time for the specified button, sets the corresponding class variable, and returns the data
-   * @param {*} button 
+   * Finds the time for the specified step, sets the corresponding class variable, and returns the data
+   * @param {String} step
+   * @return {HTMLElement|String}
    */
-  _setButtonTime(button) {
+  _setStepTime(step) {
     let data;
-    switch (button) {
+    switch (step) {
       case 'prev-far':
         if (this.dataPrevFar === undefined) {
           this.dataPrevFar = this.timeline.findPastDate(this.FAR_INTERVALS, this.activeLayer);
@@ -234,10 +235,10 @@ export class TimePanel {
 
   /**
    * writeme
-   * @param {String} button The button we are using ('prev-far', 'prev-short', 'next-short', 'next-far')
+   * @param {String} step The step we are using ('prev-far', 'prev-short', 'next-short', 'next-far')
    */
-  buttonPreviewTime(button) {
-    let data = this._setButtonTime(button);
+  stepPreviewTime(step) {
+    let data = this._setStepTime(step);
 
     let tooltipContent;
     if (data !== undefined) {
@@ -255,10 +256,10 @@ export class TimePanel {
       tooltipContent = 'No data';
     }
 
-    this.parentDiv.find('.js-geona-time-panel-options-prev-next__' + button)
+    this.parentDiv.find('.js-geona-time-panel-options-prev-next__' + step)
       .attr('title', tooltipContent);
 
-    tippy('.js-geona-time-panel-options-prev-next__' + button, {
+    tippy('.js-geona-time-panel-options-prev-next__' + step, {
       arrow: true,
       placement: 'top',
       animation: 'fade',
@@ -271,9 +272,10 @@ export class TimePanel {
 
   /**
    * writeme
+   * @param {String} step The step we are using ('prev-far', 'prev-short', 'next-short', 'next-far')
    */
-  buttonChangeTime(button) {
-    let data = this._setButtonTime(button);
+  stepChangeTime(step) {
+    let data = this._setStepTime(step);
 
     if (data !== undefined) {
       // update timeline
@@ -285,7 +287,7 @@ export class TimePanel {
       this.mapChangeTime(data.date);
 
       // Time has changed so no longer valid
-      this._resetButtonTimes();
+      this._resetStepTimes();
     }
   }
 

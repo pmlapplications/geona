@@ -1,9 +1,10 @@
+import $ from 'jquery';
 /**
  * Sets the triggers for events relating to the timePanel.
  * @param {EventManager} eventManager The EventManager for the current map.
  * @param {JQuery} parentDiv The div which contains the current map.
  */
-export function registerTriggers(eventManager, parentDiv) {
+export function registerTriggers(eventManager, parentDiv, timePanel) {
   // Toggle timePanel visibility
   parentDiv.find('.js-geona-time-panel-toggle').click(() => {
     if (parentDiv.find('.js-geona-time-panel').hasClass('removed')) {
@@ -25,7 +26,7 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('timePanel.buttonPreviewTime', 'prev-far');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonChangeTime', 'prev-far');
+      eventManager.trigger('timePanel.stepChangeTime', 'prev-far');
     });
 
   // wreitme
@@ -34,7 +35,7 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('timePanel.buttonPreviewTime', 'prev-short');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonChangeTime', 'prev-short');
+      eventManager.trigger('timePanel.stepChangeTime', 'prev-short');
     });
 
   // wreitme
@@ -43,7 +44,7 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('timePanel.buttonPreviewTime', 'next-short');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonChangeTime', 'next-short');
+      eventManager.trigger('timePanel.stepChangeTime', 'next-short');
     });
 
   // wreitme
@@ -52,6 +53,19 @@ export function registerTriggers(eventManager, parentDiv) {
       eventManager.trigger('timePanel.buttonPreviewTime', 'next-far');
     })
     .click(() => {
-      eventManager.trigger('timePanel.buttonChangeTime', 'next-far');
+      eventManager.trigger('timePanel.stepChangeTime', 'next-far');
     });
+
+  // keydown listener
+  $(document).on('keydown', (key) => {
+    if (timePanel.timeline && timePanel.timeline.keydownListenerEnabled) {
+      switch (key.keyCode) {
+        case 37:
+          eventManager.trigger('timePanel.stepChangeTime', 'prev-short');
+          break;
+        case 39:
+          eventManager.trigger('timePanel.stepChangeTime', 'next-short');
+      }
+    }
+  });
 }

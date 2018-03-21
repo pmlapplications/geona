@@ -368,6 +368,7 @@ export class OlMap extends GeonaMap {
       {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
       settings
     );
+
     // Add 'hasTime' modifier if it doesn't already have a modifier
     if (options.modifier === undefined && geonaLayer.dimensions && geonaLayer.dimensions.time) {
       options.modifier = 'hasTime';

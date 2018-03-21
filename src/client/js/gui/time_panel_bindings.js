@@ -37,13 +37,13 @@ export function registerBindings(eventManager, timePanel) {
     timePanel.pikadayUpdateGraphic(time);
   });
 
-  // Show the tooltip for prev/next buttons
-  eventManager.bind('timePanel.buttonPreviewTime', (button) => {
-    timePanel.buttonPreviewTime(button);
+  // Show the tooltip for prev/next steps
+  eventManager.bind('timePanel.stepPreviewTime', (step) => {
+    timePanel.stepPreviewTime(step);
   });
 
-  // Change the map layers and other elements, triggered by the buttons
-  eventManager.bind('timePanel.buttonChangeTime', (button) => {
-    timePanel.buttonChangeTime(button);
+  // Change the map layers and other elements, triggered by the steps
+  eventManager.bind('timePanel.stepChangeTime', (step) => {
+    timePanel.stepChangeTime(step);
   });
 }
