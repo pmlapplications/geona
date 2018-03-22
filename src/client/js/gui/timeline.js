@@ -90,7 +90,7 @@ export class Timeline {
     this.TIME_MARKER_DRAW_MARGIN = 5;
 
     /** @type {Array} @desc The currently active layer definitions shown on the timeline */
-    this.timelineCurrentLayers = []; // TODO store identifiers instead of whole layers
+    this.timelineCurrentLayers = [];
 
     /** @type {Number} @desc The width of the whole svg element created for the timeline */
     this.fullWidth = undefined;
@@ -143,7 +143,7 @@ export class Timeline {
 
     /** @type {Object} @desc The minimum and maximum dates after checking every layer on the timeline */
     this.layerDateExtent = { // Set to the domain for default
-      min: this.xScale.domain()[0], // TODO make everything either a string or a date in storage
+      min: this.xScale.domain()[0],
       max: this.xScale.domain()[1],
     };
 
@@ -227,7 +227,7 @@ export class Timeline {
       .attr('y', this.SELECTOR_TOOL_Y)
       .attr('width', this.SELECTOR_TOOL_WIDTH)
       .attr('height', this.dataHeight)
-      .attr('rx', this.SELECTOR_TOOL_RX) // TODO move to css?
+      .attr('rx', this.SELECTOR_TOOL_RX)
       .attr('ry', this.SELECTOR_TOOL_RY)
       .call(drag);
 
@@ -239,7 +239,7 @@ export class Timeline {
       .attr('y1', 0); // y2, x1, x2 are set when the first layer is added
 
     /** @type {Date} @desc Today's date - only changes on page reload */
-    this.todayDate = new Date(); // TODO Make string?
+    this.todayDate = new Date();
 
     /** @type {Set} @desc A Set of the dates from all layers, used for findFutureDate() and findPastDate() */
     this._allLayerDates = new Set();
@@ -467,7 +467,7 @@ export class Timeline {
       .remove().exit();
 
     // Remove the layer from the current layers array
-    let layerToRemove = this._findActiveLayerDefinition(layerIdentifier); // todo rename
+    let layerToRemove = this._findCurrentLayerDefinition(layerIdentifier);
     let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
     this.timelineCurrentLayers.splice(layerIndex, 1);
 
@@ -694,7 +694,7 @@ export class Timeline {
   /**
    * Sets the timeline date to the specified date. If date is outside the layerDateExtent then it will be capped at the
    * layerDateExtent min or max.
-   * @param {String|Date} date // TODO make definitely string
+   * @param {String|Date} date The date to set the timeline to - will be restrained if outside the layerDateExtent.
    */
   triggerMapDateChange(date) {
     let validDate = date;
@@ -886,7 +886,7 @@ export class Timeline {
    * @param {String} layerIdentifier The identifier for the currentLayer.
    * @return {Object|undefined} A layer from this.timelineCurrentLayers
    */
-  _findActiveLayerDefinition(layerIdentifier) {
+  _findCurrentLayerDefinition(layerIdentifier) {
     for (let layer of this.timelineCurrentLayers) {
       if (layer.identifier === layerIdentifier) {
         return layer;
@@ -963,6 +963,7 @@ export class Timeline {
    *
    * @param  {Number} intervals         Number of times to traverse forwards before returning.
    * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
+   *
    * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
    */
   findFutureDate(intervals, layerIdentifier) {
@@ -1166,50 +1167,4 @@ function getDateFormat(date) {
   } else {
     return d3.timeFormat('%b %Y')(date);
   }
-}
-
-/**
- * Deeply assigns two objects into a new object, with the second object taking priority.
- * Deep assignment means that nested objects will be combined as well, instead of the default
- * Object.assign() behaviour where only the top-level properties are combined.
- * @param {*} object1
- * @param {*} args
- * @return {Object} Combined object
- */
-function deepAssign(object1, ...args) {
-  // Check for circular references
-  for (let arg of args) {
-    try {
-      JSON.stringify(arg);
-    } catch (e) {
-      if (e instanceof TypeError) {
-        throw new Error('Cannot deep assign object with circular reference!');
-      } else {
-        throw e;
-      }
-    }
-  }
-
-  // Objects are safe, we can proceed
-  // 
-  let newObject = object1;
-
-  let object2 = args[0];
-
-  // Check to see if we need to recurse
-  if (args.length > 1) {
-    object2 = deepAssign(args);
-  }
-
-  //
-  for (let key of Object.keys(object2)) {
-    if (typeof key === 'object' && key !== null && key.length === undefined && !(key instanceof Date)) {
-      // Probably a normal object - recurse
-      object1.key = deepAssign(object1.key, object2.key);
-    } else {
-      object1.key = object2.key;
-    }
-  }
-
-  return newObject;
 }
