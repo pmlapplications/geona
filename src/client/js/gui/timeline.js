@@ -27,10 +27,11 @@ import {registerBindings} from './timeline_bindings';
  */
 export class Timeline {
   // TODO redraw on window resize
-  // TODO on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip (not in current portal)
-  // TODO should layers reorder if layers are reordered on GUI?
-  // TODO timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
   // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
+
+  // TODO new feature - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
+  // TODO new feature - should layers reorder if layers are reordered on GUI?
+  // TODO new feature - timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -180,7 +181,7 @@ export class Timeline {
       ')')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
-      .on('click', (dateLabel) => { // TODO check all of these and remove one at a time to see if it actually breaks (i.e. which click assignments are actually needed)
+      .on('click', (dateLabel) => {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
@@ -258,7 +259,7 @@ export class Timeline {
    */
   addTimelineLayer(layerToAdd) {
     // Add this layer's times to the Set of all layer times
-    let allDatetimes = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier); // TODO make just id
+    let allDatetimes = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
     for (let datetime of allDatetimes) {
       this._allLayerDates.add(datetime);
     }
@@ -276,7 +277,7 @@ export class Timeline {
 
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1) { // FIXME set to the layerdateextent if that's undefined thing
-      let allDates = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier); // TODO id
+      let allDates = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
       if (allDates.length > 1) {
         this._updateXScaleDomain(allDates);
       }
@@ -302,7 +303,6 @@ export class Timeline {
 
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        // TODO will need to get the title from the identifier
         let label = selectPropertyLanguage(layer.getTitleOrDisplayName());
         // If this was found to be a duplicate, we want to get the label with source appended
         if (duplicateLayerLabels.has(label)) {
@@ -328,7 +328,6 @@ export class Timeline {
         return layer.identifier;
       })
       .attr('transform', (layer) => {
-        // TODO will need to get the title from the identifier
         let label = this.yAxisFullLabels[layer.identifier];
         return 'translate(0, ' + this.yScale(label) + ')';
       })
@@ -336,14 +335,12 @@ export class Timeline {
       .append('rect')
       .attr('class', 'js-geona-timeline-layer-bar geona-timeline-layer-bar')
       .attr('x', (layer) => {
-        // TODO will need to just be the layer identifier not a property
         let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         return this.xScale(new Date(allDates[0]).getTime());
       })
       .attr('y', 0) // Alignment is relative to the group, so 0 always refers to the top position of the group.
       .attr('height', this.LAYER_HEIGHT)
       .attr('width', (layer) => {
-        // TODO will need to just be the layer identifier not a property
         let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDateXPosition = this.xScale(new Date(allDates[0]).getTime());
         let endDateXPosition = this.xScale(new Date(allDates[allDates.length - 1]).getTime());
@@ -470,8 +467,8 @@ export class Timeline {
       .remove().exit();
 
     // Remove the layer from the current layers array
-    let layerToRemove = this._findActiveLayerDefinition(layerIdentifier); // TODO can remove this function afterwards
-    let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove); // TODO wou;ld jst be an identifier
+    let layerToRemove = this._findActiveLayerDefinition(layerIdentifier); // todo rename
+    let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
     this.timelineCurrentLayers.splice(layerIndex, 1);
 
     // Remove the title from the yAxisFullLabels
@@ -481,7 +478,6 @@ export class Timeline {
     // Regenerate the Set of layer times
     let regeneratedSetDates = [];
     for (let layer of this.timelineCurrentLayers) {
-      // TODO make just identifier
       regeneratedSetDates = regeneratedSetDates.concat(this.geona.map.getActiveLayerDatetimes(layer.identifier));
     }
     regeneratedSetDates.sort();
@@ -506,7 +502,6 @@ export class Timeline {
     }
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        // TODO will need to get the title from the identifier
         let label = selectPropertyLanguage(layer.getTitleOrDisplayName());
         // If this was found to be a duplicate, we want to get the label with source appended
         if (duplicateLayerLabels.has(label)) {
@@ -521,7 +516,7 @@ export class Timeline {
       }));
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
-    this.timelineXAxisGroup // TODO should this go in its own method? (i.e. is it duplicated elsewhere?)
+    this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
     this.timelineYAxisGroup
@@ -533,7 +528,6 @@ export class Timeline {
     // Vertically-align each layer bar with its title on the y-axis
     this.timelineData.selectAll('.js-geona-timeline-layer')
       .attr('transform', (layer) => {
-        // TODO change to be just identifier
         let label = this.yAxisFullLabels[layer.identifier];
         return 'translate(0, ' + this.yScale(label) + ')';
       });
@@ -633,12 +627,12 @@ export class Timeline {
     // Adjust the positioning of the layer bars
     this.timelineData.selectAll('.js-geona-timeline-layer-bar')
       .attr('x', (layer) => {
-        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO change to id
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
         return this.xScale(new Date(startDate).getTime());
       })
       .attr('width', (layer) => {
-        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO change to id
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
         let endDate = allDates[allDates.length - 1];
         return this.xScale(new Date(endDate).getTime()) - this.xScale(new Date(startDate).getTime());
@@ -687,7 +681,7 @@ export class Timeline {
   updateLayerDateExtent() {
     this.layerDateExtent = {};
     for (let layer of this.timelineCurrentLayers) {
-      let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO just id
+      let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
       if (new Date(allDates[0]) < this.layerDateExtent.min || this.layerDateExtent.min === undefined) {
         this.layerDateExtent.min = new Date(allDates[0]);
       }
@@ -980,7 +974,7 @@ export class Timeline {
     // If a layer has been supplied, we only want to traverse the times for that layer
     if (layerIdentifier) {
       // TODO find this function and import it (also move this sort of thing to a generic utils file)
-      for (let layer of this.timelineCurrentLayers) { // TODO find in the geona active layers
+      for (let layer of this.timelineCurrentLayers) {
         if (layer.identifier === layerIdentifier) {
           layerTitle = selectPropertyLanguage(layer.title);
           listOfDates = this.geona.map.getActiveLayerDatetimes(layerIdentifier);
@@ -1017,13 +1011,13 @@ export class Timeline {
       changingLayers.push(layerTitle);
     } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
       for (let layer of this.timelineCurrentLayers) {
-        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO just be identifier
+        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let dateIndex = values.findIndex((value) => {
           // Required to avoid problems with date representation comparisons (info on wiki)
           return new Date(futureDate).getTime() === new Date(value).getTime();
         });
         if (dateIndex !== -1) {
-          let title = selectPropertyLanguage(layer.title); // TODO get title from ientifier
+          let title = selectPropertyLanguage(layer.title);
           changingLayers.push(title);
         }
       }
@@ -1070,8 +1064,8 @@ export class Timeline {
       // TODO find this function and import it (also move this sort of thing to a generic utils file)
       for (let layer of this.timelineCurrentLayers) {
         if (layer.identifier === layerIdentifier) {
-          layerTitle = selectPropertyLanguage(layer.title); // TODO get title from id
-          listOfDates = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO just id
+          layerTitle = selectPropertyLanguage(layer.title);
+          listOfDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         }
       }
     }
@@ -1096,7 +1090,7 @@ export class Timeline {
     if (new Date(this.selectorDate) > new Date(startingDate)) {
       let loadedLayers = 0;
       for (let layer of this.timelineCurrentLayers) {
-        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO change to ID
+        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let valueIndex = values.findIndex((value) => {
           return new Date(startingDate).getTime() === new Date(value).getTime();
         });
@@ -1125,7 +1119,7 @@ export class Timeline {
       changingLayers.push(layerTitle);
     } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
       for (let layer of this.timelineCurrentLayers) {
-        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO change to id
+        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         // Functions required to avoid problems with date representation comparisons
         let valueIndex = values.findIndex((value) => {
           return new Date(pastDate).getTime() === new Date(value).getTime();
