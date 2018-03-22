@@ -26,6 +26,13 @@ export class Geona {
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
     this.layerNames = [];
+
+    // Get the parent div and add the 'geona-container' class to it
+    this.parentDiv = $(this.config.get('divId'));
+    this.parentDiv.toggleClass('geona-container', true);
+    // Adding a tabindex makes the div selectable as a document activeElement
+    this.parentDiv.attr('tabindex', 0);
+
     this.eventManager = new EventManager();
     this.gui = new Gui(this);
     this.geonaServer = this.config.get('geonaServer');

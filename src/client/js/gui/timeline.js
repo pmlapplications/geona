@@ -37,17 +37,19 @@ export class Timeline {
     this.eventManager = timePanel.geona.eventManager;
 
     // Default options will be merged with the settings parameter
+    // TODO add keydown enabled option and add this.keydownenabled THEN check if keybindings work!
     let defaultOptions = {
       animateSelector: true,
+      initialPaddingPercentage: {
+        left: 10,
+        right: 10,
+      },
+      keydownListenerEnabled: true,
       timelineMargins: {
         top: 5,
         left: 0,
         right: 200,
         bottom: 0,
-      },
-      initialPaddingPercentage: {
-        left: 10,
-        right: 10,
       },
     };
     /** @type {Object} @desc Default options with custom settings if defined */

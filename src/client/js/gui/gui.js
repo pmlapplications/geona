@@ -28,14 +28,11 @@ registerHelpers(handlebars);
 export class Gui {
   /**
    * Initialises all the elements of the GUI.
-   * @param {Geona} geona The geona instance for this GUI.
+   * @param {Geona} geona The Geona instance for this GUI.
    */
   constructor(geona) {
     this.geona = geona;
-
-    // Get the parent div and add the 'geona-container' class to it
-    this.parentDiv = $(this.geona.config.get('divId'));
-    this.parentDiv.toggleClass('geona-container', true);
+    this.parentDiv = this.geona.parentDiv;
   }
 
   /**

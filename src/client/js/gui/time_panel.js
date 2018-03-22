@@ -66,7 +66,7 @@ export class TimePanel {
       this.drawTimeline();
     }
 
-    registerTriggers(this.geona.eventManager, this.parentDiv);
+    registerTriggers(this.geona.eventManager, this.parentDiv, this);
     registerBindings(this.geona.eventManager, this);
   }
 
