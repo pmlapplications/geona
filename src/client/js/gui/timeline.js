@@ -28,10 +28,12 @@ import {registerBindings} from './timeline_bindings';
 export class Timeline {
   // TODO redraw on window resize
   // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
+  // TODO the timeline should not overlap the map, it should push it up
 
   // TODO new feature - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
   // TODO new feature - should layers reorder if layers are reordered on GUI?
   // TODO new feature - timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
+  // TODO new feature - active layer can be selected, so controls consider only that layer (GUI should update to show which layer is the current layer)
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -187,7 +189,7 @@ export class Timeline {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate);
+        this.moveSelectorToDate(this.selectorDate);
       });
 
 
@@ -365,7 +367,7 @@ export class Timeline {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate);
+        this.moveSelectorToDate(this.selectorDate);
       });
 
     this.timelineYAxisGroup
@@ -667,7 +669,7 @@ export class Timeline {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate);
+        this.moveSelectorToDate(this.selectorDate);
       });
   }
 
@@ -681,7 +683,7 @@ export class Timeline {
     // Use the xScale to convert the x-coordinate to a date
     this.selectorDate = this.xScale.invert(clickXPosition);
     this.triggerMapDateChange(this.selectorDate);
-    this._moveSelectorToDate(this.selectorDate);
+    this.moveSelectorToDate(this.selectorDate);
   }
 
   /**
@@ -733,7 +735,7 @@ export class Timeline {
    * Moves the selector tool to the date position on the x-axis.
    * @param {String} date The date to move the selector tool to.
    */
-  _moveSelectorToDate(date) {
+  moveSelectorToDate(date) {
     this.selectorDate = date;
     if (date < this.layerDateExtent.min) {
       this.selectorDate = this.layerDateExtent.min;

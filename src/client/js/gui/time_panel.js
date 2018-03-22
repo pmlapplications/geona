@@ -1,7 +1,6 @@
 import 'jquery';
 import * as templates from '../../templates/compiled';
 import Pikaday from 'pikaday-time';
-// import Pikaday from 'pikaday';
 import moment from 'moment';
 
 import tippy from 'tippy.js';
@@ -23,22 +22,33 @@ export class TimePanel {
     this.gui = gui;
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
+    /** @type {JQuery} @desc The jQuery selection for the div which contains this instance of Geona */
     this.parentDiv = gui.parentDiv;
 
+    /** @type {Number} @desc The number of datetimes to traverse when calling step methods with a 'short' value */
     this.SHORT_INTERVALS = 1;
+    /** @type {Number} @desc The number of datetimes to traverse when calling step methods with a 'far' value */
     this.FAR_INTERVALS = 10;
 
+    /** @type {Timeline} @desc The instance of the timeline that has been created for this instance of Geona */
     this.timeline = undefined;
+    /** @type {Pikaday} @desc The Pikaday-time date picker that can be used to select datetimes */
     this.pikaday = undefined;
 
-    this.timePrevFar = undefined;
-    this.timePrevShort = undefined;
-    this.timeNextFar = undefined;
-    this.timeNextShort = undefined;
+    /** @type {String} @desc The datetime to move to when a step method is called with the value 'prev-far' */
+    this.datetimePrevFar = undefined;
+    /** @type {String} @desc The datetime to move to when a step method is called with the value 'prev-short' */
+    this.datetimePrevShort = undefined;
+    /** @type {String} @desc The datetime to move to when a step method is called with the value 'next-short' */
+    this.datetimeNextFar = undefined;
+    /** @type {String} @desc The datetime to move to when a step method is called with the value 'next-far' */
+    this.datetimeNextShort = undefined;
 
+    /** @type {Number} @desc The width of the TimePanel container in px */
     this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width();
 
-    this.activeLayer = undefined;
+    /** @type {String} @desc The identifier for the currently selected layer on the timeline */
+    this.activeLayer = undefined; // Currently there are no GUI controls for this, but the appropriate functions should be ready for use from the console
 
     this.parentDiv.append(templates.time_panel());
     if (!this.config.opened) {
@@ -70,25 +80,28 @@ export class TimePanel {
   }
 
   /**
-   *
+   * Draws the SVG timeline and adds any currently active layers.
+   * Only one timeline can be drawn at a time per instance of Geona.
    */
   drawTimeline() {
+    if (this.timeline === undefined) {
     // Assign ID to this instance's timeline container
-    let instanceId = this.parentDiv.attr('id');
-    this.parentDiv.find('.js-geona-time-panel-timeline').attr('id', instanceId + '-timeline-container');
+      let instanceId = this.parentDiv.attr('id');
+      this.parentDiv.find('.js-geona-time-panel-timeline').attr('id', instanceId + '-timeline-container');
 
-    this.timeline = new Timeline(this, {
-      elementId: instanceId + '-timeline-container',
-    });
+      this.timeline = new Timeline(this, {
+        elementId: instanceId + '-timeline-container',
+      });
 
-    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
-      if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'hasTime') {
-        let availableLayer = this.geona.map._availableLayers[layerIdentifier];
-        this.timeline.addTimelineLayer(availableLayer);
+      for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+        if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'hasTime') {
+          let availableLayer = this.geona.map._availableLayers[layerIdentifier];
+          this.timeline.addTimelineLayer(availableLayer);
+        }
       }
-    }
 
-    this.pikadayUpdateGraphic(this.timeline.selectorDate);
+      this.pikadayUpdateGraphic(this.timeline.selectorDate);
+    }
   }
 
   /**
@@ -142,12 +155,12 @@ export class TimePanel {
     this.geona.map.loadLayersToNearestValidTime(utcDate);
 
     // Update timeline display
-    this.timelineUpdateGraphic(date); // todo rename timelineUpdateDisplay
+    this.timelineUpdateGraphic(date);
   }
 
   /**
    * Changes the pikaday date without changing the map layers.
-   * @param {String|Date} time
+   * @param {String|Date} time The datetime to set the current date box to.
    */
   pikadayUpdateGraphic(time) {
     this.pikaday.setDate(time, true); // true parameter prevents 'onSelect' action on pikaday from triggering
@@ -156,7 +169,7 @@ export class TimePanel {
   /**
    * Called when the timeline is used to change the time.
    * Updates the pikaday and current-date text input, then calls mapChangeTime()
-   * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
+   * @param {String|Date} time Time in Date() parseable format
    */
   timelineChangeTime(time) {
     this.pikadayUpdateGraphic(time);
@@ -167,15 +180,15 @@ export class TimePanel {
 
   /**
    * Changes the display of the timeline without changing the map layers or any other components.
-   * @param {String|Date} time
+   * @param {String|Date} time Datetime to set the timeline to.
    */
   timelineUpdateGraphic(time) {
-    this.timeline._moveSelectorToDate(time);
+    this.timeline.moveSelectorToDate(time);
   }
 
   /**
    * Changes the times of the layers on the map
-   * @param {String} time Time in d3-timelines format (e.g. Sun Dec 12 2010 23:57:22 GMT+0000 (GMT))
+   * @param {String|Date} time Time in Date() parseable format
    */
   mapChangeTime(time) {
     this.geona.map.loadLayersToNearestValidTime(time);
@@ -187,45 +200,45 @@ export class TimePanel {
    * Resets the button step times so they will be recalculated.
    */
   _resetStepTimes() {
-    this.dataPrevFar = undefined;
-    this.dataPrevShort = undefined;
-    this.dataNextShort = undefined;
-    this.dataNextFar = undefined;
+    this.datetimePrevFar = undefined;
+    this.datetimePrevShort = undefined;
+    this.datetimeNextShort = undefined;
+    this.datetimeNextFar = undefined;
   }
 
   /**
    * @private
    *
-   * Finds the time for the specified step, sets the corresponding class variable, and returns the data
-   * @param {String} step
-   * @return {HTMLElement|String}
+   * Finds the time for the specified step, sets the corresponding class variable, and returns the data.
+   * @param {String} step The type of step to take ('prev-far', 'prev-short', 'next-short', 'next-far').
+   * @return {HTMLElement|String} An HTML table containing the layers that will be set to a certain time, or 'No data'.
    */
   _setStepTime(step) {
     let data;
     switch (step) {
       case 'prev-far':
-        if (this.dataPrevFar === undefined) {
-          this.dataPrevFar = this.timeline.findPastDate(this.FAR_INTERVALS, this.activeLayer);
+        if (this.datetimePrevFar === undefined) {
+          this.datetimePrevFar = this.timeline.findPastDate(this.FAR_INTERVALS, this.activeLayer);
         }
-        data = this.dataPrevFar;
+        data = this.datetimePrevFar;
         break;
       case 'prev-short':
-        if (this.dataPrevShort === undefined) {
-          this.dataPrevShort = this.timeline.findPastDate(this.SHORT_INTERVALS, this.activeLayer);
+        if (this.datetimePrevShort === undefined) {
+          this.datetimePrevShort = this.timeline.findPastDate(this.SHORT_INTERVALS, this.activeLayer);
         }
-        data = this.dataPrevShort;
+        data = this.datetimePrevShort;
         break;
       case 'next-short':
-        if (this.dataNextShort === undefined) {
-          this.dataNextShort = this.timeline.findFutureDate(this.SHORT_INTERVALS, this.activeLayer);
+        if (this.datetimeNextShort === undefined) {
+          this.datetimeNextShort = this.timeline.findFutureDate(this.SHORT_INTERVALS, this.activeLayer);
         }
-        data = this.dataNextShort;
+        data = this.datetimeNextShort;
         break;
       case 'next-far':
-        if (this.dataNextFar === undefined) {
-          this.dataNextFar = this.timeline.findFutureDate(this.FAR_INTERVALS, this.activeLayer);
+        if (this.datetimeNextFar === undefined) {
+          this.datetimeNextFar = this.timeline.findFutureDate(this.FAR_INTERVALS, this.activeLayer);
         }
-        data = this.dataNextFar;
+        data = this.datetimeNextFar;
         break;
     }
 
@@ -296,10 +309,7 @@ export class TimePanel {
    */
   setActiveLayer(layerIdentifier = undefined) {
     this.activeLayer = layerIdentifier;
-    this.timePrevFar = undefined;
-    this.timePrevShort = undefined;
-    this.timeNextShort = undefined;
-    this.timeNextFar = undefined;
+    this._resetStepTimes();
   }
 
   getActiveLayer() {
