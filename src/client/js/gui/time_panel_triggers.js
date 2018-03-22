@@ -21,37 +21,37 @@ export function registerTriggers(eventManager, parentDiv, timePanel) {
       eventManager.trigger('timePanel.showPikaday');
     });
 
-  // wreitme
+  // Preview and change time based on the step value corresponding to prev-far
   parentDiv.find('.js-geona-time-panel-options-prev-next__prev-far')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonPreviewTime', 'prev-far');
+      eventManager.trigger('timePanel.stepPreviewTime', 'prev-far');
     })
     .click(() => {
       eventManager.trigger('timePanel.stepChangeTime', 'prev-far');
     });
 
-  // wreitme
+  // Preview and change time based on the step value corresponding to prev-short
   parentDiv.find('.js-geona-time-panel-options-prev-next__prev-short')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonPreviewTime', 'prev-short');
+      eventManager.trigger('timePanel.stepPreviewTime', 'prev-short');
     })
     .click(() => {
       eventManager.trigger('timePanel.stepChangeTime', 'prev-short');
     });
 
-  // wreitme
+  // Preview and change time based on the step value corresponding to next-short
   parentDiv.find('.js-geona-time-panel-options-prev-next__next-short')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonPreviewTime', 'next-short');
+      eventManager.trigger('timePanel.stepPreviewTime', 'next-short');
     })
     .click(() => {
       eventManager.trigger('timePanel.stepChangeTime', 'next-short');
     });
 
-  // wreitme
+  // Preview and change time based on the step value corresponding to next-far
   parentDiv.find('.js-geona-time-panel-options-prev-next__next-far')
     .mouseover(() => {
-      eventManager.trigger('timePanel.buttonPreviewTime', 'next-far');
+      eventManager.trigger('timePanel.stepPreviewTime', 'next-far');
     })
     .click(() => {
       eventManager.trigger('timePanel.stepChangeTime', 'next-far');

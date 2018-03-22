@@ -757,10 +757,10 @@ export class Timeline {
     }
 
     // FIXME Pan the timeline if the selector has moved offscreen
-    // if (this.xScale(new Date(this.selectorDate)) < 0 || this.xScale(new Date(this.selectorDate)) > this.dataWidth) {
-    //   this.setView([this.xScale.invert(0), this.xScale.invert(this.dataWidth)]);
-    //   this._translateSelectorTool();
-    // }
+    if (this.xScale(new Date(this.selectorDate)) < 0 || this.xScale(new Date(this.selectorDate)) > this.dataWidth) {
+      this.setView([this.xScale.invert(0), this.xScale.invert(this.dataWidth)]);
+      this._translateSelectorTool();
+    }
   }
 
   /**
@@ -894,7 +894,7 @@ export class Timeline {
    * Moves the selector tool on the x-axis. Used when the xScale changes.
    */
   _translateSelectorTool() {
-  // Adjust positioning of the selector tool
+    // Adjust positioning of the selector tool
     this.selectorTool
       .attr('x', () => {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;

@@ -63,7 +63,7 @@ export class TimePanel {
     this.pikaday = new Pikaday(
       {
         field: this.parentDiv.find('.js-geona-time-panel-options-current-date')[0],
-        format: 'YYYY-MM-DD HH-mm', // FIXME
+        format: moment().format('YYYY-MM-DD HH-mm'), // fixme formats are not kept
         onSelect: (date) => {
           this.pikadayChangeTime(date);
         },
@@ -246,7 +246,8 @@ export class TimePanel {
   }
 
   /**
-   * writeme
+   * Constructs an HTML table containing information about the specified datetime, and puts it into a tooltip for
+   * the corresponding step button.
    * @param {String} step The step we are using ('prev-far', 'prev-short', 'next-short', 'next-far')
    */
   stepPreviewTime(step) {
@@ -283,7 +284,7 @@ export class TimePanel {
   }
 
   /**
-   * writeme
+   * Changes the map time based on the step specified.
    * @param {String} step The step we are using ('prev-far', 'prev-short', 'next-short', 'next-far')
    */
   stepChangeTime(step) {
@@ -305,13 +306,17 @@ export class TimePanel {
 
   /**
    * Sets the active timeline layer. Undefined means there is no active layer.
-   * @param {String|undefined} layerIdentifier The ID for the layer (maybe should be title)
+   * @param {String|undefined} [layerIdentifier] The identifier for the layer.
    */
   setActiveLayer(layerIdentifier = undefined) {
     this.activeLayer = layerIdentifier;
     this._resetStepTimes();
   }
 
+  /**
+   * Returns the contents of this.activeLayer.
+   * @return {String} The identifier of the currently active timeline layer.
+   */
   getActiveLayer() {
     return this.activeLayer;
   }
