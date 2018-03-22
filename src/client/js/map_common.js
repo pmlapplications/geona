@@ -11,6 +11,7 @@ import LayerWms from '../../common/layer/layer_wms';
 import LayerWmts from '../../common/layer/layer_wmts';
 
 
+// TODO some of these functions perhaps shouldn't be in here
 /**
  * Variables and functions common to all map types.
  */
