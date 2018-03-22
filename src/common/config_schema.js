@@ -201,6 +201,7 @@ export let client = {
       doc: 'The identifier for the data layers to put on the map by default.',
       format: Array,
       default: ['Rrs_412', 'chlor_a'],
+      // default: ['chlor_a', 'Rrs_412'],
     },
     dataLayers: {
       doc: 'The Geona-style definitions of all data to be made available by default.',
@@ -963,8 +964,8 @@ export let client = {
                   'current': true,
                   'values': [
                     // '1997-09-04T00:00:00.000Z',
-                    '1998-01-11T00:00:00.000Z',
-                    '2005-06-20T00:00:00.000Z',
+                    // '1998-01-11T00:00:00.000Z',
+                    // '2005-06-20T00:00:00.000Z',
                     '2015-12-27T00:00:00.000Z',
                   ],
                 },

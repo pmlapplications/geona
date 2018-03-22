@@ -14,7 +14,6 @@ import {registerBindings} from './time_panel_bindings';
  * Creates the GUI time panel.
  */
 export class TimePanel {
-  // TODO keydown listeners
   /**
    * Creates the timeline depending on the config options.
    * @param {Gui} gui                      The Gui for this instance of Geona.

@@ -88,6 +88,8 @@ export class Timeline {
     this.SELECTOR_TOOL_CORRECTION = this.SELECTOR_TOOL_WIDTH / 2;
     /** @type {Number} @desc CONST - The amount of pixels off the edge of the timeline before markers are not drawn */
     this.TIME_MARKER_DRAW_MARGIN = 5;
+    /** @type {Number} @desc CONST - The time in ms to add to each side if the first timeline layer only has a single time*/
+    this.SINGLE_TIME_EXTENT_MARGIN = 15638400000; // 6 months in ms
 
     /** @type {Array} @desc The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
@@ -168,7 +170,7 @@ export class Timeline {
       ')')
       .call(this.zoomBehavior)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
-        this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
+        this.clickDate(this.timeline.node());
       });
 
 
@@ -276,11 +278,18 @@ export class Timeline {
 
 
     // Update xScale domain to show first layer's full extent
-    if (this.timelineCurrentLayers.length === 1) { // FIXME set to the layerdateextent if that's undefined thing
+    if (this.timelineCurrentLayers.length === 1) {
       let allDates = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
       if (allDates.length > 1) {
         this._updateXScaleDomain(allDates);
+      } else {
+        let singleDomain = [
+          new Date(allDates[0]).getTime() - this.SINGLE_TIME_EXTENT_MARGIN,
+          new Date(allDates[0]).getTime() + this.SINGLE_TIME_EXTENT_MARGIN,
+        ];
+        this._updateXScaleDomain(singleDomain);
       }
+
       if (layerToAdd.dimensions.time.default) {
         this.selectorDate = layerToAdd.dimensions.time.default;
       }
@@ -682,11 +691,22 @@ export class Timeline {
     this.layerDateExtent = {};
     for (let layer of this.timelineCurrentLayers) {
       let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
-      if (new Date(allDates[0]) < this.layerDateExtent.min || this.layerDateExtent.min === undefined) {
-        this.layerDateExtent.min = new Date(allDates[0]);
-      }
-      if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max || this.layerDateExtent.max === undefined) { // eslint-disable-line max-len
-        this.layerDateExtent.max = new Date(allDates[allDates.length - 1]);
+      if (allDates.length === 1) {
+        if (new Date(allDates[0] - this.SINGLE_TIME_EXTENT_MARGIN) < this.layerDateExtent.min
+          || this.layerDateExtent.min === undefined) {
+          this.layerDateExtent.min = new Date(new Date(allDates[0]) - this.SINGLE_TIME_EXTENT_MARGIN);
+        }
+        if (new Date(allDates[0] + this.SINGLE_TIME_EXTENT_MARGIN) > this.layerDateExtent.max
+          || this.layerDateExtent.max === undefined) {
+          this.layerDateExtent.max = new Date(new Date(allDates[0]) + this.SINGLE_TIME_EXTENT_MARGIN);
+        }
+      } else {
+        if (new Date(allDates[0]) < this.layerDateExtent.min || this.layerDateExtent.min === undefined) {
+          this.layerDateExtent.min = new Date(allDates[0]);
+        }
+        if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max || this.layerDateExtent.max === undefined) { // eslint-disable-line max-len
+          this.layerDateExtent.max = new Date(allDates[allDates.length - 1]);
+        }
       }
     }
   }
