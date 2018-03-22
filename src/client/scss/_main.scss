@@ -280,6 +280,10 @@
   fill: #ffffff;
 }
 
+.geona-timeline-x-axis {
+  shape-rendering: crispEdges;
+}
+
 .geona-timeline-x-axis .tick:hover text {
     fill: #999;
     cursor: pointer; // glitchy

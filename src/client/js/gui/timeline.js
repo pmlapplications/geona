@@ -30,7 +30,6 @@ export class Timeline {
   // TODO on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip (not in current portal)
   // TODO should layers reorder if layers are reordered on GUI?
   // TODO timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
-  // TODO classes do not have 'js' at the beginning
   // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
@@ -179,7 +178,6 @@ export class Timeline {
         (this.Y_AXIS_LABEL_WIDTH) + ', ' +
         (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) +
       ')')
-      .attr('shape-rendering', 'crispEdges')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
       .on('click', (dateLabel) => { // TODO check all of these and remove one at a time to see if it actually breaks (i.e. which click assignments are actually needed)
@@ -192,21 +190,19 @@ export class Timeline {
 
     /** @type {SVGElement} @desc The SVG g element which holds the y-axis elements */
     this.timelineYAxisGroup = this.timeline.append('g')
-      .attr('class', 'geona-timeline-y-axis')
       .call(this.yAxis)
       .on('click', () => { // Prevents the click functions from being triggered when y-axis is clicked
         d3.event.stopPropagation();
       });
     this.timelineYAxisGroup // Adds plain background to go behind labels
       .append('rect')
-      .attr('class', 'geona-timeline-y-axis-background')
+      .attr('class', 'js-geona-timeline-y-axis-background geona-timeline-y-axis-background')
       .attr('width', this.Y_AXIS_LABEL_WIDTH)
       .attr('height', this.fullHeight);
 
 
     /** @type {SVGElement} @desc The SVG g element which holds the timeline data (layers) */
-    this.timelineData = this.timeline.append('g')
-      .attr('class', 'geona-timeline-data');
+    this.timelineData = this.timeline.append('g');
 
 
     /** @type {d3.drag} @desc The drag behaviour to be used for dragging the selector tool */
@@ -321,13 +317,13 @@ export class Timeline {
       }));
 
 
-    this.timelineLayerSelection = this.timelineData.selectAll('.geona-timeline-layer');
+    this.timelineLayerSelection = this.timelineData.selectAll('.js-geona-timeline-layer');
     // Create a g for each layer
     this.timelineLayerBars = this.timelineLayerSelection
       .remove().exit()
       .data(this.timelineCurrentLayers)
       .enter().append('g')
-      .attr('class', 'geona-timeline-layer')
+      .attr('class', 'js-geona-timeline-layer geona-timeline-layer')
       .attr('data-layer-identifier', (layer) => { // Adds the identifier as a data attribute
         return layer.identifier;
       })
@@ -338,7 +334,7 @@ export class Timeline {
       })
       // Within the g create a rect
       .append('rect')
-      .attr('class', 'geona-timeline-layer-bar')
+      .attr('class', 'js-geona-timeline-layer-bar geona-timeline-layer-bar')
       .attr('x', (layer) => {
         // TODO will need to just be the layer identifier not a property
         let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
@@ -369,7 +365,7 @@ export class Timeline {
     this.timelineYAxisGroup
       .call(this.yAxis)
       .raise()
-      .select('.geona-timeline-y-axis-background')
+      .select('.js-geona-timeline-y-axis-background')
       .attr('height', this.fullHeight);
 
     // Trim the visible title to prevent overspill onto the layer bars
@@ -380,9 +376,9 @@ export class Timeline {
       .call((yAxisLabels) => {
         this._trimYAxisLabels(yAxisLabels);
       })
-      .attr('class', 'geona-timeline-title-tippy')
+      .attr('class', 'js-geona-timeline-title-tippy')
       .on('mouseover', () => { // Set a tooltip to appear with the full title if we mouseover the trimmed title
-        tippy('.geona-timeline-title-tippy', {
+        tippy('.js-geona-timeline-title-tippy', {
           arrow: true,
           placement: 'top-start',
           animation: 'fade',
@@ -451,7 +447,7 @@ export class Timeline {
     this.timelineData.select('[data-layer-identifier = ' + layer.identifier + ']').selectAll('line')
       .data(filteredDates)
       .enter().append('line')
-      .attr('class', 'geona-timeline-layer-time-marker')
+      .attr('class', 'js-geona-timeline-layer-time-marker geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
         let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
@@ -531,11 +527,11 @@ export class Timeline {
     this.timelineYAxisGroup
       .call(this.yAxis)
       .raise()
-      .select('.geona-timeline-y-axis-background')
+      .select('.js-geona-timeline-y-axis-background')
       .attr('height', this.fullHeight);
 
     // Vertically-align each layer bar with its title on the y-axis
-    this.timelineData.selectAll('.geona-timeline-layer')
+    this.timelineData.selectAll('.js-geona-timeline-layer')
       .attr('transform', (layer) => {
         // TODO change to be just identifier
         let label = this.yAxisFullLabels[layer.identifier];
@@ -635,7 +631,7 @@ export class Timeline {
     this.timelineXAxisGroup.call(this.xAxis);
 
     // Adjust the positioning of the layer bars
-    this.timelineData.selectAll('.geona-timeline-layer-bar')
+    this.timelineData.selectAll('.js-geona-timeline-layer-bar')
       .attr('x', (layer) => {
         let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier); // TODO change to id
         let startDate = allDates[0];
@@ -818,7 +814,7 @@ export class Timeline {
    */
   _resizeLayerBars() {
     // Adjust the positioning of the layer bars
-    this.timelineData.selectAll('.geona-timeline-layer-bar')
+    this.timelineData.selectAll('.js-geona-timeline-layer-bar')
       .attr('x', (layer) => {
         let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
@@ -838,7 +834,7 @@ export class Timeline {
    */
   _redrawTimeMarkers() {
     // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
+    this.timelineData.selectAll('.js-geona-timeline-layer-time-marker')
       .remove().exit();
     // Add time markers back
     for (let layer of this.timelineCurrentLayers) {
@@ -851,7 +847,7 @@ export class Timeline {
    * Moves the time markers on the x-axis. Used when the xScale has panned, and not zoomed.
    */
   _translateTimeMarkers() {
-    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
+    this.timelineData.selectAll('.js-geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
         let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
