@@ -7,6 +7,8 @@ import {
 } from './map_common';
 import $ from 'jquery';
 
+import {registerBindings} from './map_leaflet_bindings';
+
 let L;
 
 /**
@@ -15,16 +17,17 @@ let L;
  * @implements {GeonaMap}
  */
 export class LMap extends GeonaMap {
-  // TODO generateDatetimesFromIntervals on add
   /**
    * Instantiate a new LMap and create a new Leaflet map.
    * @param  {Object} config The map config to load
    * @param {HTMLElement} mapDiv The div to put the map in
    */
-  constructor(config, mapDiv) {
+  constructor(config, mapDiv, geona) {
     super();
     /** @type {Object} The map config */
     this.config = config;
+    this.eventManager = geona.eventManager;
+    this.parentDiv = geona.parentDiv;
     /**  @type {Object} The available map layers */
     this._availableLayers = {};
     /**  @type {L.featureGroup} The layers on the map */
@@ -60,7 +63,7 @@ export class LMap extends GeonaMap {
       },
     });
 
-    // TODO sort these when finished
+
     /** @private @type {Boolean} Tracks whether the map has been initialized */
     this.initialized = false;
 
@@ -106,6 +109,7 @@ export class LMap extends GeonaMap {
       let layerServer = this._availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
+    // TODO don't do this if there is an overlay 'do you want to load or make new map'
     // Adds all defined data layers to the map
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
@@ -128,6 +132,8 @@ export class LMap extends GeonaMap {
     }
 
     this.loadConfig_();
+
+    registerBindings(this.eventManager, this);
     // Must come last in the constructor
     this.initialized = true;
   }
@@ -1001,6 +1007,17 @@ export class LMap extends GeonaMap {
       // Return the merged and sorted array that was created when the layer was added.
       return this._activeLayerGeneratedTimes[layerIdentifier];
     }
+  }
+
+  /**
+   * Adjusts the height of the attribution bar so that it rests on top of the Timeline.
+   */
+  adjustAttributionHeight() {
+    let attributionBar = this.parentDiv.find('.leaflet-control-attribution');
+    let timePanelHeight = this.parentDiv.find('.js-geona-time-panel').height();
+    console.log('leaf');
+    // Change the height of the attribution bar
+    attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }
 }
 

@@ -6,6 +6,7 @@ import {
   loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage,
   findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
+import {registerBindings} from './map_openlayers_bindings';
 
 import proj4 from 'proj4';
 
@@ -26,10 +27,13 @@ export class OlMap extends GeonaMap {
    * @param  {Object} config The map config to load
    * @param {HTMLElement} mapDiv The div to put the map in
    */
-  constructor(config, mapDiv) {
+  constructor(config, mapDiv, geona) {
     super();
     /** @type {Object} The map config */
     this.config = config;
+    this.eventManager = geona.eventManager;
+    this.parentDiv = geona.parentDiv;
+
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
     this.basemaps_ = {};
     /** @private @type {Object} The available map Layers, as Geona Layers */
@@ -107,6 +111,7 @@ export class OlMap extends GeonaMap {
       this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
+    // TODO don't do this if there is an overlay 'do you want to load or make new map'
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
         for (let layerIdentifier of this.config.data) {
@@ -128,6 +133,8 @@ export class OlMap extends GeonaMap {
     }
 
     this.loadConfig_();
+
+    registerBindings(this.eventManager, this);
 
     // Must come last in the method
     this.initialized = true;
@@ -998,6 +1005,16 @@ export class OlMap extends GeonaMap {
       // Return the merged and sorted array that was created when the layer was added.
       return this._activeLayerGeneratedTimes[layerIdentifier];
     }
+  }
+
+  /**
+   * Adjusts the height of the attribution bar so that it rests on top of the Timeline.
+   */
+  adjustAttributionHeight() {
+    let attributionBar = this.parentDiv.find('.ol-attribution');
+    let timePanelHeight = this.parentDiv.find('.js-geona-time-panel').height();
+    // Change the height of the attribution bar
+    attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }
 }
 

@@ -13,6 +13,7 @@ export function registerTriggers(eventManager, parentDiv, timePanel) {
     } else {
       eventManager.trigger('timePanel.hideTimePanel');
     }
+    eventManager.trigger('timePanel.heightChanged');
   });
 
   // Show Pikaday widget

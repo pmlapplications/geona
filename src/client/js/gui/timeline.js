@@ -318,6 +318,7 @@ export class Timeline {
         // If this was found to be a duplicate, we want to get the label with source appended
         if (duplicateLayerLabels.has(label)) {
           if (layer.layerServer) {
+            // TODO append the layer ID if they're the same title AND server
             label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.layerServer;
           } else {
             label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier;
@@ -359,6 +360,9 @@ export class Timeline {
       });
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
+    // After changing the height we fire an event to indicate this fact
+    this.eventManager.trigger('timePanel.heightChanged', this.parentDiv);
+
     this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
@@ -527,6 +531,9 @@ export class Timeline {
       }));
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
+    // After changing the height we fire an event to indicate this fact
+    this.eventManager.trigger('timePanel.heightChanged', this.parentDiv);
+
     this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
