@@ -10,12 +10,24 @@ import {registerBindings} from './timeline_bindings';
 /**
  * An SVG timeline, built using D3 version 4.
  * Used to select times for layers on the map.
+ *
+ * The Timeline can be controlled in a variety of ways:
+ * - Clicking on a bar will move the selector to that position, and load the closest previous time.
+ * - Clicking on an x-axis label will move the selector to the label date and load the closest previous time.
+ * - The method moveSelectorToDate() can be called programmatically to change the location of the selector tool.
+ *   Note that this does not actually affect the map layers, which are controlled with their map library methods.
+ * - TODO The method xyz can be called programmatically to set the pan and zoom.
+ * - The timeline can be scrolled on in order to adjust the zoom level.
+ * - The timeline can be dragged in order to pan forwards and backwards along the x-axis.
+ *
+ * There are also controls in the TimePanel for:
+ * - Buttons to move a set number of intervals forwards and backwards in time.
+ * - A Pikaday date picker to jump to a specific datetime.
+ * - Keydown listeners to trigger the command to move a set number of intervals forwards and backwards in time.
  */
 export class Timeline {
   // TODO redraw on window resize
-  // TODO write full list of controls - scroll, drag, click, tickClick, programmatic, keydown (and mention that the buttons and pikaday are in timepanel)
   // TODO on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip (not in current portal)
-  // TODO x-axis line needs to be crispEdges (see firefox)
   // TODO should layers reorder if layers are reordered on GUI?
   // TODO timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
   // TODO classes do not have 'js' at the beginning
@@ -37,7 +49,6 @@ export class Timeline {
     this.eventManager = timePanel.geona.eventManager;
 
     // Default options will be merged with the settings parameter
-    // TODO add keydown enabled option and add this.keydownenabled THEN check if keybindings work!
     let defaultOptions = {
       animateSelector: true,
       initialPaddingPercentage: {
@@ -168,6 +179,7 @@ export class Timeline {
         (this.Y_AXIS_LABEL_WIDTH) + ', ' +
         (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) +
       ')')
+      .attr('shape-rendering', 'crispEdges')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
       .on('click', (dateLabel) => { // TODO check all of these and remove one at a time to see if it actually breaks (i.e. which click assignments are actually needed)

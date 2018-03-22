@@ -2,7 +2,8 @@ import $ from 'jquery';
 /**
  * Sets the triggers for events relating to the timePanel.
  * @param {EventManager} eventManager The EventManager for the current map.
- * @param {JQuery} parentDiv The div which contains the current map.
+ * @param {JQuery}       parentDiv    The div which contains the current map.
+ * @param {TimePanel}    timePanel    The Geona TimePanel these triggers correspond to.
  */
 export function registerTriggers(eventManager, parentDiv, timePanel) {
   // Toggle timePanel visibility
@@ -72,7 +73,9 @@ export function registerTriggers(eventManager, parentDiv, timePanel) {
       // TODO if the overlay is not visible and the collaboration overlay is not visible (from GISPortal)
       // if () {
       // If the timeline is instantiated and accepting keyboard commands
-      if (timePanel.timeline && timePanel.timeline.options.keydownListenerEnabled) {
+      if (timePanel.timeline
+        && timePanel.timeline.options.keydownListenerEnabled
+        && timePanel.timeline.timelineCurrentLayers.length > 0) {
         switch (key.keyCode) {
           case 37:
             eventManager.trigger('timePanel.stepChangeTime', 'prev-short');
