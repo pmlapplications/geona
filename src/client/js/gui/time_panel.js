@@ -63,7 +63,6 @@ export class TimePanel {
     this.pikaday = new Pikaday(
       {
         field: this.parentDiv.find('.js-geona-time-panel-options-current-date')[0],
-        format: moment().format('YYYY-MM-DD HH-mm'), // fixme formats are not kept and it's the wrong time (gets today's date)
         onSelect: (date) => {
           this.pikadayChangeTime(date);
         },
@@ -163,7 +162,10 @@ export class TimePanel {
    * @param {String|Date} time The datetime to set the current date box to.
    */
   pikadayUpdateGraphic(time) {
-    this.pikaday.setDate(time, true); // true parameter prevents 'onSelect' action on pikaday from triggering
+    // FIXME format doesn't work
+    let formattedTime = moment(time).format('YYYY-MM-DD HH:mm').toString();
+    console.log(formattedTime);
+    this.pikaday.setDate(formattedTime, true); // true parameter prevents 'onSelect' action on pikaday from triggering
   }
 
   /**
@@ -272,6 +274,7 @@ export class TimePanel {
     this.parentDiv.find('.js-geona-time-panel-options-prev-next__' + step)
       .attr('title', tooltipContent);
 
+    // FIXME these tooltips don't update properly (so when they display a new tooltip it still has the old stuff too)
     tippy('.js-geona-time-panel-options-prev-next__' + step, {
       arrow: true,
       placement: 'top-end',

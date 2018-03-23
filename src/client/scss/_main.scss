@@ -190,6 +190,7 @@
   bottom: 0;
   position: absolute;
   width: 100%;
+  pointer-events: none; // TODO not a big fan of this, is there a better way?
 }
 
 .geona-time-panel-toggle{
@@ -197,6 +198,7 @@
   height: auto;
   background-color: #fff;
   text-align: center;
+  pointer-events: all;
 }
 
 .geona-time-panel{
@@ -204,6 +206,7 @@
   height: auto;
   background-color: #fff;
   padding: 5px;
+  pointer-events: all;
 }
 
 .geona-time-panel__heading{

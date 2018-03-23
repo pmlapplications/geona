@@ -189,7 +189,7 @@ function registerLayersTriggers(eventManager, parentDiv) {
   });
 
   // Show/hide layer
-  // TODO why is 'this' invalid, and is there a better way to do it?
+  // TODO 'this' is invalid because of strict mode - is there a better way to do it?
   parentDiv.find('.js-geona-layers-list__item-visibility').click(function(jQueryEvent) {
     // Finds the list element that contains the icon which was clicked
     let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this

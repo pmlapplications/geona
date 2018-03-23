@@ -28,7 +28,6 @@ import {registerBindings} from './timeline_bindings';
 export class Timeline {
   // TODO redraw on window resize
   // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
-  // TODO the timeline should not overlap the map, it should push it up
 
   // TODO new feature - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
   // TODO new feature - should layers reorder if layers are reordered on GUI?
@@ -45,6 +44,7 @@ export class Timeline {
    *   @param {Object}  [settings.initialPaddingPercentage] The % to pad each side of the first layer bar.
    */
   constructor(timePanel, settings) {
+    window.d3 = d3;
     this.timePanel = timePanel;
     this.parentDiv = timePanel.parentDiv;
     this.geona = timePanel.geona;
@@ -118,7 +118,7 @@ export class Timeline {
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
-    this.xScale2 = d3.scaleTime() // TODO is there any alternative to this? Maybe create a new one in zoom, with the properties taken from this one (using getters etc.)?
+    this.xScale2 = d3.scaleTime()
       .range([this.Y_AXIS_LABEL_WIDTH, this.fullWidth])
       .domain([
         new Date('2010-01-01'),
@@ -295,6 +295,12 @@ export class Timeline {
       if (layerToAdd.dimensions.time.default) {
         this.selectorDate = layerToAdd.dimensions.time.default;
       }
+
+      // TODO read the paper and implement, should be quite easy
+      // Save programmatic zoom stuff
+      console.log(d3.zoomTransform(this.timeline.node()));
+      console.log(this.xScale.invert(this.Y_AXIS_LABEL_WIDTH));
+      console.log(this.xScale.invert(this.fullWidth));
     }
 
 
@@ -636,7 +642,7 @@ export class Timeline {
   zoom() {
     // We translate each layer along the x axis, and scale each layer horizontally
     // Update the domain based on the newly-transformed scale
-    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain()); // TODO see if there's a nice way of updating this.xScale2 around the place
+    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain());
 
     // Update the x-axis display
     this.timelineXAxisGroup.call(this.xAxis);
@@ -763,8 +769,14 @@ export class Timeline {
     }
 
     // FIXME Pan the timeline if the selector has moved offscreen
-    if (this.xScale(new Date(this.selectorDate)) < 0 || this.xScale(new Date(this.selectorDate)) > this.dataWidth) {
-      this.setView([this.xScale.invert(0), this.xScale.invert(this.dataWidth)]);
+    if (
+      this.xScale(new Date(this.selectorDate)) < this.Y_AXIS_LABEL_WIDTH
+      || this.xScale(new Date(this.selectorDate)) > this.Y_AXIS_LABEL_WIDTH + this.dataWidth
+    ) {
+      this.setView([
+        this.xScale.invert(this.Y_AXIS_LABEL_WIDTH),
+        this.xScale.invert(this.Y_AXIS_LABEL_WIDTH + this.dataWidth),
+      ]);
       this._translateSelectorTool();
     }
   }
@@ -823,11 +835,21 @@ export class Timeline {
 
     // TODO I don't exactly understand this - I copied it from https://bl.ocks.org/mbostock/431a331294d2b5ddd33f947cf4c81319
     // It also doesn't work, but neither did the code above
-    this.timeline.call(this.zoomBehavior)
-      .call(this.zoomBehavior.transform,
-        d3.zoomIdentity
-          .scale(this.dataWidth / (this.xScale(new Date(dates[dates.length - 1]) - this.xScale(new Date(dates[0])))))
-          .translate(-this.xScale(new Date(dates[0])), 0));
+    // this.timeline.call(this.zoomBehavior)
+    //   .call(this.zoomBehavior.transform,
+    //     d3.zoomIdentity
+    //       .scale(this.dataWidth / (this.xScale(new Date(dates[dates.length - 1]) - this.xScale(new Date(dates[0])))))
+    //       .translate(-this.xScale(new Date(dates[0])), 0));
+
+    // this.timeline.call(this.zoomBehavior.translateTo, (this.xScale(new Date('2001-01-01')) - this.fullWidth));
+
+    // Depending on how the x,y is decided, may be easier to use scaleBy and translateBy
+    // translateTo - translates the current zoom transform so that the supplied x,y is
+    // made the centre of the zoomBehavior extent. Does not affect scale (use scaleTo()?)
+
+
+    // this.zoomBehavior.translateTo(this.timeline, 0, 0);
+    console.log(d3.zoomTransform(this.timeline.node()));
   }
 
   /**
@@ -1002,7 +1024,6 @@ export class Timeline {
 
     // If a layer has been supplied, we only want to traverse the times for that layer
     if (layerIdentifier) {
-      // TODO find this function and import it (also move this sort of thing to a generic utils file)
       for (let layer of this.timelineCurrentLayers) {
         if (layer.identifier === layerIdentifier) {
           layerTitle = selectPropertyLanguage(layer.title);
@@ -1090,7 +1111,6 @@ export class Timeline {
 
     // If a layer has been supplied, we only want to traverse the times for that layer
     if (layerIdentifier) {
-      // TODO find this function and import it (also move this sort of thing to a generic utils file)
       for (let layer of this.timelineCurrentLayers) {
         if (layer.identifier === layerIdentifier) {
           layerTitle = selectPropertyLanguage(layer.title);
