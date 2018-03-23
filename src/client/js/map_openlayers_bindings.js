@@ -5,7 +5,6 @@
 export function registerBindings(eventManager, mapOpenlayers) {
   // Adjust attribution height for this map (trigger set in Timeline class)
   eventManager.bind('timePanel.heightChanged', () => {
-    console.log('triggering OL');
     mapOpenlayers.adjustAttributionHeight();
   });
 }

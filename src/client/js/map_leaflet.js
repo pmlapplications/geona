@@ -530,7 +530,7 @@ export class LMap extends GeonaMap {
 
         if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
           // We might need to generate datetimes for this layer (TODO more information on wiki)
-          let timeValues = geonaLayer.dimensions.time.values;
+          let timeValues = geonaLayer.dimensions.time.values.sort();
           if (geonaLayer.dimensions.time.intervals) {
             // We only want to generate the datetimes once
             if (!this._activeLayerGeneratedTimes[geonaLayer.identifier]) {
@@ -551,19 +551,15 @@ export class LMap extends GeonaMap {
 
           // Selects the requested time, the closest to the map time, or the default layer time.
           if (options.requestedTime !== undefined) {
-            time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
+            time = findNearestValidTime(timeValues, options.requestedTime);
           } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-            time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
+            time = findNearestValidTime(timeValues, this._mapTime);
           } else if (options.modifier === 'hasTime') {
-            if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
-              time = geonaLayer.dimensions.time.default;
-              geonaLayer.dimensions.time.values.sort();
-            }
+            time = geonaLayer.dimensions.time.default;
           }
         }
 
-        // eslint-disable-next-line new-cap
-        layer = new L.tileLayer.wms(geonaLayerServer.url, {
+        let tileLayerOptions = {
           identifier: geonaLayer.identifier,
           layers: geonaLayer.identifier,
           styles: style || '',
@@ -579,15 +575,19 @@ export class LMap extends GeonaMap {
           shown: options.shown,
           opacity: 1,
           timeHidden: false,
-        });
+        };
 
         // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
         // This is why we have 'time', 'Time' and 'TIME' to cover all cases
         if (options.modifier === 'hasTime' && time !== undefined) {
-          layer.options.time = time;
-          layer.options.Time = time;
-          layer.options.TIME = time;
+          console.log('leaflet add layer ' + time);
+          tileLayerOptions.time = time;
+          tileLayerOptions.Time = time;
+          tileLayerOptions.TIME = time;
         }
+
+        // eslint-disable-next-line new-cap
+        layer = new L.tileLayer.wms(geonaLayerServer.url, tileLayerOptions);
         break;
       }
       case undefined:
@@ -879,7 +879,7 @@ export class LMap extends GeonaMap {
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].options.zIndex;
-
+        console.log(time);
         // We define the layer options so that only the time changes
         let layerOptions = {
           modifier: 'hasTime',
@@ -1015,7 +1015,6 @@ export class LMap extends GeonaMap {
   adjustAttributionHeight() {
     let attributionBar = this.parentDiv.find('.leaflet-control-attribution');
     let timePanelHeight = this.parentDiv.find('.js-geona-time-panel').height();
-    console.log('leaf');
     // Change the height of the attribution bar
     attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }

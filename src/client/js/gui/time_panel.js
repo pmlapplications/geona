@@ -63,7 +63,7 @@ export class TimePanel {
     this.pikaday = new Pikaday(
       {
         field: this.parentDiv.find('.js-geona-time-panel-options-current-date')[0],
-        format: moment().format('YYYY-MM-DD HH-mm'), // fixme formats are not kept
+        format: moment().format('YYYY-MM-DD HH-mm'), // fixme formats are not kept and it's the wrong time (gets today's date)
         onSelect: (date) => {
           this.pikadayChangeTime(date);
         },
@@ -274,7 +274,7 @@ export class TimePanel {
 
     tippy('.js-geona-time-panel-options-prev-next__' + step, {
       arrow: true,
-      placement: 'top',
+      placement: 'top-end',
       animation: 'fade',
       duration: 100,
       maxWidth: this.fullWidth + 'px',

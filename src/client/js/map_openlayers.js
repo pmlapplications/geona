@@ -587,7 +587,7 @@ export class OlMap extends GeonaMap {
 
     if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
       // We might need to generate datetimes for this layer (TODO more information on wiki)
-      let timeValues = geonaLayer.dimensions.time.values;
+      let timeValues = geonaLayer.dimensions.time.values.sort();
       if (geonaLayer.dimensions.time.intervals) {
         // We only want to generate the datetimes once
         if (!this._activeLayerGeneratedTimes[geonaLayer.identifier]) {
