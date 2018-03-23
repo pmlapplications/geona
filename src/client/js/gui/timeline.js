@@ -318,8 +318,7 @@ export class Timeline {
         // If this was found to be a duplicate, we want to get the label with source appended
         if (duplicateLayerLabels.has(label)) {
           if (layer.layerServer) {
-            // TODO append the layer ID if they're the same title AND server
-            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.layerServer;
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier + ' - ' + layer.layerServer;
           } else {
             label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier;
           }
