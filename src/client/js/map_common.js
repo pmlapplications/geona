@@ -236,6 +236,7 @@ export function constructExtent(extent1, extent2) {
  * @return {String[]}            The newly-generated datetime values based on the data in the geonaLayer.
  */
 export function generateDatetimesFromIntervals(geonaLayer) {
+  // TODO add a progress bar for this operation (bar fills up as times get closer to the endtime)
   // Some servers will represent time as 'startDate/endDate/period' so we will have to generate that data
   let datetimes = [];
 

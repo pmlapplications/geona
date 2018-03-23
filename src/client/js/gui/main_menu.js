@@ -324,7 +324,7 @@ export class MainMenu {
         let zIndex = this.geona.map.layerGet(activeLayerKey, 'zIndex');
         if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
           // Get the data in the correct format from the geona layer
-          let data = _compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
+          let data = this._compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
           // Insert layer data object at the top of the list - higher on the list means higher on the map
           this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
         }
@@ -548,44 +548,46 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.share_panel());
   }
-}
 
-/**
+  /**
    * Takes a Geona layer and constructs an object to use when displaying layer information on the layers list
    * @param {Layer}   geonaLayer The Geona layer definition to get information from.
    * @return {Object}            Object containing information used by the layer item template
    */
-function _compileLayerInformation(geonaLayer) {
-  let layerInformation = {
-    identifier: geonaLayer.identifier,
-  };
-  if (geonaLayer.title !== undefined) {
-    layerInformation.title = selectPropertyLanguage(geonaLayer.title);
-  }
-  if (geonaLayer.boundingBox !== undefined) {
-    layerInformation.boundingBox = {
-      north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
-      east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
-      south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
-      west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
+  _compileLayerInformation(geonaLayer) {
+    let layerInformation = {
+      identifier: geonaLayer.identifier,
     };
-  }
-  if (geonaLayer.dimensions !== undefined) {
-    if (geonaLayer.dimensions.time && geonaLayer.dimensions.time.values) { // TODO needs to support intervals too
-      let sortedDates = geonaLayer.dimensions.time.values.sort();
-      layerInformation.dateRange = {
-        start: moment.utc(sortedDates[0]).format('YYYY-MM-DD'),
-        end: moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD'),
+    if (geonaLayer.title !== undefined) {
+      layerInformation.title = selectPropertyLanguage(geonaLayer.title);
+    }
+    if (geonaLayer.boundingBox !== undefined) {
+      layerInformation.boundingBox = {
+        north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
+        east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
+        south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
+        west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
       };
     }
-  }
-  if (geonaLayer.abstract !== undefined) {
-    layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
-  }
-  // TODO contact info is in he layer above - in the server?
-  // if (geonaLayer.) {
+    if (geonaLayer.dimensions !== undefined) {
+      if (geonaLayer.dimensions.time) {
+        let sortedDates = this.geona.map.getActiveLayerDatetimes(geonaLayer.identifier);
+        if (sortedDates.length === 1) {
+          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' only.';
+        } else {
+          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' to ' +
+          moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD');
+        }
+      }
+    }
+    if (geonaLayer.abstract !== undefined) {
+      layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
+    }
+    // TODO contact info is in he layer above - in the server?
+    // if (geonaLayer.) {
 
-  // }
+    // }
 
-  return layerInformation;
+    return layerInformation;
+  }
 }
