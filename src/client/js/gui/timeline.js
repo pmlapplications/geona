@@ -38,10 +38,10 @@ export class Timeline {
    *
    * @param {TimePanel} timePanel An instance of a TimePanel which the Timeline will be displayed within.
    * @param {Object}    settings  A collection of settings which affect the Timeline.
-   *   @param {String}  settings.elementId         The id of the element into which the Timeline will be inserted.
-   *   @param {Object}  [settings.timelineMargins] The margins in px (top, left, right, bottom) around the timeline.
-   *   @param {Boolean} [settings.animateSelector] If true, the selector will animate between positions on the timeline.
-   *   @param {Object}  [settings.initialPaddingPercentage] The % to pad each side of the first layer bar.
+   *   @param {String}  settings.elementId           The id of the element into which the Timeline will be inserted.
+   *   @param {Object}  [settings.timelineMargins]   The margins in px (top, left, right, bottom) around the timeline.
+   *   @param {Boolean} [settings.animateSelector]   If True, the selector tool will animate between positions.
+   *   @param {Object}  [settings.paddingPercentage] The % to pad when setting the view or showing the first layer.
    */
   constructor(timePanel, settings) {
     window.d3 = d3;
@@ -53,7 +53,7 @@ export class Timeline {
     // Default options will be merged with the settings parameter
     let defaultOptions = {
       animateSelector: true,
-      initialPaddingPercentage: {
+      paddingPercentage: {
         left: 10,
         right: 10,
       },
@@ -282,25 +282,25 @@ export class Timeline {
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1) {
       let allDates = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
+      let pixelPosition1 = this.xScale(new Date('2010-01-01'));
+      let pixelPosition2 = this.xScale(new Date('2011-01-01'));
       if (allDates.length > 1) {
+        this._updateXScaleDomain(allDates, false); // We don't use padding while we calculate the scaling variables
+        this.pixelsPerYearAtScale1 = pixelPosition2 - pixelPosition1; // todo jsdoc pixelPerYear...
         this._updateXScaleDomain(allDates);
       } else {
         let singleDomain = [
           new Date(allDates[0]).getTime() - this.SINGLE_TIME_EXTENT_MARGIN,
           new Date(allDates[0]).getTime() + this.SINGLE_TIME_EXTENT_MARGIN,
         ];
+        this._updateXScaleDomain(singleDomain, false); // We don't use padding while we calculate the scaling variables
+        this.pixelsPerYearAtScale1 = pixelPosition2 - pixelPosition1; // todo jsdoc pixelPerYear...
         this._updateXScaleDomain(singleDomain);
       }
 
       if (layerToAdd.dimensions.time.default) {
         this.selectorDate = layerToAdd.dimensions.time.default;
       }
-
-      // TODO read the paper and implement, should be quite easy
-      // Save programmatic zoom stuff
-      console.log(d3.zoomTransform(this.timeline.node()));
-      console.log(this.xScale.invert(this.Y_AXIS_LABEL_WIDTH));
-      console.log(this.xScale.invert(this.fullWidth));
     }
 
 
@@ -595,7 +595,7 @@ export class Timeline {
     let rightPadding = 0;
 
     // Calculate the padding amount for each side
-    let paddingPercent = this.options.initialPaddingPercentage;
+    let paddingPercent = this.options.paddingPercentage;
     if (padding === true && (paddingPercent.left || paddingPercent.right)) {
       let startDateMs = new Date(allDates[0]).getTime();
       let endDateMs = new Date(allDates[allDates.length - 1]).getTime();
@@ -804,52 +804,36 @@ export class Timeline {
   }
 
   /**
-   * Programmatically zooms or pans so that the timeline view is set between the specified dates.
-   * @param {String[]} dates Contains two or more dates, sorted from least-to-most recent, that the view will be set to.
+   * Programmatically zooms or pans so that the timeline view is set between the min and max of the specified dates.
+   * @param {String[]} dates     Contains two or more dates, sorted from least-to-most recent.
+   * @param {Boolean}  [padding] If True, the padding specified in options.paddingPercentage will be added on.
    */
-  setView(dates) {
-    // // The difference, in ms, between the current xScale domain dates
-    // let previousDateSpacing = this.xScale.domain()[1].getTime() - this.xScale.domain()[0].getTime();
-    // // The difference, in ms, between the new min and max dates
-    // let newDateSpacing = new Date(dates[dates.length - 1]).getTime() - new Date(dates[0]).getTime();
+  setView(dates, padding = false) {
+    let firstDate = new Date(dates[0]);
+    let lastDate = new Date(dates[dates.length - 1]);
 
-    // // Update domain
-    // this._updateXScaleDomain(dates, false);
+    // Add optional padding to dates
+    let paddingPercent = this.options.paddingPercentage;
+    if (padding === true && (paddingPercent.left || paddingPercent.right)) {
+      let msDateDifference = lastDate.getTime() - firstDate.getTime();
+      firstDate = new Date(firstDate.getTime() - (msDateDifference / 100 * paddingPercent.left));
+      lastDate = new Date(lastDate.getTime() + (msDateDifference / 100 * paddingPercent.right));
+    }
 
-    // // Update the x-axis
-    // this.timelineXAxisGroup.call(this.xAxis);
+    // The number of pixels between the min and max date for the current scale value (k)
+    let pxDatesDifferenceAtCurrentScale = this.xScale(lastDate) - this.xScale(firstDate);
+    // The ratio to multiply by to fit the min and max date into the domain
+    let pxRatio = this.dataWidth / pxDatesDifferenceAtCurrentScale;
+    // Scale in or out by the ratio
+    this.zoomBehavior.scaleBy(this.timeline, pxRatio);
 
-    // // Adjust layer bars
-    // this._resizeLayerBars();
-
-    // // If the spacing is different, then the scale has changed, and we must redraw the time markers
-    // if (newDateSpacing !== previousDateSpacing) {
-    //   this._redrawTimeMarkers();
-    // } else { // We can just move the markers on the x-axis
-    //   this._translateTimeMarkers();
-    // }
-
-    // // Reposition today line and selector tool
-    // this._translateTodayLine();
-    // this._translateSelectorTool();
-
-    // TODO I don't exactly understand this - I copied it from https://bl.ocks.org/mbostock/431a331294d2b5ddd33f947cf4c81319
-    // It also doesn't work, but neither did the code above
-    // this.timeline.call(this.zoomBehavior)
-    //   .call(this.zoomBehavior.transform,
-    //     d3.zoomIdentity
-    //       .scale(this.dataWidth / (this.xScale(new Date(dates[dates.length - 1]) - this.xScale(new Date(dates[0])))))
-    //       .translate(-this.xScale(new Date(dates[0])), 0));
-
-    // this.timeline.call(this.zoomBehavior.translateTo, (this.xScale(new Date('2001-01-01')) - this.fullWidth));
-
-    // Depending on how the x,y is decided, may be easier to use scaleBy and translateBy
-    // translateTo - translates the current zoom transform so that the supplied x,y is
-    // made the centre of the zoomBehavior extent. Does not affect scale (use scaleTo()?)
-
-
-    // this.zoomBehavior.translateTo(this.timeline, 0, 0);
-    console.log(d3.zoomTransform(this.timeline.node()));
+    // The pixel position of the min date at the new scale
+    let pxPositionOfMinimumDate = this.xScale(firstDate);
+    // The scale which has just been set by the scaleBy()
+    let newScale = d3.zoomTransform(this.timeline.node()).k;
+    // Translate the zoom behavior - need to multiply by '1 / newScale' because translateBy() changes the pixel values
+    // so that they are based off the scale movement at k = 1.
+    this.zoomBehavior.translateBy(this.timeline, (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinimumDate), 0);
   }
 
   /**
