@@ -16,7 +16,7 @@ import {registerBindings} from './timeline_bindings';
  * - Clicking on an x-axis label will move the selector to the label date and load the closest previous time.
  * - The method moveSelectorToDate() can be called programmatically to change the location of the selector tool.
  *   Note that this does not actually affect the map layers, which are controlled with their map library methods.
- * - TODO The method xyz can be called programmatically to set the pan and zoom.
+ * - TODO The method setView() can be called programmatically to set the pan and zoom.
  * - The timeline can be scrolled on in order to adjust the zoom level.
  * - The timeline can be dragged in order to pan forwards and backwards along the x-axis.
  *
@@ -27,7 +27,6 @@ import {registerBindings} from './timeline_bindings';
  */
 export class Timeline {
   // TODO redraw on window resize
-  // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
 
   // TODO new feature - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
   // TODO new feature - should layers reorder if layers are reordered on GUI?
@@ -768,15 +767,23 @@ export class Timeline {
         });
     }
 
-    // FIXME Pan the timeline if the selector has moved offscreen
+    // Pan the timeline if the selector has moved offscreen
     if (
       this.xScale(new Date(this.selectorDate)) < this.Y_AXIS_LABEL_WIDTH
       || this.xScale(new Date(this.selectorDate)) > this.Y_AXIS_LABEL_WIDTH + this.dataWidth
     ) {
-      this.setView([
-        this.xScale.invert(this.Y_AXIS_LABEL_WIDTH),
-        this.xScale.invert(this.Y_AXIS_LABEL_WIDTH + this.dataWidth),
-      ]);
+      // Interrupts the transition - required so the selector will be drawn at its destination position after setView()
+      this.selectorTool.interrupt();
+
+      let minDomainTimeMs = this.xScale.domain()[0].getTime();
+      let maxDomainTimeMs = this.xScale.domain()[1].getTime();
+      let domainTimeDifferenceMs = maxDomainTimeMs - minDomainTimeMs;
+
+      // Calculate a min and max domain - keeps the same date difference (scale) but centres on the selector date
+      let newViewMinDatetime = new Date(new Date(this.selectorDate).getTime() - (domainTimeDifferenceMs / 2));
+      let newViewMaxDatetime = new Date(new Date(this.selectorDate).getTime() + (domainTimeDifferenceMs / 2));
+
+      this.setView([newViewMinDatetime, newViewMaxDatetime], false, this.options.animateSelector);
       this._translateSelectorTool();
     }
   }
@@ -807,8 +814,9 @@ export class Timeline {
    * Programmatically zooms or pans so that the timeline view is set between the min and max of the specified dates.
    * @param {String[]} dates     Contains two or more dates, sorted from least-to-most recent.
    * @param {Boolean}  [padding] If True, the padding specified in options.paddingPercentage will be added on.
+   * @param {Boolean}  [animate] If True, the view will animate smoothly to the new position.
    */
-  setView(dates, padding = false) {
+  setView(dates, padding = false, animate = false) {
     let firstDate = new Date(dates[0]);
     let lastDate = new Date(dates[dates.length - 1]);
 
@@ -825,15 +833,25 @@ export class Timeline {
     // The ratio to multiply by to fit the min and max date into the domain
     let pxRatio = this.dataWidth / pxDatesDifferenceAtCurrentScale;
     // Scale in or out by the ratio
-    this.zoomBehavior.scaleBy(this.timeline, pxRatio);
+    if (animate) {
+      this.zoomBehavior.scaleBy(this.timeline.transition().duration(500), pxRatio);
+    } else {
+      this.zoomBehavior.scaleBy(this.timeline, pxRatio);
+    }
 
-    // The pixel position of the min date at the new scale
-    let pxPositionOfMinimumDate = this.xScale(firstDate);
+    // The pixel position of the minimum date at the new scale
+    let pxPositionOfMinDate = this.xScale(firstDate);
     // The scale which has just been set by the scaleBy()
     let newScale = d3.zoomTransform(this.timeline.node()).k;
     // Translate the zoom behavior - need to multiply by '1 / newScale' because translateBy() changes the pixel values
     // so that they are based off the scale movement at k = 1.
-    this.zoomBehavior.translateBy(this.timeline, (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinimumDate), 0);
+    if (animate) {
+      this.zoomBehavior.translateBy(
+        this.timeline.transition().duration(500), (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0
+      );
+    } else {
+      this.zoomBehavior.translateBy(this.timeline, (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0);
+    }
   }
 
   /**
