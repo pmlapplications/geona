@@ -248,7 +248,7 @@ export class Timeline {
     this._allLayerDates = new Set();
 
     // Set triggers and bindings
-    $(window).resize(() => { // TODO move into triggers?
+    window.addEventListener('resize', () => {
       this.resizeTimeline();
     });
 
@@ -623,7 +623,7 @@ export class Timeline {
 
     this.dataWidth = this.fullWidth - this.Y_AXIS_LABEL_WIDTH;
 
-    this.xAxisTicks = this.dataWidth / 160; // More information can be found on the Geona wiki
+    this.xAxisTicks = this.dataWidth / 165; // More information can be found on the Geona wiki
   }
 
   /**
@@ -660,15 +660,8 @@ export class Timeline {
         return this.xScale(new Date(endDate).getTime()) - this.xScale(new Date(startDate).getTime());
       });
 
-    // Check if we have zoomed - if we have we must redraw the time markers
-    // if (d3.event.transform.k !== this.previousZoomScale) {
     // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
     this._redrawTimeMarkers();
-    // Save the zoom scale
-    // this.previousZoomScale = d3.event.transform.k;
-    // } else { // We only need to translate the markers
-    // this._translateTimeMarkers();
-    // }
 
     // Adjust positioning of today line and selector tool
     this._translateTodayLine();
