@@ -15,6 +15,7 @@ export default class Layer {
       this.layerServer = layerServer.identifier;
     }
 
+    this.identifier = layerConfig.identifier;
     this.title = layerConfig.title;
     this.displayName = undefined;
     this.abstract = layerConfig.abstract;

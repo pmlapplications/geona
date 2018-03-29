@@ -182,13 +182,13 @@ export let client = {
               isTemporal: false,
               styles: [
                 {
-                  name: 'line_black',
+                  identifier: 'line_black',
                 },
                 {
-                  name: 'line-white',
+                  identifier: 'line-white',
                 },
                 {
-                  name: 'line',
+                  identifier: 'line',
                 },
               ],
               layerServer: 'https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities',
