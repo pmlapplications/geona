@@ -751,10 +751,8 @@ export class LMap extends GeonaMap {
     if (this._activeLayers[layerIdentifier] !== undefined) {
       // We don't want to reveal the layer if it's been hidden due to invalid time
       if (this._activeLayers[layerIdentifier].options.timeHidden === false) {
-        // This changes all the tiles of the layer to be completely see-through
-        this._activeLayers[layerIdentifier].setOpacity(1);
-        // There is no corresponding getOpacity() method so we have to update our options manually
-        this._activeLayers[layerIdentifier].options.opacity = 1;
+        // Make the layer visible again, setting the opacity to the stored value
+        this._activeLayers[layerIdentifier].setOpacity(this._activeLayers[layerIdentifier].options.opacity);
       }
       // A layer hidden due to being having no data at the current time will be shown again once there is data available
       this._activeLayers[layerIdentifier].options.shown = true;
@@ -767,12 +765,32 @@ export class LMap extends GeonaMap {
    */
   hideLayer(layerIdentifier) {
     if (this._activeLayers[layerIdentifier] !== undefined) {
+      // setOpacity overrides the opacity options, but we might want to hide a translucent layer
+      let opacityCache = this._activeLayers[layerIdentifier].options.opacity;
       // This changes all the tiles of the layer to be completely see-through
       this._activeLayers[layerIdentifier].setOpacity(0);
-      // There is no corresponding getOpacity() method so we have to update our options manually
-      this._activeLayers[layerIdentifier].options.opacity = 0;
+      // Reapply the opacity, to keep the opacity on load without actually making the layer visible now
+      this._activeLayers[layerIdentifier].options.opacity = opacityCache;
       // A layer hidden due to being having no data at the current time will remain hidden once there is data available
       this._activeLayers[layerIdentifier].options.shown = false;
+    }
+  }
+
+  /**
+   * Sets the opacity of a layer on the map, making it invisible, translucent or opaque. Does not affect whether a layer
+   * is actually hidden or not.
+   * @param {String} layerIdentifier The identifier of the data layer being made hidden.
+   * @param {Number} opacity         The opacity, between 0 (invisible) and 1 (opaque).
+   */
+  setLayerOpacity(layerIdentifier, opacity) {
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      if (this._activeLayers[layerIdentifier].options.shown) {
+        // This changes all the tiles of the layer to the opacity
+        this._activeLayers[layerIdentifier].setOpacity(opacity);
+      }
+
+      // There is no corresponding getOpacity() method so we have to update our options manually
+      this._activeLayers[layerIdentifier].options.opacity = opacity;
     }
   }
 
