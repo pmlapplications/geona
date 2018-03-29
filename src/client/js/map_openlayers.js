@@ -782,6 +782,18 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * Sets the opacity of a layer on the map, making it invisible, translucent or opaque. Does not affect whether a layer
+   * is actually hidden or not.
+   * @param {String} layerIdentifier The identifier of the data layer being made hidden.
+   * @param {Number} opacity         The opacity, between 0 (invisible) and 1 (opaque).
+   */
+  setLayerOpacity(layerIdentifier, opacity) {
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      this._activeLayers[layerIdentifier].setOpacity(opacity);
+    }
+  }
+
+  /**
    * Moves the layer to the specified index, and reorders the other map layers where required.
    *
    * Displaced layers move downwards if the reordered layer is being moved up.

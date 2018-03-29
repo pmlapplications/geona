@@ -32,6 +32,7 @@ export class Timeline {
   // TODO new feature - should layers reorder if layers are reordered on GUI?
   // TODO new feature - timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
   // TODO new feature - active layer can be selected, so controls consider only that layer (GUI should update to show which layer is the current layer)
+  // TODO new feature - extended keyboard shortcuts (select time period, select active layer)
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
