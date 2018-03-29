@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import 'jquery';
 import * as d3 from 'd3';
 import tippy from 'tippy.js';
 
@@ -157,9 +157,6 @@ export class Timeline {
         this.zoom();
       });
 
-    /** @type {Number} @desc Used in this.zoom() to determine whether we should redraw time markers */
-    this.previousZoomScale = 1;
-
     /** @type {SVGElement} @desc The main SVG element used for the timeline */
     this.timeline = d3.select('#' + this.options.elementId) // Selects the main element to insert the timeline into
       .append('svg')
@@ -281,19 +278,13 @@ export class Timeline {
     // Update xScale domain to show first layer's full extent
     if (this.timelineCurrentLayers.length === 1) {
       let allDates = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
-      let pixelPosition1 = this.xScale(new Date('2010-01-01'));
-      let pixelPosition2 = this.xScale(new Date('2011-01-01'));
       if (allDates.length > 1) {
-        this._updateXScaleDomain(allDates, false); // We don't use padding while we calculate the scaling variables
-        this.pixelsPerYearAtScale1 = pixelPosition2 - pixelPosition1; // todo jsdoc pixelPerYear...
         this._updateXScaleDomain(allDates);
       } else {
         let singleDomain = [
           new Date(allDates[0]).getTime() - this.SINGLE_TIME_EXTENT_MARGIN,
           new Date(allDates[0]).getTime() + this.SINGLE_TIME_EXTENT_MARGIN,
         ];
-        this._updateXScaleDomain(singleDomain, false); // We don't use padding while we calculate the scaling variables
-        this.pixelsPerYearAtScale1 = pixelPosition2 - pixelPosition1; // todo jsdoc pixelPerYear...
         this._updateXScaleDomain(singleDomain);
       }
 
@@ -967,24 +958,79 @@ export class Timeline {
    */
   resizeTimeline() {
     // resources https://stackoverflow.com/questions/25875316/d3-preserve-scale-translate-after-resetting-range http://jsfiddle.net/xf3fk8hu/9/ https://stackoverflow.com/questions/32959056/responsive-d3-zoom-behavior
-    // FIXME problem with margin after resize
+    let minDomainDatetimeMs = this.xScale.domain()[0].getTime();
+    let maxDomainDatetimeMs = this.xScale.domain()[1].getTime();
+    console.log(minDomainDatetimeMs + ', ' + maxDomainDatetimeMs);
+    let domainDatetimeDifferenceMs = maxDomainDatetimeMs - minDomainDatetimeMs;
+
+    // let msPerPixel = (maxDomainDatetimeMs - minDomainDatetimeMs) / this.dataWidth;
+    console.log(maxDomainDatetimeMs - minDomainDatetimeMs);
+    // console.log(msPerPixel);
+
+    // let transform = d3.zoomTransform(this.timeline.node());
+    // let previousWidth = this.fullWidth * transform.k;
+    let previousWidth = this.dataWidth;
     this._calculateWidths();
+    let newWidth = this.dataWidth;
+
+    let widthResizeProportion = newWidth / previousWidth;
+
+    maxDomainDatetimeMs = minDomainDatetimeMs + (domainDatetimeDifferenceMs * widthResizeProportion);
+
+    // let newWidth = this.fullWidth * transform.k;
+
+    // maxDomainDatetimeMs = msPerPixel * this.dataWidth;
+    console.log(maxDomainDatetimeMs);
 
     this.timeline
       .attr('width', this.fullWidth + 1); // +1 because the containing svg needs to be 1 px longer than inner elements
 
-    this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
-    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME This line fixes the zoom alignment bug, but introduces the axis warping backwards in time bug (or, the layers warping forwards in time bug)
+
+    this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth + this.Y_AXIS_LABEL_WIDTH]);
+
+    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
+
+    // Keep the domain the same
+
+    // console.log('domain about to set');
+    // console.log(new Date(minDomainDatetimeMs));
+    // console.log(new Date(maxDomainDatetimeMs));
+    // this.xScale.domain([
+    //   new Date(minDomainDatetimeMs),
+    //   new Date(maxDomainDatetimeMs),
+    // ]);
+
+    // this.zoomBehavior.transform(this.timeline, d3.zoomIdentity);
+
+    // console.log('domain set');
+
+    // let newX = -(newWidth * ((transform.x * -1) / previousWidth));
+
+    // let translateBy = (newX - transform.x) / transform.k;
+
+    // this.timeline.call(this.zoomBehavior.transform, transform.translate(translateBy, 0));
+
+    let currentTransform = d3.zoomTransform(this.timeline.node());
+
+    let resizeProportion = newWidth / previousWidth;
+
+    // this.zoomBehavior.translateBy();
+    // this.zoomBehavior.scaleBy(this.timeline, 1 / resizeProportion);
+    // this.zoomBehavior.scaleTo(this.timeline, 1);
+
 
     this.xAxis.ticks(this.xAxisTicks);
     this.timelineXAxisGroup
       .call(this.xAxis);
+
 
     // Reposition data elements
     this._resizeLayerBars();
     this._redrawTimeMarkers();
     this._translateTodayLine();
     this._translateSelectorTool();
+
+    console.log(d3.zoomTransform(this.timeline.node()));
   }
 
   /**
