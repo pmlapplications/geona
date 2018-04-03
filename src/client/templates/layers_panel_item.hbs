@@ -1,62 +1,75 @@
 <li class="js-geona-layers-list__item geona-layers-list__item" data-identifier="{{data.identifier}}">
-  <div>{{data.title}}</div>
   <div class="geona-layers-list__item-header">
-    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-visibility icon-preview-1"></span>
-    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-information icon-information"></span>
-    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-remove geona-layers-list__item-remove icon-bin-2"></span>
+    <div>{{data.title}}</div>
+    <div>
+      <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-visibility-showing icon-preview-1"></span>
+      <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-visibility-hiding icon-hide removed"></span>
+      <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-settings icon-setting-adjustment"></span>
+      <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-information icon-information"></span>
+      <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-analysis icon-business-chart-2"></span>
+      <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-remove geona-layers-list__item-remove icon-bin-2"></span>
+    </div>
   </div>
-  <table>
+  <div class="js-geona-layers-list__item-settings">
+
+  </div>
+
+  <table class="js-geona-layers-list__item-info">
     {{#if data.indicator}}
-    <tr class="geona-layers-list__item-row">
+    <tr class="geona-layers-list__item-info-row">
       <td>Indicators</td>
-      <td class="geona-layers-list__item-data">{{data.indicator}}</td>
+      <td class="geona-layers-list__item-info-data">{{data.indicator}}</td>
     </tr>
     {{/if}}
 
     {{#if data.boundingBox}}
-    <tr class="geona-layers-list__item-row">
+    <tr class="geona-layers-list__item-info-row">
       <td>Bounding box</td>
-      <td class="geona-layers-list__item-data">
+      <td class="geona-layers-list__item-info-data">
         {{data.boundingBox.north}} N, {{data.boundingBox.east}} E, {{data.boundingBox.south}} S, {{data.boundingBox.west}} W,
       </td>
     </tr>
     {{/if}}
 
     {{#if data.dateRange}}
-    <tr class="geona-layers-list__item-row">
+    <tr class="geona-layers-list__item-info-row">
       <td>Date range</td>
-      <td class="geona-layers-list__item-data">{{data.dateRange}}</td>
+      <td class="geona-layers-list__item-info-data">{{data.dateRange}}</td>
     </tr>
     {{/if}}
 
     {{#if data.abstract}}
-    <tr class="geona-layers-list__item-row">
+    <tr class="geona-layers-list__item-info-row">
       <td>Abstract</td>
-      <td class="geona-layers-list__item-data">{{data.abstract}}</td>
+      <td class="geona-layers-list__item-info-data">{{data.abstract}}</td>
     </tr>
     {{/if}}
 
     {{#if data.contactInformation}}
       {{#if data.contactInformation.person}}
-      <tr class="geona-layers-list__item-row">
+      <tr class="geona-layers-list__item-info-row">
         <td>Contact</td>
-        <td class="geona-layers-list__item-data">{{data.contactInformation.person}}</td>
+        <td class="geona-layers-list__item-info-data">{{data.contactInformation.person}}</td>
       </tr>
       {{/if}}
 
       {{#if data.contactInformation.phone}}
-      <tr class="geona-layers-list__item-row">
+      <tr class="geona-layers-list__item-info-row">
         <td>Telephone</td>
-        <td class="geona-layers-list__item-data">{{data.contactInformation.phone}}</td>
+        <td class="geona-layers-list__item-info-data">{{data.contactInformation.phone}}</td>
       </tr>
       {{/if}}
 
       {{#if data.contactInformation.email}}
-      <tr class="geona-layers-list__item-row">
+      <tr class="geona-layers-list__item-info-row">
         <td>Email</td>
-        <td class="geona-layers-list__item-data">{{data.contactInformation.email}}</td>
+        <td class="geona-layers-list__item-info-data">{{data.contactInformation.email}}</td>
       </tr>
       {{/if}}
     {{/if}}
   </table>
+
+  <div class="js-geona-layers-list__item-analysis">
+
+  </div>
 </li>
