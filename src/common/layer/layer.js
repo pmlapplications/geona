@@ -20,7 +20,6 @@ export default class Layer {
     this.displayName = undefined;
     this.abstract = layerConfig.abstract;
     this.keywords = layerConfig.keywords;
-    this.contactInformation = layerConfig.contactInformation;
     this.provider = layerConfig.provider;
     this.attribution = layerConfig.attribution;
     this.authority = layerConfig.authority;

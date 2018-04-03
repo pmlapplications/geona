@@ -211,6 +211,50 @@ export let client = {
           identifier: 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
           version: '1.3.0',
           url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
+          service: {
+            'title': {
+              'und': 'PML RSG THREDDS Data Server',
+            },
+            'abstract': {
+              'und': 'Scientific Data',
+            },
+            'keywords': {
+              'und': ['meteorology', 'atmosphere', 'climate', 'ocean', 'earth science'],
+            },
+            'onlineResource': 'http://www.pml.ac.uk',
+            'contactInformation': {
+              'person': 'Remote Sensing Group',
+              'phone': [
+                '',
+              ],
+              'email': [
+                'rsgweb@pml.ac.uk',
+              ],
+            },
+          },
+          capability: {
+            'getMap': {
+              'formats': [
+                'image/png',
+                'image/png;mode=32bit',
+                'image/gif',
+                'image/jpeg',
+                'application/vnd.google-earth.kmz',
+              ],
+              'get': [
+                'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
+              ],
+            },
+            'getFeatureInfo': {
+              'formats': [
+                'image/png',
+                'text/xml',
+              ],
+              'get': [
+                'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
+              ],
+            },
+          },
           layers: [
             {
               identifier: 'chlor_a',
@@ -270,13 +314,6 @@ export let client = {
                 },
               },
             },
-          ],
-        },
-        {
-          identifier: 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
-          version: '1.3.0',
-          url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
-          layers: [
             {
               'identifier': 'Rrs_412',
               'protocol': 'wms',

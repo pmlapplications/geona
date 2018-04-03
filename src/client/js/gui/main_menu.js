@@ -229,6 +229,9 @@ export class MainMenu {
    */
   addUrlLayerToMap(layerIdentifier) {
     let layerServerDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServer));
+    console.log(layerServerDeepCopy);
+    console.log(JSON.stringify(layerServerDeepCopy.service));
+    console.log(JSON.stringify(layerServerDeepCopy.capability));
     for (let layer of layerServerDeepCopy.layers) {
       if (layer.identifier === layerIdentifier) {
         let geonaLayer;
@@ -559,7 +562,7 @@ export class MainMenu {
       identifier: geonaLayer.identifier,
     };
     if (geonaLayer.title !== undefined) {
-      layerInformation.title = selectPropertyLanguage(geonaLayer.title);
+      layerInformation.title = selectPropertyLanguage(geonaLayer.getTitleOrDisplayName());
     }
     if (geonaLayer.boundingBox !== undefined) {
       layerInformation.boundingBox = {
@@ -583,10 +586,11 @@ export class MainMenu {
     if (geonaLayer.abstract !== undefined) {
       layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
     }
-    // TODO contact info is in he layer above - in the server?
-    // if (geonaLayer.) {
-
-    // }
+    // contact info
+    let layerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+    if (layerServer.service && layerServer.service.contactInformation) {
+      layerInformation.contactInformation = layerServer.service.contactInformation;
+    }
 
     return layerInformation;
   }
