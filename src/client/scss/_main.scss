@@ -164,6 +164,11 @@
   overflow-wrap: break-word;
 }
 
+.geona-layers-list__item-header{
+  background-color: $panel-content-header;
+  color: #fff;
+}
+
 .geona-layers-list__item-header-icon{
   display: inline-block;
   font-size: 20px;
@@ -174,11 +179,11 @@
   }
 }
 // TODO not working
-.geona-layers-list__item-row{
+.geona-layers-list__item-info-row{
   border-bottom: 1px solid #000000;
 }
 // TODO not working
-.geona-layers-list__item-data{
+.geona-layers-list__item-info-data{
   overflow-wrap: break-word;
   table-layout: fixed;
 }

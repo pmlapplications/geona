@@ -285,24 +285,34 @@ export class MainMenu {
 
   /**
    * Hides the layer specified in the item
-   * @param {HTMLElement} item The list element that contains the element that was clicked.
+   * @param {String}      identifier The identifier for the layer to hide.
+   * @param {HTMLElement} item       The element that was clicked.
    */
-  hideLayer(item) {
-    // TODO change icon to 'hide' instead of 'preview-1'
-    // item.classList.remove('icon-preview-1');
-    // item.classList.add('icon-hide');
-    this.geona.map.hideLayer(item.dataset.identifier);
+  hideLayer(identifier, item) {
+    // Remove the button which represents a layer being currently shown
+    item.classList.add('removed');
+    // Find the button which represents a layer being currently hidden
+    let visibilityHidingElement = item.nextElementSibling;
+    // Make the hidden button visible (un-remove it)
+    visibilityHidingElement.classList.remove('removed');
+
+    this.geona.map.hideLayer(identifier);
   }
 
   /**
    * Shows the layer specified in the item
-   * @param {HTMLElement} item The list element that contains the element that was clicked.
+   * @param {String}      identifier The identifier for the layer to show.
+   * @param {HTMLElement} item       The element that was clicked.
    */
-  showLayer(item) {
-    // TODO change icon to 'preview-1' instead of 'hide'
-    // item.classList.remove('icon-hide');
-    // item.classList.add('icon-preview-1');
-    this.geona.map.showLayer(item.dataset.identifier);
+  showLayer(identifier, item) {
+    // Remove the button which represents a layer being currently hidden
+    item.classList.add('removed');
+    // Find the button which represents a layer being currently shown
+    let visibilityShowingElement = item.previousElementSibling;
+    // Make the showing button visible (un-remove it)
+    visibilityShowingElement.classList.remove('removed');
+
+    this.geona.map.showLayer(identifier);
   }
 
   /**
@@ -561,9 +571,11 @@ export class MainMenu {
     let layerInformation = {
       identifier: geonaLayer.identifier,
     };
+    // Gets the title or the display name in appropriate language
     if (geonaLayer.title !== undefined) {
       layerInformation.title = selectPropertyLanguage(geonaLayer.getTitleOrDisplayName());
     }
+    // The bounding box
     if (geonaLayer.boundingBox !== undefined) {
       layerInformation.boundingBox = {
         north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
@@ -572,6 +584,7 @@ export class MainMenu {
         west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
       };
     }
+    // Time min and max, formatted as YYYY-MM-DD
     if (geonaLayer.dimensions !== undefined) {
       if (geonaLayer.dimensions.time) {
         let sortedDates = this.geona.map.getActiveLayerDatetimes(geonaLayer.identifier);
@@ -583,10 +596,11 @@ export class MainMenu {
         }
       }
     }
+    // Abstract in appropriate language
     if (geonaLayer.abstract !== undefined) {
       layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
     }
-    // contact info
+    // Contact information
     let layerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
     if (layerServer.service && layerServer.service.contactInformation) {
       layerInformation.contactInformation = layerServer.service.contactInformation;

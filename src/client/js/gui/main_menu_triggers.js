@@ -188,18 +188,23 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
   });
 
-  // Show/hide layer
-  // TODO 'this' is invalid because of strict mode - is there a better way to do it?
-  parentDiv.find('.js-geona-layers-list__item-visibility').click(function(jQueryEvent) {
-    // Finds the list element that contains the icon which was clicked
-    let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this
-    if (this.classList.contains('layer-hidden')) {// eslint-disable-line no-invalid-this
-      eventManager.trigger('mainMenu.showLayer', [item[0]]);
-      this.classList.remove('layer-hidden');// eslint-disable-line no-invalid-this
-    } else {
-      eventManager.trigger('mainMenu.hideLayer', [item[0]]);
-      this.classList.add('layer-hidden');// eslint-disable-line no-invalid-this
-    }
+  // Show layer
+  parentDiv.find('.js-geona-layers-list__item-visibility-hiding').click(function(jQueryEvent) {
+    let item = jQueryEvent.target; // The HTML element which was clicked
+    let identifier = $(jQueryEvent.target).closest('li')[0].dataset.identifier; // The layer id, stored in the dataset
+    eventManager.trigger('mainMenu.showLayer', [identifier, item]);
+  });
+
+  // Hide layer
+  parentDiv.find('.js-geona-layers-list__item-visibility-showing').click(function(jQueryEvent) {
+    let item = jQueryEvent.target; // The HTML element which was clicked
+    let identifier = $(jQueryEvent.target).closest('li')[0].dataset.identifier; // The layer id, stored in the dataset
+    eventManager.trigger('mainMenu.hideLayer', [identifier, item]);
+  });
+
+  // Show settings panel
+  parentDiv.find('.js-geona-layers-list__item-settings').click(function(jQueryEvent) {
+
   });
 
   // Remove layer

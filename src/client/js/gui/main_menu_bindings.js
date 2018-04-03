@@ -63,14 +63,14 @@ export function registerBindings(eventManager, menu) {
     menu.reorderLayers(item[0]);
   });
   // Show layer
-  // Item is the list item that contained the icon that was clicked
-  eventManager.bind('mainMenu.showLayer', (item) => {
-    menu.showLayer(item[0]);
+  // Item is the icon that was clicked
+  eventManager.bind('mainMenu.showLayer', ([identifier, item]) => {
+    menu.showLayer(identifier, item);
   });
   // Hide layer
-  // Item is the list item that contained the icon that was clicked
-  eventManager.bind('mainMenu.hideLayer', (item) => {
-    menu.hideLayer(item[0]);
+  // Item is the icon that was clicked
+  eventManager.bind('mainMenu.hideLayer', ([identifier, item]) => {
+    menu.hideLayer(identifier, item);
   });
   // Remove layer
   // Item is the list item that contained the icon that was clicked
