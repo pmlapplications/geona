@@ -783,14 +783,36 @@ export class LMap extends GeonaMap {
    * @param {Number} opacity         The opacity, between 0 (invisible) and 1 (opaque).
    */
   setLayerOpacity(layerIdentifier, opacity) {
+    // Force the opacity to be between 0 and 1
+    let safeOpacity = opacity;
+    if (opacity > 1) {
+      safeOpacity = 1;
+    } else if (opacity < 0) {
+      safeOpacity = 0;
+    }
+
+    // Set the opacity using the safe opacity
     if (this._activeLayers[layerIdentifier] !== undefined) {
       if (this._activeLayers[layerIdentifier].options.shown) {
         // This changes all the tiles of the layer to the opacity
-        this._activeLayers[layerIdentifier].setOpacity(opacity);
+        this._activeLayers[layerIdentifier].setOpacity(safeOpacity);
       }
 
       // There is no corresponding getOpacity() method so we have to update our options manually
-      this._activeLayers[layerIdentifier].options.opacity = opacity;
+      this._activeLayers[layerIdentifier].options.opacity = safeOpacity;
+    }
+  }
+
+  /**
+   * Gets the opacity for the active layer with the specified identifier.
+   * @param  {String} layerIdentifier The identifier for the active Leaflet layer we want to check.
+   * @return {Number}                 The opacity, between 0 and 1.
+   */
+  getLayerOpacity(layerIdentifier) {
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      return this._activeLayers[layerIdentifier].options.opacity;
+    } else {
+      throw new Error('There is no layer currently on the map with the identifier: ' + layerIdentifier);
     }
   }
 

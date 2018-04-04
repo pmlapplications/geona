@@ -794,6 +794,19 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+   * Gets the opacity for the active layer with the specified identifier.
+   * @param  {String} layerIdentifier The identifier for the active OpenLayers layer we want to check.
+   * @return {Number}                 The opacity, between 0 and 1.
+   */
+  getLayerOpacity(layerIdentifier) {
+    if (this._activeLayers[layerIdentifier] !== undefined) {
+      return this._activeLayers[layerIdentifier].getOpacity();
+    } else {
+      throw new Error('There is no layer currently on the map with the identifier: ' + layerIdentifier);
+    }
+  }
+
+  /**
    * Moves the layer to the specified index, and reorders the other map layers where required.
    *
    * Displaced layers move downwards if the reordered layer is being moved up.
