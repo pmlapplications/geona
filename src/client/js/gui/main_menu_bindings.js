@@ -72,11 +72,16 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.hideLayer', ([identifier, item]) => {
     menu.hideLayer(identifier, item);
   });
+  // Toggle layers panel item panel
+  eventManager.bind('mainMenu.toggleLayersPanelItemPanel', ([item, panel]) => {
+    menu.toggleLayersPanelItemPanel(item, panel);
+  });
   // Remove layer
   // Item is the list item that contained the icon that was clicked
   eventManager.bind('mainMenu.removeLayer', (item) => {
     menu.removeLayer(item[0]);
   });
+
   /*
    * Analysis Panel
    */

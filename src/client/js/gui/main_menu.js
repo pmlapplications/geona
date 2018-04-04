@@ -28,7 +28,7 @@ export class MainMenu {
     /** @type {String[]} @desc Holds the order of the layers in the layers list, using identifiers. */
     this.layersPanelItemList = [];
     /** @type {HTMLElement} @desc The currently open layer element - defaults to first layer element.  */
-    this.layersPanelActiveItem = undefined;
+    this.layersPanelActiveItemPanel = undefined;
 
     /** @type {HTMLElement} @desc Holds the explore panel after creation so it can be displayed again easily. */
     this.explorePanel = undefined;
@@ -354,7 +354,9 @@ export class MainMenu {
           let data = this._compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
           // Insert layer data object at the top of the list - higher on the list means higher on the map
           let item = this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
-          $(item).find('.js-geona-layers-list__item-body').addClass('removed');
+          $(item).find('.js-geona-layers-list__item-settings').addClass('removed');
+          $(item).find('.js-geona-layers-list__item-info').addClass('removed');
+          $(item).find('.js-geona-layers-list__item-analysis').addClass('removed');
         }
       }
     }
@@ -367,9 +369,11 @@ export class MainMenu {
 
 
     // Find the topmost HTML element in the list to use for the default active layer
-    this.layersPanelActiveItem = this.parentDiv.find('.js-geona-layers-list').children()[0];
+    let topmostItem = this.parentDiv.find('.js-geona-layers-list').children()[0];
+    this.layersPanelActiveItemPanel = $(topmostItem).find('.js-geona-layers-list__item-info')[0];
+
     // Make its contents visible
-    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-body').removeClass('removed');
+    this.layersPanelActiveItemPanel.classList.remove('removed');
   }
 
   /**
@@ -451,33 +455,24 @@ export class MainMenu {
   }
 
   /**
-   * Sets which layer item is currently active, or makes all item
-   * @param {String|undefined} layerIdentifier The identifier for the layer to make active, or undefined.
-   * @param {String}           panel           The panel to open onto ('settings', 'info', 'analysis').
+   * Opens the specified panel of the specified item.
+   * @param {HTMLElement} item  The item in the layers list.
+   * @param {String}      panel The name of the panel to open ('settings', 'info', 'analysis').
    */
-  selectLayersPanelActiveItem(layerIdentifier, panel) {
-    if (layerIdentifier === undefined) {
-      $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-body').addClass('removed');
+  toggleLayersPanelItemPanel(item, panel) {
+    let itemPanelToToggle = $(item).find('.js-geona-layers-list__item-' + panel)[0];
+
+    // If the item we want to toggle is the currently active panel, just close it
+    if (itemPanelToToggle.isEqualNode(this.layersPanelActiveItemPanel)) {
+      itemPanelToToggle.classList.add('removed');
+      this.layersPanelActiveItemPanel = undefined;
     } else {
-      for (let item of this.parentDiv.find('.js-geona-layers-list__item')) {
-        if (item.dataset.contains(layerIdentifier)) {
-          $(item).find('.js-geona-layers-list__item-' + panel).removeClass('removed');
-        }
+      if (this.layersPanelActiveItemPanel !== undefined) {
+        this.layersPanelActiveItemPanel.classList.add('removed'); // Close the current panel
       }
+      itemPanelToToggle.classList.remove('removed'); // Open the new panel
+      this.layersPanelActiveItemPanel = itemPanelToToggle;
     }
-  }
-
-  showSettingsPanel() {
-    // Remove the info panel if active
-    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-info').addClass('removed');
-    // Remove the analysis panel if active
-    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-analysis').addClass('removed');
-    // Show the settings panel
-    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-settings').removeClass('removed');
-  }
-
-  showInfoPanel() {
-
   }
 
   /**

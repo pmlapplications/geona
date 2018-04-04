@@ -189,28 +189,41 @@ function registerLayersTriggers(eventManager, parentDiv) {
   });
 
   // Show layer
-  parentDiv.find('.js-geona-layers-list__item-visibility-hiding').click(function(jQueryEvent) {
+  parentDiv.find('.js-geona-layers-list__item-header-icon-visibility-hiding').click((jQueryEvent) => {
     let item = jQueryEvent.target; // The HTML element which was clicked
     let identifier = $(jQueryEvent.target).closest('li')[0].dataset.identifier; // The layer id, stored in the dataset
     eventManager.trigger('mainMenu.showLayer', [identifier, item]);
   });
 
   // Hide layer
-  parentDiv.find('.js-geona-layers-list__item-visibility-showing').click(function(jQueryEvent) {
+  parentDiv.find('.js-geona-layers-list__item-header-icon-visibility-showing').click((jQueryEvent) => {
     let item = jQueryEvent.target; // The HTML element which was clicked
     let identifier = $(jQueryEvent.target).closest('li')[0].dataset.identifier; // The layer id, stored in the dataset
     eventManager.trigger('mainMenu.hideLayer', [identifier, item]);
   });
 
-  // Show settings panel
-  parentDiv.find('.js-geona-layers-list__item-settings').click(function(jQueryEvent) {
+  // Toggle settings panel
+  parentDiv.find('.js-geona-layers-list__item-header-icon-settings').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.toggleLayersPanelItemPanel', [item, 'settings']);
+  });
 
+  // Toggle info panel
+  parentDiv.find('.js-geona-layers-list__item-header-icon-info').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.toggleLayersPanelItemPanel', [item, 'info']);
+  });
+
+  // Toggle analysis panel
+  parentDiv.find('.js-geona-layers-list__item-header-icon-analysis').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.toggleLayersPanelItemPanel', [item, 'analysis']);
   });
 
   // Remove layer
-  parentDiv.find('.js-geona-layers-list__item-remove').click(function(jQueryEvent) {
+  parentDiv.find('.js-geona-layers-list__item-header-icon-remove').click((jQueryEvent) => {
     // Finds the list element that contains the icon which was clicked
-    let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this
+    let item = $(jQueryEvent.target).closest('li');
     eventManager.trigger('mainMenu.removeLayer', [item[0]]);
   });
 }
