@@ -1,4 +1,4 @@
-import 'jquery';
+import $ from 'jquery';
 import moment from 'moment';
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './main_menu_triggers';
@@ -23,10 +23,28 @@ export class MainMenu {
     this.config = menuConfigOptions;
     this.parentDiv = gui.parentDiv;
 
-    // requestLayers holds the layers found for the most recent WMS/WMTS request
-    this.requestLayers = [];
-    // layersBoxList holds the order of the layers in the layers list
-    this.layersBoxList = [];
+    /** @type {Object} Holds the layerServer found for the most recent WMS/WMTS request. */
+    this.requestLayerServer = undefined;
+    /** @type {String[]} @desc Holds the order of the layers in the layers list, using identifiers. */
+    this.layersPanelItemList = [];
+    /** @type {HTMLElement} @desc The currently open layer element - defaults to first layer element.  */
+    this.layersPanelActiveItem = undefined;
+
+    /** @type {HTMLElement} @desc Holds the explore panel after creation so it can be displayed again easily. */
+    this.explorePanel = undefined;
+    /** @type {HTMLElement} @desc Holds the layers panel after creation so it can be displayed again easily. */
+    this.layersPanel = undefined;
+    /** @type {HTMLElement} @desc Holds the analysis panel after creation so it can be displayed again easily. */
+    this.analysisPanel = undefined;
+    /** @type {HTMLElement} @desc Holds the login panel after creation so it can be displayed again easily. */
+    this.loginPanel = undefined;
+    /** @type {HTMLElement} @desc Holds the options panel after creation so it can be displayed again easily. */
+    this.optionsPanel = undefined;
+    /** @type {HTMLElement} @desc Holds the help panel after creation so it can be displayed again easily. */
+    this.helpPanel = undefined;
+    /** @type {HTMLElement} @desc Holds the share panel after creation so it can be displayed again easily. */
+    this.sharePanel = undefined;
+
 
     // Sets up menu toggle control
     if (this.config.collapsible) {
@@ -85,9 +103,20 @@ export class MainMenu {
     this.parentDiv.find('.js-geona-panel').addClass('removed');
   }
 
-  /* ------------------------------------*\
-      Explore Panel
-  \* ------------------------------------*/
+  /**
+   * Empties the contents of the Geona menu panel.
+   */
+  emptyCurrentPanel() {
+    this.parentDiv.find('.js-geona-panel')
+      .empty()
+      .removeClass('removed');
+  }
+
+  /**
+   * ------------------------------------
+   * Explore Panel
+   * ------------------------------------
+   */
 
   /**
    * Shows the explore panel.
@@ -197,14 +226,14 @@ export class MainMenu {
   getLayerServer(url, service, save, useCache) {
     this._clearPreviousUrlLayers();
     getLayerServer(url, service, save, useCache)
-      .then((layers) => {
+      .then((layerServer) => {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('removed');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('removed');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        for (let layer of layers.layers) {
+        for (let layer of layerServer.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
         }
-        this.requestLayerServer = layers;
+        this.requestLayerServer = layerServer;
       }).catch((err) => {
         alert('No layers found. Error: ' + JSON.stringify(err));
       });
@@ -229,9 +258,6 @@ export class MainMenu {
    */
   addUrlLayerToMap(layerIdentifier) {
     let layerServerDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServer));
-    console.log(layerServerDeepCopy);
-    console.log(JSON.stringify(layerServerDeepCopy.service));
-    console.log(JSON.stringify(layerServerDeepCopy.capability));
     for (let layer of layerServerDeepCopy.layers) {
       if (layer.identifier === layerIdentifier) {
         let geonaLayer;
@@ -266,6 +292,178 @@ export class MainMenu {
     } else {
       this.geona.map.addLayer(layer, layerServer);
     }
+  }
+
+  /**
+   * ------------------------------------
+   * Layers Panel
+   * ------------------------------------
+   */
+
+  /**
+   * Clears current panel content and adds layers currently on map to the list of layers.
+   */
+  displayLayersPanel() {
+    // Switch the layers tab to be active
+    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
+    this.parentDiv.find('.js-geona-menu__layers').addClass('geona-menu__tab--active');
+
+    // Remove the current panel contents
+    this.emptyCurrentPanel();
+
+    // If the layers panel hasn't been created yet, we need to create it first
+    if (this.layersPanel === undefined) {
+      this.constructLayersPanel();
+      this.layersPanel = this.parentDiv.find('.js-geona-layers-list');
+    } else {
+      // Add the layers panel
+      this.parentDiv.find('.js-geona-panel').prepend(this.layersPanel);
+    }
+  }
+
+  /**
+   * Populates the layers panel with the active layer information.
+   */
+  constructLayersPanel() {
+    this.parentDiv.find('.js-geona-panel').append(templates.layers_panel());
+
+    let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
+    // Double loop used to find the zIndex of a layer so the list can be populated correctly
+    for (let index = 0; index < activeLayersKeys.length; index++) {
+      // Loop through the active layers on the map and populate the layers list
+      for (let activeLayerKey of activeLayersKeys) {
+        let modifier = this.geona.map.layerGet(activeLayerKey, 'modifier');
+        let zIndex = this.geona.map.layerGet(activeLayerKey, 'zIndex');
+        if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
+          // Get the data in the correct format from the geona layer
+          let data = this._compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
+          // Insert layer data object at the top of the list - higher on the list means higher on the map
+          let item = this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+          $(item).find('.js-geona-layers-list__item-body').addClass('removed');
+        }
+      }
+    }
+
+
+    this.layersPanelItemList.length = 0;
+    for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
+      this.layersPanelItemList.unshift(layerBox.dataset.identifier);
+    }
+
+
+    // Find the topmost HTML element in the list to use for the default active layer
+    this.layersPanelActiveItem = this.parentDiv.find('.js-geona-layers-list').children()[0];
+    console.log(this.layersPanelActiveItem);
+    // Make its contents visible
+    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-body').removeClass('removed');
+  }
+
+  /**
+   * Takes a Geona layer and constructs an object to use when displaying layer information on the layers list
+   * @param {Layer}   geonaLayer The Geona layer definition to get information from.
+   * @return {Object}            Object containing information used by the layer item template
+   */
+  _compileLayerInformation(geonaLayer) {
+    let layerInformation = {
+      identifier: geonaLayer.identifier,
+    };
+    // Gets the title or the display name in appropriate language
+    if (geonaLayer.title !== undefined) {
+      layerInformation.title = selectPropertyLanguage(geonaLayer.getTitleOrDisplayName());
+    }
+    // The bounding box
+    if (geonaLayer.boundingBox !== undefined) {
+      layerInformation.boundingBox = {
+        north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
+        east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
+        south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
+        west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
+      };
+    }
+    // Time min and max, formatted as YYYY-MM-DD
+    if (geonaLayer.dimensions !== undefined) {
+      if (geonaLayer.dimensions.time) {
+        let sortedDates = this.geona.map.getActiveLayerDatetimes(geonaLayer.identifier);
+        if (sortedDates.length === 1) {
+          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' only.';
+        } else {
+          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' to ' +
+          moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD');
+        }
+      }
+    }
+    // Abstract in appropriate language
+    if (geonaLayer.abstract !== undefined) {
+      layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
+    }
+    // Contact information
+    let layerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+    if (layerServer.service && layerServer.service.contactInformation) {
+      layerInformation.contactInformation = layerServer.service.contactInformation;
+    }
+
+    return layerInformation;
+  }
+
+  /**
+   * Reorders the map layers. Also recreates the layersPanelItemList array to match the current ul list of elements
+   * @param {HTMLElement} item The item that was dragged and dropped.
+   */
+  reorderLayers(item) {
+    // Reset the list
+    this.layersPanelItemList.length = 0;
+    // Repopulate the list
+    for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
+      this.layersPanelItemList.unshift(layerBox.dataset.identifier);
+    }
+
+    let basemapActive = false;
+    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+      if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'basemap') {
+        basemapActive = true;
+      }
+    }
+
+    for (let index = 0; index < this.layersPanelItemList.length; index++) {
+      if (this.layersPanelItemList[index] === item.dataset.identifier) {
+        // If there's a basemap we need to increase the index by 1 (layersPanelItemList does not track basemaps)
+        if (basemapActive === true) {
+          this.geona.map.reorderLayers(item.dataset.identifier, index + 1);
+        } else {
+          this.geona.map.reorderLayers(item.dataset.identifier, index);
+        }
+      }
+    }
+  }
+
+  /**
+   * Sets which layer item is currently active, or makes all item
+   * @param {String|undefined} layerIdentifier The identifier for the layer to make active, or undefined.
+   * @param {String}           panel           The panel to open onto ('settings', 'info', 'analysis').
+   */
+  selectLayersPanelActiveItem(layerIdentifier, panel) {
+    if (layerIdentifier === undefined) {
+      $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-body').addClass('removed');
+    } else {
+      for (let item of this.parentDiv.find('.js-geona-layers-list__item')) {
+        if (item.dataset.contains(layerIdentifier)) {
+          $(item).find('.js-geona-layers-list__item-' + panel).removeClass('removed');
+        }
+      }
+    }
+  }
+
+  showSettingsPanel() {
+    // Remove the info panel if active
+    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-info').addClass('removed');
+    // Remove the analysis panel if active
+    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-analysis').addClass('removed');
+    // Show the settings panel
+    $(this.layersPanelActiveItem).find('.js-geona-layers-list__item-settings').removeClass('removed');
+  }
+
+  showInfoPanel() {
+
   }
 
   /**
@@ -316,74 +514,14 @@ export class MainMenu {
   }
 
   /**
-   * Clears current panel content and adds layers currently on map to the list of layers.
+   * ------------------------------------
+   * Analysis Panel
+   * ------------------------------------
    */
-  displayLayersPanel() {
-    this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
-    this.parentDiv.find('.js-geona-menu__layers').addClass('geona-menu__tab--active');
-
-    this.parentDiv.find('.js-geona-panel')
-      .empty()
-      .removeClass('removed');
-
-    this.parentDiv.find('.js-geona-panel').prepend(templates.layers_panel());
-
-    let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
-    // Double loop used to find the zIndex of a layer so the list can be populated correctly
-    for (let index = 0; index < activeLayersKeys.length; index++) {
-      // Loop through the active layers on the map and populate the layers list
-      for (let activeLayerKey of activeLayersKeys) {
-        let modifier = this.geona.map.layerGet(activeLayerKey, 'modifier');
-        let zIndex = this.geona.map.layerGet(activeLayerKey, 'zIndex');
-        if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
-          // Get the data in the correct format from the geona layer
-          let data = this._compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
-          // Insert layer data object at the top of the list - higher on the list means higher on the map
-          this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
-        }
-      }
-    }
-
-    this.layersBoxList.length = 0;
-    for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
-      this.layersBoxList.unshift(layerBox.dataset.identifier);
-    }
-  }
 
   /**
-   * Reorders the map layers. Also recreates the layersBoxList array to match the current ul list of elements
-   * @param {HTMLElement} item The item that was dragged and dropped.
+   *
    */
-  reorderLayers(item) {
-    // Reset the list
-    this.layersBoxList.length = 0;
-    // Repopulate the list
-    for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
-      this.layersBoxList.unshift(layerBox.dataset.identifier);
-    }
-
-    let basemapActive = false;
-    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
-      if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'basemap') {
-        basemapActive = true;
-      }
-    }
-
-    for (let index = 0; index < this.layersBoxList.length; index++) {
-      if (this.layersBoxList[index] === item.dataset.identifier) {
-        // If there's a basemap we need to increase the index by 1 (layersBoxList does not track basemaps)
-        if (basemapActive === true) {
-          this.geona.map.reorderLayers(item.dataset.identifier, index + 1);
-        } else {
-          this.geona.map.reorderLayers(item.dataset.identifier, index);
-        }
-      }
-    }
-  }
-
-  /**
- *
- */
   displayAnalysisPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__analysis').addClass('geona-menu__tab--active');
@@ -396,8 +534,14 @@ export class MainMenu {
   }
 
   /**
- *
- */
+   * ------------------------------------
+   * Login Panel
+   * ------------------------------------
+   */
+
+  /**
+   *
+   */
   displayLoginPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__login').addClass('geona-menu__tab--active');
@@ -408,6 +552,12 @@ export class MainMenu {
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.login_panel());
   }
+
+  /**
+   * ------------------------------------
+   * Options Panel
+   * ------------------------------------
+   */
 
   /**
    * Shows the Options panel (select basemaps, borders, graticule, projection)
@@ -535,8 +685,14 @@ export class MainMenu {
   }
 
   /**
- *
- */
+   * ------------------------------------
+   * Help Panel
+   * ------------------------------------
+   */
+
+  /**
+   *
+   */
   displayHelpPanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__help').addClass('geona-menu__tab--active');
@@ -549,8 +705,14 @@ export class MainMenu {
   }
 
   /**
- *
- */
+   * ------------------------------------
+   * Share Panel
+   * ------------------------------------
+   */
+
+  /**
+   *
+   */
   displaySharePanel() {
     this.parentDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.parentDiv.find('.js-geona-menu__share').addClass('geona-menu__tab--active');
@@ -560,52 +722,5 @@ export class MainMenu {
       .removeClass('removed');
 
     this.parentDiv.find('.js-geona-panel').prepend(templates.share_panel());
-  }
-
-  /**
-   * Takes a Geona layer and constructs an object to use when displaying layer information on the layers list
-   * @param {Layer}   geonaLayer The Geona layer definition to get information from.
-   * @return {Object}            Object containing information used by the layer item template
-   */
-  _compileLayerInformation(geonaLayer) {
-    let layerInformation = {
-      identifier: geonaLayer.identifier,
-    };
-    // Gets the title or the display name in appropriate language
-    if (geonaLayer.title !== undefined) {
-      layerInformation.title = selectPropertyLanguage(geonaLayer.getTitleOrDisplayName());
-    }
-    // The bounding box
-    if (geonaLayer.boundingBox !== undefined) {
-      layerInformation.boundingBox = {
-        north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
-        east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
-        south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
-        west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
-      };
-    }
-    // Time min and max, formatted as YYYY-MM-DD
-    if (geonaLayer.dimensions !== undefined) {
-      if (geonaLayer.dimensions.time) {
-        let sortedDates = this.geona.map.getActiveLayerDatetimes(geonaLayer.identifier);
-        if (sortedDates.length === 1) {
-          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' only.';
-        } else {
-          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' to ' +
-          moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD');
-        }
-      }
-    }
-    // Abstract in appropriate language
-    if (geonaLayer.abstract !== undefined) {
-      layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
-    }
-    // Contact information
-    let layerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
-    if (layerServer.service && layerServer.service.contactInformation) {
-      layerInformation.contactInformation = layerServer.service.contactInformation;
-    }
-
-    return layerInformation;
   }
 }
