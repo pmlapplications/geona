@@ -10,68 +10,131 @@
       <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-remove geona-layers-list__item-remove icon-bin-2"></span>
     </div>
   </div>
+  <div>Scalebar with units and current layer time</div>
   <div class="js-geona-layers-list__item-body">
-    <div class="js-geona-layers-list__item-settings">
-
+    <div class="js-geona-layers-list__item-body-settings">
+      <div>
+        <h4>Min:</h4>
+        <input type="text">
+      </div>
+      <div>
+        <h4>Max:</h4>
+        <input type="text">
+      </div>
+      <br>
+      <input type="checkbox">Logarithmic
+      <input type="checkbox">Auto scale
+      Reset
+      <br>
+      Layer Opacity -
+      <br>
+      <input type="range" min="0" max="1" step="0.01" value="1">
+      <br>
+      Layer style
+      <br><select></select>
+      <br>
+      <div>
+        <h4>Below Min Colour</h4>
+        <br>
+        <select></select>
+      </div>
+      <div>
+        <h4>Above Max Colour</h4>
+        <br>
+        <select></select>
+      </div>
+      <br>
+      Colour Bands:
+      <input type="number">
+      <br>
+      <input type="range" min="1" max="255" step="1" value="255">
+      <br>
+      Zoom to data
     </div>
 
-    <table class="js-geona-layers-list__item-info">
+    <table class="js-geona-layers-list__item-body-info">
       {{#if data.indicator}}
-      <tr class="geona-layers-list__item-info-row">
+      <tr class="geona-layers-list__item-body-info-row">
         <td>Indicators</td>
-        <td class="geona-layers-list__item-info-data">{{data.indicator}}</td>
+        <td class="geona-layers-list__item-body-info-data">{{data.indicator}}</td>
       </tr>
       {{/if}}
 
       {{#if data.boundingBox}}
-      <tr class="geona-layers-list__item-info-row">
+      <tr class="geona-layers-list__item-body-info-row">
         <td>Bounding box</td>
-        <td class="geona-layers-list__item-info-data">
+        <td class="geona-layers-list__item-body-info-data">
           {{data.boundingBox.north}} N, {{data.boundingBox.east}} E, {{data.boundingBox.south}} S, {{data.boundingBox.west}} W,
         </td>
       </tr>
       {{/if}}
 
       {{#if data.dateRange}}
-      <tr class="geona-layers-list__item-info-row">
+      <tr class="geona-layers-list__item-body-info-row">
         <td>Date range</td>
-        <td class="geona-layers-list__item-info-data">{{data.dateRange}}</td>
+        <td class="geona-layers-list__item-body-info-data">{{data.dateRange}}</td>
       </tr>
       {{/if}}
 
       {{#if data.abstract}}
-      <tr class="geona-layers-list__item-info-row">
+      <tr class="geona-layers-list__item-body-info-row">
         <td>Abstract</td>
-        <td class="geona-layers-list__item-info-data">{{data.abstract}}</td>
+        <td class="geona-layers-list__item-body-info-data">{{data.abstract}}</td>
       </tr>
       {{/if}}
 
       {{#if data.contactInformation}}
         {{#if data.contactInformation.person}}
-        <tr class="geona-layers-list__item-info-row">
+        <tr class="geona-layers-list__item-body-info-row">
           <td>Contact</td>
-          <td class="geona-layers-list__item-info-data">{{data.contactInformation.person}}</td>
+          <td class="geona-layers-list__item-body-info-data">{{data.contactInformation.person}}</td>
         </tr>
         {{/if}}
 
         {{#if data.contactInformation.phone}}
-        <tr class="geona-layers-list__item-info-row">
+        <tr class="geona-layers-list__item-body-info-row">
           <td>Telephone</td>
-          <td class="geona-layers-list__item-info-data">{{data.contactInformation.phone}}</td>
+          <td class="geona-layers-list__item-body-info-data">{{data.contactInformation.phone}}</td>
         </tr>
         {{/if}}
 
         {{#if data.contactInformation.email}}
-        <tr class="geona-layers-list__item-info-row">
+        <tr class="geona-layers-list__item-body-info-row">
           <td>Email</td>
-          <td class="geona-layers-list__item-info-data">{{data.contactInformation.email}}</td>
+          <td class="geona-layers-list__item-body-info-data">{{data.contactInformation.email}}</td>
         </tr>
         {{/if}}
       {{/if}}
     </table>
 
-    <div class="js-geona-layers-list__item-analysis">
-
+    <div class="js-geona-layers-list__item-body-analysis">
+      <h4>Analysis</h4>
+      To refine the data before analysis you can:
+      <h4>Draw</h4>
+      Draw a selection box on the map
+      <br>
+      <button><span class="icon-anchor-point-1"></span>Draw Polygon</button>
+      <button><span class="icon-network-1-1"></span>Draw Irregular Polygon</button>
+      <br>Or enter coordinates
+      <br><input type="text" placeholder="Left, Bottom, Right, Top"></input>
+      <button>Save</button>
+      <h4>Upload</h4>
+      Upload a shape file (requires all three of .shp, .shx & .dbf)
+      <br>or
+      <br>Upload a CSV file containing point data, including matchup data for comparison
+      <br><button><span class="icon-file-upload"></span>Upload Files</button>
+      <br>Alternatively you can drag and drop files straight onto the map! (GPX, GeoJSON, IGC, KML, TopoJSON)
+      <h4>Select</h4>
+      Use this dropdown or select an existing polygon:
+      <select>
+        <option value="default" selected disabled>You have no files yet, please add some.</option>
+      </select>
+      <br>
+      <br>
+      <button><span class="icon-cloud-download"></span>Download netCDF</button>
+      <button>Make new plot</button>
+      <br>
+      <button><span class="icon-eraser"></span>Clear selection</button>
     </div>
   </div>
 </li>

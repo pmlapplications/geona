@@ -58,18 +58,15 @@ export function registerBindings(eventManager, menu) {
     menu.displayLayersPanel();
   });
   // Reorder layers
-  // Item is the list item that was dragged and dropped
-  eventManager.bind('mainMenu.reorderLayers', (item) => {
+  eventManager.bind('mainMenu.reorderLayers', (item) => { // Item is the list item that was dragged and dropped
     menu.reorderLayers(item[0]);
   });
   // Show layer
-  // Item is the icon that was clicked
-  eventManager.bind('mainMenu.showLayer', ([identifier, item]) => {
+  eventManager.bind('mainMenu.showLayer', ([identifier, item]) => { // Item is the icon that was clicked
     menu.showLayer(identifier, item);
   });
   // Hide layer
-  // Item is the icon that was clicked
-  eventManager.bind('mainMenu.hideLayer', ([identifier, item]) => {
+  eventManager.bind('mainMenu.hideLayer', ([identifier, item]) => { // Item is the icon that was clicked
     menu.hideLayer(identifier, item);
   });
   // Toggle layers panel item panel
@@ -77,8 +74,7 @@ export function registerBindings(eventManager, menu) {
     menu.toggleLayersPanelItemPanel(item, panel);
   });
   // Remove layer
-  // Item is the list item that contained the icon that was clicked
-  eventManager.bind('mainMenu.removeLayer', (item) => {
+  eventManager.bind('mainMenu.removeLayer', (item) => { // Item is the list item that contained the icon that was clicked
     menu.removeLayer(item[0]);
   });
 
