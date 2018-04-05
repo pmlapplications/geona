@@ -575,6 +575,7 @@ export class LMap extends GeonaMap {
           shown: options.shown,
           opacity: 1,
           timeHidden: false,
+          numcolorbands: 255,
         };
 
         // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
@@ -1019,17 +1020,34 @@ export class LMap extends GeonaMap {
   /**
    * Translates a generic request for a layer key into an Leaflet options.key and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String|L.tileLayer.wms} layerIdentifier The identifier for the map layer we want to check,
-   *                                                  or the Leaflet layer itself.
-   * @param  {String}                 key             The key that we want to find the value of.
-   * @return {*}                                      The value for the requested key.
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of.
+   *
+   * @return {*}                      The value for the requested key.
    */
   layerGet(layerIdentifier, key) {
-    // Determine whether we've received a String or a tileLayer.wms
-    if (typeof layerIdentifier === 'string') {
-      return this._activeLayers[layerIdentifier].options[key];
-    } else {
-      return layerIdentifier.options[key];
+    return this._activeLayers[layerIdentifier].options[key];
+  }
+
+  /**
+   * Translates a generic request for a layer source key into an Leaflet wmsParams.key and returns the result.
+   * Used for methods not specific to one map library (e.g. in the GUI).
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check,
+   *                                                or the OpenLayers layer itself.
+   * @param  {String}               key             The key that we want to find the value of.
+   * @return {*}                                    The value for the requested key.
+   */
+  layerSourceGet(layerIdentifier, key) {
+    let layerSource = this._activeLayers[layerIdentifier].wmsParams;
+    switch (key) {
+      case 'style':
+        return layerSource.styles;
+      case 'format':
+        return layerSource.format;
+      case 'numcolorbands':
+        return this.layerGet(layerIdentifier, 'numcolorbands');
+      default:
+        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numcolorbands\']');
     }
   }
 
@@ -1058,6 +1076,8 @@ export class LMap extends GeonaMap {
     // Change the height of the attribution bar
     attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }
+
+  // TODO set numcolorbands method
 }
 
 /**

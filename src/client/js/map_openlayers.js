@@ -1002,17 +1002,34 @@ export class OlMap extends GeonaMap {
   /**
    * Translates a generic request for a layer key into an OpenLayers get() and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String|ol.layer.Tile} layerIdentifier The identifier for the map layer we want to check,
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of.
+   *
+   * @return {*}                      The value for the requested key.
+   */
+  layerGet(layerIdentifier, key) {
+    return this._activeLayers[layerIdentifier].get(key);
+  }
+
+  /**
+   * Translates a generic request for a layer key into an OpenLayers getParams() and returns the result.
+   * Used for methods not specific to one map library (e.g. in the GUI).
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check,
    *                                                or the OpenLayers layer itself.
    * @param  {String}               key             The key that we want to find the value of.
    * @return {*}                                    The value for the requested key.
    */
-  layerGet(layerIdentifier, key) {
-    // Determine whether we've received a String or a Layer.Tile
-    if (typeof layerIdentifier === 'string') {
-      return this._activeLayers[layerIdentifier].get(key);
-    } else {
-      return layerIdentifier.get(key);
+  layerSourceGet(layerIdentifier, key) {
+    let layerSource = this._activeLayers[layerIdentifier].getSource();
+    switch (key) {
+      case 'style':
+        return layerSource.getParams().STYLES;
+      case 'format':
+        return layerSource.getParams().FORMAT;
+      case 'colorbands':
+        return layerSource.getParams().NUMCOLORBANDS;
+      default:
+        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numcolorbands\']');
     }
   }
 
@@ -1041,6 +1058,8 @@ export class OlMap extends GeonaMap {
     // Change the height of the attribution bar
     attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }
+
+  // TODO set numcolorbands method
 }
 
 /**

@@ -3175,11 +3175,6 @@ describe('client/js/map_leaflet', function() {
       let zIndex = geona.map.layerGet('Rrs_412', 'zIndex');
       expect(zIndex).to.equal(0);
     });
-    it('should return a zIndex of 0 from the layer object', function() {
-      let layer = geona.map._activeLayers.Rrs_412;
-      let zIndex = geona.map.layerGet(layer, 'zIndex');
-      expect(zIndex).to.equal(0);
-    });
     it('should throw an undefined error from the layer identifier', function() {
       expect(function() {
         geona.map.layerGet('', 'zIndex');
