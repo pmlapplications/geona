@@ -363,7 +363,7 @@ export class MainMenu {
 
           // Make current style selected in settings
           let currentStyle = this.geona.map.layerSourceGet(data.info.identifier, 'style');
-          $(item).find('option[value="' + currentStyle + '"]').prop('selected', true);
+          $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val(currentStyle).prop('selected', true);
         }
       }
     }
