@@ -1,7 +1,7 @@
 {
   "toggle": {
-    "open": "Open<br>Menu",
-    "close": "Close<br>Menu"
+    "open": "Open Menu",
+    "close": "Close Menu"
   },
   "help": {
     "termsConditions": "View Terms and Conditions"
@@ -9,5 +9,56 @@
   "time-panel": {
     "heading": "Timeline",
     "description": " - Click and drag to move, use your mouse scroll wheel to zoom, click to select a date or enter your required date in the date field on the right"
+  },
+  "layers-panel": {
+    "settings": {
+      "scale-minimum": "Min",
+      "scale-maximum": "Max",
+      "scale-logarithmic": "Logarithmic",
+      "scale-autoscale": "Auto scale",
+      "scale-reset": "Reset",
+      "opacity": "Layer Opacity",
+      "style": "Layer Style",
+      "below-minimum": "Below Min Colour",
+      "above-maximum": "Above Max Colour",
+      "colorbands": "Colour Bands",
+      "zoom-data": "Zoom to data"
+    },
+    "info": {
+      "bounding-box": "Bounding box",
+      "north-abbr": "N",
+      "east-abbr": "E",
+      "south-abbr": "S",
+      "west-abbr": "W",
+      "date-range": "Date range",
+      "date - date": "to",
+      "abstract": "Abstract",
+      "contact": "Contact",
+      "phone": "Telephone",
+      "email": "Email"
+    },
+    "analysis": {
+      "analysis-title": "Analysis",
+      "analysis-description": "To refine the data before analysis you can",
+      "draw-title": "Draw",
+      "draw-description": "Draw a selection box on the map",
+      "draw-polygon": "Draw Polygon",
+      "draw-irregular-polygon": "Draw Irregular Polygon",
+      "draw-coordinates": "Or enter coordinates",
+      "draw-coordinates-placeholder": "Left, Bottom, Right, Top",
+      "draw-save": "Save",
+      "upload-title": "Upload",
+      "upload-shape": "Upload a shape file (requires all three of .shp, .shx & .dbf)",
+      "upload-or": "or",
+      "upload-csv": "Upload a CSV file containing point data, including matchup data for comparison",
+      "upload-files": "Upload Files",
+      "upload-drag-drop": "Alternatively you can drag and drop files straight onto the map!",
+      "select-title": "Select",
+      "select-description": "Use this dropdown to select an existing polygon:",
+      "select-placeholder": "You have no files yet, please add some",
+      "select-download": "Download",
+      "select-new-plot": "Make new plot",
+      "select-clear": "Clear selection"
+    }
   }
 }

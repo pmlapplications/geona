@@ -1,7 +1,7 @@
 {
   "toggle": {
-    "open": "Afficher<br>Menu",
-    "close": "Cachez<br>Menu"
+    "open": "Afficher Menu",
+    "close": "Cachez Menu"
   },
   "help": {
     "termsConditions": "FR Afficher les termes et conditions"
@@ -9,5 +9,56 @@
   "time-panel": {
     "heading": "FRTimeline",
     "description": "FR - Click and drag to move, use your mouse scroll wheel to zoom, click to select a date or enter your required date in the date field on the right"
+  },
+  "layers-panel": {
+    "settings": {
+      "scale-minimum": "minimum",
+      "scale-maximum": "maximum",
+      "scale-logarithmic": "logarithmique",
+      "scale-autoscale": "échelle automatique",
+      "scale-reset": "réinitialiser",
+      "opacity": "Opacité de calque",
+      "style": "Style de calque",
+      "below-minimum": "En dessous de la couleur minimale",
+      "above-maximum": "Au-dessus de la couleur maximale",
+      "colorbands": "Bandes de couleur",
+      "zoom-data": "Zoomer sur les données"
+    },
+    "info": {
+      "bounding-box": "Boîte de délimitation",
+      "north-abbr": "N",
+      "east-abbr": "E",
+      "south-abbr": "S",
+      "west-abbr": "O",
+      "date-range": "Plage de dates",
+      "date - date": "à",
+      "abstract": "Abstrait",
+      "contact": "Contact",
+      "phone": "Téléphone",
+      "email": "Email"
+    },
+    "analysis": {
+      "analysis-title": "Analyse",
+      "analysis-description": "Pour affiner les données avant l'analyse, vous pouvez",
+      "draw-title": "Dessiner",
+      "draw-description": "Dessiner une boîte de sélection sur la carte",
+      "draw-polygon": "Dessiner un polygone",
+      "draw-irregular-polygon": "Dessiner un polygone irrégulier",
+      "draw-coordinates": "Ou entrez les coordonnées",
+      "draw-coordinates-placeholder": "Gauche, Bas, Droite, Haut",
+      "draw-save": "Sauvegarder",
+      "upload-title": "Télécharger",
+      "upload-shape": "Télécharger un fichier de forme (nécessite les trois fichiers .shp, .shx et .dbf)",
+      "upload-or": "ou",
+      "upload-csv": "Télécharger un fichier CSV contenant des données ponctuelles, y compris des données de rapprochement à des fins de comparaison",
+      "upload-files": "Télécharger des fichiers",
+      "upload-drag-drop": "Alternativement, vous pouvez faire glisser et déposer des fichiers directement sur la carte!",
+      "select-title": "Sélectionner",
+      "select-description": "Utilisez cette liste déroulante pour sélectionner un polygone existant",
+      "select-placeholder": "Vous n'avez pas encore de fichiers, veuillez en ajouter",
+      "select-download": "Télécharger",
+      "select-new-plot": "Faire un nouveau complot",
+      "select-clear": "Effacer la sélection"
+    }
   }
 }
