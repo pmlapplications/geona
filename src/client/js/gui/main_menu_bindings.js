@@ -77,6 +77,14 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.removeLayer', (item) => { // Item is the list item that contained the icon that was clicked
     menu.removeLayer(item[0]);
   });
+  // Change layer opacity
+  eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
+    menu.changeLayerOpacity(item, opacity);
+  });
+  // Change layer style
+  eventManager.bind('mainMenu.changeLayerStyle', ([item, style]) => { // Item is the list item that contained the select
+    menu.changeLayerStyle(item, style);
+  });
 
   /*
    * Analysis Panel

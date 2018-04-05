@@ -545,6 +545,24 @@ export class MainMenu {
     this.geona.map.showLayer(identifier);
   }
 
+  changeLayerOpacity(item, opacity) {
+    $(item).find('.js-geona-layers-list__item-body-settings-opacity-heading')
+      .text('Layer Opacity - ' + Math.round(opacity * 100) + '%'); // Math.round to avoid displaying decimals
+    let layerIdentifier = item.dataset.identifier;
+    this.geona.map.setLayerOpacity(layerIdentifier, opacity);
+  }
+
+  // TODO do we need this? Or shoul we just call the map method?
+  /**
+   * Changes the layer style.
+   * @param {HTMLElement} item  The list item which contains the select which was clicked.
+   * @param {String}      style The identifier for the style to select.
+   */
+  changeLayerStyle(item, style) {
+    let identifier = item.dataset.identifier;
+    this.geona.map.changeLayerStyle(identifier, style);
+  }
+
   /**
    * ------------------------------------
    * Analysis Panel

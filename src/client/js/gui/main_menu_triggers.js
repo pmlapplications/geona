@@ -183,6 +183,7 @@ function registerExploreTriggers(eventManager, parentDiv) {
  */
 function registerLayersTriggers(eventManager, parentDiv) {
   // Dragula reordering
+  // TODO only the item header should activate dragging
   let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]]);
   dragger.on('drop', (item) => {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
@@ -225,6 +226,20 @@ function registerLayersTriggers(eventManager, parentDiv) {
     // Finds the list element that contains the icon which was clicked
     let item = $(jQueryEvent.target).closest('li');
     eventManager.trigger('mainMenu.removeLayer', [item[0]]);
+  });
+
+  // Change layer opacity
+  parentDiv.find('.js-geona-layers-list__item-body-settings-opacity-range').on('input', (jQueryEvent) => {
+    let value = $(jQueryEvent.target).val();
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.changeLayerOpacity', [item, value]);
+  });
+
+  // Change layer style
+  parentDiv.find('.js-geona-layers-list__item-body-settings-styles-select').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let style = $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val();
+    eventManager.trigger('mainMenu.changeLayerStyle', [item, style]);
   });
 }
 
