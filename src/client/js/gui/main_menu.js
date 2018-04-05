@@ -351,12 +351,19 @@ export class MainMenu {
         let zIndex = this.geona.map.layerGet(activeLayerKey, 'zIndex');
         if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
           // Get the data in the correct format from the geona layer
-          let data = this._compileLayerInformation(this.geona.map._availableLayers[activeLayerKey]);
+          let data = this._compileLayerData(this.geona.map._availableLayers[activeLayerKey]);
           // Insert layer data object at the top of the list - higher on the list means higher on the map
-          let item = this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+          this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+          let item = this.parentDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
+
+          // Hide all panels
           $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
           $(item).find('.js-geona-layers-list__item-body-info').addClass('removed');
           $(item).find('.js-geona-layers-list__item-body-analysis').addClass('removed');
+
+          // Make current style selected in settings
+          let currentStyle = this.geona.map.layerSourceGet(data.info.identifier, 'style');
+          $(item).find('option[value="' + currentStyle + '"]').prop('selected', true);
         }
       }
     }
@@ -381,17 +388,29 @@ export class MainMenu {
    * @param {Layer}   geonaLayer The Geona layer definition to get information from.
    * @return {Object}            Object containing information used by the layer item template
    */
-  _compileLayerInformation(geonaLayer) {
-    let layerInformation = {
+  _compileLayerData(geonaLayer) {
+    // Compile data for the settings panel
+    let layerSettings = {};
+
+    if (geonaLayer.styles) {
+      layerSettings.styles = [];
+      for (let style of geonaLayer.styles) {
+        layerSettings.styles.push(style.identifier);
+      }
+    }
+
+
+    // Compile data for the info panel
+    let layerInfo = {
       identifier: geonaLayer.identifier,
     };
     // Gets the title or the display name in appropriate language
     if (geonaLayer.title !== undefined) {
-      layerInformation.title = selectPropertyLanguage(geonaLayer.getTitleOrDisplayName());
+      layerInfo.title = selectPropertyLanguage(geonaLayer.getTitleOrDisplayName());
     }
     // The bounding box
     if (geonaLayer.boundingBox !== undefined) {
-      layerInformation.boundingBox = {
+      layerInfo.boundingBox = {
         north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
         east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
         south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
@@ -403,24 +422,28 @@ export class MainMenu {
       if (geonaLayer.dimensions.time) {
         let sortedDates = this.geona.map.getActiveLayerDatetimes(geonaLayer.identifier);
         if (sortedDates.length === 1) {
-          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' only.';
+          layerInfo.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' only.';
         } else {
-          layerInformation.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' to ' +
+          layerInfo.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' to ' +
           moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD');
         }
       }
     }
     // Abstract in appropriate language
     if (geonaLayer.abstract !== undefined) {
-      layerInformation.abstract = selectPropertyLanguage(geonaLayer.abstract);
+      layerInfo.abstract = selectPropertyLanguage(geonaLayer.abstract);
     }
-    // Contact information
+    // Contact Information
     let layerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
     if (layerServer.service && layerServer.service.contactInformation) {
-      layerInformation.contactInformation = layerServer.service.contactInformation;
+      layerInfo.contactInformation = layerServer.service.contactInformation;
     }
 
-    return layerInformation;
+    // Return all
+    return {
+      settings: layerSettings,
+      info: layerInfo,
+    };
   }
 
   /**
