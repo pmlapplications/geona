@@ -399,6 +399,10 @@ export class MainMenu {
       }
     }
 
+    // Opacity
+    layerSettings.opacityReal = this.geona.map.layerGet(geonaLayer.identifier, 'opacity');
+    layerSettings.opacityPercent = Math.round(layerSettings.opacityReal * 100);
+
 
     // Compile data for the info panel
     let layerInfo = {

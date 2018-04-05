@@ -26,9 +26,9 @@
       <input type="checkbox">Auto scale
       Reset
       <br>
-      Layer Opacity -
+      <span class="js-geona-layers-list__item-body-settings-opacity-heading">Layer Opacity - {{data.settings.opacityPercent}}%</span>
       <br>
-      <input type="range" min="0" max="1" step="0.01" value="1">
+      <input class="js-geona-layers-list__item-body-settings-opacity-range" type="range" min="0" max="1" step="0.01" value="{{data.settings.opacityReal}}">
       <br>
       Layer style
       <br>
