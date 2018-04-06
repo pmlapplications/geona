@@ -184,7 +184,17 @@ function registerExploreTriggers(eventManager, parentDiv) {
 function registerLayersTriggers(eventManager, parentDiv) {
   // Dragula reordering
   // TODO only the item header should activate dragging
-  let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]]);
+  let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]],
+    {
+      moves: (el, container, handle, sibling) => {
+        console.log('----');
+        console.log(el);
+        console.log(container);
+        console.log(handle);
+        console.log(sibling);
+        return handle.classList.contains('js-geona-layers-list__item-header');
+      },
+    });
   dragger.on('drop', (item) => {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
   });

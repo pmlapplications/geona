@@ -212,45 +212,45 @@ export let client = {
           version: '1.3.0',
           url: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
           service: {
-            'title': {
-              'und': 'PML RSG THREDDS Data Server',
+            title: {
+              und: 'PML RSG THREDDS Data Server',
             },
-            'abstract': {
-              'und': 'Scientific Data',
+            abstract: {
+              und: 'Scientific Data',
             },
-            'keywords': {
-              'und': ['meteorology', 'atmosphere', 'climate', 'ocean', 'earth science'],
+            keywords: {
+              und: ['meteorology', 'atmosphere', 'climate', 'ocean', 'earth science'],
             },
-            'onlineResource': 'http://www.pml.ac.uk',
-            'contactInformation': {
-              'person': 'Remote Sensing Group',
-              'phone': [
+            onlineResource: 'http://www.pml.ac.uk',
+            contactInformation: {
+              person: 'Remote Sensing Group',
+              phone: [
                 '',
               ],
-              'email': [
+              email: [
                 'rsgweb@pml.ac.uk',
               ],
             },
           },
           capability: {
-            'getMap': {
-              'formats': [
+            getMap: {
+              formats: [
                 'image/png',
                 'image/png;mode=32bit',
                 'image/gif',
                 'image/jpeg',
                 'application/vnd.google-earth.kmz',
               ],
-              'get': [
+              get: [
                 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
               ],
             },
-            'getFeatureInfo': {
-              'formats': [
+            getFeatureInfo: {
+              formats: [
                 'image/png',
                 'text/xml',
               ],
-              'get': [
+              get: [
                 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY',
               ],
             },
@@ -315,29 +315,33 @@ export let client = {
               },
             },
             {
-              'identifier': 'Rrs_412',
-              'protocol': 'wms',
-              'modifier': 'hasTime',
-              'title': {
-                'und': 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
+              identifier: 'Rrs_412',
+              protocol: 'wms',
+              modifier: 'hasTime',
+              title: {
+                und: 'surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air',
               },
-              'abstract': {
-                'und': 'Sea surface reflectance defined as the ratio of water-leaving radiance to surface irradiance at 412 nm.',
+              abstract: {
+                und: 'Sea surface reflectance defined as the ratio of water-leaving radiance to surface irradiance at 412 nm.',
               },
-              'styles': [
+              styles: [
                 {
                   identifier: 'boxfill/cmocean_speed',
                   title: {
                     und: 'boxfill/cmocean_speed',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_speed palette ',
+                    und: 'boxfill style, using the cmocean_speed palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_speed',
+                      },
                     },
                   ],
                 },
@@ -347,13 +351,17 @@ export let client = {
                     und: 'boxfill/ncview',
                   },
                   abstract: {
-                    und: 'boxfill style, using the ncview palette ',
+                    und: 'boxfill style, using the ncview palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=ncview',
+                      },
                     },
                   ],
                 },
@@ -363,13 +371,17 @@ export let client = {
                     und: 'boxfill/occam',
                   },
                   abstract: {
-                    und: 'boxfill style, using the occam palette ',
+                    und: 'boxfill style, using the occam palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=occam',
+                      },
                     },
                   ],
                 },
@@ -379,13 +391,17 @@ export let client = {
                     und: 'boxfill/cmocean_algae',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_algae palette ',
+                    und: 'boxfill style, using the cmocean_algae palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_algae',
+                      },
                     },
                   ],
                 },
@@ -395,13 +411,17 @@ export let client = {
                     und: 'boxfill/cmocean_oxy',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_oxy palette ',
+                    und: 'boxfill style, using the cmocean_oxy palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_oxy',
+                      },
                     },
                   ],
                 },
@@ -411,13 +431,17 @@ export let client = {
                     und: 'boxfill/cmocean_haline',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_haline palette ',
+                    und: 'boxfill style, using the cmocean_haline palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_haline',
+                      },
                     },
                   ],
                 },
@@ -427,13 +451,17 @@ export let client = {
                     und: 'boxfill/sst_36',
                   },
                   abstract: {
-                    und: 'boxfill style, using the sst_36 palette ',
+                    und: 'boxfill style, using the sst_36 palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=sst_36',
+                      },
                     },
                   ],
                 },
@@ -443,13 +471,17 @@ export let client = {
                     und: 'boxfill/cmocean_dense',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_dense palette ',
+                    und: 'boxfill style, using the cmocean_dense palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_dense',
+                      },
                     },
                   ],
                 },
@@ -459,13 +491,17 @@ export let client = {
                     und: 'boxfill/orange-descending',
                   },
                   abstract: {
-                    und: 'boxfill style, using the orange-descending palette ',
+                    und: 'boxfill style, using the orange-descending palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=orange-descending',
+                      },
                     },
                   ],
                 },
@@ -475,13 +511,17 @@ export let client = {
                     und: 'boxfill/cci_blue_red',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cci_blue_red palette ',
+                    und: 'boxfill style, using the cci_blue_red palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cci_blue_red',
+                      },
                     },
                   ],
                 },
@@ -491,13 +531,17 @@ export let client = {
                     und: 'boxfill/cmocean_turbid',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_turbid palette ',
+                    und: 'boxfill style, using the cmocean_turbid palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_turbid',
+                      },
                     },
                   ],
                 },
@@ -507,13 +551,17 @@ export let client = {
                     und: 'boxfill/cmocean_tempo',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_tempo palette ',
+                    und: 'boxfill style, using the cmocean_tempo palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_tempo',
+                      },
                     },
                   ],
                 },
@@ -523,13 +571,17 @@ export let client = {
                     und: 'boxfill/cmocean_deep',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_deep palette ',
+                    und: 'boxfill style, using the cmocean_deep palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_deep',
+                      },
                     },
                   ],
                 },
@@ -539,13 +591,17 @@ export let client = {
                     und: 'boxfill/cmocean_curl',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_curl palette ',
+                    und: 'boxfill style, using the cmocean_curl palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_curl',
+                      },
                     },
                   ],
                 },
@@ -555,13 +611,17 @@ export let client = {
                     und: 'boxfill/cmocean_thermal',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_thermal palette ',
+                    und: 'boxfill style, using the cmocean_thermal palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_thermal',
+                      },
                     },
                   ],
                 },
@@ -571,13 +631,17 @@ export let client = {
                     und: 'boxfill/blue-descending',
                   },
                   abstract: {
-                    und: 'boxfill style, using the blue-descending palette ',
+                    und: 'boxfill style, using the blue-descending palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=blue-descending',
+                      },
                     },
                   ],
                 },
@@ -587,13 +651,17 @@ export let client = {
                     und: 'boxfill/redblue-reverse',
                   },
                   abstract: {
-                    und: 'boxfill style, using the redblue-reverse palette ',
+                    und: 'boxfill style, using the redblue-reverse palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=redblue-reverse',
+                      },
                     },
                   ],
                 },
@@ -603,13 +671,17 @@ export let client = {
                     und: 'boxfill/soil-moisture',
                   },
                   abstract: {
-                    und: 'boxfill style, using the soil-moisture palette ',
+                    und: 'boxfill style, using the soil-moisture palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=soil-moisture',
+                      },
                     },
                   ],
                 },
@@ -619,29 +691,17 @@ export let client = {
                     und: 'boxfill/cmocean_phase',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_phase palette ',
+                    und: 'boxfill style, using the cmocean_phase palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
-                    },
-                  ],
-                },
-                {
-                  identifier: 'boxfill/alg',
-                  title: {
-                    und: 'boxfill/alg',
-                  },
-                  abstract: {
-                    und: 'boxfill style, using the alg palette ',
-                  },
-                  legendUrl: [
-                    {
-                      width: '110',
-                      height: '264',
-                      format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_phase',
+                      },
                     },
                   ],
                 },
@@ -651,13 +711,37 @@ export let client = {
                     und: 'boxfill/cci_main',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cci_main palette ',
+                    und: 'boxfill style, using the cci_main palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cci_main',
+                      },
+                    },
+                  ],
+                },
+                {
+                  identifier: 'boxfill/alg',
+                  title: {
+                    und: 'boxfill/alg',
+                  },
+                  abstract: {
+                    und: 'boxfill style, using the alg palette',
+                  },
+                  legendUrl: [
+                    {
+                      width: 110,
+                      height: 264,
+                      format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=alg',
+                      },
                     },
                   ],
                 },
@@ -667,13 +751,17 @@ export let client = {
                     und: 'boxfill/orange',
                   },
                   abstract: {
-                    und: 'boxfill style, using the orange palette ',
+                    und: 'boxfill style, using the orange palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=orange',
+                      },
                     },
                   ],
                 },
@@ -683,13 +771,17 @@ export let client = {
                     und: 'boxfill/greyscale',
                   },
                   abstract: {
-                    und: 'boxfill style, using the greyscale palette ',
+                    und: 'boxfill style, using the greyscale palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=greyscale',
+                      },
                     },
                   ],
                 },
@@ -699,13 +791,17 @@ export let client = {
                     und: 'boxfill/greyscale-reverse',
                   },
                   abstract: {
-                    und: 'boxfill style, using the greyscale-reverse palette ',
+                    und: 'boxfill style, using the greyscale-reverse palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=greyscale-reverse',
+                      },
                     },
                   ],
                 },
@@ -715,13 +811,17 @@ export let client = {
                     und: 'boxfill/balance-blue',
                   },
                   abstract: {
-                    und: 'boxfill style, using the balance-blue palette ',
+                    und: 'boxfill style, using the balance-blue palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=balance-blue',
+                      },
                     },
                   ],
                 },
@@ -731,13 +831,17 @@ export let client = {
                     und: 'boxfill/cmocean_ice',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_ice palette ',
+                    und: 'boxfill style, using the cmocean_ice palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_ice',
+                      },
                     },
                   ],
                 },
@@ -747,13 +851,17 @@ export let client = {
                     und: 'boxfill/cmocean_delta',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_delta palette ',
+                    und: 'boxfill style, using the cmocean_delta palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_delta',
+                      },
                     },
                   ],
                 },
@@ -763,13 +871,17 @@ export let client = {
                     und: 'boxfill/cmocean_balance',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_balance palette ',
+                    und: 'boxfill style, using the cmocean_balance palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_balance',
+                      },
                     },
                   ],
                 },
@@ -779,29 +891,17 @@ export let client = {
                     und: 'boxfill/cmocean_solar',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_solar palette ',
+                    und: 'boxfill style, using the cmocean_solar palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
-                    },
-                  ],
-                },
-                {
-                  identifier: 'boxfill/occam_pastel-30',
-                  title: {
-                    und: 'boxfill/occam_pastel-30',
-                  },
-                  abstract: {
-                    und: 'boxfill style, using the occam_pastel-30 palette ',
-                  },
-                  legendUrl: [
-                    {
-                      width: '110',
-                      height: '264',
-                      format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_solar',
+                      },
                     },
                   ],
                 },
@@ -811,13 +911,37 @@ export let client = {
                     und: 'boxfill/ferret',
                   },
                   abstract: {
-                    und: 'boxfill style, using the ferret palette ',
+                    und: 'boxfill style, using the ferret palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=ferret',
+                      },
+                    },
+                  ],
+                },
+                {
+                  identifier: 'boxfill/occam_pastel-30',
+                  title: {
+                    und: 'boxfill/occam_pastel-30',
+                  },
+                  abstract: {
+                    und: 'boxfill style, using the occam_pastel-30 palette',
+                  },
+                  legendUrl: [
+                    {
+                      width: 110,
+                      height: 264,
+                      format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=occam_pastel-30',
+                      },
                     },
                   ],
                 },
@@ -827,13 +951,17 @@ export let client = {
                     und: 'boxfill/redblue',
                   },
                   abstract: {
-                    und: 'boxfill style, using the redblue palette ',
+                    und: 'boxfill style, using the redblue palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=redblue',
+                      },
                     },
                   ],
                 },
@@ -843,13 +971,17 @@ export let client = {
                     und: 'boxfill/colour-blind-safe',
                   },
                   abstract: {
-                    und: 'boxfill style, using the colour-blind-safe palette ',
+                    und: 'boxfill style, using the colour-blind-safe palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=colour-blind-safe',
+                      },
                     },
                   ],
                 },
@@ -859,13 +991,17 @@ export let client = {
                     und: 'boxfill/alg2',
                   },
                   abstract: {
-                    und: 'boxfill style, using the alg2 palette ',
+                    und: 'boxfill style, using the alg2 palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=alg2',
+                      },
                     },
                   ],
                 },
@@ -875,13 +1011,17 @@ export let client = {
                     und: 'boxfill/cmocean_gray',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_gray palette ',
+                    und: 'boxfill style, using the cmocean_gray palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_gray',
+                      },
                     },
                   ],
                 },
@@ -891,13 +1031,17 @@ export let client = {
                     und: 'boxfill/blue',
                   },
                   abstract: {
-                    und: 'boxfill style, using the blue palette ',
+                    und: 'boxfill style, using the blue palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=blue',
+                      },
                     },
                   ],
                 },
@@ -907,13 +1051,17 @@ export let client = {
                     und: 'boxfill/cmocean_matter',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_matter palette ',
+                    und: 'boxfill style, using the cmocean_matter palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_matter',
+                      },
                     },
                   ],
                 },
@@ -923,13 +1071,17 @@ export let client = {
                     und: 'boxfill/cmocean_amp',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_amp palette ',
+                    und: 'boxfill style, using the cmocean_amp palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_amp',
+                      },
                     },
                   ],
                 },
@@ -939,13 +1091,17 @@ export let client = {
                     und: 'boxfill/green-descending',
                   },
                   abstract: {
-                    und: 'boxfill style, using the green-descending palette ',
+                    und: 'boxfill style, using the green-descending palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=green-descending',
+                      },
                     },
                   ],
                 },
@@ -955,13 +1111,17 @@ export let client = {
                     und: 'boxfill/cmocean_balance_reverse',
                   },
                   abstract: {
-                    und: 'boxfill style, using the cmocean_balance_reverse palette ',
+                    und: 'boxfill style, using the cmocean_balance_reverse palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=cmocean_balance_reverse',
+                      },
                     },
                   ],
                 },
@@ -971,35 +1131,39 @@ export let client = {
                     und: 'boxfill/rainbow',
                   },
                   abstract: {
-                    und: 'boxfill style, using the rainbow palette ',
+                    und: 'boxfill style, using the rainbow palette',
                   },
                   legendUrl: [
                     {
-                      width: '110',
-                      height: '264',
+                      width: 110,
+                      height: 264,
                       format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=Rrs_412&PALETTE=rainbow',
+                      },
                     },
                   ],
                 },
               ],
-              'projections': [
+              projections: [
                 'EPSG:4326',
                 'EPSG:3857',
               ],
-              'boundingBox': {
-                'minLat': '-89.97916412353516',
-                'minLon': '-179.9791717529297',
-                'maxLat': '89.97916412353516',
-                'maxLon': '179.9791717529297',
+              boundingBox: {
+                minLat: '-89.97916412353516',
+                minLon: '-179.9791717529297',
+                maxLat: '89.97916412353516',
+                maxLon: '179.9791717529297',
               },
-              'dimensions': {
-                'time': {
-                  'units': 'unknown',
-                  'default': '2015-12-27T00:00:00.000Z',
-                  'multipleValues': true,
-                  'nearestValue': false,
-                  'current': true,
-                  'values': [
+              dimensions: {
+                time: {
+                  units: 'unknown',
+                  default: '2015-12-27T00:00:00.000Z',
+                  multipleValues: true,
+                  nearestValue: false,
+                  current: true,
+                  values: [
                     // '1997-09-04T00:00:00.000Z',
                     // '1998-01-11T00:00:00.000Z',
                     // '2005-06-20T00:00:00.000Z',
@@ -1007,7 +1171,7 @@ export let client = {
                   ],
                 },
               },
-              'layerServer': 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
+              layerServer: 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
             },
           ],
         },
