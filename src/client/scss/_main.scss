@@ -75,12 +75,21 @@
 
 .geona-menu-toggle__icon{
   font-size: 18px;
-  display: inline-block;
   padding-top: 9px;
+  width: 18px;
+  display: inline-block;
+
+  &:before{
+    width: 18px;
+  }
 }
 
 .geona-menu-toggle__text{
   font-size: 11px;
+  word-wrap: break-word;
+  width: 37px;
+  text-align: right;
+  overflow: auto;
   float: right;
   padding-top: 3px;
 }

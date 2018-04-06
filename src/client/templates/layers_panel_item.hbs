@@ -14,23 +14,23 @@
   <div class="js-geona-layers-list__item-body">
     <div class="js-geona-layers-list__item-body-settings">
       <div>
-        <h4>Min:</h4>
+        <h4>{{t 'menu:layers-panel.settings.scale-minimum'}}:</h4>
         <input type="text">
       </div>
       <div>
-        <h4>Max:</h4>
+        <h4>{{t 'menu:layers-panel.settings.scale-maximum'}}:</h4>
         <input type="text">
       </div>
       <br>
-      <input type="checkbox">Logarithmic
-      <input type="checkbox">Auto scale
-      Reset
+      <input type="checkbox">{{t 'menu:layers-panel.settings.scale-logarithmic'}}
+      <input type="checkbox">{{t 'menu:layers-panel.settings.scale-autoscale'}}
+      {{t 'menu:layers-panel.settings.scale-reset'}}
       <br>
-      <span class="js-geona-layers-list__item-body-settings-opacity-heading">Layer Opacity - {{data.settings.opacityPercent}}%</span>
+      <span class="js-geona-layers-list__item-body-settings-opacity-heading">{{t 'menu:layers-panel.settings.opacity'}} - {{data.settings.opacityPercent}}%</span>
       <br>
       <input class="js-geona-layers-list__item-body-settings-opacity-range" type="range" min="0" max="1" step="0.01" value="{{data.settings.opacityReal}}">
       <br>
-      Layer style
+      {{t 'menu:layers-panel.settings.style'}}
       <br>
       <select class="js-geona-layers-list__item-body-settings-styles-select">
         {{#each data.settings.styles}}
@@ -39,51 +39,54 @@
       </select>
       <br>
       <div>
-        <h4>Below Min Colour</h4>
+        <h4>{{t 'menu:layers-panel.settings.below-minimum'}}</h4>
         <br>
         <select></select>
       </div>
       <div>
-        <h4>Above Max Colour</h4>
+        <h4>{{t 'menu:layers-panel.settings.above-maximum'}}</h4>
         <br>
         <select></select>
       </div>
       <br>
-      Colour Bands:
+      {{t 'menu:layers-panel.settings.colorbands'}}:
       <input type="number">
       <br>
       <input type="range" min="1" max="255" step="1" value="255">
       <br>
-      Zoom to data
+      {{t 'menu:layers-panel.settings.zoom-data'}}
     </div>
 
     <table class="js-geona-layers-list__item-body-info">
       {{#if data.info.indicator}}
       <tr class="geona-layers-list__item-body-info-row">
-        <td>Indicators</td>
+        <td>{{t 'menu:layers-panel.info.indicators'}}</td>
         <td class="geona-layers-list__item-body-info-data">{{data.info.indicator}}</td>
       </tr>
       {{/if}}
 
       {{#if data.info.boundingBox}}
       <tr class="geona-layers-list__item-body-info-row">
-        <td>Bounding box</td>
+        <td>{{t 'menu:layers-panel.info.bounding-box'}}</td>
         <td class="geona-layers-list__item-body-info-data">
-          {{data.info.boundingBox.north}} N, {{data.info.boundingBox.east}} E, {{data.info.boundingBox.south}} S, {{data.info.boundingBox.west}} W,
+          {{data.info.boundingBox.north}} {{t 'menu:layers-panel.info.north-abbr'}},
+          {{data.info.boundingBox.east}} {{t 'menu:layers-panel.info.east-abbr'}},
+          {{data.info.boundingBox.south}} {{t 'menu:layers-panel.info.south-abbr'}},
+          {{data.info.boundingBox.west}} {{t 'menu:layers-panel.info.west-abbr'}},
         </td>
       </tr>
       {{/if}}
 
       {{#if data.info.dateRange}}
       <tr class="geona-layers-list__item-body-info-row">
-        <td>Date range</td>
+        <td>{{t 'menu:layers-panel.info.date-range'}}</td>
         <td class="geona-layers-list__item-body-info-data">{{data.info.dateRange}}</td>
       </tr>
       {{/if}}
 
       {{#if data.info.abstract}}
       <tr class="geona-layers-list__item-body-info-row">
-        <td>Abstract</td>
+        <td>{{t 'menu:layers-panel.info.abstract'}}</td>
         <td class="geona-layers-list__item-body-info-data">{{data.info.abstract}}</td>
       </tr>
       {{/if}}
@@ -91,21 +94,21 @@
       {{#if data.info.contactInformation}}
         {{#if data.info.contactInformation.person}}
         <tr class="geona-layers-list__item-body-info-row">
-          <td>Contact</td>
+          <td>{{t 'menu:layers-panel.info.contact'}}</td>
           <td class="geona-layers-list__item-body-info-data">{{data.info.contactInformation.person}}</td>
         </tr>
         {{/if}}
 
         {{#if data.info.contactInformation.phone}}
         <tr class="geona-layers-list__item-body-info-row">
-          <td>Telephone</td>
+          <td>{{t 'menu:layers-panel.info.phone'}}</td>
           <td class="geona-layers-list__item-body-info-data">{{data.info.contactInformation.phone}}</td>
         </tr>
         {{/if}}
 
         {{#if data.info.contactInformation.email}}
         <tr class="geona-layers-list__item-body-info-row">
-          <td>Email</td>
+          <td>{{t 'menu:layers-panel.info.email'}}</td>
           <td class="geona-layers-list__item-body-info-data">{{data.info.contactInformation.email}}</td>
         </tr>
         {{/if}}
@@ -113,33 +116,33 @@
     </table>
 
     <div class="js-geona-layers-list__item-body-analysis">
-      <h4>Analysis</h4>
-      To refine the data before analysis you can:
-      <h4>Draw</h4>
-      Draw a selection box on the map
+      <h4>{{t 'menu:layers-panel.analysis.analysis-title'}}</h4>
+      {{t 'menu:layers-panel.analysis.analysis-description'}}:
+      <h4>{{t 'menu:layers-panel.analysis.draw-title'}}</h4>
+      {{t 'menu:layers-panel.analysis.draw-description'}}
       <br>
-      <button><span class="icon-anchor-point-1"></span>Draw Polygon</button>
-      <button><span class="icon-network-1-1"></span>Draw Irregular Polygon</button>
-      <br>Or enter coordinates
-      <br><input type="text" placeholder="Left, Bottom, Right, Top"></input>
-      <button>Save</button>
-      <h4>Upload</h4>
-      Upload a shape file (requires all three of .shp, .shx & .dbf)
-      <br>or
-      <br>Upload a CSV file containing point data, including matchup data for comparison
-      <br><button><span class="icon-file-upload"></span>Upload Files</button>
-      <br>Alternatively you can drag and drop files straight onto the map! (GPX, GeoJSON, IGC, KML, TopoJSON)
-      <h4>Select</h4>
-      Use this dropdown or select an existing polygon:
+      <button><span class="icon-anchor-point-1"></span>{{t 'menu:layers-panel.analysis.draw-polygon'}}</button>
+      <button><span class="icon-network-1-1"></span>{{t 'menu:layers-panel.analysis.draw-irregular-polygon'}}</button>
+      <br>{{t 'menu:layers-panel.analysis.draw-coordinates'}}
+      <br><input type="text" placeholder="{{t 'menu:layers-panel.analysis.draw-coordinates-placeholder'}}"></input>
+      <button>{{t 'menu:layers-panel.analysis.draw-save'}}</button>
+      <h4>{{t 'menu:layers-panel.analysis.upload-title'}}</h4>
+      {{t 'menu:layers-panel.analysis.upload-shape'}}
+      <br>{{t 'menu:layers-panel.analysis.upload-or'}}
+      <br>{{t 'menu:layers-panel.analysis.upload-csv'}}
+      <br><button><span class="icon-file-upload"></span>{{t 'menu:layers-panel.analysis.upload-files'}}</button>
+      <br>{{t 'menu:layers-panel.analysis.upload-drag-drop'}} (GPX, GeoJSON, IGC, KML, TopoJSON)
+      <h4>{{t 'menu:layers-panel.analysis.select-title'}}</h4>
+      {{t 'menu:layers-panel.analysis.select-description'}}:
       <select>
-        <option value="default" selected disabled>You have no files yet, please add some.</option>
+        <option value="default" selected disabled>{{t 'menu:layers-panel.analysis.select-placeholder'}}.</option>
       </select>
       <br>
       <br>
-      <button><span class="icon-cloud-download"></span>Download netCDF</button>
-      <button>Make new plot</button>
+      <button><span class="icon-cloud-download"></span>{{t 'menu:layers-panel.analysis.select-download'}} netCDF</button>
+      <button>{{t 'menu:layers-panel.analysis.select-new-plot'}}</button>
       <br>
-      <button><span class="icon-eraser"></span>Clear selection</button>
+      <button><span class="icon-eraser"></span>{{t 'menu:layers-panel.analysis.select-clear'}}</button>
     </div>
   </div>
 </li>

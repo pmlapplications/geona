@@ -25,6 +25,7 @@
       "zoom-data": "Zoom to data"
     },
     "info": {
+      "indicators": "Indicators",
       "bounding-box": "Bounding box",
       "north-abbr": "N",
       "east-abbr": "E",

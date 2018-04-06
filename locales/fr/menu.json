@@ -25,6 +25,7 @@
       "zoom-data": "Zoomer sur les données"
     },
     "info": {
+      "indicators": "Indicateurs",
       "bounding-box": "Boîte de délimitation",
       "north-abbr": "N",
       "east-abbr": "E",
