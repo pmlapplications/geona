@@ -1149,6 +1149,7 @@ export class Timeline {
    */
   findPastDate(intervals, layerIdentifier) {
     // TODO write tests for this
+    // Holds all the datetimes to consider when we are searching for the date - changes if layerIdentifier is defined
     let listOfDates = Array.from(this._allLayerDates);
     // Only used if layerIdentifier has been specified
     let layerTitle;
@@ -1167,8 +1168,6 @@ export class Timeline {
     let startingIndex;
 
     // findNearestValidTime() returns undefined if out of bounds, but if we are ahead, we want to load the end date
-
-
     if (new Date(this.selectorDate) > new Date(listOfDates[listOfDates.length - 1])) {
       startingIndex = listOfDates.length + 1; // If starting date is after the last time, we decrement to the last index downwards.
     } else // If the current time is less than or equal to the minimum time in the list, there isn't a time to move to
@@ -1213,15 +1212,19 @@ export class Timeline {
     } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
       for (let layer of this.timelineCurrentLayers) {
         let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
+
         // Functions required to avoid problems with date representation comparisons
+        // Searches the layer's time values for the pastDate and returns the index or -1
         let valueIndex = values.findIndex((value) => {
           return new Date(pastDate).getTime() === new Date(value).getTime();
         });
+        // Searches the list of dates' values for the pastDate and returns the index or -1
         let setIndex = listOfDates.findIndex((value) => {
           return new Date(pastDate).getTime() === new Date(value).getTime();
         });
+
         // If the past date is in the layer's time values AND this time value is not the closest one currently loaded
-        if (valueIndex !== -1 && new Date([setIndex + 1]) <= new Date(this.selectorDate)) {
+        if (valueIndex !== -1 && new Date(listOfDates[setIndex + 1]) <= new Date(this.selectorDate)) {
           let title = selectPropertyLanguage(layer.title);
           changingLayers.push(title);
         }
