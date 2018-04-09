@@ -30,7 +30,7 @@ export class Geona {
     // Get the parent div and add the 'geona-container' class to it
     this.parentDiv = $(this.config.get('divId'));
     this.parentDiv.toggleClass('geona-container', true);
-    // Adding a tabindex makes the div selectable as a document activeElement
+    // Adding a tabindex makes the div selectable as an activeElement - required for instance-specific keyboard commands
     this.parentDiv.attr('tabindex', 0);
 
     this.eventManager = new EventManager();

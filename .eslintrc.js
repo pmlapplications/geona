@@ -105,7 +105,7 @@ module.exports = {
     'no-warning-comments': 1,
     'no-with': 2, // google
     'prefer-promise-reject-errors': 2,
-    'radix': [1, 'as-needed'],
+    'radix': [1, 'always'],
     'require-await': 2,
     'wrap-iife': [1, 'outside'],
     'yoda': 1,

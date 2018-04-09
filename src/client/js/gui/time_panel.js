@@ -19,6 +19,7 @@ export class TimePanel {
    * @param {Object} timelineConfigOptions The config options relating to timelines.
    */
   constructor(gui, timelineConfigOptions) {
+    // TODO make all instances of 'date' or 'time' into 'datetime'
     this.gui = gui;
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
@@ -137,6 +138,7 @@ export class TimePanel {
    * @param {String|Date} endDate   The date to set as the maximum.
    */
   setPikadayRange(startDate, endDate) {
+    // TODO nothing calls this currently - should happen when a new timeline layer is added I guess
     this.pikaday.setMinDate(new Date(startDate));
     this.pikaday.setMaxDate(new Date(endDate));
   }

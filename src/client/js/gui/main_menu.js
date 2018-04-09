@@ -556,7 +556,7 @@ export class MainMenu {
     this.geona.map.setLayerOpacity(layerIdentifier, opacity);
   }
 
-  // TODO do we need this? Or shoul we just call the map method?
+  // TODO do we need this? Or should we just call the map method?
   /**
    * Changes the layer style.
    * @param {HTMLElement} item  The list item which contains the select which was clicked.

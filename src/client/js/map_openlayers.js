@@ -1014,10 +1014,10 @@ export class OlMap extends GeonaMap {
   /**
    * Translates a generic request for a layer key into an OpenLayers getParams() and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String} layerIdentifier The identifier for the map layer we want to check,
-   *                                                or the OpenLayers layer itself.
-   * @param  {String}               key             The key that we want to find the value of.
-   * @return {*}                                    The value for the requested key.
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numcolorbands').
+   *
+   * @return {*}                      The value for the requested key.
    */
   layerSourceGet(layerIdentifier, key) {
     let layerSource = this._activeLayers[layerIdentifier].getSource();

@@ -529,7 +529,7 @@ export class LMap extends GeonaMap {
         }
 
         if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
-          // We might need to generate datetimes for this layer (TODO more information on wiki)
+          // We might need to generate datetimes for this layer
           let timeValues = geonaLayer.dimensions.time.values.sort();
           if (geonaLayer.dimensions.time.intervals) {
             // We only want to generate the datetimes once
@@ -1032,10 +1032,10 @@ export class LMap extends GeonaMap {
   /**
    * Translates a generic request for a layer source key into an Leaflet wmsParams.key and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String} layerIdentifier The identifier for the map layer we want to check,
-   *                                                or the OpenLayers layer itself.
-   * @param  {String}               key             The key that we want to find the value of.
-   * @return {*}                                    The value for the requested key.
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numcolorbands').
+   *
+   * @return {*}                      The value for the requested key.
    */
   layerSourceGet(layerIdentifier, key) {
     let layerSource = this._activeLayers[layerIdentifier].wmsParams;

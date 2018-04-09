@@ -15,8 +15,8 @@ import {registerBindings} from './timeline_bindings';
  * - Clicking on a bar will move the selector to that position, and load the closest previous time.
  * - Clicking on an x-axis label will move the selector to the label date and load the closest previous time.
  * - The method moveSelectorToDate() can be called programmatically to change the location of the selector tool.
- *   Note that this does not actually affect the map layers, which are controlled with their map library methods.
- * - TODO The method setView() can be called programmatically to set the pan and zoom.
+ *     Note that this does not actually affect the map layers, which are controlled with their map library methods.
+ * - The method setView() can be called programmatically to set the pan and zoom.
  * - The timeline can be scrolled on in order to adjust the zoom level.
  * - The timeline can be dragged in order to pan forwards and backwards along the x-axis.
  *
@@ -26,7 +26,7 @@ import {registerBindings} from './timeline_bindings';
  * - Keydown listeners to trigger the command to move a set number of intervals forwards and backwards in time.
  */
 export class Timeline {
-  // TODO redraw on window resize
+  // TODO redraw on window resize is bugged (see Geona issue 97)
 
   // TODO new feature - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
   // TODO new feature - should layers reorder if layers are reordered on GUI?
@@ -955,6 +955,7 @@ export class Timeline {
   }
 
   /**
+   * TODO Currently not working properly (see Geona issue 97)
    * Redraws the Timeline elements for a new window width. Called when the window resizes.
    */
   resizeTimeline() {
