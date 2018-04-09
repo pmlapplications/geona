@@ -945,11 +945,11 @@ export class Timeline {
         // Gives us the percentage of text which is contained within the label area
         let trimProportion = this.Y_AXIS_LABEL_WIDTH / textElement.getComputedTextLength();
         // Gives us the number of characters we can fit into the label area from the full title
-        let trimLength = Math.floor(textElement.innerHTML.length * trimProportion) - 3; // -3 makes space for '...'
+        let trimLength = Math.floor(textElement.textContent.length * trimProportion) - 3; // -3 makes space for '...'
         // Gives us the trimmed title, with ellipsis at end to indicate cutoff
-        let trimmedLabel = textElement.innerHTML.slice(0, trimLength) + '...';
+        let trimmedLabel = textElement.textContent.slice(0, trimLength) + '...';
 
-        textElement.innerHTML = trimmedLabel;
+        textElement.textContent = trimmedLabel;
       }
     }
   }
