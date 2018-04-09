@@ -61,9 +61,11 @@ export class TimePanel {
 
     // Pikaday widget - instantiated blank
     // TODO i18n for the pikaday
-    this.pikaday = new Pikaday(
+    this.pikaday = new Pikaday( // TODO try jquery version of pikaday
       {
         field: this.parentDiv.find('.js-geona-time-panel-options-current-date')[0],
+        format: 'YYYY-MM-DD HH:mm',
+        use24hour: true,
         onSelect: (date) => {
           this.pikadayChangeTime(date);
         },
@@ -165,15 +167,16 @@ export class TimePanel {
    */
   pikadayUpdateGraphic(time) {
     // FIXME format doesn't work
-    let formattedTime = moment(time).format('YYYY-MM-DD HH:mm').toString();
-    console.log(formattedTime);
-    this.pikaday.setDate(formattedTime, true); // true parameter prevents 'onSelect' action on pikaday from triggering
+    // let formattedTime = moment(time).format('YYYY-MM-DD HH:mm').toString();
+    // console.log(formattedTime);
+    // this.pikaday.setDate(formattedTime, true); // true parameter prevents 'onSelect' action on pikaday from triggering
+    this.pikaday.setDate(time, true); // true parameter prevents 'onSelect' action on pikaday from triggering
   }
 
   /**
    * Called when the timeline is used to change the time.
-   * Updates the pikaday and current-date text input, then calls mapChangeTime()
-   * @param {String|Date} time Time in Date() parseable format
+   * Updates the pikaday and current-date text input, then calls mapChangeTime().
+   * @param {String|Date} time Time in Date() parseable format.
    */
   timelineChangeTime(time) {
     this.pikadayUpdateGraphic(time);
