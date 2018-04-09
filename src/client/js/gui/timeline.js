@@ -250,6 +250,7 @@ export class Timeline {
       this.resizeTimeline();
     });
 
+    checkBrowser();
     // registerTriggers(); // TODO move all triggers into here?
     registerBindings(this.eventManager, this);
   }
@@ -1257,5 +1258,30 @@ function getDateFormat(date) {
     return d3.timeFormat('%Y-%m-%d')(date);
   } else {
     return d3.timeFormat('%b %Y')(date);
+  }
+}
+
+/**
+ * Performs browser compatibility checks and fixes for the Timeline.
+ * Each polyfill should be commented with the browser and the reason the polyfill is needed.
+ */
+function checkBrowser() {
+  /* eslint-disable */ // eslint is disabled for this function, as polyfills can be quite old
+
+  // IE11 - required for tippy to work on the SVG text used for the titles
+  if (SVGElement.prototype.contains === undefined) {
+    SVGElement.prototype.contains = function contains(node) {
+      if (!(0 in arguments)) {
+        throw new TypeError('1 argument is required');
+      }
+
+      do {
+        if (this === node) {
+          return true;
+        }
+      } while (node = node && node.parentNode);
+
+      return false;
+    };
   }
 }
