@@ -120,7 +120,83 @@ export class Scalebar {
     }
   }
 
-  createGetLegendUrl() {}
+  /**
+   * Constructs a URL which is used to get the scalebar image.
+   * @param {Layer}   geonaLayer  The Geona Layer we want to get a scalebar for.
+   * @param {String}  [legendUrl] The legendUrl taken from the current style for this layer.
+   * @param {Boolean} [preview]   If True, the image is only a preview, so default values will be used.
+   *
+   * @return {String}             The URL used to get the scalebar image.
+   */
+  createGetLegendUrl(geonaLayer, legendUrl, preview = false) {
+    // Holds the request types and parameters to be appended on the URL
+    let requestParameters = '';
+    // Will be used to hold the legendUrl - if preview is True, will have its PALETTE request parameter modified
+    let baseUrl = legendUrl || '';
+
+    if (geonaLayer.legendSettings.parameters) {
+      let legendParameters = geonaLayer.legendSettings.parameters;
+      if (legendParameters.height) {
+        requestParameters += '&HEIGHT=' + legendParameters.height; // todo why do we get these if they are in the details anyway?
+      }
+      if (legendParameters.width) {
+        requestParameters += '&WIDTH=' + legendParameters.width;
+      }
+      if (legendParameters.colorBarOnly) {
+        requestParameters += '&COLORBARONLY=' + legendParameters.colorBarOnly;
+      }
+    }
+
+    // The preview scalebar will only use default values
+    if (preview) {
+      if (geonaLayer.scaleMinDefault && geonaLayer.scaleMaxDefault) {
+        requestParameters += '&COLORSCALERANGE=' + geonaLayer.scaleMinDefault + ',' + geonaLayer.scaleMaxDefault;
+      }
+      if (geonaLayer.defaultStyle) {
+        baseUrl = baseUrl.replace(/&PALETTE=.+/g, '');
+        requestParameters += '&PALETTE=' + geonaLayer.defaultStyle.replace(/.+?(?=\/)\//g, '');
+      }
+      if (geonaLayer.defaultColorBands) {
+        requestParameters += '&NUMCOLORBANDS=' + geonaLayer.defaultColorbands;
+      }
+      if (geonaLayer.defaultAboveMaxColor) {
+        requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.defaultAboveMaxColor;
+      }
+      if (geonaLayer.defaultBelowMinColor) {
+        requestParameters += '&BELOWMINCOLOR=' + geonaLayer.defaultBelowMinColor;
+      }
+    } else {
+      if (geonaLayer.scaleMin && geonaLayer.scaleMax) {
+        requestParameters += '&COLORSCALERANGE=' + geonaLayer.scaleMin + ',' + geonaLayer.scaleMax;
+      }
+      if (geonaLayer.defaultLog) {
+        requestParameters += '&LOGSCALE=' + geonaLayer.defaultLogarithmic;
+      }
+      if (geonaLayer.colorBands) {
+        requestParameters += '&NUMCOLORBANDS=' + geonaLayer.colorBands;
+      }
+      if (geonaLayer.AboveMaxColor) {
+        requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.aboveMaxColor;
+      }
+      if (geonaLayer.BelowMinColor) {
+        requestParameters += '&BELOWMINCOLOR=' + geonaLayer.belowMinColor;
+      }
+    }
+
+    // We prepend a '?' to the requestParameters if it doesn't already exist
+    if (requestParameters.length > 0 && baseUrl.indexOf('?') === -1) {
+      requestParameters = '?' + requestParameters;
+    }
+
+    // If we had a legendUrl supplied, we will use that - otherwise we build a new URL
+    if (baseUrl.length > 0) {
+      return baseUrl + requestParameters;
+    } else {
+      let serverUrl = this.geona.map._availableLayerServers[geonaLayer.layerServer].url;
+      // TODO the identifier here might change - we need to save an originalIdentifier on each layer, which never changes and is used for server requests
+      return serverUrl + 'REQUEST=GetLegendGraphic&LAYER=' + geonaLayer.identifier + requestParameters + '&FORMAT=image/png';
+    }
+  }
 
   getAutoScale() {}
 
