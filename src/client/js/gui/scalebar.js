@@ -132,3 +132,19 @@ export class Scalebar {
 
   drawScalebar() {}
 }
+
+/**
+ * Converts a full number into the standard form of that number.
+ * For example, '0.005' would be converted to '5.00e-3'.
+ * @param  {Number|String} number The full number to convert into standard form.
+ * @return {String}               A number in standard form.
+ */
+function convertToStandardForm(number) {
+  let string = number.toString();
+  let exponential = parseFloat(number).toExponential(2);
+  if (exponential) {
+    return exponential;
+  } else {
+    return string;
+  }
+}
