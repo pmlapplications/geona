@@ -177,7 +177,7 @@ export class Scalebar {
         requestParameters += '&LOGSCALE=' + geonaLayer.defaultLogarithmic;
       }
       if (geonaLayer.colorBands) {
-        requestParameters += '&NUMCOLORBANDS=' + geonaLayer.colorBands;
+        requestParameters += '&NUMCOLORBANDS=' + this.geona.map.layerSourceGet(this.identifier, 'numColorBands');
       }
       if (geonaLayer.AboveMaxColor) {
         requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.aboveMaxColor;
@@ -250,16 +250,38 @@ export class Scalebar {
       geonaLayer.logarithmic = isLogarithmic;
 
       if (force) {
-        this.drawScalebar();
+        this.updateScalebar();
       } else {
         // TODO create changes buffer functionality
         console.error('addToChangesBuffer does not exist yet!');
-        // this.mainMenu.addToChangesBuffer(this.layerIdentifier, this.drawScalebar);
+        // this.mainMenu.addToChangesBuffer(this.layerIdentifier, this.updateScalebar);
       }
     }
   }
 
-  updateScalebar() {}
+  /**
+   * Constructs a new object containing layer params, and updates the map layer with the params, then calls for the
+   * scalebar to be redrawn.
+   */
+  updateScalebar() {
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
+
+    // OL is updateParams() Leaf is setParams()
+
+    let params = {
+      colorScaleRange: geonaLayer.scaleMin + ',' + geonaLayer.scaleMax,
+      logScale: geonaLayer.logarithmic,
+      numColorBands: this.geona.map.layerSourceGet(this.identifier, 'numColorBands'),
+      style: this.geona.map.layerSourceGet(this.identifier, 'style'),
+      aboveMaxColor: geonaLayer.aboveMaxColor,
+      belowMinColor: geonaLayer.belowMinColor,
+      elevation: geonaLayer.currentElevation,
+    };
+
+    this.geona.map.updateSourceParams(this.identifier, params);
+
+    this.drawScalebar();
+  }
 
   drawScalebar() {}
 }
