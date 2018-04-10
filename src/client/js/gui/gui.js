@@ -9,7 +9,7 @@
  */
 
 import handlebars from 'handlebars/runtime';
-import $ from 'jquery';
+import 'jquery';
 
 import {registerHelpers} from '../../../common/hbs_helpers';
 import * as templates from '../../templates/compiled';

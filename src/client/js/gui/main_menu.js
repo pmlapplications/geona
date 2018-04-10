@@ -8,6 +8,7 @@ import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common'
 import LayerWms from '../../../common/layer/layer_wms';
 import LayerWmts from '../../../common/layer/layer_wmts';
 
+// TODO separate mainMenu into individual files for each panel
 /**
  * Loads the templates and defines the functions relating to the main menu.
  */
@@ -27,7 +28,7 @@ export class MainMenu {
     this.requestLayerServer = undefined;
     /** @type {String[]} @desc Holds the order of the layers in the layers list, using identifiers. */
     this.layersPanelItemList = [];
-    /** @type {HTMLElement} @desc The currently open layer element - defaults to first layer element.  */
+    /** @type {HTMLElement} @desc The currently open layer element - defaults to first layer element. */
     this.layersPanelActiveItemPanel = undefined;
 
     /** @type {HTMLElement} @desc Holds the explore panel after creation so it can be displayed again easily. */
@@ -44,6 +45,9 @@ export class MainMenu {
     this.helpPanel = undefined;
     /** @type {HTMLElement} @desc Holds the share panel after creation so it can be displayed again easily. */
     this.sharePanel = undefined;
+
+    /** @type {Object} @desc Holds an array of impending changes for each layer. */
+    this.changesBuffer = {};
 
 
     // Sets up menu toggle control
@@ -183,8 +187,8 @@ export class MainMenu {
   }
 
   /**
-   * If the file has been cached already, inform the user and offer ability to find layers from cached version
-   * @param {String} url The contents of the URL input box
+   * If the file has been cached already, inform the user and offer ability to find layers from cached version.
+   * @param {String} url The contents of the URL input box.
    */
   scanCache(url) {
     // Disable button and inform user of cache scan
@@ -582,6 +586,17 @@ export class MainMenu {
   changeLayerStyle(item, style) {
     let identifier = item.dataset.identifier;
     this.geona.map.changeLayerStyle(identifier, style);
+  }
+
+  /**
+   * Adds a function, with parameters, to this layer's changes buffer. Overwrites already-existing buffered references
+   * to this function for this layer.
+   * @param {String}   layerIdentifier The identifier for the layer we are making changes to.
+   * @param {Function} func            The function to call once the buffer has timed out.
+   * @param {Array}    [params]        The parameters to call with the function.
+   */
+  addToChangesBuffer(layerIdentifier, func, params) {
+    // TODO
   }
 
   /**

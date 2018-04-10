@@ -1070,7 +1070,7 @@ export class LMap extends GeonaMap {
   /**
    * Adjusts the height of the attribution bar so that it rests on top of the Timeline.
    */
-  adjustAttributionHeight() {
+  adjustAttributionHeight() { // todo this glitches offset up and down sometimes, but I don't know why
     let attributionBar = this.parentDiv.find('.leaflet-control-attribution');
     let timePanelHeight = this.parentDiv.find('.js-geona-time-panel').height();
     // Change the height of the attribution bar
