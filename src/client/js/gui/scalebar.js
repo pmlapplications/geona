@@ -1,3 +1,21 @@
+/* Type definitions for this class */
+/**
+ * A ScalebarDetails object contains all the information needed to make a call for a new scalebar.
+ * @typedef {Object} ScalebarDetails
+ *   @property {String} url        A GetLegend URL for this layer.
+ *   @property {Number} width      The desired width of the scalebar (vertically-orientated).
+ *   @property {Number} height     The desired height of the scalebar (vertically-orientated).
+ *   @property {Tick[]} scaleTicks The real and standardised values for the ticks along the bar.
+ */
+/**
+ * A Tick is a representation of a scalebar axis tick. It contains the real and display (standard form) values for the
+ * tick (e.g. real: 0.005, standardForm: '5.00e-3').
+ * @typedef {Object} Tick
+ *   @property {Number} real         The number in decimal form.
+ *   @property {String} standardForm The number converted to standard form.
+ */
+
+
 /**
  * A class used to instantiate and control a scalebar for a layer.
  */
@@ -16,27 +34,26 @@ export class Scalebar {
 
   /**
    * Constructs and returns an Object containing the info needed to draw the scalebar.
-   * @typedef {Object} scalebarDetails
-   *   @property {String}   url        writeme.
-   *   @property {Number}   width      writeme.
-   *   @property {Number}   height     writeme.
-   *   @property {Number[]} scaleTicks writeme.
-   *
-   * @return {scalebarDetails} The information needed to draw a scalebar.
+   * @return {ScalebarDetails} The information needed to draw a scalebar.
    */
   getScalebarDetails() {
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     let activeStyle = this.geona.map.layerSourceGet(this.layerIdentifier, 'style');
 
-    if (geonaLayer) {
+    if (!geonaLayer) {
+      throw new Error('Layer with identifier ' + this.layerIdentifier + ' is not available on the map.');
+    } else {
+      // Set the defualt values for getting a Legend URL
       let url;
       let width = 1;
       let height = 500;
 
+      // The style should contain a legendUrl, width and height, so we try to find these for the currently active style.
       if (geonaLayer.styles) {
         for (let style of geonaLayer.styles) {
           if (style.identifier === activeStyle) {
             if (style.legendUrl) {
+              // We take the information that's available
               if (style.legendUrl.onlineResource && style.legendUrl.onlineResource.href) {
                 url = this.createGetLegendUrl(geonaLayer, style.legendUrl.onlineResource.href);
               }
@@ -45,11 +62,62 @@ export class Scalebar {
             }
           }
         }
+      }
+      // If we couldn't find a legendUrl, we'll construct one ourselves
+      if (url === undefined) {
         url = this.createGetLegendUrl(geonaLayer);
       }
-    }
 
-    return {};
+      // Update the GUI boxes with the new min and max values.
+      this.mainMenu.setScalebarInputs(geonaLayer.scaleMin, geonaLayer.scaleMax, this.layersPanelItem);
+
+      // Will hold the axis ticks for the scalebar
+      let scaleTicks = [];
+
+      // Create the axis ticks
+      if (geonaLayer.logarithmic) {
+        // Get the range of the scale
+        let range = Math.log(geonaLayer.scaleMax) - Math.log(geonaLayer.scaleMin);
+
+        // Generate 5 ticks for the scalebar
+        let logScaleMin = Math.log(geonaLayer.scaleMin);
+        for (let i = 0; i < 5; i++) {
+          let step = (range / 4) * i;
+          let value = logScaleMin + step;
+          value = Math.exp(value);
+
+          let tick = {
+            real: value,
+            standardForm: convertToStandardForm(value),
+          };
+
+          scaleTicks.push(tick);
+        }
+      } else {
+        // Get the range of the scale
+        let range = geonaLayer.scaleMax - geonaLayer.scaleMin;
+
+        // Generate 5 ticks for the scalebar
+        for (let i = 0; i < 5; i++) {
+          let step = (range / 4) * i;
+          let value = geonaLayer.scaleMin + step;
+
+          let tick = {
+            real: value,
+            standardForm: convertToStandardForm(value),
+          };
+
+          scaleTicks.push(tick);
+        }
+      }
+
+      return {
+        url: url,
+        width: width,
+        height: height,
+        scaleTicks: scaleTicks,
+      };
+    }
   }
 
   createGetLegendUrl() {}

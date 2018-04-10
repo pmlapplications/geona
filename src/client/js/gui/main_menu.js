@@ -415,10 +415,10 @@ export class MainMenu {
     // The bounding box
     if (geonaLayer.boundingBox !== undefined) {
       layerInfo.boundingBox = {
-        north: parseInt(geonaLayer.boundingBox.maxLat).toFixed(2),
-        east: parseInt(geonaLayer.boundingBox.maxLon).toFixed(2),
-        south: parseInt(geonaLayer.boundingBox.minLat).toFixed(2),
-        west: parseInt(geonaLayer.boundingBox.minLon).toFixed(2),
+        north: parseInt(geonaLayer.boundingBox.maxLat, 10).toFixed(2),
+        east: parseInt(geonaLayer.boundingBox.maxLon, 10).toFixed(2),
+        south: parseInt(geonaLayer.boundingBox.minLat, 10).toFixed(2),
+        west: parseInt(geonaLayer.boundingBox.minLon, 10).toFixed(2),
       };
     }
     // Time min and max, formatted as YYYY-MM-DD
@@ -549,6 +549,23 @@ export class MainMenu {
     this.geona.map.showLayer(identifier);
   }
 
+  /**
+   * Updates the values in the scale min and max boxes.
+   * @param {Number}      min  The minimum value for the scalebar.
+   * @param {Number}      max  The maximum value for the scalebar.
+   * @param {HTMLElement} item The panel item which contains the boxes to change.
+   */
+  setScalebarInputs(min, max, item) {
+    $(item).find('.js-geona-layers-list__item-body-settings__scale-min').val(min);
+    $(item).find('.js-geona-layers-list__item-body-settings__scale-max').val(max);
+    // TODO add eventManager call for collaboration (will use class variable to remove eslint complaint)
+  }
+
+  /**
+   * Changes the layer opacity for the layer which corresponds to the given item.
+   * @param {HTMLElement} item    The layers panel item which was clicked.
+   * @param {Number}      opacity The value for the opacity between 0 and 1.
+   */
   changeLayerOpacity(item, opacity) {
     $(item).find('.js-geona-layers-list__item-body-settings-opacity-heading')
       .text('Layer Opacity - ' + Math.round(opacity * 100) + '%'); // Math.round to avoid displaying decimals
