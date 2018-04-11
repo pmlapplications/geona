@@ -8,6 +8,8 @@ import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common'
 import LayerWms from '../../../common/layer/layer_wms';
 import LayerWmts from '../../../common/layer/layer_wmts';
 
+import {Scalebar} from './scalebar';
+
 /* Type definitions for this class */
 /**
  * A 'this' context, which may be different from this Class instance's 'this' context.
@@ -56,6 +58,8 @@ export class MainMenu {
     this.changesBuffer = {};
     /** @type {Number} @desc CONST - The time to wait (in ms) before executing the buffered operations for a layer. */
     this.CHANGES_BUFFER_TIME = 10000;
+
+    this.layersPanelScalebars = {};
 
 
     // Sets up menu toggle control
@@ -367,6 +371,11 @@ export class MainMenu {
           // Insert layer data object at the top of the list - higher on the list means higher on the map
           this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
           let item = this.parentDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
+
+          this.layersPanelScalebars[data.info.identifier] = new Scalebar(this, {
+            layersPanelItem: item,
+            layerIdentifier: data.info.identifier,
+          });
 
           // Hide all panels
           $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
