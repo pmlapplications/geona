@@ -204,7 +204,15 @@ export class Scalebar {
 
   getAutoScale() {}
 
-  resetScale() {}
+  /**
+   * Resets the scale to its original values.
+   */
+  resetScale() { // todo untested
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
+    let min = geonaLayer.scaleMinDefault;
+    let max = geonaLayer.scaleMaxDefault;
+    this.validateScale(min, max);
+  }
 
   /**
    * Verifies that the scale is within allowed bounds, and then updates the scalebar.
