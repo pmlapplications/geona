@@ -43,6 +43,11 @@ export default class LayerWms extends LayerVisible {
           this.scale.maxDefault = metadata.scaleRange[1];
           this.scale.numColorBandsDefault = metadata.numColorBands;
           this.scale.logarithmicDefault = metadata.logScaling;
+
+          this.scale.colorBarOnly = true;
+          this.scale.rotation = 0;
+          this.scale.height = undefined;
+          this.scale.width = undefined;
         }
         );
     }
@@ -61,8 +66,8 @@ function getMetadata(url, layerIdentifier) {
     // ajax to server getLayerServer
     let requestUrl = encodeURIComponent(url) + '/' + layerIdentifier;
     $.ajax('http://127.0.0.1:7890/utils/wms/getMetadata/' + requestUrl)
-      .done((layerServerJson) => {
-        resolve(layerServerJson);
+      .done((metadataJson) => {
+        resolve(metadataJson);
       })
       .fail((err) => {
         reject(err);

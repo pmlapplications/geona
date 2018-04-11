@@ -16,6 +16,7 @@ export default class Layer {
     }
 
     this.identifier = layerConfig.identifier;
+    this.originalIdentifier = layerConfig.identifier;
     this.title = layerConfig.title;
     this.displayName = undefined;
     this.abstract = layerConfig.abstract;
@@ -44,6 +45,14 @@ export default class Layer {
       if (!this.modifier) {
         this.modifier = 'hasTime';
       }
+    }
+
+    if (!this.modifier || this.modifier === 'hasTime') {
+      this.aboveMaxColor = undefined;
+      this.belowMinColor = undefined;
+
+      this.aboveMaxColorDefault = undefined;
+      this.belowMinColorDefault = undefined;
     }
 
     // this.crs = ['EPSG:4326', 'CRS:84', 'EPSG:41001', 'EPSG:27700', 'EPSG:3408',
