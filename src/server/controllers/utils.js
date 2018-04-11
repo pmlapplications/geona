@@ -1,6 +1,6 @@
 /** @module controllers/utils */
 
-import {getCapabilities, jsonifyCapabilities} from '../utils/ogc/common';
+import {getCapabilities, jsonifyCapabilities, getMetadata} from '../utils/ogc/common';
 import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
 import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
 import {parseWcsCapabilities} from '../utils/ogc/wcs_capabilities_parser';
@@ -68,6 +68,20 @@ export function wmsGetLayers(req, res) {
       // console.log(JSON.stringify(layer));
     }).catch((err) => {
       console.log(err);
+      res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
+    });
+}
+
+/**
+ * Get the available layer metadata details from a wms server.
+ * @param  {Object} req Express request
+ * @param  {Object} res Express response
+ */
+export function wmsGetMetadata(req, res) {
+  getMetadata('wms', req.params.url, req.params.layerIdentifier)
+    .then((jsonMetadata) => {
+      res.send(jsonMetadata);
+    }).catch((err) => {
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }
