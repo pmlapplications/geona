@@ -41,13 +41,13 @@ export class Scalebar {
    * @return {ScalebarDetails} The information needed to draw a scalebar.
    */
   getScalebarDetails() { // todo untested
-    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     let activeStyle = this.geona.map.layerSourceGet(this.layerIdentifier, 'style');
 
     if (!geonaLayer) {
       throw new Error('Layer with identifier ' + this.layerIdentifier + ' is not available on the map.');
     } else {
-      // Set the defualt values for getting a Legend URL
+      // Set the default values for getting a Legend URL
       let url;
       let width = 1;
       let height = 500;
@@ -58,11 +58,11 @@ export class Scalebar {
           if (style.identifier === activeStyle) {
             if (style.legendUrl) {
               // We take the information that's available
+              width = parseInt(style.legendUrl.width, 10);
+              height = parseInt(style.legendUrl.height, 10);
               if (style.legendUrl.onlineResource && style.legendUrl.onlineResource.href) {
                 url = this.createGetLegendUrl(geonaLayer, style.legendUrl.onlineResource.href);
               }
-              width = parseInt(style.legendUrl.width, 10);
-              height = parseInt(style.legendUrl.height, 10);
             }
           }
         }
@@ -73,18 +73,18 @@ export class Scalebar {
       }
 
       // Update the GUI boxes with the new min and max values.
-      this.mainMenu.setScalebarInputs(geonaLayer.scaleMin, geonaLayer.scaleMax, this.layersPanelItem);
+      this.mainMenu.setScalebarInputs(geonaLayer.scale.min, geonaLayer.scale.max, this.layersPanelItem);
 
       // Will hold the axis ticks for the scalebar
       let scaleTicks = [];
 
       // Create the axis ticks
-      if (geonaLayer.logarithmic) {
+      if (geonaLayer.scale.logarithmic) {
         // Get the range of the scale
-        let range = Math.log(geonaLayer.scaleMax) - Math.log(geonaLayer.scaleMin);
+        let range = Math.log(geonaLayer.scale.max) - Math.log(geonaLayer.scale.min);
 
         // Generate 5 ticks for the scalebar
-        let logScaleMin = Math.log(geonaLayer.scaleMin);
+        let logScaleMin = Math.log(geonaLayer.scale.min);
         for (let i = 0; i < 5; i++) {
           let step = (range / 4) * i;
           let value = logScaleMin + step;
@@ -99,12 +99,12 @@ export class Scalebar {
         }
       } else {
         // Get the range of the scale
-        let range = geonaLayer.scaleMax - geonaLayer.scaleMin;
+        let range = geonaLayer.scale.max - geonaLayer.scale.min;
 
         // Generate 5 ticks for the scalebar
         for (let i = 0; i < 5; i++) {
           let step = (range / 4) * i;
-          let value = geonaLayer.scaleMin + step;
+          let value = geonaLayer.scale.min + step;
 
           let tick = {
             real: value,
@@ -138,52 +138,51 @@ export class Scalebar {
     // Will be used to hold the legendUrl - if preview is True, will have its PALETTE request parameter modified
     let baseUrl = legendUrl || '';
 
-    if (geonaLayer.legendSettings.parameters) {
-      let legendParameters = geonaLayer.legendSettings.parameters;
-      if (legendParameters.height) {
-        requestParameters += '&HEIGHT=' + legendParameters.height; // todo why do we get these if they are in the details anyway?
-      }
-      if (legendParameters.width) {
-        requestParameters += '&WIDTH=' + legendParameters.width;
-      }
-      if (legendParameters.colorBarOnly) {
-        requestParameters += '&COLORBARONLY=' + legendParameters.colorBarOnly;
-      }
+    if (geonaLayer.scale.height) {
+      requestParameters += '&HEIGHT=' + geonaLayer.scale.height;
+    }
+    if (geonaLayer.scale.width) {
+      requestParameters += '&WIDTH=' + geonaLayer.scale.width;
+    }
+    if (geonaLayer.scale.colorBarOnly) {
+      requestParameters += '&COLORBARONLY=' + geonaLayer.scale.colorBarOnly;
     }
 
     // The preview scalebar will only use default values
     if (preview) {
-      if (geonaLayer.scaleMinDefault && geonaLayer.scaleMaxDefault) {
-        requestParameters += '&COLORSCALERANGE=' + geonaLayer.scaleMinDefault + ',' + geonaLayer.scaleMaxDefault;
+      if (geonaLayer.scale.minDefault && geonaLayer.scale.maxDefault) {
+        requestParameters += '&COLORSCALERANGE=' + geonaLayer.scale.minDefault + ',' + geonaLayer.scale.maxDefault;
       }
       if (geonaLayer.defaultStyle) {
+        // Removes the PALETTE parameter and value
         baseUrl = baseUrl.replace(/&PALETTE=.+/g, '');
+        // Replaces the PALETTE parameter with the palette half of the style (e.g. the 'alg' part of 'boxfill/alg')
         requestParameters += '&PALETTE=' + geonaLayer.defaultStyle.replace(/.+?(?=\/)\//g, '');
       }
-      if (geonaLayer.defaultColorBands) {
-        requestParameters += '&NUMCOLORBANDS=' + geonaLayer.defaultColorbands;
+      if (geonaLayer.scale.numColorBandsDefault) {
+        requestParameters += '&NUMCOLORBANDS=' + geonaLayer.scale.numColorBandsDefault;
       }
-      if (geonaLayer.defaultAboveMaxColor) {
-        requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.defaultAboveMaxColor;
+      if (geonaLayer.scale.aboveMaxColorDefault) {
+        requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.scale.aboveMaxColorDefault;
       }
-      if (geonaLayer.defaultBelowMinColor) {
-        requestParameters += '&BELOWMINCOLOR=' + geonaLayer.defaultBelowMinColor;
+      if (geonaLayer.scale.belowMinColorDefault) {
+        requestParameters += '&BELOWMINCOLOR=' + geonaLayer.scale.belowMinColorDefault;
       }
     } else {
-      if (geonaLayer.scaleMin && geonaLayer.scaleMax) {
-        requestParameters += '&COLORSCALERANGE=' + geonaLayer.scaleMin + ',' + geonaLayer.scaleMax;
+      if (geonaLayer.scale.min && geonaLayer.scale.max) {
+        requestParameters += '&COLORSCALERANGE=' + geonaLayer.scale.min + ',' + geonaLayer.scale.max;
       }
       if (geonaLayer.defaultLog) {
-        requestParameters += '&LOGSCALE=' + geonaLayer.defaultLogarithmic;
+        requestParameters += '&LOGSCALE=' + geonaLayer.scale.defaultLogarithmic;
       }
       if (geonaLayer.colorBands) {
-        requestParameters += '&NUMCOLORBANDS=' + this.geona.map.layerSourceGet(this.identifier, 'numColorBands');
+        requestParameters += '&NUMCOLORBANDS=' + geonaLayer.scale.numColorBands;
       }
-      if (geonaLayer.AboveMaxColor) {
-        requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.aboveMaxColor;
+      if (geonaLayer.scale.aboveMaxColor) {
+        requestParameters += '&ABOVEMAXCOLOR=' + geonaLayer.scale.aboveMaxColor;
       }
-      if (geonaLayer.BelowMinColor) {
-        requestParameters += '&BELOWMINCOLOR=' + geonaLayer.belowMinColor;
+      if (geonaLayer.scale.belowMinColor) {
+        requestParameters += '&BELOWMINCOLOR=' + geonaLayer.scale.belowMinColor;
       }
     }
 
@@ -209,8 +208,8 @@ export class Scalebar {
    */
   resetScale() { // todo untested
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
-    let min = geonaLayer.scaleMinDefault;
-    let max = geonaLayer.scaleMaxDefault;
+    let min = geonaLayer.scale.minDefault;
+    let max = geonaLayer.scale.maxDefault;
     this.validateScale(min, max);
   }
 
@@ -240,7 +239,7 @@ export class Scalebar {
     let isLogarithmic = $(logarithmicCheckbox).is(':checked');
 
     // If the scale has actually changed then we will update the scalebar
-    if (newMin !== geonaLayer.scaleMin || newMax !== geonaLayer.scaleMax || isLogarithmic !== geonaLayer.logarithmic) {
+    if (newMin !== geonaLayer.scale.min || newMax !== geonaLayer.scale.max || isLogarithmic !== geonaLayer.scale.logarithmic) {
       // We'll prevent the user from using a log scale if invalid, but we'll allow the rest of the updates to go ahead
       if (isLogarithmic && newMin <= 0) {
         alert('Cannot use a logarithmic scale with negative or zero values.');
@@ -253,9 +252,9 @@ export class Scalebar {
       $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-max').val(newMax);
 
       // Update the layer definition
-      geonaLayer.scaleMin = newMin;
-      geonaLayer.scaleMax = newMax;
-      geonaLayer.logarithmic = isLogarithmic;
+      geonaLayer.scale.min = newMin;
+      geonaLayer.scale.max = newMax;
+      geonaLayer.scale.logarithmic = isLogarithmic;
 
       if (force) {
         this.updateScalebar();
@@ -273,12 +272,12 @@ export class Scalebar {
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
 
     let params = {
-      colorScaleRange: geonaLayer.scaleMin + ',' + geonaLayer.scaleMax,
-      logScale: geonaLayer.logarithmic,
-      numColorBands: this.geona.map.layerSourceGet(this.identifier, 'numColorBands'),
+      colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
+      logScale: geonaLayer.scale.logarithmic,
+      numColorBands: geonaLayer.scale.numColorBands,
       style: this.geona.map.layerSourceGet(this.identifier, 'style'),
-      aboveMaxColor: geonaLayer.aboveMaxColor,
-      belowMinColor: geonaLayer.belowMinColor,
+      aboveMaxColor: geonaLayer.scale.aboveMaxColor,
+      belowMinColor: geonaLayer.scale.belowMinColor,
       elevation: geonaLayer.currentElevation,
     };
 
