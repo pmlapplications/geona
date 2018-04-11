@@ -1066,7 +1066,7 @@ export class OlMap extends GeonaMap {
    * @param {String} layerIdentifier The identifier for the layer we want to update.
    * @param {Object} newParams       The new params to use in the source.
    */
-  updateSourceParams(layerIdentifier, newParams) {
+  updateSourceParams(layerIdentifier, newParams) { // todo untested
     let layerSource = this._activeLayers[layerIdentifier].getSource();
     let params = layerSource.getParams();
     for (let param of newParams) {

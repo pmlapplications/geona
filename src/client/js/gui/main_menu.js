@@ -8,6 +8,12 @@ import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common'
 import LayerWms from '../../../common/layer/layer_wms';
 import LayerWmts from '../../../common/layer/layer_wmts';
 
+/* Type definitions for this class */
+/**
+ * A 'this' context, which may be different from this Class instance's 'this' context.
+ * @typedef {this} This
+ */
+
 // TODO separate mainMenu into individual files for each panel
 /**
  * Loads the templates and defines the functions relating to the main menu.
@@ -48,6 +54,8 @@ export class MainMenu {
 
     /** @type {Object} @desc Holds an array of impending changes for each layer. */
     this.changesBuffer = {};
+    /** @type {Number} @desc CONST - The time to wait (in ms) before executing the buffered operations for a layer. */
+    this.CHANGES_BUFFER_TIME = 10000;
 
 
     // Sets up menu toggle control
@@ -593,10 +601,54 @@ export class MainMenu {
    * to this function for this layer.
    * @param {String}   layerIdentifier The identifier for the layer we are making changes to.
    * @param {Function} func            The function to call once the buffer has timed out.
-   * @param {Array}    [params]        The parameters to call with the function.
+   * @param {This}     context         The 'this' context to use with the function.
+   * @param {*[]}      [params]        The parameters to call with the function.
    */
-  addToChangesBuffer(layerIdentifier, func, params) {
-    // TODO
+  addToChangesBuffer(layerIdentifier, func, context, params) {
+    // If this is the first time an operation is being buffered for this layer, we'll initialise its buffer
+    if (this.changesBuffer[layerIdentifier] === undefined) {
+      this.changesBuffer[layerIdentifier] = {
+        operations: new Set(),
+        timeout: undefined,
+      };
+    }
+    let layerBuffer = this.changesBuffer[layerIdentifier];
+
+    // We need to check if the function we've been given is already buffered - if it is, we will remove the older one
+    for (let operation of layerBuffer.operations) {
+      if (operation.func === func) {
+        layerBuffer.operations.delete(operation);
+      }
+    }
+
+    // Append the new function and params to the list of operations
+    layerBuffer.operations.add({
+      func: func,
+      params: params,
+    });
+
+    // Restart the timeout
+    clearTimeout(layerBuffer.timeout);
+    layerBuffer.timeout = setTimeout(() => {
+      // When the timeout is finished, we will execute the operations
+      this.executeChangesBuffer(layerIdentifier);
+    }, this.CHANGES_BUFFER_TIME);
+  }
+
+  /**
+   * Executes all the buffered operations in the order they were added.
+   * @param {String} layerIdentifier The layer whose operations we are going to execute.
+   */
+  executeChangesBuffer(layerIdentifier) {
+    let layerBuffer = this.changesBuffer[layerIdentifier];
+
+    // The timeout might still be active, so we will clear it
+    clearTimeout(layerBuffer.timeout);
+
+    // We will loop through and execute all the operations
+    for (let operation of layerBuffer.operations) {
+      operation.func.apply(operation.context, operation.params);
+    }
   }
 
   /**

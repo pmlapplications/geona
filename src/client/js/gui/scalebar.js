@@ -252,9 +252,7 @@ export class Scalebar {
       if (force) {
         this.updateScalebar();
       } else {
-        // TODO create changes buffer functionality
-        console.error('addToChangesBuffer does not exist yet!');
-        // this.mainMenu.addToChangesBuffer(this.layerIdentifier, this.updateScalebar);
+        this.mainMenu.addToChangesBuffer(this.layerIdentifier, this.updateScalebar, this);
       }
     }
   }

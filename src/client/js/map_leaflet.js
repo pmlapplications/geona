@@ -1085,7 +1085,7 @@ export class LMap extends GeonaMap {
    * @param {String} layerIdentifier The identifier for the layer we want to update.
    * @param {Object} newParams       The new params to use in the source.
    */
-  updateSourceParams(layerIdentifier, newParams) {
+  updateSourceParams(layerIdentifier, newParams) { // todo untested
     let layer = this._activeLayers[layerIdentifier];
     let params = layer.wmsParams;
     for (let param of newParams) {
