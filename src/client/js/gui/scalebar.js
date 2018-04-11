@@ -40,7 +40,7 @@ export class Scalebar {
    * Constructs and returns an Object containing the info needed to draw the scalebar.
    * @return {ScalebarDetails} The information needed to draw a scalebar.
    */
-  getScalebarDetails() {
+  getScalebarDetails() { // todo untested
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     let activeStyle = this.geona.map.layerSourceGet(this.layerIdentifier, 'style');
 
@@ -132,7 +132,7 @@ export class Scalebar {
    *
    * @return {String}             The URL used to get the scalebar image.
    */
-  createGetLegendUrl(geonaLayer, legendUrl, preview = false) {
+  createGetLegendUrl(geonaLayer, legendUrl, preview = false) { // todo untested
     // Holds the request types and parameters to be appended on the URL
     let requestParameters = '';
     // Will be used to hold the legendUrl - if preview is True, will have its PALETTE request parameter modified
@@ -212,7 +212,7 @@ export class Scalebar {
    * @param {Number|String} max     The maximum scale value.
    * @param {Boolean}       [force] If True, will immediately apply the change instead of asking to confirm changes.
    */
-  validateScale(min, max, force = false) {
+  validateScale(min, max, force = false) { // todo untested
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     let newMin = parseFloat(min);
     let newMax = parseFloat(max);
@@ -263,10 +263,8 @@ export class Scalebar {
    * Constructs a new object containing layer params, and updates the map layer with the params, then calls for the
    * scalebar to be redrawn.
    */
-  updateScalebar() {
+  updateScalebar() { // todo untested
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
-
-    // OL is updateParams() Leaf is setParams()
 
     let params = {
       colorScaleRange: geonaLayer.scaleMin + ',' + geonaLayer.scaleMax,

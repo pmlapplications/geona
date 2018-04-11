@@ -37,11 +37,11 @@ export class OlMap extends GeonaMap {
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
     this.basemaps_ = {};
     /** @private @type {Object} The available map Layers, as Geona Layers */
-    this._availableLayers = {};
+    this._availableLayers = {}; // todo this shouldn't be private
     /** @private @type {Object} The available map LayerServers, as Geona LayerServers */
-    this._availableLayerServers = {};
+    this._availableLayerServers = {}; // todo this shouldn't be private
     /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
-    this._activeLayers = {};
+    this._activeLayers = {}; // todo this shouldn't be private
     /** @private @type {Object} @desc The generated times for the active layers */
     this._activeLayerGeneratedTimes = {};
     /** @private @type {String} The latest time that the active map layers are set to */
@@ -1015,7 +1015,7 @@ export class OlMap extends GeonaMap {
    * Translates a generic request for a layer key into an OpenLayers getParams() and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
    * @param  {String} layerIdentifier The identifier for the map layer we want to check.
-   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numcolorbands').
+   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numColorBands').
    *
    * @return {*}                      The value for the requested key.
    */
@@ -1026,10 +1026,10 @@ export class OlMap extends GeonaMap {
         return layerSource.getParams().STYLES;
       case 'format':
         return layerSource.getParams().FORMAT;
-      case 'colorbands':
+      case 'numColorBands':
         return layerSource.getParams().NUMCOLORBANDS;
       default:
-        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numcolorbands\']');
+        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numColorBands\']');
     }
   }
 
@@ -1060,6 +1060,44 @@ export class OlMap extends GeonaMap {
   }
 
   // TODO set numcolorbands method
+
+  /**
+   * Updates the source params for the specified layer.
+   * @param {String} layerIdentifier The identifier for the layer we want to update.
+   * @param {Object} newParams       The new params to use in the source.
+   */
+  updateSourceParams(layerIdentifier, newParams) {
+    let layerSource = this._activeLayers[layerIdentifier].getSource();
+    let params = layerSource.getParams();
+    for (let param of newParams) {
+      switch (param) {
+        case 'style':
+          params.STYLES = newParams[param];
+          break;
+        case 'numColorBands':
+          params.numcolorbands = newParams[param];
+          break;
+        case 'logScale':
+          params.logscale = newParams[param];
+          break;
+        case 'colorScaleRange':
+          params.colorscalerange = newParams[param];
+          break;
+        case 'aboveMaxColor':
+          params.ABOVEMAXCOLOR = newParams[param];
+          break;
+        case 'belowMinColor':
+          params.BELOWMINCOLOR = newParams[param];
+          break;
+        case 'elevation':
+          params.ELEVATION = newParams[param];
+          break;
+        default:
+          throw new Error('Updating param ' + param + ' is not supported currently.');
+      }
+    }
+    layerSource.updateParams(params);
+  }
 }
 
 /**

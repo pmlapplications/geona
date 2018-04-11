@@ -29,10 +29,11 @@ export class LMap extends GeonaMap {
     this.eventManager = geona.eventManager;
     this.parentDiv = geona.parentDiv;
     /**  @type {Object} The available map layers */
-    this._availableLayers = {};
+    this._availableLayers = {};// todo this shouldn't be private
+    this._availableLayerServers = {}; // todo this shouldn't be private
     /**  @type {L.featureGroup} The layers on the map */
     this._mapLayers = L.featureGroup();
-    this._activeLayers = {};
+    this._activeLayers = {};// todo this shouldn't be private
     this._activeLayerGeneratedTimes = {};
     /** @type {String} The time the map is set to */
     this._mapTime = undefined;
@@ -1033,7 +1034,7 @@ export class LMap extends GeonaMap {
    * Translates a generic request for a layer source key into an Leaflet wmsParams.key and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
    * @param  {String} layerIdentifier The identifier for the map layer we want to check.
-   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numcolorbands').
+   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numColorBands').
    *
    * @return {*}                      The value for the requested key.
    */
@@ -1044,10 +1045,10 @@ export class LMap extends GeonaMap {
         return layerSource.styles;
       case 'format':
         return layerSource.format;
-      case 'numcolorbands':
+      case 'numColorBands':
         return this.layerGet(layerIdentifier, 'numcolorbands');
       default:
-        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numcolorbands\']');
+        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numColorBands\']');
     }
   }
 
@@ -1078,6 +1079,44 @@ export class LMap extends GeonaMap {
   }
 
   // TODO set numcolorbands method
+
+  /**
+   * Updates the source params for the specified layer.
+   * @param {String} layerIdentifier The identifier for the layer we want to update.
+   * @param {Object} newParams       The new params to use in the source.
+   */
+  updateSourceParams(layerIdentifier, newParams) {
+    let layer = this._activeLayers[layerIdentifier];
+    let params = layer.wmsParams;
+    for (let param of newParams) {
+      switch (param) {
+        case 'style':
+          params.styles = newParams[param];
+          break;
+        case 'numColorBands':
+          params.numcolorbands = newParams[param];
+          break;
+        case 'logScale':
+          params.logscale = newParams[param];
+          break;
+        case 'colorScaleRange':
+          params.colorscalerange = newParams[param];
+          break;
+        case 'aboveMaxColor':
+          params.abovemaxcolor = newParams[param];
+          break;
+        case 'belowMinColor':
+          params.belowmincolor = newParams[param];
+          break;
+        case 'elevation':
+          params.elevation = newParams[param];
+          break;
+        default:
+          throw new Error('Updating param ' + param + ' is not supported currently.');
+      }
+    }
+    layer.setParams(params);
+  }
 }
 
 /**
