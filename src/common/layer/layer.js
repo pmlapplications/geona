@@ -30,7 +30,6 @@ export default class Layer {
     this.styles = layerConfig.styles;
 
     this.isTemporal = layerConfig.isTemporal;
-    this.firstTime = layerConfig.firstTime;
     this.lastTime = layerConfig.lastTime;
 
     this.modifier = layerConfig.modifier;
