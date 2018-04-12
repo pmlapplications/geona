@@ -280,7 +280,7 @@ export class Scalebar {
    * scalebar to be redrawn.
    */
   updateScalebar() { // todo untested
-    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
 
     let params = {
       colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
@@ -297,7 +297,61 @@ export class Scalebar {
     this.drawScalebar();
   }
 
-  drawScalebar() {}
+  /**
+   * Draws a scalebar based on the current settings. Will replace the currently-displayed scalebar if there is one.
+   */
+  drawScalebar() {
+    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+
+    let scalebarDetails = this.getScalebarDetails();
+
+    if (scalebarDetails) {
+      geonaLayer.scale.currentUrl = scalebarDetails.url;
+      geonaLayer.scale.scaleTicks = scalebarDetails.scaleTicks;
+      geonaLayer.scale.width = scalebarDetails.width;
+      geonaLayer.scale.height = scalebarDetails.height;
+    }
+
+    // Holds HTML elements which will be added to the layer item at the end of the method
+    let scalebarElements = '';
+
+    let scalebarAltText = 'Scalebar representing data for layer ' + this.layerIdentifier +
+      ' between the values of ' + geonaLayer.scale.min + ' minimum and ' + geonaLayer.scale.max +
+      ' maximum, in units of ' + geonaLayer.units + '.';
+
+    let scalebarImg = '<img src="' + scalebarDetails.url + '" alt="' + scalebarAltText + '">';
+
+    // Add the scalebar image to the elements
+    scalebarElements += scalebarImg;
+
+
+    // Make the span elements for each scalebar tick
+    let ticks = scalebarDetails.scaleTicks;
+    console.log(ticks);
+    for (let i = 0; i < ticks.length; i++) {
+      // We use the position as a class for setting the position of the labels
+      let position;
+      switch (i) {
+        case 0: position = 'min';
+          break;
+        case 1: position = 'centermin';
+          break;
+        case 2: position = 'center';
+          break;
+        case 3: position = 'centermax';
+          break;
+        case 4: position = 'max';
+          break;
+        default:
+          throw new Error('There are more than 5 scalebar ticks - something has gone wrong! (Have you changed the number of ticks calculated?)');
+      }
+      let scalebarLabel = '<span class="js-geona--layers-list__item-scalebar-label ' + position + '">' + ticks[i].standardForm + '</span>';
+      console.log(scalebarLabel);
+      scalebarElements += scalebarLabel;
+    }
+
+    $(this.layersPanelItem).find('.js-geona-layers-list__item-scalebar').html(scalebarElements);
+  }
 }
 
 /**
