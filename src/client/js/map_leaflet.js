@@ -72,6 +72,7 @@ export class LMap extends GeonaMap {
     this._map = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
       center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
+      keyboard: false,
       maxBounds: [
         [this.config.viewSettings.maxExtent.minLat, this.config.viewSettings.maxExtent.minLon],
         [this.config.viewSettings.maxExtent.maxLat, this.config.viewSettings.maxExtent.maxLon],
