@@ -15,39 +15,63 @@ export default class LayerWms extends LayerVisible {
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
     this.protocol = 'wms';
+    this.scale = {};
+
     // TODO each layer is getting created twice for some reason
+    if (layerConfig.scale) {
+      this.scale.width = layerConfig.scale.width;
+      this.scale.height = layerConfig.scale.height;
+    }
 
     // Basemaps and borders do not have metadata, so we only find it for data layers
     if (!this.modifier || this.modifier === 'hasTime') {
       getMetadata(layerServer.url, this.identifier)
         .then((metadataString) => {
-          console.log(this.identifier);
-          console.log(JSON.parse(metadataString));
           let metadata = JSON.parse(metadataString);
 
-          this.units = metadata.units;
-          this.representationStyles = metadata.supportedStyles;
-          this.defaultStyle = 'boxfill/' + metadata.defaultPalette;
-
+          if (!this.units) {
+            this.units = metadata.units;
+          }
+          if (!this.representationStyles) {
+            this.representationStyles = metadata.supportedStyles;
+          }
+          if (!this.defaultStyle) {
+            this.defaultStyle = 'boxfill/' + metadata.defaultPalette;
+          }
           if (metadata.copyright) {
             this.attribution += ' ' + metadata.copyright;
           }
 
-          this.scale = {};
-          this.scale.min = metadata.scaleRange[0];
-          this.scale.max = metadata.scaleRange[1];
-          this.scale.numColorBands = metadata.numColorBands;
-          this.scale.logarithmic = metadata.logScaling;
-
-          this.scale.minDefault = metadata.scaleRange[0];
-          this.scale.maxDefault = metadata.scaleRange[1];
-          this.scale.numColorBandsDefault = metadata.numColorBands;
-          this.scale.logarithmicDefault = metadata.logScaling;
-
-          this.scale.colorBarOnly = true;
-          this.scale.rotation = 0;
-          this.scale.height = undefined;
-          this.scale.width = undefined;
+          if (!this.scale.min) {
+            this.scale.min = metadata.scaleRange[0];
+          }
+          if (!this.scale.max) {
+            this.scale.max = metadata.scaleRange[1];
+          }
+          if (!this.scale.numColorBands) {
+            this.scale.numColorBands = metadata.numColorBands;
+          }
+          if (!this.scale.logarithmic) {
+            this.scale.logarithmic = metadata.logScaling;
+          }
+          if (!this.scale.minDefault) {
+            this.scale.minDefault = metadata.scaleRange[0];
+          }
+          if (!this.scale.maxDefault) {
+            this.scale.maxDefault = metadata.scaleRange[1];
+          }
+          if (!this.scale.numColorBandsDefault) {
+            this.scale.numColorBandsDefault = metadata.numColorBands;
+          }
+          if (!this.scale.logarithmicDefault) {
+            this.scale.logarithmicDefault = metadata.logScaling;
+          }
+          if (!this.scale.colorBarOnly) {
+            this.scale.colorBarOnly = true;
+          }
+          if (!this.scale.rotation) {
+            this.scale.rotation = 0;
+          }
         }
         );
     }
@@ -65,7 +89,7 @@ function getMetadata(url, layerIdentifier) {
   return new Promise((resolve, reject) => {
     // ajax to server getLayerServer
     let requestUrl = encodeURIComponent(url) + '/' + layerIdentifier;
-    $.ajax('http://127.0.0.1:7890/utils/wms/getMetadata/' + requestUrl)
+    $.ajax('http://192.171.164.90:7890/utils/wms/getMetadata/' + requestUrl)
       .done((metadataJson) => {
         resolve(metadataJson);
       })
