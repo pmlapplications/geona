@@ -651,16 +651,22 @@ export class MainMenu {
   executeChangesBuffer(layerIdentifier) {
     let layerBuffer = this.changesBuffer[layerIdentifier];
 
+    // The buffer may not have been made for this layer yet
+    if (layerBuffer) {
     // The timeout might still be active, so we will clear it
-    clearTimeout(layerBuffer.timeout);
+      clearTimeout(layerBuffer.timeout);
 
-    // We will loop through and execute all the operations
-    for (let operation of layerBuffer.operations) {
-      operation.func.apply(operation.context, operation.params);
+      // We will loop through and execute all the operations
+      for (let operation of layerBuffer.operations) {
+        operation.func.apply(operation.context, operation.params);
+      }
+
+      // Reset the operations for this layer
+      layerBuffer.operations.clear();
+    } else {
+      throw new Error('Changes buffer has not been initialised for layer ' + layerIdentifier +
+      '. Add a function to the buffer first.');
     }
-
-    // Reset the operations for this layer
-    layerBuffer.operations.clear();
   }
 
   /**
