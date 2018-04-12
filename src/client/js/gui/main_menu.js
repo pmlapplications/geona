@@ -658,6 +658,9 @@ export class MainMenu {
     for (let operation of layerBuffer.operations) {
       operation.func.apply(operation.context, operation.params);
     }
+
+    // Reset the operations for this layer
+    layerBuffer.operations.clear();
   }
 
   /**
