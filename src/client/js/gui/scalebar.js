@@ -40,7 +40,7 @@ export class Scalebar {
    * Constructs and returns an Object containing the info needed to draw the scalebar.
    * @return {ScalebarDetails} The information needed to draw a scalebar.
    */
-  getScalebarDetails() { // todo untested
+  getScalebarDetails() {
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     let activeStyle = this.geona.map.layerSourceGet(this.layerIdentifier, 'style');
 
@@ -49,8 +49,14 @@ export class Scalebar {
     } else {
       // Set the default values for getting a Legend URL
       let url;
-      let width = 1;
-      let height = 500;
+      let width;
+      let height;
+
+      // Set the width and height to the layer's specified info, if possible
+      if (geonaLayer.scale) {
+        width = geonaLayer.scale.width;
+        height = geonaLayer.scale.height;
+      }
 
       // The style should contain a legendUrl, width and height, so we try to find these for the currently active style.
       if (geonaLayer.styles) {
@@ -58,11 +64,13 @@ export class Scalebar {
           if (style.identifier === activeStyle) {
             if (style.legendUrl) {
               // We take the information that's available
-              width = parseInt(style.legendUrl.width, 10);
-              height = parseInt(style.legendUrl.height, 10);
-              if (style.legendUrl.onlineResource && style.legendUrl.onlineResource.href) {
-                url = this.createGetLegendUrl(geonaLayer, style.legendUrl.onlineResource.href);
+              if (!width) {
+                width = parseInt(style.legendUrl[0].width, 10); // TODO why would there be multiple legendUrls? Add logic if appropriate
               }
+              if (!height) {
+                height = parseInt(style.legendUrl[0].height, 10);
+              }
+              url = this.createGetLegendUrl(geonaLayer, style.legendUrl[0]);
             }
           }
         }
@@ -81,13 +89,14 @@ export class Scalebar {
       // Create the axis ticks
       if (geonaLayer.scale.logarithmic) {
         // Get the range of the scale
-        let range = Math.log(geonaLayer.scale.max) - Math.log(geonaLayer.scale.min);
+        let max = Math.log(parseFloat(geonaLayer.scale.max, 10));
+        let min = Math.log(parseFloat(geonaLayer.scale.min, 10));
+        let range = max - min;
 
         // Generate 5 ticks for the scalebar
-        let logScaleMin = Math.log(geonaLayer.scale.min);
         for (let i = 0; i < 5; i++) {
           let step = (range / 4) * i;
-          let value = logScaleMin + step;
+          let value = min + step;
           value = Math.exp(value);
 
           let tick = {
@@ -99,12 +108,14 @@ export class Scalebar {
         }
       } else {
         // Get the range of the scale
-        let range = geonaLayer.scale.max - geonaLayer.scale.min;
+        let max = parseFloat(geonaLayer.scale.max, 10);
+        let min = parseFloat(geonaLayer.scale.min, 10);
+        let range = max - min;
 
         // Generate 5 ticks for the scalebar
         for (let i = 0; i < 5; i++) {
           let step = (range / 4) * i;
-          let value = geonaLayer.scale.min + step;
+          let value = min + step;
 
           let tick = {
             real: value,
@@ -117,8 +128,8 @@ export class Scalebar {
 
       return {
         url: url,
-        width: width,
-        height: height,
+        width: width || 1,
+        height: height || 500,
         scaleTicks: scaleTicks,
       };
     }
@@ -207,7 +218,7 @@ export class Scalebar {
    * Resets the scale to its original values.
    */
   resetScale() { // todo untested
-    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     let min = geonaLayer.scale.minDefault;
     let max = geonaLayer.scale.maxDefault;
     this.validateScale(min, max);

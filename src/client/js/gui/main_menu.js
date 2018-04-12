@@ -356,6 +356,7 @@ export class MainMenu {
    * Populates the layers panel with the active layer information.
    */
   constructLayersPanel() {
+    // FIXME the layer items are only made once, so add a 'addLayerItem' method which can be called when we add a new active layer
     this.parentDiv.find('.js-geona-panel').append(templates.layers_panel());
 
     let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
