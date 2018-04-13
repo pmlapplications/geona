@@ -138,22 +138,32 @@ export class Scalebar {
   /**
    * Constructs a URL which is used to get the scalebar image.
    * @param {Layer}   geonaLayer  The Geona Layer we want to get a scalebar for.
-   * @param {String}  [legendUrl] The legendUrl taken from the current style for this layer.
+   * @param {Object}  [legendUrl] The legendUrl info taken from the current style for this layer.
    * @param {Boolean} [preview]   If True, the image is only a preview, so default values will be used.
    *
    * @return {String}             The URL used to get the scalebar image.
    */
-  createGetLegendUrl(geonaLayer, legendUrl, preview = false) { // todo untested
+  createGetLegendUrl(geonaLayer, legendUrl, preview = false) {
     // Holds the request types and parameters to be appended on the URL
     let requestParameters = '';
-    // Will be used to hold the legendUrl - if preview is True, will have its PALETTE request parameter modified
-    let baseUrl = legendUrl || '';
 
+    // Will be used to hold the legendUrl - if preview is True, will have its PALETTE request parameter modified
+    let baseUrl = '';
+    if (legendUrl.onlineResource && legendUrl.onlineResource.href) {
+      baseUrl = legendUrl.onlineResource.href;
+    }
+
+    // If the layer has a specific height to use, use that
     if (geonaLayer.scale.height) {
       requestParameters += '&HEIGHT=' + geonaLayer.scale.height;
+    } else if (legendUrl.height) { // Otherwise, if the style has a height to use, use that
+      requestParameters += '&HEIGHT=' + legendUrl.height;
     }
+    // If the layer has a specific width to use, use that
     if (geonaLayer.scale.width) {
       requestParameters += '&WIDTH=' + geonaLayer.scale.width;
+    } else if (legendUrl.width) { // Otherwise, if the style has a width to use, use that
+      requestParameters += '&WIDTH=' + legendUrl.width;
     }
     if (geonaLayer.scale.colorBarOnly) {
       requestParameters += '&COLORBARONLY=' + geonaLayer.scale.colorBarOnly;
