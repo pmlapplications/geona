@@ -1,3 +1,4 @@
+import * as templates from '../../templates/compiled';
 import $ from 'jquery';
 
 /* Type definitions for this class */
@@ -323,47 +324,34 @@ export class Scalebar {
       geonaLayer.scale.scaleTicks = scalebarDetails.scaleTicks;
       geonaLayer.scale.width = scalebarDetails.width;
       geonaLayer.scale.height = scalebarDetails.height;
+      geonaLayer.scale.rotationAngle = scalebarDetails.rotationAngle;
     }
 
-    // Holds HTML elements which will be added to the layer item at the end of the method
-    let scalebarElements = '';
+    // The URL we will use to request the scalebar image
+    let scalebarUrl = geonaLayer.scale.currentUrl;
 
-    let scalebarAltText = 'Scalebar representing data for layer ' + this.layerIdentifier +
-      ' between the values of ' + geonaLayer.scale.min + ' minimum and ' + geonaLayer.scale.max +
-      ' maximum, in units of ' + geonaLayer.units + '.';
-
-    let scalebarImg = '<img src="' + scalebarDetails.url + '" alt="' + scalebarAltText + '">';
-
-    // Add the scalebar image to the elements
-    scalebarElements += scalebarImg;
-
-
-    // Make the span elements for each scalebar tick
-    let ticks = scalebarDetails.scaleTicks;
-    console.log(ticks);
-    for (let i = 0; i < ticks.length; i++) {
-      // We use the position as a class for setting the position of the labels
-      let position;
-      switch (i) {
-        case 0: position = 'min';
-          break;
-        case 1: position = 'centermin';
-          break;
-        case 2: position = 'center';
-          break;
-        case 3: position = 'centermax';
-          break;
-        case 4: position = 'max';
-          break;
-        default:
-          throw new Error('There are more than 5 scalebar ticks - something has gone wrong! (Have you changed the number of ticks calculated?)');
-      }
-      let scalebarLabel = '<span class="js-geona--layers-list__item-scalebar-label ' + position + '">' + ticks[i].standardForm + '</span>';
-      console.log(scalebarLabel);
-      scalebarElements += scalebarLabel;
+    if (geonaLayer.scale.rotationAngle !== 0) {
+      let requestUrl = encodeURIComponent(scalebarUrl) + '/' + geonaLayer.scale.rotationAngle;
+      scalebarUrl = 'http://127.0.0.1:7890/utils/rotateImageFromUrl/' + requestUrl;
     }
 
-    $(this.layersPanelItem).find('.js-geona-layers-list__item-scalebar').html(scalebarElements);
+    // Holds data which will be passed to the scalebar template
+    let scalebarData = {
+      scalebar: {
+        src: scalebarUrl, // The URL that the <img> tag will use as its src
+      },
+      scale: {
+        identifier: geonaLayer.identifier,
+        min: geonaLayer.scale.min,
+        max: geonaLayer.scale.max,
+        units: geonaLayer.units,
+      },
+      labels: geonaLayer.scale.scaleTicks,
+    };
+
+    // Add the scalebar to this layers panel item
+    $(this.layersPanelItem).find('.js-geona-layers-list__item-scalebar')
+      .html(templates.scalebar({scalebarData: scalebarData}));
   }
 }
 
