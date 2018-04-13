@@ -21,6 +21,7 @@ export default class LayerWms extends LayerVisible {
     if (layerConfig.scale) {
       this.scale.width = layerConfig.scale.width;
       this.scale.height = layerConfig.scale.height;
+      this.scale.rotationAngle = layerConfig.scale.rotationAngle;
     }
 
     // Basemaps and borders do not have metadata, so we only find it for data layers
@@ -69,8 +70,8 @@ export default class LayerWms extends LayerVisible {
           if (!this.scale.colorBarOnly) {
             this.scale.colorBarOnly = true;
           }
-          if (!this.scale.rotation) {
-            this.scale.rotation = 0;
+          if (!this.scale.rotationAngle) {
+            this.scale.rotationAngle = 0;
           }
         }
         );
