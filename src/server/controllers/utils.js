@@ -5,6 +5,7 @@ import {parseWmsCapabilities} from '../utils/ogc/wms_capabilities_parser';
 import {parseWmtsCapabilities} from '../utils/ogc/wmts_capabilities_parser';
 import {parseWcsCapabilities} from '../utils/ogc/wcs_capabilities_parser';
 import {parseWfsCapabilities} from '../utils/ogc/wfs_capabilities_parser';
+import {rotate} from '../utils/rotation';
 
 /**
  * Get the available data layers and server details from a wcs server.
@@ -126,4 +127,19 @@ export function sosGetLayers(req, res) {
   //     console.log(err);
   //     res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
   //   });
+}
+
+/**
+ * Gets a rotated image based on an image URL.
+ * @param {Object} req Express request.
+ * @param {Object} res Express response.
+ */
+export function rotateImageFromUrl(req, res) {
+  // todo proxy whitelist - if not on the whitelist respond with a 401 error
+  rotate(req.params.url, parseFloat(req.params.angle))
+    .then((rotatedImage) => {
+      res.send(rotatedImage);
+    }).catch((err) => {
+      // if it's the angle being invalid say that, otherwise just pass generic 404 error
+    });
 }
