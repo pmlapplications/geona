@@ -51,11 +51,13 @@ export class Scalebar {
       let url;
       let width;
       let height;
+      let rotationAngle;
 
       // Set the width and height to the layer's specified info, if possible
       if (geonaLayer.scale) {
         width = geonaLayer.scale.width;
         height = geonaLayer.scale.height;
+        rotationAngle = geonaLayer.scale.rotationAngle;
       }
 
       // The style should contain a legendUrl, width and height, so we try to find these for the currently active style.
@@ -130,6 +132,7 @@ export class Scalebar {
         url: url,
         width: width || 1,
         height: height || 500,
+        rotationAngle: rotationAngle || 0,
         scaleTicks: scaleTicks,
       };
     }
