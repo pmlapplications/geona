@@ -11,6 +11,14 @@
     "description": " - Click and drag to move, use your mouse scroll wheel to zoom, click to select a date or enter your required date in the date field on the right"
   },
   "layers-panel": {
+    "scalebar": {
+      "alt-text": {
+        "intro": "Scalebar representing data for layer",
+        "between": "between the values of",
+        "minimum": "minimum and",
+        "maximum": "maximum, in units of"
+      }
+    },
     "settings": {
       "scale-minimum": "Min",
       "scale-maximum": "Max",
