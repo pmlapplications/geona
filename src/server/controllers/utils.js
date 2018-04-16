@@ -24,7 +24,7 @@ export function wcsGetLayers(req, res) {
       res.json(layer);
     // console.log(JSON.stringify(layer));
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }
@@ -46,7 +46,7 @@ export function wfsGetLayers(req, res) {
       res.json(layer);
     // console.log(JSON.stringify(layer));
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }
@@ -68,7 +68,7 @@ export function wmsGetLayers(req, res) {
       res.json(layer);
       // console.log(JSON.stringify(layer));
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
     });
 }

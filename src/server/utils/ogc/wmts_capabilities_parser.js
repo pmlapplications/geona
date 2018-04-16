@@ -320,11 +320,8 @@ function parse1_0(url, capabilities) {
           // TODO If the layer has a link to the current tile matrix set AND there isn't already a bounding box, add the bounding box to the layer
           for (let tileMatrixSetId of layerMatrix) {
             if (tileMatrixSet.tileMatrixSet === tileMatrixSetId.identifier.value) {
-              console.log('Match');
               if (tileMatrixSetId.boundingBox) {
                 let currentTileMatrixBox = tileMatrixSetId.boundingBox;
-                console.log('boundingBox found, and is being added to:');
-                console.log(layer);
                 layer.boundingBox = {};
                 if (currentTileMatrixBox.name && currentTileMatrixBox.value) {
                   layer.boundingBox = populateBoundingBox(currentTileMatrixBox);
@@ -340,7 +337,6 @@ function parse1_0(url, capabilities) {
     for (let matrixSet of layerMatrix) {
       let thisMatrixSet = matrixSets[matrixSet.identifier.value] = {};
       thisMatrixSet.projection = convertCrs(matrixSet.supportedCRS);
-      console.log(thisMatrixSet.projection);
       if (thisMatrixSet.projection === 'OGC:CRS84') {
         thisMatrixSet.projection = 'EPSG:4326';
       }
@@ -546,8 +542,6 @@ function populateBoundingBox(box) {
     }
   } else {
     // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
-    console.log('box.value.crs:');
-    console.log(box.value.crs);
     let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
     if (xyOrientation === 'en') {
       boundingBox = {
