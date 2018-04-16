@@ -187,6 +187,71 @@
     float: right;
   }
 }
+
+.geona-layers-list__item-scalebar-img {
+  max-width: 100%;
+  height: 100%;
+}
+
+.geona-layers-list__item-scalebar-labels {
+  // position: relative;
+  display: flex;
+}
+
+.geona-layers-list__item-scalebar-labels__label { // fixme - not at 0, 25, 50, 75, 100
+  flex: 5;
+  text-align: center;
+
+  &.min {
+    text-align: left;
+  }
+
+  &.max {
+    text-align: right;
+  }
+}
+
+.geona-layers-list__item-scalebar-labels__label::before { //fixme
+  content: ' ';
+    width: 1px;
+    height: 7px;
+    background-color: #000;
+    position: relative;
+    bottom: 100%;
+    left: 50%;
+
+    &.min {
+      left: 0%;
+      background-color: red;
+    }
+
+    &.max {
+      left: 100%;
+      background-color: green;
+    }
+}
+
+/**
+&:before {
+    content: ' ';
+    width: 1px;
+    height: 7px;
+    background-color: #000;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+  }
+
+&:before{
+      // position: absolute;
+      left: 0;
+      background-color: red;
+    }
+
+    &:before{
+      left: 100%;
+    }
+ */
 // TODO not working
 .geona-layers-list__item-body-info-row{
   border-bottom: 1px solid #000000;
