@@ -367,35 +367,15 @@ export class MainMenu {
         let modifier = this.geona.map.layerGet(activeLayerKey, 'modifier');
         let zIndex = this.geona.map.layerGet(activeLayerKey, 'zIndex');
         if (modifier !== 'basemap' && modifier !== 'borders' && zIndex === index) {
-          // Get the data in the correct format from the geona layer
-          let data = this._compileLayerData(this.geona.map._availableLayers[activeLayerKey]);
-          // Insert layer data object at the top of the list - higher on the list means higher on the map
-          this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
-          let item = this.parentDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
-
-          this.layersPanelScalebars[data.info.identifier] = new Scalebar(this, {
-            layersPanelItem: item,
-            layerIdentifier: data.info.identifier,
-          });
-
-          // Hide all panels
-          $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
-          $(item).find('.js-geona-layers-list__item-body-info').addClass('removed');
-          $(item).find('.js-geona-layers-list__item-body-analysis').addClass('removed');
-
-          // Make current style selected in settings
-          let currentStyle = this.geona.map.layerSourceGet(data.info.identifier, 'style');
-          $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val(currentStyle).prop('selected', true);
+          this.addLayerItem(activeLayerKey);
         }
       }
     }
-
 
     this.layersPanelItemList.length = 0;
     for (let layerBox of this.parentDiv.find('.js-geona-layers-list').children()) {
       this.layersPanelItemList.unshift(layerBox.dataset.identifier);
     }
-
 
     // Find the topmost HTML element in the list to use for the default active layer
     let topmostItem = this.parentDiv.find('.js-geona-layers-list').children()[0];
@@ -403,6 +383,37 @@ export class MainMenu {
 
     // Make its contents visible
     this.layersPanelActiveItemPanel.classList.remove('removed');
+  }
+
+  /**
+   * Adds a layer item to the layers panel list.
+   * @param {String} layerIdentifier The identifier for the data layer we want to create an item for.
+   */
+  addLayerItem(layerIdentifier) {
+    let modifier = this.geona.map.layerGet(layerIdentifier, 'modifier');
+    if (modifier === 'basemap' || modifier === 'borders') {
+      throw new Error('Cannot add a map layer item to the GUI for a basemap or borders layer! Use a layer with no modifier or a \'hasTime\' modifier instead.');
+    } else {
+      // Get the data in the correct format from the geona layer
+      let data = this._compileLayerData(this.geona.map._availableLayers[layerIdentifier]);
+      // Insert layer data object at the top of the list - higher on the list means higher on the map
+      this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+      let item = this.parentDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
+
+      this.layersPanelScalebars[data.info.identifier] = new Scalebar(this, {
+        layersPanelItem: item,
+        layerIdentifier: data.info.identifier,
+      });
+
+      // Hide all panels
+      $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
+      $(item).find('.js-geona-layers-list__item-body-info').addClass('removed');
+      $(item).find('.js-geona-layers-list__item-body-analysis').addClass('removed');
+
+      // Make current style selected in settings
+      let currentStyle = this.geona.map.layerSourceGet(data.info.identifier, 'style');
+      $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val(currentStyle).prop('selected', true);
+    }
   }
 
   /**
