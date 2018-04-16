@@ -126,7 +126,7 @@ export function getLayerServerFromCacheOrUrl(geonaServer, url, protocol, save, u
             }
           }
           if (save === true) {
-            fs.writeFileSync(filepath, layerServer, 'utf8');
+            fs.writeFileSync(filepath, JSON.stringify(layerServer), 'utf8');
           }
           resolve({
             layerServer: layerServer,
