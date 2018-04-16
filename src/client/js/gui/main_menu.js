@@ -257,7 +257,9 @@ export class MainMenu {
   getLayerServer(url, service, save, useCache) {
     this._clearPreviousUrlLayers();
     getLayerServer(this.geona.geonaServer, url, service, save, useCache)
-      .then((layerServerInfo) => {
+      .then((layerServerJson) => {
+        let layerServerInfo = JSON.parse(layerServerJson);
+
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('removed');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('removed');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');

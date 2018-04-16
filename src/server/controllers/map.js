@@ -42,7 +42,7 @@ export function getCache(req, res) {
  *
  * @return {Object}     Geona LayerServer returned from the request
  */
-export function getServersideLayerServer(req, res) {
+export function getServersideLayerServer(req, res) { // TODO rename whole chain to LayerServerInfo
   // The parameters will all be strings because of the URL, so reset them
   let params = resetParameterTypes(
     [
@@ -125,13 +125,18 @@ export function getLayerServerFromCacheOrUrl(geonaServer, url, protocol, save, u
               break;
             }
           }
-          if (save === true) {
-            fs.writeFileSync(filepath, JSON.stringify(layerServer), 'utf8');
-          }
-          resolve({
+
+          let layerServerInfo = {
             layerServer: layerServer,
             layers: layers,
-          });
+          };
+
+          layerServerInfo = JSON.stringify(layerServerInfo);
+
+          if (save === true) {
+            fs.writeFileSync(filepath, layerServerInfo, 'utf8');
+          }
+          resolve(layerServerInfo);
         });
       } catch (e) {
         console.error(e);
