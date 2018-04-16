@@ -14,6 +14,8 @@ describe('server/controllers/map', function() {
   let cacheUri = '/local1/data/scratch/git/web-development/gp2-contribution-guide/cache/';
   // Path to the dependencies expected folder
   let expectedUri = '/local1/data/scratch/git/web-development/gp2-contribution-guide/test_dependencies/expected/server/controllers/';
+  // Server Geona is running on
+  let geonaServer = 'http://192.171.164.90:7890';
 
   describe('getCache()', function() {
     before(function() {
@@ -2136,7 +2138,7 @@ describe('server/controllers/map', function() {
     it('should return the file', function(done) {
       // Search for TEMPORARY_TEST_FILE.json
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      let searchFile = 'http://127.0.0.1:7890/map/getCache/TEMPORARY_TEST_FILE.json';
+      let searchFile = geonaServer + '/map/getCache/TEMPORARY_TEST_FILE.json';
       request(searchFile, (err, response) => {
         expect(err).to.be.null;
         expect(response.statusCode).to.equal(200);
@@ -2148,7 +2150,7 @@ describe('server/controllers/map', function() {
     it('should return a 404 error', function(done) {
       // Search for '.json'
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      let searchFile = 'http://127.0.0.1:7890/map/getCache/.json';
+      let searchFile = geonaServer + '/map/getCache/.json';
       request(searchFile, (err, response) => {
         expect(err).to.be.null;
         expect(response.statusCode).to.equal(404);
@@ -2175,7 +2177,7 @@ describe('server/controllers/map', function() {
 
     it('should make a request to the URL and find a LayerServer', function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      getLayerServerFromCacheOrUrl('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?request=GetCapabilities&service=WMS', 'wms', true, false)
+      getLayerServerFromCacheOrUrl(geonaServer, 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?request=GetCapabilities&service=WMS', 'wms', true, false)
         .then(function(layerServer) {
           let expectedLayerServer = fs.readFileSync(expectedUri + 'map__getCache__layer_server.json', 'utf8');
           expect(layerServer).to.deep.equal(expectedLayerServer);
@@ -2200,7 +2202,7 @@ describe('server/controllers/map', function() {
       }
     });
     it('should make a request to the cache and find a LayerServer', function(done) {
-      getLayerServerFromCacheOrUrl('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?request=GetCapabilities&service=WMS', 'wms', false, true)
+      getLayerServerFromCacheOrUrl(geonaServer, 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?request=GetCapabilities&service=WMS', 'wms', false, true)
         .then(function(layerServer) {
           let expectedLayerServer = fs.readFileSync(expectedUri + 'map__getCache__layer_server.json', 'utf8');
           expect(layerServer).to.deep.equal(expectedLayerServer);
@@ -2216,7 +2218,7 @@ describe('server/controllers/map', function() {
     });
     it('should make a request to the URL and not save the LayerServer', function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      getLayerServerFromCacheOrUrl('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?request=GetCapabilities&service=WMS', 'wms', false, false)
+      getLayerServerFromCacheOrUrl(geonaServer, 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?request=GetCapabilities&service=WMS', 'wms', false, false)
         .then(function(layerServer) {
           let expectedLayerServer = fs.readFileSync(expectedUri + 'map__getCache__layer_server.json', 'utf8');
           expect(layerServer).to.deep.equal(expectedLayerServer);
@@ -2225,7 +2227,7 @@ describe('server/controllers/map', function() {
           done();
         })
         .catch(function(err) {
-          console.log(err);
+          console.error(err);
           expect.fail();
           done();
         });

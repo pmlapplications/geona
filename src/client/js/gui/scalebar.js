@@ -332,7 +332,7 @@ export class Scalebar {
 
     if (geonaLayer.scale.rotationAngle !== 0) {
       let requestUrl = encodeURIComponent(scalebarUrl) + '/' + geonaLayer.scale.rotationAngle;
-      scalebarUrl = 'http://127.0.0.1:7890/utils/rotateImageFromUrl/' + requestUrl;
+      scalebarUrl = this.geona.geonaServer + '/utils/rotateImageFromUrl/' + requestUrl;
     }
 
     // Holds data which will be passed to the scalebar template

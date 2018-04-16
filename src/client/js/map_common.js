@@ -114,9 +114,9 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
  * @param {String} url The URL to check the cache for
  * @return {Boolean}   True if the URL has been saved previously
  */
-export function urlInCache(url) {
+export function urlInCache(geonaServer, url) {
   return new Promise((resolve, reject) => {
-    let searchFile = 'http://127.0.0.1:7890/map/getCache/' + encodeURIComponent(urlToFilename(url) + '.json');
+    let searchFile = geonaServer + '/map/getCache/' + encodeURIComponent(urlToFilename(url) + '.json');
     request(searchFile, (err, response) => {
       if (err) {
         reject(err);
@@ -137,11 +137,11 @@ export function urlInCache(url) {
  * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
  * @return {Array}              List of layers found from the request
  */
-export function getLayerServer(url, service, save = false, useCache = false) {
+export function getLayerServer(geonaServer, url, service, save = false, useCache = false) {
   return new Promise((resolve, reject) => {
     // ajax to server getLayerServer
-    let requestUrl = encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
-    $.ajax('http://127.0.0.1:7890/map/getLayerServer/' + requestUrl)
+    let requestUrl = encodeURIComponent(geonaServer) + '/' + encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
+    $.ajax(geonaServer + '/map/getLayerServer/' + requestUrl)
       .done((layerServerJson) => {
         resolve(layerServerJson);
       })
@@ -281,7 +281,7 @@ export function generateDatetimesFromIntervals(geonaLayer) {
  * @param  {Object} config The config for the map
  * @return {Object}           The availableLayers and availableLayerServers
  */
-export function loadDefaultLayersAndLayerServers(config) {
+export function loadDefaultLayersAndLayerServers(config, geonaServer) {
   // TODO actually instantiate some layer servers instead of just using the Objects
 
   // We will be modifying the config, so we want to clone it.
@@ -317,7 +317,7 @@ export function loadDefaultLayersAndLayerServers(config) {
             let geonaLayer;
             switch (layer.protocol.toLowerCase()) {
               case 'wms':
-                geonaLayer = new LayerWms(layer, layerServer);
+                geonaLayer = new LayerWms(geonaServer, layer, layerServer);
                 break;
               case 'wmts':
                 geonaLayer = new LayerWmts(layer, layerServer);

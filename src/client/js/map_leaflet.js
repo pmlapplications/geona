@@ -26,6 +26,7 @@ export class LMap extends GeonaMap {
     super();
     /** @type {Object} The map config */
     this.config = config;
+    this.geona = geona;
     this.eventManager = geona.eventManager;
     this.parentDiv = geona.parentDiv;
     /**  @type {Object} The available map layers */
@@ -101,7 +102,7 @@ export class LMap extends GeonaMap {
 
 
     // Load the default basemaps, borders layers, and data layers.
-    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config);
+    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config, this.geona.geonaServer);
     this._availableLayers = loadedServersAndLayers.availableLayers;
     this._availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
@@ -583,7 +584,6 @@ export class LMap extends GeonaMap {
         // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
         // This is why we have 'time', 'Time' and 'TIME' to cover all cases
         if (options.modifier === 'hasTime' && time !== undefined) {
-          console.log('leaflet add layer ' + time);
           tileLayerOptions.time = time;
           tileLayerOptions.Time = time;
           tileLayerOptions.TIME = time;
@@ -922,7 +922,6 @@ export class LMap extends GeonaMap {
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = this._activeLayers[layerIdentifier].options.zIndex;
-        console.log(time);
         // We define the layer options so that only the time changes
         let layerOptions = {
           modifier: 'hasTime',

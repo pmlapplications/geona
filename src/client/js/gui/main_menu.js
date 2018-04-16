@@ -214,7 +214,7 @@ export class MainMenu {
       this.parentDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('removed');
     }, 3000);
 
-    urlInCache(url)
+    urlInCache(this.geona.geonaServer, url)
       .then((inCache) => {
         // Re-enable button
         this.parentDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', false);
@@ -256,16 +256,17 @@ export class MainMenu {
    */
   getLayerServer(url, service, save, useCache) {
     this._clearPreviousUrlLayers();
-    getLayerServer(url, service, save, useCache)
-      .then((layerServer) => {
+    getLayerServer(this.geona.geonaServer, url, service, save, useCache)
+      .then((layerServerInfo) => {
         this.parentDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('removed');
         this.parentDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('removed');
         let dropdown = this.parentDiv.find('.js-geona-explore-panel-content__layer-select');
-        for (let layer of layerServer.layers) {
+        for (let layer of layerServerInfo.layers) {
           dropdown.append('<option value="' + layer.identifier + '">' + layer.identifier + '</option>');
         }
-        this.requestLayerServer = layerServer;
+        this.requestLayerServerInfo = layerServerInfo;
       }).catch((err) => {
+        console.error(err);
         alert('No layers found. Error: ' + JSON.stringify(err));
       });
   }
@@ -288,24 +289,24 @@ export class MainMenu {
    * @param {String} layerIdentifier The identifier for the layer in the input box
    */
   addUrlLayerToMap(layerIdentifier) {
-    let layerServerDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServer));
-    for (let layer of layerServerDeepCopy.layers) {
+    let layerServerInfoDeepCopy = JSON.parse(JSON.stringify(this.requestLayerServerInfo));
+    for (let layer of layerServerInfoDeepCopy.layers) {
       if (layer.identifier === layerIdentifier) {
         let geonaLayer;
         switch (layer.protocol.toLowerCase()) {
           case 'wms':
-            geonaLayer = new LayerWms(layer, layerServerDeepCopy);
+            geonaLayer = new LayerWms(this.geona.geonaServer, layer, layerServerInfoDeepCopy.layerServer);
             break;
           case 'wmts':
-            geonaLayer = new LayerWmts(layer, layerServerDeepCopy);
+            geonaLayer = new LayerWmts(layer, layerServerInfoDeepCopy.layerServer);
             break;
           default:
             throw new Error('Unsupported layer protocol: ' + layer.protocol.toLowerCase());
         }
         if (layer.dimension && layer.dimension.time) {
-          this.geona.map.addLayer(geonaLayer, layerServerDeepCopy, {modifier: 'hasTime'});
+          this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer, {modifier: 'hasTime'});
         } else {
-          this.geona.map.addLayer(geonaLayer, layerServerDeepCopy);
+          this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer);
         }
       }
     }

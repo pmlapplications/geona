@@ -18,12 +18,5 @@ export default class LayerServerWmts extends LayerServerOws {
 
     this.operationsMetadata = serverConfig.operationsMetadata;
     this.tileMatrixSets = serverConfig.tileMatrixSets;
-
-    for (let layer of this.layers) {
-      // Add the supported projections to each layer from its tileMatrixSetLinks
-      for (let tileMatrixSetId of layer.tileMatrixSetLinks) {
-        layer.projections.push(this.tileMatrixSets[tileMatrixSetId.tileMatrixSet].projection);
-      }
-    }
   }
 }

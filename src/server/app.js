@@ -131,6 +131,7 @@ app.use(mainRouter);
 let server = http.createServer(app);
 
 server.listen(configServer.get('port'), function() {
+  // TODO make this say the actual server
   console.log('Server running at http://127.0.0.1:' + configServer.get('port'));
 });
 

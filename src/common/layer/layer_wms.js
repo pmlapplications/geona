@@ -12,12 +12,11 @@ export default class LayerWms extends LayerVisible {
    * @param  {Object}      layerConfig   The config for the layer
    * @param  {LayerServer} [layerServer] The server that provides this layer. Not all layer types require a server
    */
-  constructor(layerConfig, layerServer) {
+  constructor(geonaServer, layerConfig, layerServer) {
     super(layerConfig, layerServer);
     this.protocol = 'wms';
     this.scale = {};
 
-    // TODO each layer is getting created twice for some reason
     if (layerConfig.scale) {
       this.scale.width = layerConfig.scale.width;
       this.scale.height = layerConfig.scale.height;
@@ -26,7 +25,7 @@ export default class LayerWms extends LayerVisible {
 
     // Basemaps and borders do not have metadata, so we only find it for data layers
     if (!this.modifier || this.modifier === 'hasTime') {
-      getMetadata(layerServer.url, this.identifier)
+      getMetadata(geonaServer, layerServer.url, this.identifier)
         .then((metadataString) => {
           let metadata = JSON.parse(metadataString);
 
@@ -36,7 +35,7 @@ export default class LayerWms extends LayerVisible {
           if (!this.representationStyles) {
             this.representationStyles = metadata.supportedStyles;
           }
-          if (!this.defaultStyle) {
+          if (!this.defaultStyle) { // fixme the default style should check that the layer.styles actually exists
             this.defaultStyle = 'boxfill/' + metadata.defaultPalette;
           }
           if (metadata.copyright) {
@@ -86,11 +85,11 @@ export default class LayerWms extends LayerVisible {
  *
  * @return {Array}              List of layers found from the request
  */
-function getMetadata(url, layerIdentifier) {
+function getMetadata(geonaServer, url, layerIdentifier) {
   return new Promise((resolve, reject) => {
-    // ajax to server getLayerServer
+    // ajax to server getMetadata
     let requestUrl = encodeURIComponent(url) + '/' + layerIdentifier;
-    $.ajax('http://192.171.164.90:7890/utils/wms/getMetadata/' + requestUrl)
+    $.ajax(geonaServer + '/utils/wms/getMetadata/' + requestUrl)
       .done((metadataJson) => {
         resolve(metadataJson);
       })

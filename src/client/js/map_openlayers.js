@@ -31,6 +31,7 @@ export class OlMap extends GeonaMap {
     super();
     /** @type {Object} The map config */
     this.config = config;
+    this.geona = geona;
     this.eventManager = geona.eventManager;
     this.parentDiv = geona.parentDiv;
 
@@ -100,7 +101,7 @@ export class OlMap extends GeonaMap {
       ],
     });
 
-    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config);
+    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config, this.geona.geonaServer);
     this._availableLayers = loadedServersAndLayers.availableLayers;
     this._availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
@@ -141,7 +142,7 @@ export class OlMap extends GeonaMap {
 
     // wms
     // https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?service=WMS&request=GetCapabilities
-    // $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServer(serverConfig);
     //   });
@@ -150,37 +151,37 @@ export class OlMap extends GeonaMap {
 
     // // wmts 3857 - success
     // http://www.ngi.be/cartoweb/1.0.0/WMTSCapabilities.xml
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fwww.ngi.be%2Fcartoweb%2F1.0.0%2FWMTSCapabilities.xml')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/http%3A%2F%2Fwww.ngi.be%2Fcartoweb%2F1.0.0%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 4326 - error
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Ftiles.maps.eox.at%2Fwmts%2F%3FSERVICE%3DWMTS%26REQUEST%3DGetCapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/https%3A%2F%2Ftiles.maps.eox.at%2Fwmts%2F%3FSERVICE%3DWMTS%26REQUEST%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 4326 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fgibs.earthdata.nasa.gov%2Fwmts%2Fepsg4326%2Fbest%2Fwmts.cgi%3FVERSION%3D1.0.0%26Request%3DGetCapabilities%26Service%3DWMTS')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/https%3A%2F%2Fgibs.earthdata.nasa.gov%2Fwmts%2Fepsg4326%2Fbest%2Fwmts.cgi%3FVERSION%3D1.0.0%26Request%3DGetCapabilities%26Service%3DWMTS')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // WMTS 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fviewer.globalland.vgt.vito.be%2Fmapcache%2Fwmts%3Fservice%3DWMTS%26request%3DGetCapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/http%3A%2F%2Fviewer.globalland.vgt.vito.be%2Fmapcache%2Fwmts%3Fservice%3DWMTS%26request%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
