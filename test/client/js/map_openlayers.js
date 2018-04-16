@@ -41,6 +41,7 @@ describe('client/js/map_openlayers', function() {
     let config1 = {
       'geonaVariable': 'geonaOlTest',
       'onReadyCallback': 'geonaOnReady',
+      'geonaServer': 'http://192.171.164.90:7890',
       'divId': 'oltest',
       'map': {
         'library': 'openlayers',
@@ -2327,10 +2328,13 @@ describe('client/js/map_openlayers', function() {
       },
     };
 
-    Promise.resolve(load(config1)).catch(function(err) {
-      console.error(err);
-      done();
-    });
+    Promise.resolve(load(config1)).then(function() {
+      console.warn('geonaServer is set to \'' + config1.geonaServer + '\' - please ensure this is the address you want to use for your testing.');
+    })
+      .catch(function(err) {
+        console.error(err);
+        done();
+      });
   });
 
   describe('constructor', function() {
@@ -3159,12 +3163,12 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('getLayersFromWms()', function() {
-    let wmsLayerServer;
+    let wmsLayerServerInfo;
     before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      getLayerServer('https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY', 'wms', false, false)
-        .then(function(layerServer) {
-          wmsLayerServer = layerServer;
+      getLayerServer(geona.geonaServer, 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY', 'wms', false, false)
+        .then(function(layerServerInfo) {
+          wmsLayerServerInfo = layerServerInfo;
           done();
         })
         .catch(function(err) {
@@ -3174,21 +3178,21 @@ describe('client/js/map_openlayers', function() {
     });
 
     it('should have found some layers', function() {
-      expect(wmsLayerServer.layers.length).to.be.above(0);
+      expect(wmsLayerServerInfo.layers.length).to.be.above(0);
     });
     it('should add one of the retrieved layers to the map', function() {
-      if (wmsLayerServer.layers[0].dimensions) {
-        if (wmsLayerServer.layers[0].dimensions.time) {
-          geona.map.addLayer(wmsLayerServer.layers[0], wmsLayerServer, {modifier: 'hasTime'});
+      if (wmsLayerServerInfo.layers[0].dimensions) {
+        if (wmsLayerServerInfo.layers[0].dimensions.time) {
+          geona.map.addLayer(wmsLayerServerInfo.layers[0], wmsLayerServerInfo.layerServer, {modifier: 'hasTime'});
         } else {
-          geona.map.addLayer(wmsLayerServer.layers[0], wmsLayerServer);
+          geona.map.addLayer(wmsLayerServerInfo.layers[0], wmsLayerServerInfo.layerServer);
         }
       } else {
-        geona.map.addLayer(wmsLayerServer.layers[0], wmsLayerServer);
+        geona.map.addLayer(wmsLayerServerInfo.layers[0], wmsLayerServerInfo.layerServer);
       }
 
       let firstMapLayer = geona.map._map.getLayers().getArray()[0];
-      expect(firstMapLayer.get('identifier')).to.equal(wmsLayerServer.layers[0].identifier);
+      expect(firstMapLayer.get('identifier')).to.equal(wmsLayerServerInfo.layers[0].identifier);
     });
     // TODO add test for saving layers once functionality implemented
     // it('should save the layers found', function() {});
@@ -3201,12 +3205,12 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('getLayersFromWmts()', function() {
-    let wmtsLayerServer;
+    let wmtsLayerServerInfo;
     before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
-      getLayerServer('https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?VERSION=1.0.0&Request=GetCapabilities&Service=WMTS', 'wmts', false, false)
-        .then(function(layerServer) {
-          wmtsLayerServer = layerServer;
+      getLayerServer(geona.geonaServer, 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?VERSION=1.0.0&Request=GetCapabilities&Service=WMTS', 'wmts', false, false)
+        .then(function(layerServerInfo) {
+          wmtsLayerServerInfo = layerServerInfo;
           done();
         })
         .catch(function(err) {
@@ -3216,13 +3220,13 @@ describe('client/js/map_openlayers', function() {
     });
 
     it('should have found some layers', function() {
-      expect(wmtsLayerServer.layers.length).to.be.above(0);
+      expect(wmtsLayerServerInfo.layers.length).to.be.above(0);
     });
     it('should add one of the retrieved layers to the map', function() {
-      geona.map.addLayer(wmtsLayerServer.layers[0], wmtsLayerServer);
+      geona.map.addLayer(wmtsLayerServerInfo.layers[0], wmtsLayerServerInfo.layerServer);
 
       let firstMapLayer = geona.map._map.getLayers().getArray()[0];
-      expect(firstMapLayer.get('identifier')).to.equal(wmtsLayerServer.layers[0].identifier);
+      expect(firstMapLayer.get('identifier')).to.equal(wmtsLayerServerInfo.layers[0].identifier);
     });
     // TODO add test for saving layers once functionality implemented
     // it('should save the layers found', function() {});
