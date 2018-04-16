@@ -12,6 +12,7 @@
   },
   "layers-panel": {
     "scalebar": {
+      "units": "FR Scale",
       "alt-text": {
         "intro": "FR Scalebar representing data for layer",
         "between": "FR between the values of",
