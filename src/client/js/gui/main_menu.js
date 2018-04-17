@@ -586,14 +586,35 @@ export class MainMenu {
 
   /**
    * Updates the values in the scale min and max boxes.
+   * @param {HTMLElement} item The panel item which contains the boxes to change.
    * @param {Number}      min  The minimum value for the scalebar.
    * @param {Number}      max  The maximum value for the scalebar.
-   * @param {HTMLElement} item The panel item which contains the boxes to change.
    */
-  setScalebarInputs(min, max, item) {
+  setScalebarInputs(item, min, max) {
     $(item).find('.js-geona-layers-list__item-body-settings__scale-min').val(min);
     $(item).find('.js-geona-layers-list__item-body-settings__scale-max').val(max);
     // TODO add eventManager call for collaboration (will use class variable to remove eslint complaint)
+  }
+
+  /**
+   * Finds the min and max values and updates the scalebar and settings.
+   * @param {HTMLElement} item The item for the layer being changed.
+   */
+  applyAutoScale(item) {
+    let layerIdentifier = item.dataset.identifier;
+    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+    this.layersPanelScalebars[layerIdentifier].getAutoScale()
+      .then((minMaxObject) => {
+        let min = minMaxObject.min;
+        let max = minMaxObject.max;
+        let log = geonaLayer.scale.logarithmicDefault;
+        this.layersPanelScalebars[layerIdentifier].validateScale(min, max, log);
+        this.addToChangesBuffer(layerIdentifier, this.setScalebarInputs, this, [item, min, max]); // fixme will glitch if the min and max value boxes are then changed?
+      })
+      .catch((err) => {
+        console.error('Unable to automatically find min and max values for layer ' + layerIdentifier + '. Returned error: ' + err);
+        alert('Unable to automatically find min and max values for layer ' + layerIdentifier + '. Returned error: ' + err);
+      });
   }
 
   /**
@@ -683,6 +704,8 @@ export class MainMenu {
       '. Add a function to the buffer first.');
     }
   }
+
+  animateChangesBuffer(layerIdentifier) {}
 
   /**
    * ------------------------------------

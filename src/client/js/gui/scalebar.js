@@ -236,6 +236,7 @@ export class Scalebar {
       let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
       let baseUrl = geonaLayerServer.url;
 
+      // We need the baseUrl to have a '?' before the request parameters
       if (baseUrl.indexOf('?') === -1) {
         baseUrl = baseUrl + '?';
       }
@@ -254,6 +255,7 @@ export class Scalebar {
          + '&elevation=' + (geonaLayer.elevation || -1)
          + '&srs=' + this.geona.map.config.projection;
 
+      // Make the request for the min and max scale values
       $.ajax(baseUrl + minMaxRequestParameters)
         .done((minMaxJson) => {
           resolve(minMaxJson);

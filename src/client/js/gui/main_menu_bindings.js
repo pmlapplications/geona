@@ -81,6 +81,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.layersPanelScalebars.validateScale', ([layerIdentifier, min, max, log, instant]) => {
     menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
   });
+  // Apply autoscale
+  eventManager.bind('mainMenu.applyAutoScale', (item) => {
+    menu.applyAutoScale(item);
+  });
   // Change layer opacity
   eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
     menu.changeLayerOpacity(item, opacity);
