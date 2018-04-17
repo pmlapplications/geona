@@ -21,6 +21,16 @@ export default class LayerWms extends LayerVisible {
       this.scale.width = layerConfig.scale.width;
       this.scale.height = layerConfig.scale.height;
       this.scale.rotationAngle = layerConfig.scale.rotationAngle;
+      this.scale.colorBarOnly = layerConfig.scale.colorBarOnly;
+      this.scale.min = layerConfig.scale.min;
+      this.scale.max = layerConfig.scale.max;
+      this.scale.numColorBands = layerConfig.scale.numColorBands;
+      this.scale.logarithmic = layerConfig.scale.logarithmic;
+      this.scale.minDefault = layerConfig.scale.minDefault;
+      this.scale.maxDefault = layerConfig.scale.maxDefault;
+      this.scale.numColorBandsDefault = layerConfig.scale.numColorBandsDefault;
+      this.scale.logarithmicDefault = layerConfig.scale.logarithmicDefault;
+      this.scale.rotationAngle = layerConfig.scale.rotationAngle;
     }
 
     // Basemaps and borders do not have metadata, so we only find it for data layers
@@ -67,7 +77,7 @@ export default class LayerWms extends LayerVisible {
             this.scale.logarithmicDefault = metadata.logScaling;
           }
           if (!this.scale.colorBarOnly) {
-            this.scale.colorBarOnly = true;
+            this.scale.colorBarOnly = false;
           }
           if (!this.scale.rotationAngle) {
             this.scale.rotationAngle = 0;
@@ -81,14 +91,15 @@ export default class LayerWms extends LayerVisible {
 /**
  * Fetches layers for all supported services.
  * @param  {String} url             URL for service request.
- * @param  {String} layerIdentifier The identifier for the layer to get metadata for.
+ * @param  {String} layerIdentifier The identifier of the layer to get metadata for.
  *
- * @return {Array}              List of layers found from the request
+ * @return {Array}                  List of layers found from the request
  */
-function getMetadata(geonaServer, url, layerIdentifier) {
+function getMetadata(geonaServer, url, layerIdentifier) { // FIXME doesn't work server-side
   return new Promise((resolve, reject) => {
     // ajax to server getMetadata
     let requestUrl = encodeURIComponent(url) + '/' + layerIdentifier;
+    console.log('about to ajax');
     $.ajax(geonaServer + '/utils/wms/getMetadata/' + requestUrl)
       .done((metadataJson) => {
         resolve(metadataJson);

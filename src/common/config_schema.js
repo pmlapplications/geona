@@ -317,6 +317,7 @@ export let client = {
                 height: 500,
                 width: 30,
                 rotationAngle: 90,
+                colorBarOnly: true,
               },
             },
             {
@@ -1180,6 +1181,7 @@ export let client = {
                 height: 500,
                 width: 30,
                 rotationAngle: 90,
+                colorBarOnly: true,
               },
               layerServer: 'https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities',
             },

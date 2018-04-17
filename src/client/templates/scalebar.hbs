@@ -6,6 +6,7 @@
   {{scalebarData.scale.max}} {{t 'menu:layers-panel.scalebar.alt-text.maximum'}}
   {{scalebarData.scale.units}}."></img>
 <br>
+{{#if scalebarData.scalebar.colorBarOnly}}
 <div class="geona-layers-list__item-scalebar-labels">
   <span class="geona-layers-list__item-scalebar-labels__label min" title="{{scalebarData.labels.[0].real}}">{{scalebarData.labels.[0].standardForm}}</span>
   <span class="geona-layers-list__item-scalebar-labels__label centermin" title="{{scalebarData.labels.[1].real}}">{{scalebarData.labels.[1].standardForm}}</span>
@@ -13,3 +14,4 @@
   <span class="geona-layers-list__item-scalebar-labels__label centermax" title="{{scalebarData.labels.[3].real}}">{{scalebarData.labels.[3].standardForm}}</span>
   <span class="geona-layers-list__item-scalebar-labels__label max" title="{{scalebarData.labels.[4].real}}">{{scalebarData.labels.[4].standardForm}}</span>
 </div>
+{{/if}}
