@@ -672,12 +672,15 @@ export class MainMenu {
       params: params,
     });
 
-    // Restart the timeout
+    // Set a new timeout
     clearTimeout(layerBuffer.timeout);
     layerBuffer.timeout = setTimeout(() => {
       // When the timeout is finished, we will execute the operations
       this.executeChangesBuffer(layerIdentifier);
     }, this.CHANGES_BUFFER_TIME);
+
+    // Set a new 'Apply Changes' button animation
+    this.animateChangesBufferButton(layerIdentifier);
   }
 
   /**
@@ -686,6 +689,9 @@ export class MainMenu {
    */
   executeChangesBuffer(layerIdentifier) {
     let layerBuffer = this.changesBuffer[layerIdentifier];
+
+    // todo Remove the 'apply changes' button from view
+
 
     // The buffer may not have been made for this layer yet
     if (layerBuffer) {
@@ -705,7 +711,38 @@ export class MainMenu {
     }
   }
 
-  animateChangesBuffer(layerIdentifier) {}
+  /**
+   * Sets a new animation for the changes buffer 'apply changes' button.
+   * @param {String} layerIdentifier The identifier for the layer whose button we want to animate.
+   */
+  animateChangesBufferButton(layerIdentifier) {
+    let button = this.parentDiv
+      .find('.js-geona-layers-list__item[data-identifier="' + layerIdentifier + '"]') // Find the item
+      .find('.js-geona-layers-list__item-body-settings__apply-changes')[0]; // Find the button for this item
+
+    let buttonTimeIndicator = $(button)
+      .find('.js-geona-layers-list__item-body-settings__apply-changes__time-indicator')[0];
+
+
+    // buttonTimeIndicator.style.transition = 'right ' + this.CHANGES_BUFFER_TIME + ' linear';
+    console.log(buttonTimeIndicator);
+    console.log(buttonTimeIndicator.style.transition);
+
+    button.classList.remove('removed');
+    window.buttonti = buttonTimeIndicator;
+    setTimeout(() => { // fixme horrible hack, get it working another way
+      this.testAddAnimating(buttonTimeIndicator);
+    }, 0);
+    // button.classList.add('animating');
+    // buttonTimeIndicator.classList.add('animating');
+    // remove class 'removed'
+    // transition-duration = this.buffer time
+    // 
+  }
+
+  testAddAnimating(buttonTi) {
+    buttonTi.classList.add('animating');
+  }
 
   /**
    * ------------------------------------

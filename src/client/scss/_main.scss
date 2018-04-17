@@ -252,6 +252,48 @@
       left: 100%;
     }
  */
+
+.geona-layers-list__item-body-settings__apply-changes{
+  position: relative;
+  // background-color: $button-background;
+  background: none;
+  z-index: 1;
+
+  // &.animating{
+
+  // }
+
+
+}
+
+// .geona-layers-list__item-body-settings__apply-changes .geona-layers-list__item-body-settings__apply-changes__time-indicator{
+.geona-layers-list__item-body-settings__apply-changes__time-indicator{
+  position: absolute;
+  background-color: #837b67; //todo add its own variable
+  bottom: 0;
+  left: 0;
+  right: 100%;
+  top: 0;
+  z-index: -1;
+
+  -webkit-transition: right 10s linear;
+  // transition is set from the JavaScript in animateChangesBufferButton() in order to match the CHANGES_BUFFER_TIME
+
+  // &.animating{
+    // right: 0;
+  // }
+}
+
+.geona-layers-list__item-body-settings__apply-changes__time-indicator.animating{
+  right: 0;
+
+  -webkit-transition: right 10s linear;
+}
+
+// .geona-layers-list__item-body-settings__apply-changes.animating .geona-layers-list__item-body-settings__apply-changes__time-indicator{
+  // right: 0;
+// }
+
 // TODO not working
 .geona-layers-list__item-body-info-row{
   border-bottom: 1px solid #000000;
