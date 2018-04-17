@@ -226,16 +226,53 @@ export class Scalebar {
     }
   }
 
-  getAutoScale() {}
+  /**
+   * Tries to get appropriate min and max scale values for use when automatically setting a linear scale.
+   * @return {Promise} Will resolve to an Object containing a min and a max value.
+   */
+  getAutoScale() {
+    return new Promise((resolve, reject) => {
+      let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+      let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+      let baseUrl = geonaLayerServer.url;
+
+      if (baseUrl.indexOf('?') === -1) {
+        baseUrl = baseUrl + '?';
+      }
+
+      // Set the bounding box parameter in correct format
+      let bbox = geonaLayer.boundingBox.minLon + ','
+        + geonaLayer.boundingBox.minLat + ','
+        + geonaLayer.boundingBox.maxLon + ','
+        + geonaLayer.boundingBox.maxLat;
+
+      // todo why are the width and height 50?
+      // We need to give: request, layers, item, bbox, time, elevation, srs, width, height 
+      let minMaxRequestParameters = 'request=GetMetadata&item=minmax&width=50&height=50&layers=' + geonaLayer.identifier
+         + '&time=' + this.geona.map.layerGet(geonaLayer.identifier, 'layerTime')
+         + '&bbox=' + bbox
+         + '&elevation=' + (geonaLayer.elevation || -1)
+         + '&srs=' + this.geona.map.config.projection;
+
+      $.ajax(baseUrl + minMaxRequestParameters)
+        .done((minMaxJson) => {
+          resolve(minMaxJson);
+        })
+        .fail((err) => {
+          reject(err);
+        });
+    });
+  }
 
   /**
    * Resets the scale to its original values.
    */
-  resetScale() { // todo untested
+  resetScale() { // todo untested - also should this be a 'getResetScale' to be then manually used with validateScale()?
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     let min = geonaLayer.scale.minDefault;
     let max = geonaLayer.scale.maxDefault;
-    this.validateScale(min, max);
+    let log = geonaLayer.scale.logarithmicDefault;
+    this.validateScale(min, max, log);
   }
 
   /**
