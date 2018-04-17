@@ -359,7 +359,6 @@ export class MainMenu {
    * Populates the layers panel with the active layer information.
    */
   constructLayersPanel() {
-    // FIXME the layer items are only made once, so add a 'addLayerItem' method which can be called when we add a new active layer
     this.parentDiv.find('.js-geona-panel').append(templates.layers_panel());
 
     let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
@@ -648,6 +647,7 @@ export class MainMenu {
     // Append the new function and params to the list of operations
     layerBuffer.operations.add({
       func: func,
+      context: context,
       params: params,
     });
 
@@ -668,7 +668,7 @@ export class MainMenu {
 
     // The buffer may not have been made for this layer yet
     if (layerBuffer) {
-    // The timeout might still be active, so we will clear it
+      // The timeout might still be active, so we will clear it
       clearTimeout(layerBuffer.timeout);
 
       // We will loop through and execute all the operations
