@@ -1070,7 +1070,7 @@ export class OlMap extends GeonaMap {
   updateSourceParams(layerIdentifier, newParams) { // todo untested
     let layerSource = this._activeLayers[layerIdentifier].getSource();
     let params = layerSource.getParams();
-    for (let param of newParams) {
+    for (let param of Object.keys(newParams)) {
       switch (param) {
         case 'style':
           params.STYLES = newParams[param];

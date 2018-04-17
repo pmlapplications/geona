@@ -232,6 +232,15 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.removeLayer', [item[0]]);
   });
 
+  // Change layer min value
+  parentDiv.find('.js-geona-layers-list__item-body-settings__scale-min').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li');
+    let layerIdentifier = item[0].dataset.identifier;
+    let min = jQueryEvent.target.value;
+    let max = item.find('.js-geona-layers-list__item-body-settings__scale-max').val();
+    let log = item.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked');
+    eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable
+  });
   // Change layer opacity
   parentDiv.find('.js-geona-layers-list__item-body-settings-opacity-range').on('input', (jQueryEvent) => {
     let value = $(jQueryEvent.target).val();

@@ -1088,7 +1088,7 @@ export class LMap extends GeonaMap {
   updateSourceParams(layerIdentifier, newParams) { // todo untested
     let layer = this._activeLayers[layerIdentifier];
     let params = layer.wmsParams;
-    for (let param of newParams) {
+    for (let param of Object.keys(newParams)) {
       switch (param) {
         case 'style':
           params.styles = newParams[param];

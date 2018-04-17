@@ -330,20 +330,20 @@ export class Scalebar {
    * Constructs a new object containing layer params, and updates the map layer with the params, then calls for the
    * scalebar to be redrawn.
    */
-  updateScalebar() { // todo untested
+  updateScalebar() {
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     // todo these need to be set at the start as well (in OL and L map libraries)
     let params = {
       colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
       logScale: geonaLayer.scale.logarithmic,
       numColorBands: geonaLayer.scale.numColorBands,
-      style: this.geona.map.layerSourceGet(this.identifier, 'style'),
+      style: this.geona.map.layerSourceGet(this.layerIdentifier, 'style'),
       aboveMaxColor: geonaLayer.scale.aboveMaxColor,
       belowMinColor: geonaLayer.scale.belowMinColor,
       elevation: geonaLayer.currentElevation,
     };
 
-    this.geona.map.updateSourceParams(this.identifier, params);
+    this.geona.map.updateSourceParams(this.layerIdentifier, params);
 
     this.drawScalebar();
   }

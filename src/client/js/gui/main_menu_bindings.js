@@ -77,6 +77,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.removeLayer', (item) => { // Item is the list item that contained the icon that was clicked
     menu.removeLayer(item[0]);
   });
+  // Validate (calls update and draw) scale
+  eventManager.bind('mainMenu.layersPanelScalebars.validateScale', ([layerIdentifier, min, max, log, instant]) => {
+    menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
+  });
   // Change layer opacity
   eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
     menu.changeLayerOpacity(item, opacity);
