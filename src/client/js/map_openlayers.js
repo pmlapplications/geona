@@ -1027,7 +1027,7 @@ export class OlMap extends GeonaMap {
         return layerSource.getParams().STYLES;
       case 'format':
         return layerSource.getParams().FORMAT;
-      case 'numColorBands':
+      case 'numColorBands': // todo just remove this, duh
         return layerSource.getParams().NUMCOLORBANDS;
       default:
         throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numColorBands\']');

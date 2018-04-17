@@ -1046,7 +1046,7 @@ export class LMap extends GeonaMap {
       case 'format':
         return layerSource.format;
       case 'numColorBands':
-        return this.layerGet(layerIdentifier, 'numcolorbands');
+        return this.layerGet(layerIdentifier, 'numcolorbands'); // todo just remove this, duh
       default:
         throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numColorBands\']');
     }

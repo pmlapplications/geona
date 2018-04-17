@@ -280,9 +280,9 @@ export class Scalebar {
    * @param {Number|String} min         The minimum scale value.
    * @param {Number|String} max         The maximum scale value.
    * @param {Boolean}       logarithmic If True, the scale is logarithmic.
-   * @param {Boolean}       [force]     If True, will immediately apply the change instead of asking to confirm changes.
+   * @param {Boolean}       [instant]   If True, will immediately apply the change instead of asking to confirm changes.
    */
-  validateScale(min, max, logarithmic, force = false) {
+  validateScale(min, max, logarithmic, instant = false) {
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     let newMin = parseFloat(min);
     let newMax = parseFloat(max);
@@ -318,7 +318,7 @@ export class Scalebar {
       geonaLayer.scale.max = newMax;
       geonaLayer.scale.logarithmic = isLogarithmic;
 
-      if (force) {
+      if (instant) {
         this.updateScalebar();
       } else {
         this.mainMenu.addToChangesBuffer(this.layerIdentifier, this.updateScalebar, this);
@@ -332,7 +332,7 @@ export class Scalebar {
    */
   updateScalebar() { // todo untested
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
-
+    // todo these need to be set at the start as well (in OL and L map libraries)
     let params = {
       colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
       logScale: geonaLayer.scale.logarithmic,
@@ -351,7 +351,7 @@ export class Scalebar {
   /**
    * Draws a scalebar based on the current settings. Will replace the currently-displayed scalebar if there is one.
    */
-  drawScalebar() {
+  drawScalebar() { // todo make sure min and max (and all info actually) are correctly defaulting
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
 
     let scalebarDetails = this.getScalebarDetails();
@@ -376,6 +376,7 @@ export class Scalebar {
     let scalebarData = {
       scalebar: {
         src: scalebarUrl, // The URL that the <img> tag will use as its src
+        colorBarOnly: geonaLayer.scale.colorBarOnly,
       },
       scale: {
         identifier: geonaLayer.identifier,
