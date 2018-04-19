@@ -282,7 +282,7 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.changeLayerStyle', [item, style]);
   });
 
-  // Set below min color
+  // Set below min color - contains show/hide below min color input
   parentDiv.find('.js-geona-layers-list__item-body-settings__below-min-color').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li')[0];
     let option = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color option:selected').val();
@@ -300,7 +300,7 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.setBelowMinColor', [item.dataset.identifier, option]);
   });
 
-  // Set above max color
+  // Set above max color - contains show/hide above max color input
   parentDiv.find('.js-geona-layers-list__item-body-settings__above-max-color').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li')[0];
     let option = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color option:selected').val();
@@ -318,6 +318,18 @@ function registerLayersTriggers(eventManager, parentDiv) {
     let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val();
     let option = '0x' + customColorHex;
     eventManager.trigger('mainMenu.setAboveMaxColor', [item.dataset.identifier, option]);
+  });
+
+  // Set number of color bands
+  parentDiv.find('.js-geona-layers-list__item-body-settings__color-bands-text').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let numColorBands = $(item).find('.js-geona-layers-list__item-body-settings__color-bands-text').val();
+    eventManager.trigger('mainMenu.setNumberOfColorBands', [item, numColorBands]);
+  });
+  parentDiv.find('.js-geona-layers-list__item-body-settings__color-bands-slider').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let numColorBands = $(item).find('.js-geona-layers-list__item-body-settings__color-bands-slider').val();
+    eventManager.trigger('mainMenu.setNumberOfColorBands', [item, numColorBands]);
   });
 
   // Execute changes buffer

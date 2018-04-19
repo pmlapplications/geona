@@ -119,7 +119,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.hideAboveMaxColorInput', (item) => {
     menu.hideAboveMaxColorInput(item);
   });
-  // Set number color bands
+  // Set number of color bands
+  eventManager.bind('mainMenu.setNumberOfColorBands', ([item, numColorBands]) => {
+    menu.setNumberOfColorBands(item, numColorBands);
+  });
 
   // Execute changes buffer
   eventManager.bind('mainMenu.executeChangesBuffer', (layerIdentifier) => {
