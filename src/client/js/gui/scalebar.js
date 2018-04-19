@@ -1,26 +1,10 @@
 import * as templates from '../../templates/compiled';
 import $ from 'jquery';
 
-/* Type definitions for this class */
-/**
- * A ScalebarDetails object contains all the information needed to make a call for a new scalebar.
- * @typedef {Object} ScalebarDetails
- *   @property {String} url        A GetLegend URL for this layer.
- *   @property {Number} width      The desired width of the scalebar (vertically-orientated).
- *   @property {Number} height     The desired height of the scalebar (vertically-orientated).
- *   @property {Tick[]} scaleTicks The real and standardised values for the ticks along the bar.
- */
-/**
- * A Tick is a representation of a scalebar axis tick. It contains the real and display (standard form) values for the
- * tick (e.g. real: 0.005, standardForm: '5.00e-3').
- * @typedef {Object} Tick
- *   @property {Number} real         The number in decimal form.
- *   @property {String} standardForm The number converted to standard form.
- */
-
-
 /**
  * A class used to instantiate and control a scalebar for a layer.
+ *
+ * todo Talk about minmax
  */
 export class Scalebar {
   /**
@@ -33,8 +17,13 @@ export class Scalebar {
     this.parentDiv = mainMenu.parentDiv;
     this.mainMenu = mainMenu;
 
+    /** @type {HTMLElement} @desc The item this scalebar belongs to. */
     this.layersPanelItem = scalebarConfigOptions.layersPanelItem;
+    /** @type {HTMLElement} @desc The identifier for the layer this scalebar represents. */
     this.layerIdentifier = scalebarConfigOptions.layerIdentifier;
+
+    /** @type {Number} @desc CONST - The number of divisions to search when finding the min and max scale values. */
+    this.MINMAX_SEARCH_DENSITY = 1000;
   }
 
   /**
@@ -227,7 +216,8 @@ export class Scalebar {
   }
 
   /**
-   * Tries to get appropriate min and max scale values for use when automatically setting a linear scale.
+   * Tries to get appropriate min and max scale values for use when automatically setting a linear scale. Uses the NCWMS
+   * 'minmax' GetMetadata item. More information on the minmax item can be found at the head of this file.
    * @return {Promise} Will resolve to an Object containing a min and a max value.
    */
   getAutoScale() {
@@ -247,13 +237,14 @@ export class Scalebar {
         + geonaLayer.boundingBox.maxLon + ','
         + geonaLayer.boundingBox.maxLat;
 
-      // todo why are the width and height 50?
-      // We need to give: request, layers, item, bbox, time, elevation, srs, width, height 
-      let minMaxRequestParameters = 'request=GetMetadata&item=minmax&width=50&height=50&layers=' + geonaLayer.identifier
+      // The minmax operation gets approximate min and max values for the scale at the selected datetime
+      let minMaxRequestParameters = 'request=GetMetadata&item=minmax&layers=' + geonaLayer.identifier
          + '&time=' + this.geona.map.layerGet(geonaLayer.identifier, 'layerTime')
          + '&bbox=' + bbox
          + '&elevation=' + (geonaLayer.elevation || -1)
-         + '&srs=' + this.geona.map.config.projection;
+         + '&srs=' + this.geona.map.config.projection
+         + '&width=' + this.MINMAX_SEARCH_DENSITY
+         + '&height=' + this.MINMAX_SEARCH_DENSITY;
 
       // Make the request for the min and max scale values
       $.ajax(baseUrl + minMaxRequestParameters)
@@ -332,7 +323,7 @@ export class Scalebar {
    * Constructs a new object containing layer params, and updates the map layer with the params, then calls for the
    * scalebar to be redrawn.
    */
-  updateScalebar() {
+  updateScalebar() { // fixme if the autoscale chooses the default log, the logarithmic checkbox does not update
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     // todo these need to be set at the start as well (in OL and L map libraries)
     let params = {
@@ -410,3 +401,20 @@ function convertToStandardForm(number) {
     return string;
   }
 }
+
+/* Type definitions for this class */
+/**
+ * A ScalebarDetails object contains all the information needed to make a call for a new scalebar.
+ * @typedef {Object} ScalebarDetails
+ *   @property {String} url        A GetLegend URL for this layer.
+ *   @property {Number} width      The desired width of the scalebar (vertically-orientated).
+ *   @property {Number} height     The desired height of the scalebar (vertically-orientated).
+ *   @property {Tick[]} scaleTicks The real and standardised values for the ticks along the bar.
+ */
+/**
+ * A Tick is a representation of a scalebar axis tick. It contains the real and display (standard form) values for the
+ * tick (e.g. real: 0.005, standardForm: '5.00e-3').
+ * @typedef {Object} Tick
+ *   @property {Number} real         The number in decimal form.
+ *   @property {String} standardForm The number converted to standard form.
+ */
