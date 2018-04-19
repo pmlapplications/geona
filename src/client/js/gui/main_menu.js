@@ -849,6 +849,34 @@ export class MainMenu {
   }
 
   /**
+   * Updates the number of color bands used in the data scale.
+   * @param {HTMLElement} item             The item for the layer we are updating.
+   * @param {Number}      numberColorBands The number of color bands between 1 and 255.
+   */
+  setNumberOfColorBands(item, numberColorBands) {
+    let numColorBands = numberColorBands;
+    // Enforce number extent
+    if (numColorBands < 1) {
+      numColorBands = 1;
+    } else if (numColorBands > 255) {
+      numColorBands = 255;
+    }
+
+    // Set the new option for the Geona Layer
+    let layerIdentifier = item.dataset.identifier;
+    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+    geonaLayer.scale.numColorBands = numColorBands;
+
+    // Add the function to update scalebar to the buffer
+    let scalebar = this.layersPanelScalebars[layerIdentifier];
+    this.addToChangesBuffer(layerIdentifier, scalebar.updateScalebar, scalebar);
+
+    // Update the color band box and slider
+    $(item).find('.js-geona-layers-list__item-body-settings__color-bands-text').val(numColorBands);
+    $(item).find('.js-geona-layers-list__item-body-settings__color-bands-slider').val(numColorBands);
+  }
+
+  /**
    * ------------------------------------
    * Analysis Panel
    * ------------------------------------
