@@ -784,6 +784,27 @@ export class MainMenu {
     this.addToChangesBuffer(layerIdentifier, scalebar.updateScalebar, scalebar);
   }
 
+  /**
+   * Sets the color which should be returned from the server for data values above the current scale maximum.
+   * @param {String} layerIdentifier The identifier for the layer we are altering.
+   * @param {String} optionValue     The value returned from the dropdown option.
+   */
+  setAboveMaxColor(layerIdentifier, optionValue) {
+    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+
+    // Regex for matching '0x' followed by a valid hex code
+    if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue) || optionValue === 'transparent') {
+      geonaLayer.scale.aboveMaxColor = optionValue;
+    } else if (/(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue)) { // Regex for matching a valid hex code
+      geonaLayer.scale.aboveMaxColor = '0x' + optionValue;
+    } else if (optionValue === 'Default') {
+      geonaLayer.scale.aboveMaxColor = undefined;
+    } else {
+      throw new Error('aboveMaxColor value of ' + optionValue + ' is not valid! Values must be one of \'0x[valid hex code]\', \'[valid hex code]\', \'transparent\' or \'Default\'.');
+    }
+
+    let scalebar = this.layersPanelScalebars[layerIdentifier];
+    this.addToChangesBuffer(layerIdentifier, scalebar.updateScalebar, scalebar);
   }
 
   /**
