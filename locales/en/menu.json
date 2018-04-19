@@ -30,7 +30,7 @@
       "style": "Layer Style",
       "below-minimum": "Below Min Colour",
       "above-maximum": "Above Max Colour",
-      "colorbands": "Colour Bands",
+      "color-bands": "Colour Bands",
       "apply-changes": "Apply Changes",
       "zoom-data": "Zoom to data"
     },
