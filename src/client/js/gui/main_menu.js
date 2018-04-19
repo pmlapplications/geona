@@ -826,6 +826,16 @@ export class MainMenu {
       .addClass('removed');
     // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
   }
+
+  /**
+   * Shows the input area for above max custom color.
+   * @param {HTMLElement} item The item that contains the input area.
+   */
+  showAboveMaxColorInput(item) {
+    $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input')
+      .removeClass('removed');
+    // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
+  }
    * ------------------------------------
    * Analysis Panel
    * ------------------------------------
