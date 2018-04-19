@@ -17,6 +17,7 @@ import {Scalebar} from './scalebar';
  */
 
 // TODO separate mainMenu into individual files for each panel
+// TODO layer panel items should be classes of their own
 /**
  * Loads the templates and defines the functions relating to the main menu.
  */
@@ -359,7 +360,7 @@ export class MainMenu {
   /**
    * Populates the layers panel with the active layer information.
    */
-  constructLayersPanel() {
+  constructLayersPanel() { // todo do all this for wmts layers :(
     this.parentDiv.find('.js-geona-panel').append(templates.layers_panel());
 
     let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
@@ -403,10 +404,23 @@ export class MainMenu {
       this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
       let item = this.parentDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
 
-      this.layersPanelScalebars[data.info.identifier] = new Scalebar(this, {
+      let scalebar = new Scalebar(this, {
         layersPanelItem: item,
         layerIdentifier: data.info.identifier,
       });
+      this.layersPanelScalebars[data.info.identifier] = scalebar;
+
+      scalebar.drawScalebar();
+
+      // U[pda the logarithmic checkbox
+
+      // update hre autoscale checkbox and if it's checked then disable it
+
+      // Update the layer style selected value
+
+      // Update the below min selected value
+
+      // Update the above max selected value
 
       // Hide all panels
       $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
