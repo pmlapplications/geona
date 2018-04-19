@@ -182,6 +182,7 @@ export class MainMenu {
    * @param {String} url The URL currently in the input box
    */
   autoselectService(url) {
+    // todo why don't we just use regex.test()?
     // Regex for case-insensitive 'wms' or 'wmts'
     let result = /((w|W)(m|M)(s|S))|((w|W)(m|M)(t|T)(s|S))/.exec(url);
     if (result !== null) {
@@ -593,7 +594,7 @@ export class MainMenu {
   setScalebarInputs(item, min, max) {
     $(item).find('.js-geona-layers-list__item-body-settings__scale-min').val(min);
     $(item).find('.js-geona-layers-list__item-body-settings__scale-max').val(max);
-    // TODO add eventManager call for collaboration (will use class variable to remove eslint complaint)
+    // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
   }
 
   /**
@@ -836,6 +837,18 @@ export class MainMenu {
       .removeClass('removed');
     // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
   }
+
+  /**
+   * Hides the input area for above max custom color.
+   * @param {HTMLElement} item The item that contains the input area.
+   */
+  hideAboveMaxColorInput(item) {
+    $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input')
+      .addClass('removed');
+    // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
+  }
+
+  /**
    * ------------------------------------
    * Analysis Panel
    * ------------------------------------
