@@ -197,10 +197,10 @@ export class Scalebar {
       if (geonaLayer.scale.min && geonaLayer.scale.max) {
         requestParameters += '&COLORSCALERANGE=' + geonaLayer.scale.min + ',' + geonaLayer.scale.max;
       }
-      if (geonaLayer.defaultLog) {
+      if (geonaLayer.scale.logarithmicDefault) {
         requestParameters += '&LOGSCALE=' + geonaLayer.scale.logarithmicDefault;
       }
-      if (geonaLayer.colorBands) {
+      if (geonaLayer.scale.numColorBands) {
         requestParameters += '&NUMCOLORBANDS=' + geonaLayer.scale.numColorBands;
       }
       if (geonaLayer.scale.aboveMaxColor) {
