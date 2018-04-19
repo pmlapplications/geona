@@ -808,6 +808,14 @@ export class MainMenu {
   }
 
   /**
+   * Shows the input area for below min custom color.
+   * @param {HTMLElement} item The item that contains the input area.
+   */
+  showBelowMinColorInput(item) {
+    $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input')
+      .removeClass('removed');
+    // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
+  }
    * ------------------------------------
    * Analysis Panel
    * ------------------------------------
