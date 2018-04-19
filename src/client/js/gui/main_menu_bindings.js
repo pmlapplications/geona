@@ -93,6 +93,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.changeLayerStyle', ([item, style]) => { // Item is the list item that contained the select
     menu.changeLayerStyle(item, style);
   });
+  // Execute changes buffer
+  eventManager.bind('mainMenu.executeChangesBuffer', (layerIdentifier) => {
+    menu.executeChangesBuffer(layerIdentifier);
+  });
 
   /*
    * Analysis Panel

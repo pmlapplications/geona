@@ -687,11 +687,8 @@ export class MainMenu {
    * Executes all the buffered operations in the order they were added.
    * @param {String} layerIdentifier The layer whose operations we are going to execute.
    */
-  executeChangesBuffer(layerIdentifier) {
+  executeChangesBuffer(layerIdentifier) { // fixme if a valid operation is added, then an invalid operation is error thrown in validatescale(), this will still execute, but the GUI will be out of sync
     let layerBuffer = this.changesBuffer[layerIdentifier];
-
-    // todo Remove the 'apply changes' button from view
-
 
     // The buffer may not have been made for this layer yet
     if (layerBuffer) {
@@ -705,6 +702,9 @@ export class MainMenu {
 
       // Reset the operations for this layer
       layerBuffer.operations.clear();
+
+      // Remove the button from view
+      this.removeChangesBufferButton(layerIdentifier);
     } else {
       throw new Error('Changes buffer has not been initialised for layer ' + layerIdentifier +
       '. Add a function to the buffer first.');
@@ -712,36 +712,57 @@ export class MainMenu {
   }
 
   /**
-   * Sets a new animation for the changes buffer 'apply changes' button.
+   * Starts the animation for the changes buffer 'Apply Changes' button from the beginning.
    * @param {String} layerIdentifier The identifier for the layer whose button we want to animate.
    */
   animateChangesBufferButton(layerIdentifier) {
+    // The 'apply changes' button
     let button = this.parentDiv
       .find('.js-geona-layers-list__item[data-identifier="' + layerIdentifier + '"]') // Find the item
       .find('.js-geona-layers-list__item-body-settings__apply-changes')[0]; // Find the button for this item
-
+    // The animating background element which indicates the time
     let buttonTimeIndicator = $(button)
       .find('.js-geona-layers-list__item-body-settings__apply-changes__time-indicator')[0];
 
-
-    // buttonTimeIndicator.style.transition = 'right ' + this.CHANGES_BUFFER_TIME + ' linear';
-    console.log(buttonTimeIndicator);
-    console.log(buttonTimeIndicator.style.transition);
-
+    // Make the button visible if it isn't already
     button.classList.remove('removed');
-    window.buttonti = buttonTimeIndicator;
-    setTimeout(() => { // fixme horrible hack, get it working another way
-      this.testAddAnimating(buttonTimeIndicator);
-    }, 0);
-    // button.classList.add('animating');
-    // buttonTimeIndicator.classList.add('animating');
-    // remove class 'removed'
-    // transition-duration = this.buffer time
-    // 
+    // Set the animation duration to match the changes buffer time if it isn't already
+    buttonTimeIndicator.style.animationDuration = this.CHANGES_BUFFER_TIME + 'ms';
+
+    // The button might already be mid-animation, so we need to forcibly restart it
+    button.classList.remove('animating');
+    buttonTimeIndicator.classList.remove('animating');
+    // This forces the animation to restart by triggering a DOM reflow
+    forceCssReflow(buttonTimeIndicator);
+
+    // We add the class animating to trigger the animation of the time indicator and make the button translucent
+    button.classList.add('animating');
+    buttonTimeIndicator.classList.add('animating');
   }
 
-  testAddAnimating(buttonTi) {
-    buttonTi.classList.add('animating');
+  /**
+   * Removes the buffer 'apply changes' button from view.
+   * @param {String} layerIdentifier The identifier for the layer whose button we want to remove.
+   */
+  removeChangesBufferButton(layerIdentifier) {
+    // The 'apply changes' button
+    let button = this.parentDiv
+      .find('.js-geona-layers-list__item[data-identifier="' + layerIdentifier + '"]') // Find the item
+      .find('.js-geona-layers-list__item-body-settings__apply-changes')[0]; // Find the button for this item
+    // The animating background element which indicates the time
+    let buttonTimeIndicator = $(button)
+      .find('.js-geona-layers-list__item-body-settings__apply-changes__time-indicator')[0];
+
+    // Hide the button from view
+    button.classList.add('removed');
+
+    // Resets the button to its non-animating state, so that it can be re-animated later
+    button.classList.remove('animating');
+    buttonTimeIndicator.classList.remove('animating');
+  }
+
+  }
+
   }
 
   /**
@@ -1009,4 +1030,17 @@ export class MainMenu {
   constructSharePanel() {
     this.parentDiv.find('.js-geona-panel').prepend(templates.share_panel());
   }
+}
+
+/**
+ * Forces the CSS to reflow for the given element. Used to restart an animation (like on the 'Apply Changes' button).
+ *
+ * It is important to note that DOM reflow can be very expensive, so where possible try to remove your animated
+ * components from the DOM flow by styling the element CSS to position: absolute or position: fixed.
+ *
+ * @param {HTMLElement} element The element to reflow around.
+ */
+function forceCssReflow(element) {
+  // A bit of a hack - there is no proper method to restart an animation before it's complete.
+  void element.offsetWidth; // eslint-disable-line no-void
 }

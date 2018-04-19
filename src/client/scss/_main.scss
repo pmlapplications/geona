@@ -255,44 +255,36 @@
 
 .geona-layers-list__item-body-settings__apply-changes{
   position: relative;
-  // background-color: $button-background;
-  background: none;
+  background-color: $button-background;
   z-index: 1;
 
-  // &.animating{
-
-  // }
-
+  &.animating{
+    background-color: transparentize($button-background, 0.6)
+  }
 
 }
 
-// .geona-layers-list__item-body-settings__apply-changes .geona-layers-list__item-body-settings__apply-changes__time-indicator{
 .geona-layers-list__item-body-settings__apply-changes__time-indicator{
   position: absolute;
-  background-color: #837b67; //todo add its own variable
+  background-color: $button-background;
   bottom: 0;
   left: 0;
   right: 100%;
   top: 0;
   z-index: -1;
 
-  -webkit-transition: right 10s linear;
-  // transition is set from the JavaScript in animateChangesBufferButton() in order to match the CHANGES_BUFFER_TIME
-
-  // &.animating{
-    // right: 0;
-  // }
+  &.animating {
+    animation-name: applyChanges;
+    animation-timing-function: linear;
+    // animation-duration is set to match the CHANGES_BUFFER_TIME in the main_menu JavaScript
+  }
 }
 
-.geona-layers-list__item-body-settings__apply-changes__time-indicator.animating{
-  right: 0;
-
-  -webkit-transition: right 10s linear;
+@keyframes applyChanges {
+  from {right: 100%;}
+  to   {right: 0;}
 }
 
-// .geona-layers-list__item-body-settings__apply-changes.animating .geona-layers-list__item-body-settings__apply-changes__time-indicator{
-  // right: 0;
-// }
 
 // TODO not working
 .geona-layers-list__item-body-info-row{

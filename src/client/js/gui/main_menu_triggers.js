@@ -281,6 +281,14 @@ function registerLayersTriggers(eventManager, parentDiv) {
     let style = $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val();
     eventManager.trigger('mainMenu.changeLayerStyle', [item, style]);
   });
+
+
+  // Execute changes buffer
+  parentDiv.find('.js-geona-layers-list__item-body-settings__apply-changes').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let layerIdentifier = item.dataset.identifier;
+    eventManager.trigger('mainMenu.executeChangesBuffer', layerIdentifier);
+  });
 }
 
 /**
