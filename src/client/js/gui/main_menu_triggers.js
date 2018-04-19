@@ -282,6 +282,43 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.changeLayerStyle', [item, style]);
   });
 
+  // Set below min color
+  parentDiv.find('.js-geona-layers-list__item-body-settings__below-min-color').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let option = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color option:selected').val();
+    if (option === 'Custom') {
+      eventManager.trigger('mainMenu.showBelowMinColorInput', item);
+    } else {
+      eventManager.trigger('mainMenu.hideBelowMinColorInput', item);
+      eventManager.trigger('mainMenu.setBelowMinColor', [item.dataset.identifier, option]);
+    }
+  });
+  parentDiv.find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').val();
+    let option = '0x' + customColorHex;
+    eventManager.trigger('mainMenu.setBelowMinColor', [item.dataset.identifier, option]);
+  });
+
+  // Set above max color
+  parentDiv.find('.js-geona-layers-list__item-body-settings__above-max-color').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let option = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color option:selected').val();
+    if (option === 'Custom') {
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val();
+      option = '0x' + customColorHex;
+      eventManager.trigger('mainMenu.showAboveMaxColorInput', item);
+    } else {
+      eventManager.trigger('mainMenu.hideAboveMaxColorInput', item);
+      eventManager.trigger('mainMenu.setAboveMaxColor', [item.dataset.identifier, option]);
+    }
+  });
+  parentDiv.find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val();
+    let option = '0x' + customColorHex;
+    eventManager.trigger('mainMenu.setAboveMaxColor', [item.dataset.identifier, option]);
+  });
 
   // Execute changes buffer
   parentDiv.find('.js-geona-layers-list__item-body-settings__apply-changes').click((jQueryEvent) => {

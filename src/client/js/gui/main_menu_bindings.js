@@ -85,6 +85,8 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.applyAutoScale', (item) => {
     menu.applyAutoScale(item);
   });
+  // Reset scale
+
   // Change layer opacity
   eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
     menu.changeLayerOpacity(item, opacity);
@@ -93,6 +95,32 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.changeLayerStyle', ([item, style]) => { // Item is the list item that contained the select
     menu.changeLayerStyle(item, style);
   });
+  // Select below min color
+  eventManager.bind('mainMenu.setBelowMinColor', ([layerIdentifier, option]) => {
+    menu.setBelowMinColor(layerIdentifier, option);
+  });
+  // Select above max color
+  eventManager.bind('mainMenu.setAboveMaxColor', ([layerIdentifier, option]) => {
+    menu.setAboveMaxColor(layerIdentifier, option);
+  });
+  // Show below min color input
+  eventManager.bind('mainMenu.showBelowMinColorInput', (item) => {
+    menu.showBelowMinColorInput(item);
+  });
+  // Hide below min color input
+  eventManager.bind('mainMenu.hideBelowMinColorInput', (item) => {
+    menu.hideBelowMinColorInput(item);
+  });
+  // Show above max color input
+  eventManager.bind('mainMenu.showAboveMaxColorInput', (item) => {
+    menu.showAboveMaxColorInput(item);
+  });
+  // Hide above max color input
+  eventManager.bind('mainMenu.hideAboveMaxColorInput', (item) => {
+    menu.hideAboveMaxColorInput(item);
+  });
+  // Set number color bands
+
   // Execute changes buffer
   eventManager.bind('mainMenu.executeChangesBuffer', (layerIdentifier) => {
     menu.executeChangesBuffer(layerIdentifier);
