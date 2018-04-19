@@ -428,16 +428,34 @@ export class MainMenu {
     // Compile data for the settings panel
     let layerSettings = {};
 
+    // Min
+    layerSettings.min = geonaLayer.scale.min;
+    // Max
+    layerSettings.max = geonaLayer.scale.max;
+    // Logarithmic
+    layerSettings.logarithmic = geonaLayer.scale.logarithmic;
+
+    // Opacity
+    layerSettings.opacityReal = this.geona.map.layerGet(geonaLayer.identifier, 'opacity');
+    layerSettings.opacityPercent = Math.round(layerSettings.opacityReal * 100);
+
+    // Styles
     if (geonaLayer.styles) {
       layerSettings.styles = [];
       for (let style of geonaLayer.styles) {
         layerSettings.styles.push(style.identifier);
       }
     }
+    // Current style
+    layerSettings.currentStyle = geonaLayer.currentStyle;
 
-    // Opacity
-    layerSettings.opacityReal = this.geona.map.layerGet(geonaLayer.identifier, 'opacity');
-    layerSettings.opacityPercent = Math.round(layerSettings.opacityReal * 100);
+    // Below min color
+    layerSettings.belowMinColor = geonaLayer.scale.belowMinColor;
+    // Above max color
+    layerSettings.aboveMaxColor = geonaLayer.scale.aboveMaxColor;
+
+    // Number of color bands
+    layerSettings.numColorBands = geonaLayer.scale.numColorBands;
 
 
     // Compile data for the info panel

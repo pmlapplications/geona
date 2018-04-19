@@ -48,6 +48,9 @@ export default class LayerWms extends LayerVisible {
           if (!this.defaultStyle) { // fixme the default style should check that the layer.styles actually exists
             this.defaultStyle = 'boxfill/' + metadata.defaultPalette;
           }
+          if (!this.currentStyle) {
+            this.currentStyle = this.defaultStyle;
+          }
           if (metadata.copyright) {
             this.attribution += ' ' + metadata.copyright;
           }

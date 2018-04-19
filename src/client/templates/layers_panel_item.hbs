@@ -9,16 +9,16 @@
       <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-analysis icon-business-chart-2"></span>
       <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-remove geona-layers-list__item-remove icon-bin-2"></span>
   </div>
-  <div class="js-geona-layers-list__item-scalebar">Scalebar with units and current layer time</div>
+  <div class="js-geona-layers-list__item-scalebar"></div>
   <div class="js-geona-layers-list__item-body">
     <div class="js-geona-layers-list__item-body-settings">
       <div>
         <h4>{{t 'menu:layers-panel.settings.scale-minimum'}}:</h4>
-        <input type="text" class="js-geona-layers-list__item-body-settings__scale-min">
+        <input type="text" class="js-geona-layers-list__item-body-settings__scale-min" value={{data.settings.min}}>
       </div>
       <div>
         <h4>{{t 'menu:layers-panel.settings.scale-maximum'}}:</h4>
-        <input type="text" class="js-geona-layers-list__item-body-settings__scale-max">
+        <input type="text" class="js-geona-layers-list__item-body-settings__scale-max" value={{data.settings.max}}>
       </div>
       <br>
       <input type="checkbox" class="js-geona-layers-list__item-body-settings__scale-logarithmic">{{t 'menu:layers-panel.settings.scale-logarithmic'}}
@@ -71,9 +71,9 @@
       </div>
       <br>
       {{t 'menu:layers-panel.settings.color-bands'}}:
-      <input class="js-geona-layers-list__item-body-settings__color-bands-text" type="number" min="1" max="255">
+      <input class="js-geona-layers-list__item-body-settings__color-bands-text" type="number" min="1" max="255" value={{data.settings.numColorBands}}>
       <br>
-      <input class="js-geona-layers-list__item-body-settings__color-bands-slider" type="range" min="1" max="255" step="1" value="255">
+      <input class="js-geona-layers-list__item-body-settings__color-bands-slider" type="range" min="1" max="255" step="1" value={{data.settings.numColorBands}}>
       <br>
       <button class="js-geona-layers-list__item-body-settings__apply-changes geona-layers-list__item-body-settings__apply-changes removed">
         {{t 'menu:layers-panel.settings.apply-changes'}}

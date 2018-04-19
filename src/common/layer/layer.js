@@ -29,6 +29,7 @@ export default class Layer {
     this.boundingBox = layerConfig.boundingBox;
     this.projections = layerConfig.projections || [];
     this.styles = layerConfig.styles;
+    this.currentStyle = layerConfig.currentStyle; // todo should check that styles contains the config specifier
 
     this.isTemporal = layerConfig.isTemporal;
     this.lastTime = layerConfig.lastTime;
