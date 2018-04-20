@@ -324,7 +324,7 @@ export class MainMenu {
     let layer = this.geona.map._availableLayers[layerIdentifier];
     let layerServer = this.geona.map._availableLayerServers[layer.layerServer];
     if (layer.modifier === 'hasTime') {
-      this.geona.map.addLayer(layer, layerServer, {modifier: 'hasTime'}); // FIXME adds duplicates now instead of erroring
+      this.geona.map.addLayer(layer, layerServer, {modifier: 'hasTime'});
     } else {
       this.geona.map.addLayer(layer, layerServer);
     }

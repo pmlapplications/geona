@@ -349,7 +349,7 @@ export class OlMap extends GeonaMap {
 
   /**
    * Add the specified layer onto the map, using the specified options.
-   * Will also add a Geona layer to the_availableLayers if not already included (and also with the LayerServer).
+   * Will also add a Geona layer to the _availableLayers if not already included (and also with the LayerServer).
    *
    * @param {Layer}       geonaLayer       The Geona Layer object to be created as an OpenLayers layer on the map.
    * @param {LayerServer} geonaLayerServer The Geona LayerServer object that corresponds to the Geona Layer.
@@ -367,8 +367,12 @@ export class OlMap extends GeonaMap {
         '\' for geonaLayer \'' + geonaLayer.identifier +
         '\' does not match identifier for geonaLayerServer\'' + geonaLayerServer.identifier + '\''
       );
-    } else if (geonaLayer.layerServer === undefined || geonaLayerServer.identifier === undefined) {
-      throw new Error('layerServer property of geonaLayer parameter or identifier property of geonaLayerServer parameter is undefined');
+    } else if (geonaLayer.layerServer === undefined) {
+      throw new Error('layerServer property of geonaLayer parameter is undefined');
+    } else if (geonaLayerServer.identifier === undefined) {
+      throw new Error('identifier property of geonaLayerServer parameter is undefined');
+    } else if (this._activeLayers[geonaLayer.identifier] !== undefined) {
+      throw new Error('Layer with identifier ' + geonaLayer.identifier + ' is already active on the map.');
     }
 
     // Merge custom options with defaults

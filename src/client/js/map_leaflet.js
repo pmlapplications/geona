@@ -441,8 +441,12 @@ export class LMap extends GeonaMap {
         '\' for geonaLayer \'' + geonaLayer.identifier +
         '\' does not match identifier for geonaLayerServer\'' + geonaLayerServer.identifier + '\''
       );
-    } else if (geonaLayer.layerServer === undefined || geonaLayerServer.identifier === undefined) {
-      throw new Error('layerServer property of geonaLayer parameter or identifier property of geonaLayerServer parameter is undefined');
+    } else if (geonaLayer.layerServer === undefined) {
+      throw new Error('layerServer property of geonaLayer parameter is undefined');
+    } else if (geonaLayerServer.identifier === undefined) {
+      throw new Error('identifier property of geonaLayerServer parameter is undefined');
+    } else if (this._activeLayers[geonaLayer.identifier] !== undefined) {
+      throw new Error('Layer with identifier ' + geonaLayer.identifier + ' is already active on the map.');
     }
 
     // Merge custom options with defaults
