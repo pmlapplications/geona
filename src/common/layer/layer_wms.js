@@ -45,12 +45,20 @@ export default class LayerWms extends LayerVisible {
           if (!this.representationStyles) {
             this.representationStyles = metadata.supportedStyles;
           }
-          if (!this.defaultStyle) { // fixme the default style should check that the layer.styles actually exists
-            this.defaultStyle = 'boxfill/' + metadata.defaultPalette;
+          if (!this.defaultStyle) {
+            let style = 'boxfill/' + metadata.defaultPalette;
+            if (this.stylesContains(style)) {
+              this.defaultStyle = style;
+            } else {
+              // todo this should really throw but it messes with everything else - do we need to have a big blocking thing to stop people from setting up the portal with bad layer data?
+              console.error('ConfigError - styles list for layer ' + this.identifier + ' does not contain the defaultStyle ' + style + ' which was retrieved from the server GetMetadata call. Please add this style to the list of styles in the config for this layer.');
+              // throw new Error('ConfigError - styles list for layer ' + this.identifier + ' does not contain the defaultStyle ' + style + ' which was retrieved from the server GetMetadata call. Please add this style to the list of styles in the config for this layer.');
+            }
           }
           if (!this.currentStyle) {
             this.currentStyle = this.defaultStyle;
           }
+
           if (metadata.copyright) {
             this.attribution += ' ' + metadata.copyright;
           }
@@ -112,4 +120,3 @@ function getMetadata(geonaServer, url, layerIdentifier) { // FIXME doesn't work 
       });
   });
 }
-

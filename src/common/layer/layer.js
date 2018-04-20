@@ -28,8 +28,27 @@ export default class Layer {
 
     this.boundingBox = layerConfig.boundingBox;
     this.projections = layerConfig.projections || [];
-    this.styles = layerConfig.styles;
-    this.currentStyle = layerConfig.currentStyle; // todo should check that styles contains the config specifier
+    if (layerConfig.styles) {
+      this.styles = layerConfig.styles;
+
+      if (layerConfig.defaultStyle) {
+        if (this.stylesContains(layerConfig.defaultStyle)) {
+          this.defaultStyle = layerConfig.defaultStyle;
+        } else {
+          throw new Error('ConfigError - styles list for layer ' + this.identifier + ' does not contain specified defaultStyle ' + layerConfig.defaultStyle);
+        }
+      }
+
+      if (layerConfig.currentStyle) {
+        if (this.stylesContains(layerConfig.currentStyle)) {
+          this.currentStyle = layerConfig.currentStyle;
+        } else {
+          throw new Error('ConfigError - styles list for layer ' + this.identifier + ' does not contain specified currentStyle ' + layerConfig.currentStyle);
+        }
+      } else if (this.defaultStyle) {
+        this.currentStyle = this.defaultStyle;
+      }
+    }
 
     this.isTemporal = layerConfig.isTemporal;
     this.lastTime = layerConfig.lastTime;
@@ -61,15 +80,38 @@ export default class Layer {
   }
 
   /**
-   * Returns either the title, or if set, the display name.
-   * @return {Object} The title or display name.
+   * Returns either the title, or if set, the display name. Always chooses the display name if it exists.
+   * @return {I18nString} The title or display name.
    */
   getTitleOrDisplayName() {
-    // Always chooses the display name if it exists
     if (this.displayName) {
       return this.displayName;
     } else {
       return this.title;
     }
   }
+
+
+  /**
+   * Checks that the styles array contains a style with the specified identifier.
+   * @param  {String}  style An identifier for the style we are checking for.
+   * @return {Boolean}       True if the styles array contains the specified style.
+   */
+  stylesContains(style) {
+    for (let layerStyle of this.styles) {
+      if (layerStyle.identifier === style) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
+
+/* Type definitions for this class */
+/**
+ * Contains one or more Strings, separated into their respective language code. For example, an I18nString might contain
+ * a String for the key 'en' (English), another String for the key 'fr' (French) and another String for the key 'und'
+ * (undefined language). This is used to present data in different languages for different i18n settings.
+ * @typedef {Object} I18nString
+ *   @property {String} string A string in the language as specified by the language code key.
+ */
