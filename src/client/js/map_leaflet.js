@@ -488,23 +488,26 @@ export class LMap extends GeonaMap {
             format = geonaLayer.formats[0];
           }
         }
-        // Select appropriate style
-        if (geonaLayer.styles !== undefined) {
-          // Default to the first style
-          style = geonaLayer.styles[0].identifier;
-          if (geonaLayer.styles[0].legendUrl !== undefined) {
-            format = geonaLayer.styles[0].legendUrl[0].format;
-          }
-          // Search for the requested style and set that as the style if found
-          // FIXME if the requested style is not available, throw an error and print out list of available styles
+
+        // Select appropriate style if needed for layer
+        if (options.requestedStyle) {
+          let requestedStyleIsValid = false;
           for (let layerStyle of geonaLayer.styles) {
             if (layerStyle.identifier === options.requestedStyle) {
+              requestedStyleIsValid = true;
               style = options.requestedStyle;
-              if (layerStyle.legendUrl !== undefined) {
+              geonaLayer.currentStyle = style;
+              if (layerStyle.legendUrl) {
                 format = layerStyle.legendUrl[0].format;
               }
             }
           }
+          if (!requestedStyleIsValid) {
+            throw new Error('Requested style ' + options.requestedStyle + ' does not appear in the list of styles for this layer. Please ensure the layer\'s styles array contains any requested style. Current style array: ' + JSON.stringify(geonaLayer.styles));
+          }
+        } else if (geonaLayer.styles) {
+          // If we aren't setting a requested style, we'll keep the same, or if that's not set yet, use a default.
+          style = geonaLayer.currentStyle || geonaLayer.defaultStyle || '';
         }
 
         // At this stage of the method, only basemaps might have different projections.
@@ -565,7 +568,7 @@ export class LMap extends GeonaMap {
         let tileLayerOptions = {
           identifier: geonaLayer.identifier,
           layers: geonaLayer.identifier,
-          styles: style || '',
+          styles: style,
           format: format || 'image/png',
           transparent: true,
           attribution: attribution,

@@ -411,7 +411,7 @@ export class OlMap extends GeonaMap {
 
     let updateOptions = {options: {}};
 
-    // As the available layers have unique identifiers, a layer with the same identifier will just be updating options
+    // As the active layers have unique identifiers, a layer with the same identifier will just be updating options
     if (this._activeLayers[geonaLayer.identifier] !== undefined) {
       // Get a source with updated options
       updateOptions = this.getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection);
@@ -552,24 +552,28 @@ export class OlMap extends GeonaMap {
         format = geonaLayer.formats[0];
       }
     }
+
     // Select appropriate style
-    if (geonaLayer.styles !== undefined) {
-      // Default to the first style
-      style = geonaLayer.styles[0].identifier;
-      if (geonaLayer.styles[0].legendUrl !== undefined) {
-        format = geonaLayer.styles[0].legendUrl[0].format;
-      }
-      // Search for the requested style and set that as the style if found
-      // FIXME if the requested style is not available, throw an error and print out list of available styles
+    if (options.requestedStyle) {
+      let requestedStyleIsValid = false;
       for (let layerStyle of geonaLayer.styles) {
         if (layerStyle.identifier === options.requestedStyle) {
+          requestedStyleIsValid = true;
           style = options.requestedStyle;
-          if (layerStyle.legendUrl !== undefined) {
+          geonaLayer.currentStyle = style;
+          if (layerStyle.legendUrl) {
             format = layerStyle.legendUrl[0].format;
           }
         }
       }
+      if (!requestedStyleIsValid) {
+        throw new Error('Requested style ' + options.requestedStyle + ' does not appear in the list of styles for this layer. Please ensure the layer\'s styles array contains any requested style. Current style array: ' + JSON.stringify(geonaLayer.styles));
+      }
+    } else if (geonaLayer.styles) {
+      // If we aren't setting a requested style, we'll keep the same, or if that's not set yet, use a default.
+      style = geonaLayer.currentStyle || geonaLayer.defaultStyle || '';
     }
+
 
     if (geonaLayer.attribution) {
       if (geonaLayer.attribution.onlineResource) {
@@ -624,7 +628,7 @@ export class OlMap extends GeonaMap {
       params: {
         LAYERS: geonaLayer.identifier,
         FORMAT: format || geonaLayer.formats || 'image/png',
-        STYLES: style || geonaLayer.styles || '',
+        STYLES: style,
         time: time,
         wrapDateLine: true,
         NUMCOLORBANDS: 255,
