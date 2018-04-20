@@ -142,20 +142,20 @@ export class Scalebar {
 
     // Will be used to hold the legendUrl - if preview is True, will have its PALETTE request parameter modified
     let baseUrl = '';
-    if (legendUrl.onlineResource && legendUrl.onlineResource.href) {
+    if (legendUrl && legendUrl.onlineResource && legendUrl.onlineResource.href) {
       baseUrl = legendUrl.onlineResource.href;
     }
 
     // If the layer has a specific height to use, use that
     if (geonaLayer.scale.height) {
       requestParameters += '&HEIGHT=' + geonaLayer.scale.height;
-    } else if (legendUrl.height) { // Otherwise, if the style has a height to use, use that
+    } else if (legendUrl && legendUrl.height) { // Otherwise, if the style has a height to use, use that
       requestParameters += '&HEIGHT=' + legendUrl.height;
     }
     // If the layer has a specific width to use, use that
     if (geonaLayer.scale.width) {
       requestParameters += '&WIDTH=' + geonaLayer.scale.width;
-    } else if (legendUrl.width) { // Otherwise, if the style has a width to use, use that
+    } else if (legendUrl && legendUrl.width) { // Otherwise, if the style has a width to use, use that
       requestParameters += '&WIDTH=' + legendUrl.width;
     }
     if (geonaLayer.scale.colorBarOnly) {
@@ -200,16 +200,19 @@ export class Scalebar {
       }
     }
 
-    // We prepend a '?' to the requestParameters if it doesn't already exist
-    if (requestParameters.length > 0 && baseUrl.indexOf('?') === -1) {
-      requestParameters = '?' + requestParameters;
+    // We append a '?' to the baseUrl if it doesn't already exist
+    if (baseUrl.indexOf('?') === -1) {
+      baseUrl = baseUrl + '?';
     }
 
     // If we had a legendUrl supplied, we will use that - otherwise we build a new URL
-    if (baseUrl.length > 0) {
+    if (baseUrl.length > 1) {
       return baseUrl + requestParameters;
     } else {
       let serverUrl = this.geona.map._availableLayerServers[geonaLayer.layerServer].url;
+      if (serverUrl.indexOf('?') === -1) {
+        serverUrl = serverUrl + '?';
+      }
       // TODO the identifier here might change - we need to save an originalIdentifier on each layer, which never changes and is used for server requests
       return serverUrl + 'REQUEST=GetLegendGraphic&LAYER=' + geonaLayer.identifier + requestParameters + '&FORMAT=image/png';
     }
