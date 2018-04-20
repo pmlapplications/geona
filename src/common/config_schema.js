@@ -287,6 +287,26 @@ export let client = {
                     },
                   ],
                 },
+                {
+                  identifier: 'boxfill/rainbow',
+                  title: {
+                    und: 'boxfill/rainbow',
+                  },
+                  abstract: {
+                    und: 'boxfill style, using the rainbow palette',
+                  },
+                  legendUrl: [
+                    {
+                      width: 110,
+                      height: 264,
+                      format: 'image/png',
+                      onlineResource: {
+                        type: 'simple',
+                        href: 'https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.1-5DAY?REQUEST=GetLegendGraphic&LAYER=chlor_a&PALETTE=rainbow',
+                      },
+                    },
+                  ],
+                },
               ],
               projections: [
                 'EPSG:4326',
