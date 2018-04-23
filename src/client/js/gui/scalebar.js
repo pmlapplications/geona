@@ -330,6 +330,7 @@ export class Scalebar {
   updateScalebar() {
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     // todo these need to be set at the start as well (in OL and L map libraries)
+    // fixme these options all need to be set somewhere (e.g. above max color is never set)
     let params = {
       colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
       logScale: geonaLayer.scale.logarithmic,

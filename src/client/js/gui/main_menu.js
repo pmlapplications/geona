@@ -409,28 +409,83 @@ export class MainMenu {
         layersPanelItem: item,
         layerIdentifier: data.info.identifier,
       });
-      this.layersPanelScalebars[data.info.identifier] = scalebar;
+      this.layersPanelScalebars[data.info.identifier] = scalebar; // todo write https://gitlab.rsg.pml.ac.uk/web-development/geona/wikis/contribution-guide/style-guides/hbs-(handlebars)
 
+      // fixme race condition from GetMetadata - results in scale ticks being NaN amongst other things
       scalebar.drawScalebar();
 
-      // U[pda the logarithmic checkbox
-
-      // update hre autoscale checkbox and if it's checked then disable it
+      // Update the logarithmic checkbox
+      if (data.settings.logarithmic) {
+        $(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', true);
+      }
 
       // Update the layer style selected value
+      let stylesSelect = $(item).find('.js-geona-layers-list__item-body-settings-styles-select');
+      let stylesOptions = stylesSelect.find('option');
+      for (let option of stylesOptions) {
+        if (option.value === geonaLayer.currentStyle) {
+          stylesSelect.val(option.value).prop('selected', true);
+        }
+      }
 
       // Update the below min selected value
+      let belowMinSelect = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color');
+      switch (geonaLayer.scale.belowMinColor) {
+        case undefined: {
+          belowMinSelect.val('Default').prop('selected', true);
+          break;
+        }
+        case 'black': {
+          belowMinSelect.val('0x000000').prop('selected', true);
+          break;
+        }
+        case 'white': {
+          belowMinSelect.val('0xffffff').prop('selected', true);
+          break;
+        }
+        case 'transparent': {
+          belowMinSelect.val('transparent').prop('selected', true);
+          break;
+        }
+        default: {
+          belowMinSelect.val('Custom').prop('selected', true);
+          let belowMinHexBox = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__text');
+          belowMinHexBox.val(geonaLayer.scale.belowMinColor);
+          this.showBelowMinColorInput(item);
+        }
+      }
 
       // Update the above max selected value
+      let aboveMaxSelect = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color');
+      switch (geonaLayer.scale.aboveMaxColor) {
+        case undefined: {
+          aboveMaxSelect.val('Default').prop('selected', true);
+          break;
+        }
+        case 'black': {
+          aboveMaxSelect.val('0x000000').prop('selected', true);
+          break;
+        }
+        case 'white': {
+          aboveMaxSelect.val('0xffffff').prop('selected', true);
+          break;
+        }
+        case 'transparent': {
+          aboveMaxSelect.val('transparent').prop('selected', true);
+          break;
+        }
+        default: {
+          aboveMaxSelect.val('Custom').prop('selected', true);
+          let aboveMaxHexBox = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text');
+          aboveMaxHexBox.val(geonaLayer.scale.aboveMaxColor);
+          this.showAboveMaxColorInput(item);
+        }
+      }
 
       // Hide all panels
       $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
       $(item).find('.js-geona-layers-list__item-body-info').addClass('removed');
       $(item).find('.js-geona-layers-list__item-body-analysis').addClass('removed');
-
-      // Make current style selected in settings
-      let currentStyle = this.geona.map.layerSourceGet(data.info.identifier, 'style');
-      $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val(currentStyle).prop('selected', true);
     }
   }
 
@@ -440,6 +495,7 @@ export class MainMenu {
    * @return {Object}            Object containing information used by the layer item template
    */
   _compileLayerData(geonaLayer) {
+    // todo typedef for LayerData
     // Compile data for the settings panel
     let layerSettings = {};
 
