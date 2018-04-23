@@ -398,8 +398,9 @@ export class MainMenu {
     if (modifier === 'basemap' || modifier === 'borders') {
       throw new Error('Cannot add a map layer item to the GUI for a basemap or borders layer! Use a layer with no modifier or a \'hasTime\' modifier instead.');
     } else {
+      let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
       // Get the data in the correct format from the geona layer
-      let data = this._compileLayerData(this.geona.map._availableLayers[layerIdentifier]);
+      let data = this._compileLayerData(geonaLayer);
       // Insert layer data object at the top of the list - higher on the list means higher on the map
       this.parentDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
       let item = this.parentDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
@@ -999,38 +1000,22 @@ export class MainMenu {
    * 
    */
   constructOptionsPanel() {
-    this.parentDiv.find('.js-geona-panel').prepend(templates.options_panel());
+    let data = this._compileOptionsData();
+    this.parentDiv.find('.js-geona-panel').prepend(templates.options_panel({data: data}));
 
-    // Populate the basemap select
-    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
-      let layer = this.geona.map._availableLayers[layerIdentifier];
-      if (layer.modifier === 'basemap') {
-        this.parentDiv.find('.js-geona-options-panel-content__basemaps').append(
-          '<option value="' + layerIdentifier + '">' + layerIdentifier + ' - ' + selectPropertyLanguage(layer.title) + '</option>'
-        );
-        // Sets the selected dropdown value to match the map's basemap
-        if (layerIdentifier === this.geona.map.config.basemap) {
-          this.parentDiv.find('.js-geona-options-panel-content__basemaps').val(layerIdentifier).prop('selected', true);
-        }
+    // Sets the selected dropdown value to match the map's basemap
+    for (let basemap of data.basemaps) {
+      if (basemap.identifier === this.geona.map.config.basemap) {
+        this.parentDiv.find('.js-geona-options-panel-content__basemaps').val(basemap.identifier).prop('selected', true);
       }
     }
 
-    // fixme use templates, don't append HTML strings
-    // Populate the borders select
-    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
-      let layer = this.geona.map._availableLayers[layerIdentifier];
-      if (layer.modifier === 'borders') {
-        for (let style of layer.styles) { // Each border option will be based on the style as well
-          this.parentDiv.find('.js-geona-options-panel-content__borders').append(
-            '<option value="' + layerIdentifier + '" data-style="' + style.identifier + '">' +
-            layerIdentifier + ' (' + style.identifier + ') - ' + selectPropertyLanguage(layer.title) +
-            '</option>'
-          );
-          // Sets the selected dropdown value to match the map's borders
-          let bordersConfig = this.geona.map.config.borders;
-          if (layerIdentifier === bordersConfig.identifier && style.identifier === bordersConfig.style) {
-            this.parentDiv.find('.js-geona-options-panel-content__borders').val(layerIdentifier).prop('selected', true);
-          }
+    // Sets the selected dropdown value to match the map's borders
+    let bordersConfig = this.geona.map.config.borders;
+    for (let border of data.borders) {
+      for (let style of border.styles) {
+        if (border.identifier === bordersConfig.identifier && style === bordersConfig.style) {
+          this.parentDiv.find('.js-geona-options-panel-content__borders').val(style).prop('selected', true);
         }
       }
     }
@@ -1043,6 +1028,52 @@ export class MainMenu {
     // Select the correct projection dropdown option
     let projection = this.geona.map.config.projection;
     this.selectProjection(projection);
+  }
+
+  /**
+   * Compiles the data needed for the options panel template and returns an Object containing it.
+   * @return {OptionsData} The basemap and borders information needed for the options panel template.
+   */
+  _compileOptionsData() {
+    // Holds information about each basemap layer
+    let basemaps = [];
+    // Holds information about each borders layer
+    let borders = [];
+
+    // Loop through the available layers on the map
+    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
+      let layer = this.geona.map._availableLayers[layerIdentifier];
+      // We only take data from basemap and borders layers
+      switch (layer.modifier) {
+        case 'basemap': {
+          let basemap = {
+            identifier: layerIdentifier,
+            title: selectPropertyLanguage(layer.title),
+          };
+          basemaps.push(basemap);
+          break;
+        }
+        case 'borders': {
+          let border = {
+            identifier: layerIdentifier,
+            title: selectPropertyLanguage(layer.title),
+            styles: [],
+          };
+          for (let style of layer.styles) {
+            border.styles.push(style.identifier);
+          }
+          borders.push(border);
+          break;
+        }
+      }
+    }
+
+    let data = {
+      basemaps: basemaps,
+      borders: borders,
+    };
+
+    return data;
   }
 
   /**
@@ -1192,3 +1223,25 @@ function forceCssReflow(element) {
   // A bit of a hack - there is no proper method to restart an animation before it's complete.
   void element.offsetWidth; // eslint-disable-line no-void
 }
+
+/* Type definitions for class */
+/**
+ * Contains information about basemap and borders layers in the current Geona instance. Used when creating the Options
+ * panel on the main menu.
+ * @typedef {Object} OptionsData
+ *   @property {OptionsDataBasemaps[]} basemaps Contains Objects with an identifier and a title.
+ *   @property {OptionsDataBorders[]}  borders  Contains Objects with an identifier, title and styles.
+ */
+/**
+ * Contains an identifier and a title for a basemap layer available in the current Geona instance.
+ * @typedef {Object} OptionsDataBasemaps
+ *   @property {String} identifier The identifier for the basemap layer.
+ *   @property {String} title      The correct-language title for the basemap layer.
+ */
+/**
+ * Contains an identifier and a title for a borders layer available in the current Geona instance.
+ * @typedef {Object} OptionsDataBorders
+ *   @property {String}   identifier The identifier for the borders layer.
+ *   @property {String}   title      The correct-language title for the borders layer.
+ *   @property {String[]} styles     The identifiers for the styles for the borders layer.
+ */

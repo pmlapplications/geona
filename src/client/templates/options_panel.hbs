@@ -3,11 +3,19 @@
   <label>Select basemap</label>
   <select class="js-geona-options-panel-content__basemaps">
     <option>None</option>
+    {{#each data.basemaps}}
+      <option value={{this.identifier}}>{{this.identifier}} - {{this.title}}</option>
+    {{/each}}
   </select>
   <br>
   <label>Select borders</label>
   <select class="js-geona-options-panel-content__borders">
     <option>None</option>
+    {{#each data.borders}}
+      {{#each this.styles}}
+        <option value={{this}}>{{../this.identifier}} ({{this}}) - {{../this.title}}</option>
+      {{/each}}
+    {{/each}}
   </select>
   <br>
   <label>Display graticule</label>
