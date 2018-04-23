@@ -622,10 +622,12 @@ export class MainMenu {
    * @param {HTMLElement} item The panel item which contains the boxes to change.
    * @param {Number}      min  The minimum value for the scalebar.
    * @param {Number}      max  The maximum value for the scalebar.
+   * @param {Boolean}     log  True if the scalebar is logarithmic.
    */
-  setScalebarInputs(item, min, max) {
+  setScalebarInputs(item, min, max, log) {
     $(item).find('.js-geona-layers-list__item-body-settings__scale-min').val(min);
     $(item).find('.js-geona-layers-list__item-body-settings__scale-max').val(max);
+    $(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', log);
     // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
   }
 
@@ -633,16 +635,18 @@ export class MainMenu {
    * Finds the min and max values and updates the scalebar and settings.
    * @param {HTMLElement} item The item for the layer being changed.
    */
-  applyAutoScale(item) {
+  applyAutoScale(item) { // todo autoscale box needs a way of being enabled again
     let layerIdentifier = item.dataset.identifier;
     let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
     this.layersPanelScalebars[layerIdentifier].getAutoScale()
       .then((minMaxObject) => {
+        $(item).find('.js-geona-layers-list__item-body-settings__scale-auto-scale').prop('disabled', true);
         let min = minMaxObject.min;
         let max = minMaxObject.max;
         let log = geonaLayer.scale.logarithmicDefault;
         this.layersPanelScalebars[layerIdentifier].validateScale(min, max, log);
-        this.addToChangesBuffer(layerIdentifier, this.setScalebarInputs, this, [item, min, max]); // fixme will glitch if the min and max value boxes are then changed?
+        // fixme will glitch if the min and max value boxes are then changed?
+        // fixme logarithmic box reports that negatives can't be used even if it's being unchecked
       })
       .catch((err) => {
         console.error('Unable to automatically find min and max values for layer ' + layerIdentifier + '. Returned error: ' + err);
@@ -1011,6 +1015,7 @@ export class MainMenu {
       }
     }
 
+    // fixme use templates, don't append HTML strings
     // Populate the borders select
     for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
       let layer = this.geona.map._availableLayers[layerIdentifier];

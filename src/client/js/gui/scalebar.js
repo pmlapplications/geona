@@ -308,6 +308,7 @@ export class Scalebar {
       // Update the min and max box values
       $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-min').val(newMin);
       $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-max').val(newMax);
+      $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', logarithmic);
 
       // Update the layer definition
       geonaLayer.scale.min = newMin;
@@ -326,7 +327,7 @@ export class Scalebar {
    * Constructs a new object containing layer params, and updates the map layer with the params, then calls for the
    * scalebar to be redrawn.
    */
-  updateScalebar() { // fixme if the autoscale chooses the default log, the logarithmic checkbox does not update
+  updateScalebar() {
     let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
     // todo these need to be set at the start as well (in OL and L map libraries)
     let params = {
