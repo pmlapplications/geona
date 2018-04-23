@@ -24,7 +24,7 @@
       "scale-minimum": "Min",
       "scale-maximum": "Max",
       "scale-logarithmic": "Logarithmic",
-      "scale-autoscale": "Auto scale",
+      "scale-auto-scale": "Auto scale",
       "scale-reset": "Reset",
       "opacity": "Layer Opacity",
       "style": "Layer Style",

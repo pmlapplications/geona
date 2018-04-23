@@ -263,7 +263,7 @@ function registerLayersTriggers(eventManager, parentDiv) {
   });
 
   // Apply layer autoscale
-  parentDiv.find('.js-geona-layers-list__item-body-settings__scale-autoscale').change((jQueryEvent) => {
+  parentDiv.find('.js-geona-layers-list__item-body-settings__scale-auto-scale').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li')[0];
     eventManager.trigger('mainMenu.applyAutoScale', item);
   });

@@ -24,7 +24,7 @@
       "scale-minimum": "minimum",
       "scale-maximum": "maximum",
       "scale-logarithmic": "logarithmique",
-      "scale-autoscale": "échelle automatique",
+      "scale-auto-scale": "échelle automatique",
       "scale-reset": "réinitialiser",
       "opacity": "Opacité de calque",
       "style": "Style de calque",
