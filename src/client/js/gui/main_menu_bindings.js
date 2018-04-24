@@ -90,6 +90,9 @@ export function registerBindings(eventManager, menu) {
     menu.reEnableAutoScale(item);
   });
   // Reset scale
+  eventManager.bind('mainMenu.layersPanelScalebars.resetScale', (layerIdentifier) => {
+    menu.layersPanelScalebars[layerIdentifier].resetScale();
+  });
 
   // Change layer opacity
   eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {

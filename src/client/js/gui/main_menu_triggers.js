@@ -271,6 +271,14 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.applyAutoScale', item);
   });
 
+  // Reset scale - also calls reEnableAutoScale
+  parentDiv.find('.js-geona-layers-list__item-body-settings__scale-reset').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let layerIdentifier = item.dataset.identifier;
+    eventManager.trigger('mainMenu.layersPanelScalebars.resetScale', layerIdentifier);
+    eventManager.trigger('mainMenu.reEnableAutoScale', item);
+  });
+
   // Change layer opacity
   parentDiv.find('.js-geona-layers-list__item-body-settings-opacity-range').on('input', (jQueryEvent) => {
     let value = $(jQueryEvent.target).val();
