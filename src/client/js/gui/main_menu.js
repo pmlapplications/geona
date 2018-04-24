@@ -19,7 +19,6 @@ import {Scalebar} from './scalebar';
 // TODO separate mainMenu into individual files for each panel
 // TODO layer panel items should be classes of their own
 // TODO consider refactoring validateScale() because it calls updateScale() by itself and I don't really like that
-// fixme call geonaDiv geonaDiv
 /**
  * Loads the templates and defines the functions relating to the main menu.
  */
@@ -794,7 +793,7 @@ export class MainMenu {
    * Executes all the buffered operations in the order they were added.
    * @param {String} layerIdentifier The layer whose operations we are going to execute.
    */
-  executeChangesBuffer(layerIdentifier) { // fixme if a valid operation is added, then an invalid operation is error thrown in validatescale(), this will still execute, but the GUI will be out of sync
+  executeChangesBuffer(layerIdentifier) {
     let layerBuffer = this.changesBuffer[layerIdentifier];
 
     // The buffer may not have been made for this layer yet

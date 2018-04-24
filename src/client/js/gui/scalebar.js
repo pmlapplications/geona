@@ -286,13 +286,19 @@ export class Scalebar {
 
     // If min or max is invalid throw an error
     if (!newMin && newMin !== 0) {
-      throw new Error('Min value ' + newMin + ' is not a valid number.');
+      let minValError = new Error('Min value ' + newMin + ' is not a valid number.');
+      minValError.name = 'MinValueInvalidError';
+      throw minValError;
     }
     if (!newMax && newMax !== 0) {
-      throw new Error('Max value ' + newMax + ' is not a valid number.');
+      let maxValError = new Error('Max value ' + newMax + ' is not a valid number.');
+      maxValError.name = 'MaxValueInvalidError';
+      throw maxValError;
     }
     if (newMin > newMax) {
-      throw new Error('Min parameter value must be smaller than max parameter value.');
+      let swappedValError = new Error('Min parameter value must be smaller than max parameter value.');
+      swappedValError.name = 'SwappedValuesError';
+      throw swappedValError;
     }
 
     // If the scale has actually changed then we will update the scalebar

@@ -78,8 +78,25 @@ export function registerBindings(eventManager, menu) {
     menu.removeLayer(item[0]);
   });
   // Validate (calls update and draw) scale
-  eventManager.bind('mainMenu.layersPanelScalebars.validateScale', ([layerIdentifier, min, max, log, instant]) => {
-    menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
+  eventManager.bind('mainMenu.layersPanelScalebars.validateScale', ([item, layerIdentifier, min, max, log, instant]) => {
+    try {
+      menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
+    } catch (err) {
+      let geonaLayer = menu.geona.map._availableLayers[layerIdentifier];
+      switch (err.name) {
+        case 'MinValueInvalidError':
+          menu.setScalebarInputs(item, geonaLayer.scale.min, max, log);
+          break;
+        case 'MaxValueInvalidError':
+          menu.setScalebarInputs(item, min, geonaLayer.scale.max, log);
+          break;
+        case 'SwappedValuesError':
+          menu.setScalebarInputs(item, geonaLayer.scale.min, geonaLayer.scale.max, log);
+          break;
+        default:
+          throw err;
+      }
+    }
   });
   // Apply auto scale
   eventManager.bind('mainMenu.applyAutoScale', (item) => {
