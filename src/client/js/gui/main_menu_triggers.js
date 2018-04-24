@@ -232,7 +232,7 @@ function registerLayersTriggers(eventManager, parentDiv) {
     eventManager.trigger('mainMenu.removeLayer', [item[0]]);
   });
 
-  // Change layer min value
+  // Change layer min value - also calls reEnableAutoScale
   parentDiv.find('.js-geona-layers-list__item-body-settings__scale-min').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li');
     let layerIdentifier = item[0].dataset.identifier;
@@ -240,9 +240,10 @@ function registerLayersTriggers(eventManager, parentDiv) {
     let max = item.find('.js-geona-layers-list__item-body-settings__scale-max').val();
     let log = item.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked');
     eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable
+    eventManager.trigger('mainMenu.reEnableAutoScale', item);
   });
 
-  // Change layer max value
+  // Change layer max value - also calls reEnableAutoScale
   parentDiv.find('.js-geona-layers-list__item-body-settings__scale-max').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li');
     let layerIdentifier = item[0].dataset.identifier;
@@ -250,9 +251,10 @@ function registerLayersTriggers(eventManager, parentDiv) {
     let max = jQueryEvent.target.value;
     let log = item.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked');
     eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable
+    eventManager.trigger('mainMenu.reEnableAutoScale', item);
   });
 
-  // Toggle layer logarithmic
+  // Toggle layer logarithmic - also calls reEnableAutoScale
   parentDiv.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li');
     let layerIdentifier = item[0].dataset.identifier;
@@ -260,6 +262,7 @@ function registerLayersTriggers(eventManager, parentDiv) {
     let max = item.find('.js-geona-layers-list__item-body-settings__scale-max').val();
     let log = $(jQueryEvent.target).prop('checked');
     eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable
+    eventManager.trigger('mainMenu.reEnableAutoScale', item); // fixme can attempt to check, which removes auto scale, but it rejects logarithmic, so it's still autoscale
   });
 
   // Apply layer autoscale

@@ -18,6 +18,8 @@ import {Scalebar} from './scalebar';
 
 // TODO separate mainMenu into individual files for each panel
 // TODO layer panel items should be classes of their own
+// TODO consider refactoring validateScale() because it calls updateScale() by itself and I don't really like that
+// fixme call parentDiv geonaDiv
 /**
  * Loads the templates and defines the functions relating to the main menu.
  */
@@ -692,23 +694,34 @@ export class MainMenu {
    * Finds the min and max values and updates the scalebar and settings.
    * @param {HTMLElement} item The item for the layer being changed.
    */
-  applyAutoScale(item) { // todo autoscale box needs a way of being enabled again
+  applyAutoScale(item) {
     let layerIdentifier = item.dataset.identifier;
     let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+
     this.layersPanelScalebars[layerIdentifier].getAutoScale()
       .then((minMaxObject) => {
+        // We disable the autoscale box to show that the auto scale is active
         $(item).find('.js-geona-layers-list__item-body-settings__scale-auto-scale').prop('disabled', true);
         let min = minMaxObject.min;
         let max = minMaxObject.max;
         let log = geonaLayer.scale.logarithmicDefault;
         this.layersPanelScalebars[layerIdentifier].validateScale(min, max, log);
-        // fixme will glitch if the min and max value boxes are then changed?
         // fixme logarithmic box reports that negatives can't be used even if it's being unchecked
       })
       .catch((err) => {
         console.error('Unable to automatically find min and max values for layer ' + layerIdentifier + '. Returned error: ' + err);
         alert('Unable to automatically find min and max values for layer ' + layerIdentifier + '. Returned error: ' + err);
       });
+  }
+
+  /**
+   * Unchecks and re-enables the auto scale checkbox for the specified item.
+   * @param {HTMLElement} item The item for the layer being changed.
+   */
+  reEnableAutoScale(item) {
+    $(item).find('.js-geona-layers-list__item-body-settings__scale-auto-scale').prop('checked', false);
+    $(item).find('.js-geona-layers-list__item-body-settings__scale-auto-scale').prop('disabled', false);
+    // TODO Collaboration - add eventManager call for collaboration (will use class variable to remove eslint complaint)
   }
 
   /**

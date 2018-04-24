@@ -3189,7 +3189,7 @@ describe('client/js/map_leaflet', function() {
   });
 
 
-  describe('getLayerServer()', function() { // FIXME how best to do this? Config would have like my address in it :S
+  describe('getLayerServer()', function() {
     let wmsLayerServerInfo;
     before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this

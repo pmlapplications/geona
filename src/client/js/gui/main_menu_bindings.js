@@ -81,9 +81,13 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.layersPanelScalebars.validateScale', ([layerIdentifier, min, max, log, instant]) => {
     menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
   });
-  // Apply autoscale
+  // Apply auto scale
   eventManager.bind('mainMenu.applyAutoScale', (item) => {
     menu.applyAutoScale(item);
+  });
+  // Re-enable auto scale
+  eventManager.bind('mainMenu.reEnableAutoScale', (item) => {
+    menu.reEnableAutoScale(item);
   });
   // Reset scale
 
@@ -123,6 +127,7 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.setNumberOfColorBands', ([item, numColorBands]) => {
     menu.setNumberOfColorBands(item, numColorBands);
   });
+  // Zoom to data
 
   // Execute changes buffer
   eventManager.bind('mainMenu.executeChangesBuffer', (layerIdentifier) => {
