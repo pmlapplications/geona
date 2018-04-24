@@ -705,7 +705,6 @@ export class MainMenu {
         let max = minMaxObject.max;
         let log = geonaLayer.scale.logarithmicDefault;
         this.layersPanelScalebars[layerIdentifier].validateScale(min, max, log);
-        // fixme logarithmic box reports that negatives can't be used even if it's being unchecked
       })
       .catch((err) => {
         console.error('Unable to automatically find min and max values for layer ' + layerIdentifier + '. Returned error: ' + err);

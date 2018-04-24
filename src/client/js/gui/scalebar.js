@@ -305,16 +305,14 @@ export class Scalebar {
     if (newMin !== geonaLayer.scale.min || newMax !== geonaLayer.scale.max || isLogarithmic !== geonaLayer.scale.logarithmic) {
       // We'll prevent the user from using a log scale if invalid, but we'll allow the rest of the updates to go ahead
       if (isLogarithmic && newMin <= 0) {
-        let logarithmicCheckbox = $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-logarithmic')[0];
-        logarithmicCheckbox.checked = false;
         isLogarithmic = false;
-        alert('Cannot use a logarithmic scale with negative or zero values.');
+        console.error('Cannot use a logarithmic scale with negative or zero values.');
       }
 
       // Update the min and max box values
       $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-min').val(newMin);
       $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-max').val(newMax);
-      $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', logarithmic);
+      $(this.layersPanelItem).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', isLogarithmic);
 
       // Update the layer definition
       geonaLayer.scale.min = newMin;
