@@ -32,7 +32,7 @@ export class Gui {
    */
   constructor(geona) {
     this.geona = geona;
-    this.parentDiv = this.geona.parentDiv;
+    this.geonaDiv = this.geona.geonaDiv;
   }
 
   /**
@@ -50,21 +50,21 @@ export class Gui {
   }
 
   /**
-   * Loads the terms and conditions template, and not the map, into the parent div.
+   * Loads the terms and conditions template, and not the map, into the Geona div.
    */
   loadTermsAndConditionsScreen() {
     this.termsAndConditions = new TermsAndConditions(this, this.geona.config.get('intro.termsAndConditions'));
   }
 
   /**
-   * Loads the required GUI elements for the map into the parent div.
+   * Loads the required GUI elements for the map into the Geona div.
    */
   loadMainScreen() {
     // Load the main template
-    this.parentDiv.html(templates.geona());
+    this.geonaDiv.html(templates.geona());
 
     // Get the HTMLElement div to put the map in
-    let mapDiv = this.parentDiv.find('.geona-map')[0];
+    let mapDiv = this.geonaDiv.find('.geona-map')[0];
 
     // Load the map
     let mapPromise = this.geona.loadMap(mapDiv);

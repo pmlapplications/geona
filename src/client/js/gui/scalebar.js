@@ -14,7 +14,7 @@ export class Scalebar {
    */
   constructor(mainMenu, scalebarConfigOptions) {
     this.geona = mainMenu.geona;
-    this.parentDiv = mainMenu.parentDiv;
+    this.geonaDiv = mainMenu.geonaDiv;
     this.mainMenu = mainMenu;
 
     /** @type {HTMLElement} @desc The item this scalebar belongs to. */

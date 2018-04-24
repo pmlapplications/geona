@@ -27,11 +27,11 @@ export class Geona {
     this.config = new Config(clientConfig);
     this.layerNames = [];
 
-    // Get the parent div and add the 'geona-container' class to it
-    this.parentDiv = $(this.config.get('divId'));
-    this.parentDiv.toggleClass('geona-container', true);
+    // Get the Geona div and add the 'geona-container' class to it
+    this.geonaDiv = $(this.config.get('divId'));
+    this.geonaDiv.toggleClass('geona-container', true);
     // Adding a tabindex makes the div selectable as an activeElement - required for instance-specific keyboard commands
-    this.parentDiv.attr('tabindex', 0);
+    this.geonaDiv.attr('tabindex', 0);
 
     this.eventManager = new EventManager();
     this.gui = new Gui(this);

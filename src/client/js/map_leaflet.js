@@ -28,7 +28,7 @@ export class LMap extends GeonaMap {
     this.config = config;
     this.geona = geona;
     this.eventManager = geona.eventManager;
-    this.parentDiv = geona.parentDiv;
+    this.geonaDiv = geona.geonaDiv;
     /**  @type {Object} The available map layers */
     this._availableLayers = {};// todo this shouldn't be private
     this._availableLayerServers = {}; // todo this shouldn't be private
@@ -1079,8 +1079,8 @@ export class LMap extends GeonaMap {
    * Adjusts the height of the attribution bar so that it rests on top of the Timeline.
    */
   adjustAttributionHeight() { // todo this glitches offset up and down sometimes, but I don't know why
-    let attributionBar = this.parentDiv.find('.leaflet-control-attribution');
-    let timePanelHeight = this.parentDiv.find('.js-geona-time-panel').height();
+    let attributionBar = this.geonaDiv.find('.leaflet-control-attribution');
+    let timePanelHeight = this.geonaDiv.find('.js-geona-time-panel').height();
     // Change the height of the attribution bar
     attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }

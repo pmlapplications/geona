@@ -15,10 +15,10 @@ export class TermsAndConditions {
     this.gui = gui;
     this.geona = gui.geona;
 
-    this.gui.parentDiv.html(templates.terms_and_conditions());
-    this.gui.parentDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + config.backgroundImage + ')');
+    this.gui.geonaDiv.html(templates.terms_and_conditions());
+    this.gui.geonaDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(this.geona.eventManager, this.gui.parentDiv);
+    registerTriggers(this.geona.eventManager, this.gui.geonaDiv);
     registerBindings(this.geona.eventManager, this);
   }
 

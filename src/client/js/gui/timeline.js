@@ -46,7 +46,7 @@ export class Timeline {
   constructor(timePanel, settings) {
     window.d3 = d3;
     this.timePanel = timePanel;
-    this.parentDiv = timePanel.parentDiv;
+    this.geonaDiv = timePanel.geonaDiv;
     this.geona = timePanel.geona;
     this.eventManager = timePanel.geona.eventManager;
 
@@ -358,7 +358,7 @@ export class Timeline {
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
     // After changing the height we fire an event to indicate this fact
-    this.eventManager.trigger('timePanel.heightChanged', this.parentDiv);
+    this.eventManager.trigger('timePanel.heightChanged', this.geonaDiv);
 
     this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
@@ -529,7 +529,7 @@ export class Timeline {
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
     // After changing the height we fire an event to indicate this fact
-    this.eventManager.trigger('timePanel.heightChanged', this.parentDiv);
+    this.eventManager.trigger('timePanel.heightChanged', this.geonaDiv);
 
     this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
@@ -611,7 +611,7 @@ export class Timeline {
    * Updates the dataWidth and fullWidth variables to keep the correct proportions for the window size.
    */
   _calculateWidths() {
-    this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
+    this.fullWidth = this.geonaDiv.find('.js-geona-time-panel-container').width() -
       this.options.timelineMargins.left - this.options.timelineMargins.right;
 
     this.dataWidth = this.fullWidth - this.Y_AXIS_LABEL_WIDTH;
@@ -1271,7 +1271,7 @@ function getDateFormat(date) {
 function checkBrowser() {
   /* eslint-disable */ // eslint is disabled for this function, as polyfills can be quite old
 
-  // IE11 - required for tippy to work on the SVG text used for the titles
+  // IE11 - required for Tippy to work on the SVG text used for the titles
   if (SVGElement.prototype.contains === undefined) {
     SVGElement.prototype.contains = function contains(node) {
       if (!(0 in arguments)) {

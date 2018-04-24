@@ -24,7 +24,7 @@ export class TimePanel {
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
     /** @type {JQuery} @desc The jQuery selection for the div which contains this instance of Geona */
-    this.parentDiv = gui.parentDiv;
+    this.geonaDiv = gui.geonaDiv;
 
     /** @type {Number} @desc The number of datetimes to traverse when calling step methods with a 'short' value */
     this.SHORT_INTERVALS = 1;
@@ -46,24 +46,24 @@ export class TimePanel {
     this.datetimeNextShort = undefined;
 
     /** @type {Number} @desc The width of the TimePanel container in px */
-    this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width();
+    this.fullWidth = this.geonaDiv.find('.js-geona-time-panel-container').width();
 
     /** @type {String} @desc The identifier for the currently selected layer on the timeline */
     this.activeLayer = undefined; // Currently there are no GUI controls for this, but the appropriate functions should be ready for use from the console
 
-    this.parentDiv.append(templates.time_panel());
+    this.geonaDiv.append(templates.time_panel());
     if (!this.config.opened) {
-      this.parentDiv.find('.js-geona-time-panel').addClass('removed');
+      this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
     }
     if (!this.config.collapsible) {
-      this.parentDiv.find('.js-geona-time-panel-toggle').remove();
+      this.geonaDiv.find('.js-geona-time-panel-toggle').remove();
     }
 
     // Pikaday widget - instantiated blank
     // TODO i18n for the pikaday
     this.pikaday = new Pikaday( // TODO try jquery version of pikaday
       {
-        field: this.parentDiv.find('.js-geona-time-panel-options-current-date')[0],
+        field: this.geonaDiv.find('.js-geona-time-panel-options-current-date')[0],
         format: 'YYYY-MM-DD HH:mm',
         use24hour: true,
         onSelect: (date) => {
@@ -77,7 +77,7 @@ export class TimePanel {
       this.drawTimeline();
     }
 
-    registerTriggers(this.geona.eventManager, this.parentDiv, this);
+    registerTriggers(this.geona.eventManager, this.geonaDiv, this);
     registerBindings(this.geona.eventManager, this);
   }
 
@@ -88,8 +88,8 @@ export class TimePanel {
   drawTimeline() {
     if (this.timeline === undefined) {
     // Assign ID to this instance's timeline container
-      let instanceId = this.parentDiv.attr('id');
-      this.parentDiv.find('.js-geona-time-panel-timeline').attr('id', instanceId + '-timeline-container');
+      let instanceId = this.geonaDiv.attr('id');
+      this.geonaDiv.find('.js-geona-time-panel-timeline').attr('id', instanceId + '-timeline-container');
 
       this.timeline = new Timeline(this, {
         elementId: instanceId + '-timeline-container',
@@ -110,14 +110,14 @@ export class TimePanel {
    * Removes the timeline from view, but not from the DOM.
    */
   hideTimePanel() {
-    this.parentDiv.find('.js-geona-time-panel').addClass('removed');
+    this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
   }
 
   /**
    * Shows the timeline on the GUI.
    */
   showTimePanel() {
-    this.parentDiv.find('.js-geona-time-panel').removeClass('removed');
+    this.geonaDiv.find('.js-geona-time-panel').removeClass('removed');
   }
 
   /**
@@ -150,7 +150,7 @@ export class TimePanel {
    * @param {String|Date} date The date to set the map to.
    */
   pikadayChangeTime(date) {
-    this.parentDiv.find('.js-geona-time-panel-options-current-date')
+    this.geonaDiv.find('.js-geona-time-panel-options-current-date')
       .val(date);
 
     // Update map layers
@@ -181,7 +181,7 @@ export class TimePanel {
   timelineChangeTime(time) {
     this.pikadayUpdateGraphic(time);
     // update buttons
-    this.parentDiv.find('.js-geona-time-panel-options-current-date').val(time);
+    this.geonaDiv.find('.js-geona-time-panel-options-current-date').val(time);
     this.mapChangeTime(time);
   }
 
@@ -276,7 +276,7 @@ export class TimePanel {
       tooltipContent = 'No data';
     }
 
-    this.parentDiv.find('.js-geona-time-panel-options-prev-next__' + step)
+    this.geonaDiv.find('.js-geona-time-panel-options-prev-next__' + step)
       .attr('title', tooltipContent);
 
     // FIXME these tooltips don't update properly (so when they display a new tooltip it still has the old stuff too)
@@ -304,7 +304,7 @@ export class TimePanel {
       // update pikaday
       this.pikadayUpdateGraphic(data.date);
       // update current date box
-      this.parentDiv.find('.js-geona-time-panel-options-current-date').val(data.date);
+      this.geonaDiv.find('.js-geona-time-panel-options-current-date').val(data.date);
       this.mapChangeTime(data.date);
 
       // Time has changed so no longer valid
