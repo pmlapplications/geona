@@ -34,7 +34,6 @@ module.exports = function(grunt) {
     'i18next-browser-languagedetector',
     'i18next-xhr-backend',
     'jquery',
-    'jquery-ui/ui/widgets/sortable',
     'lodash',
   ];
 
