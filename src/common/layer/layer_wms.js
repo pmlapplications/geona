@@ -3,7 +3,7 @@
 import LayerVisible from './layer_visible';
 
 /**
- * Class or a WMS layer.
+ * Class for a WMS layer.
  */
 export default class LayerWms extends LayerVisible {
   /**
@@ -14,8 +14,8 @@ export default class LayerWms extends LayerVisible {
    */
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
-    this.PROTOCOL = 'wms';
-    this.name = layerConfig.name;
+    this.protocol = 'wms';
+    this.identifier = layerConfig.identifier;
     this.styles = {};
   }
 }

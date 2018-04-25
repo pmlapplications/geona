@@ -41,6 +41,11 @@
   text-align: center;
   cursor: pointer;
   font-size: .875rem;
+
+  &:disabled {
+    background-color: #AAA;
+    cursor: wait;
+  }
 }
 
 /*------------------------------------*\
@@ -155,60 +160,73 @@
 .geona-layers-list__item{
   border: 1px solid #000;
   margin: 1px;
+  font-size: 11px;
+}
+
+.geona-layers-list__item-header-icon{
+  display: inline-block;
+  font-size: 20px;
+  cursor: pointer;
+  // TODO not working
+  .geona-layers-list__item-remove{
+    float: right;
+  }
+}
+// TODO not working
+.geona-layers-list__item-row{
+  border-bottom: 1px solid #000000;
+}
+// TODO not working
+.geona-layers-list__item-data{
+  overflow-wrap: break-word;
+  table-layout: fixed;
 }
 
 /*------------------------------------*\
-    Timeline
+    Time Panel
 \*------------------------------------*/
 
-.geona-timeline-container{
+.geona-time-panel-container{
   bottom: 0;
   position: absolute;
+  width: 100%;
 }
 
-.geona-timeline-toggle{
+.geona-time-panel-toggle{
   width: 20px;
   height: auto;
   background-color: #fff;
   text-align: center;
 }
 
-.geona-timeline{
+.geona-time-panel{
   width: 100%;
   height: auto;
   background-color: #fff;
+  padding: 5px;
 }
 
-.geona-timeline-heading{
+.geona-time-panel__heading{
   font-size: 15px;
 }
 
-.geona-timeline-description{
+.geona-time-panel__description{
   font-size: 13px;
 }
 
-.geona-timeline-inner__labels{
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: inline-block;
-  width: 150px;
-}
-
-.geona-timeline-inner__timebar{
-  display: inline-block;
-  width: calc(100% - 340px);
-  height: auto;
-}
-
-.geona-timeline-inner__options{
-  display: inline-block;
+.geona-time-panel-options{
   width: 180px;
   top: -19px;
   right: -5px;
+  display: inline-block;
 }
 
-.geona-timeline-control{
+.geona-time-panel-timeline {
+  width: auto;
+  display: inline-block;
+}
+
+.geona-time-panel-options-prev-next span{
   background-color: #b1a7bc;
   color: #fff;
   cursor: pointer;
@@ -218,10 +236,53 @@
   display: inline-block;
 }
 
-.geona-timeline-current-date{
+.geona-time-panel-options-current-date{
   padding-left: 10px;
   width: 100%;
   height: 35px;
+}
+
+/*------------------------------------*\
+    Timeline
+\*------------------------------------*/
+
+// .geona-timeline-y-axis-background {
+//   -webkit-filter: drop-shadow(5px 0px 5px rgba(0,0,0,0.7));
+//   filter: drop-shadow(5px 0px 5px rgba(0,0,0,0.7));
+// }
+
+.geona-timeline-selector-tool {
+  fill: $button-background;
+  cursor: e-resize;
+}
+
+.geona-timeline-today-line {
+  stroke: #add8e6;
+  stroke-width: 2;
+  stroke-dasharray: 2, 2;
+}
+
+.geona-timeline-layer {
+  fill: $timeline-layer;
+}
+
+.geona-timeline-layer-bar {
+  shape-rendering: crispEdges;
+}
+
+.geona-timeline-layer-time-marker {
+  stroke: $timeline-time-marker;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.geona-timeline-y-axis-background {
+  fill: #ffffff;
+}
+
+.geona-timeline-x-axis .tick:hover text {
+    fill: #999;
+    cursor: pointer; // glitchy
 }
 
 /*------------------------------------*\
@@ -242,6 +303,6 @@
   display: hidden !important;
 }
 
-.hidden{
+.removed{
   display: none !important;
 }

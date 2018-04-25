@@ -19,10 +19,16 @@
   @import 'vendor/_openlayers.scss';
   @import 'vendor/_streamline-filled-in.scss';
   @import 'vendor/_streamline.scss';
+  @import 'vendor/_vis.scss';
+  @import 'vendor/_dragula.scss';
 }
+
+// Pikaday
+@import 'vendor/_pikaday.scss';
 
 // Vendor extensions
 .geona-container {
   @import 'vendor_extensions/_leaflet.scss';
   @import 'vendor_extensions/_openlayers.scss';
+  @import 'vendor_extensions/_tippy.scss';
 }

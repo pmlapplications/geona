@@ -3,6 +3,7 @@
 /* eslint camelcase: 0 */
 
 import {getCapabilities, jsonifyCapabilities} from './common';
+import proj4 from 'proj4';
 
 /**
  * Parse a WMTS capabilities from a url.
@@ -52,6 +53,7 @@ export function parseLocalWmtsCapabilities(xml, url) {
  * @return {Object}             Geona server config options.
  */
 function parse1_0(url, capabilities) {
+  // TODO comment this whole method for readability
   let serviceId = capabilities.serviceIdentification;
   let servicePr = capabilities.serviceProvider;
 
@@ -78,68 +80,73 @@ function parse1_0(url, capabilities) {
   if (serviceId.accessConstraints) {
     serverConfig.service.accessConstraints = serviceId.accessConstraints;
   }
-  if (servicePr.providerSite.href) {
-    serverConfig.service.onlineResource = servicePr.providerSite.href;
-  }
+  if (servicePr) {
+    if (servicePr.providerSite) {
+      if (servicePr.providerSite.href) {
+        serverConfig.service.onlineResource = servicePr.providerSite.href;
+      }
+    }
 
-  if (servicePr.serviceContact) {
-    serverConfig.service.contactInformation = {};
-    if (servicePr.serviceContact.individualName) {
-      serverConfig.service.contactInformation.person = servicePr.serviceContact.individualName;
-    }
-    if (servicePr.serviceContact.positionName) {
-      serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
-    }
-    if (servicePr.serviceContact.contactInfo) {
-      if (servicePr.serviceContact.contactInfo.address) {
-        let provAddress = servicePr.serviceContact.contactInfo.address;
-        // If email isn't the only property in address
-        if (!(Object.keys(provAddress).length === 2 && provAddress.electronicMailAddress)) {
-          serverConfig.service.contactInformation.address = {};
-          if (provAddress.deliveryPoint) {
-            if (provAddress.deliveryPoint[0] !== '') {
-              serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
+    if (servicePr.serviceContact) {
+      serverConfig.service.contactInformation = {};
+      if (servicePr.serviceContact.individualName) {
+        serverConfig.service.contactInformation.person = servicePr.serviceContact.individualName;
+      }
+      if (servicePr.serviceContact.positionName) {
+        serverConfig.service.contactInformation.position = servicePr.serviceContact.positionName;
+      }
+      if (servicePr.serviceContact.contactInfo) {
+        if (servicePr.serviceContact.contactInfo.address) {
+          let provAddress = servicePr.serviceContact.contactInfo.address;
+          // If email isn't the only property in address
+          if (!(Object.keys(provAddress).length === 2 && provAddress.electronicMailAddress)) {
+            serverConfig.service.contactInformation.address = {};
+            if (provAddress.deliveryPoint) {
+              if (provAddress.deliveryPoint[0] !== '') {
+                serverConfig.service.contactInformation.address.addressLines = provAddress.deliveryPoint;
+              }
+            }
+            if (provAddress.city) {
+              serverConfig.service.contactInformation.address.city = provAddress.city;
+            }
+            if (provAddress.administrativeArea) {
+              serverConfig.service.contactInformation.address.stateOrProvince = provAddress.administrativeArea;
+            }
+            if (provAddress.postalCode) {
+              serverConfig.service.contactInformation.address.postCode = provAddress.postalCode;
+            }
+            if (provAddress.country) {
+              serverConfig.service.contactInformation.address.country = provAddress.country;
+            }
+            // Due to the way unmarshalling works, some undefined values do not return as falsy.
+            if (Object.keys(serverConfig.service.contactInformation.address).length === 0) {
+              serverConfig.service.contactInformation.address = undefined;
             }
           }
-          if (provAddress.city) {
-            serverConfig.service.contactInformation.address.city = provAddress.city;
-          }
-          if (provAddress.administrativeArea) {
-            serverConfig.service.contactInformation.address.stateOrProvince = provAddress.administrativeArea;
-          }
-          if (provAddress.postalCode) {
-            serverConfig.service.contactInformation.address.postCode = provAddress.postalCode;
-          }
-          if (provAddress.country) {
-            serverConfig.service.contactInformation.address.country = provAddress.country;
-          }
-          // Due to the way unmarshalling works, some undefined values do not return as falsy. 
-          if (Object.keys(serverConfig.service.contactInformation.address).length === 0) {
-            serverConfig.service.contactInformation.address = undefined;
-          }
-        }
 
 
-        if (provAddress.electronicMailAddress) {
-          if (provAddress.electronicMailAddress[0] !== '') {
-            serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
+          if (provAddress.electronicMailAddress) {
+            if (provAddress.electronicMailAddress[0] !== '') {
+              serverConfig.service.contactInformation.email = provAddress.electronicMailAddress;
+            }
           }
         }
-      }
-      if (servicePr.serviceContact.contactInfo.phone) {
-        if (servicePr.serviceContact.contactInfo.phone.voice) {
-          if (servicePr.serviceContact.contactInfo.phone.voice[0]) {
-            serverConfig.service.contactInformation.phone = servicePr.serviceContact.contactInfo.phone.voice;
+        if (servicePr.serviceContact.contactInfo.phone) {
+          if (servicePr.serviceContact.contactInfo.phone.voice) {
+            if (servicePr.serviceContact.contactInfo.phone.voice[0]) {
+              serverConfig.service.contactInformation.phone = servicePr.serviceContact.contactInfo.phone.voice;
+            }
           }
         }
       }
     }
-  }
-  // If we have reached this point and the contact information in our serverConfig is
-  // only {address: undefined}, we remove contact information.
-  if (Object.keys(serverConfig.service.contactInformation).length === 1
-        && serverConfig.service.contactInformation.address === undefined) {
-    serverConfig.service.contactInformation = undefined;
+
+    // If we have reached this point and the contact information in our serverConfig is
+    // only {address: undefined}, we remove contact information.
+    if (Object.keys(serverConfig.service.contactInformation).length === 1
+      && serverConfig.service.contactInformation.address === undefined) {
+      serverConfig.service.contactInformation = undefined;
+    }
   }
 
   if (serviceId.fees) {
@@ -157,12 +164,32 @@ function parse1_0(url, capabilities) {
           if (serverConfig.operationsMetadata[operation.name].get === undefined) {
             serverConfig.operationsMetadata[operation.name].get = [];
           }
-          serverConfig.operationsMetadata[operation.name].get.push(getOrPost.value.href);
+          let requestMethod = {};
+          requestMethod.url = getOrPost.value.href;
+          requestMethod.encoding = [];
+          for (let constraint of getOrPost.value.constraint) {
+            if (constraint.name === 'GetEncoding') {
+              for (let value of constraint.allowedValues.valueOrRange) {
+                requestMethod.encoding.push(value.value);
+              }
+            }
+          }
+          serverConfig.operationsMetadata[operation.name].get.push(requestMethod);
         } else {
           if (serverConfig.operationsMetadata[operation.name].post === undefined) {
             serverConfig.operationsMetadata[operation.name].post = [];
           }
-          serverConfig.operationsMetadata[operation.name].post.push(getOrPost.value.href);
+          let requestMethod = {};
+          requestMethod.url = getOrPost.value.href;
+          requestMethod.encoding = [];
+          for (let constraint of getOrPost.value.constraint) {
+            if (constraint.name === 'PostEncoding') {
+              for (let value of constraint.allowedValues.valueOrRange) {
+                requestMethod.encoding.push(value.value);
+              }
+            }
+          }
+          serverConfig.operationsMetadata[operation.name].post.push(requestMethod);
         }
       }
     }
@@ -190,93 +217,94 @@ function parse1_0(url, capabilities) {
         layerData.boundingBox = {};
         for (let box of dataset.value.boundingBox) {
           if (box.name && box.value) {
-            if (box.name.localPart === 'WGS84BoundingBox') {
-              layerData.boundingBox = {
-                minLat: box.value.lowerCorner[1],
-                minLon: box.value.lowerCorner[0],
-                maxLat: box.value.upperCorner[1],
-                maxLon: box.value.upperCorner[0],
-              };
-              layerData.boundingBox.OGC84dimensions = box.value.dimensions;
-            }
+            layerData.boundingBox = populateBoundingBox(box);
           }
         }
       }
-      // Style is a mandatory property
-      layerData.styles = {};
-      for (let style of dataset.value.style) {
-        layerData.styles[style.identifier.value] = {};
+    }
+    // Style is a mandatory property
+    layerData.styles = [];
+    for (let style of dataset.value.style) {
+      let styleObject = {};
+      styleObject.identifier = style.identifier.value;
 
-        if (style.title) {
-          layerData.styles[style.identifier.value].title = parseTitles(style.title);
-        }
-
-        if (style._abstract) {
-          layerData.styles[style.identifier.value].abstract = parseAbstracts(style._abstract);
-        }
-
-        if (style.keywords) {
-          layerData.styles[style.identifier.value].keywords = parseKeywords(style.keywords);
-        }
-
-        if (style.legendURL !== undefined) {
-          layerData.styles[style.identifier.value].legendURL = style.legendURL;
-        }
-
-        if (style.isDefault !== undefined) {
-          layerData.styles[style.identifier.value].isDefault = style.isDefault;
-        }
+      if (style.title) {
+        styleObject.title = parseTitles(style.title);
       }
 
-      // Format is a mandatory property
-      layerData.formats = dataset.value.format;
-
-
-      if (dataset.value.infoFormat) {
-        layerData.infoFormat = dataset.value.infoFormat;
+      if (style._abstract) {
+        styleObject.abstract = parseAbstracts(style._abstract);
       }
 
-      if (dataset.value.dimension) {
-        layerData.dimension = parseDimensions(dataset.value.dimension);
+      if (style.keywords) {
+        styleObject.keywords = parseKeywords(style.keywords);
       }
 
-      if (dataset.value.metadata) {
-        // Real metadata examples did not match the schema, so we take everything and remove TYPE_NAME afterwards
-        layerData.metadata = dataset.value.metadata;
-        for (let data of layerData.metadata) {
-          data.TYPE_NAME = undefined;
+      if (style.legendURL !== undefined) {
+        styleObject.legendURL = style.legendURL;
+      }
+
+      if (style.isDefault !== undefined) {
+        styleObject.isDefault = style.isDefault;
+      }
+
+      layerData.styles.push(styleObject);
+    }
+
+    // Format is a mandatory property
+    layerData.formats = dataset.value.format;
+
+
+    if (dataset.value.infoFormat) {
+      layerData.infoFormat = dataset.value.infoFormat;
+    }
+
+    if (dataset.value.dimension) {
+      layerData.dimensions = parseDimensions(dataset.value.dimension);
+    }
+
+    if (dataset.value.metadata) {
+      // Real metadata examples did not match the schema, so we take everything and remove TYPE_NAME afterwards
+      layerData.metadata = dataset.value.metadata;
+      for (let data of layerData.metadata) {
+        data.TYPE_NAME = undefined;
+      }
+    }
+
+    // TileMatrixSetLink is a mandatory property
+    layerData.tileMatrixSetLinks = [];
+    for (let matrixData of dataset.value.tileMatrixSetLink) {
+      let setLinksObject = {};
+      setLinksObject.tileMatrixSet = matrixData.tileMatrixSet;
+
+      let tileMatrixLimitsArray = [];
+      if (matrixData.tileMatrixSetLimits) {
+        for (let currentMatrix of matrixData.tileMatrixSetLimits.tileMatrixLimits) {
+          let currentMatrixLimits = {};
+          currentMatrixLimits.identifier = currentMatrix.tileMatrix;
+          currentMatrixLimits.minTileRow = currentMatrix.minTileRow;
+          currentMatrixLimits.maxTileRow = currentMatrix.maxTileRow;
+          currentMatrixLimits.minTileCol = currentMatrix.minTileCol;
+          currentMatrixLimits.maxTileCol = currentMatrix.maxTileCol;
+          tileMatrixLimitsArray.push(currentMatrixLimits);
         }
       }
-
-      // TileMatrixSetLink is a mandatory property
-      layerData.tileMatrixSetLinks = {};
-      let tileMatrixSetLimitsObject = {};
-      for (let matrixData of dataset.value.tileMatrixSetLink) {
-        layerData.tileMatrixSetLinks[matrixData.tileMatrixSet] = {};
-        if (matrixData.tileMatrixSetLimits) {
-          for (let currentMatrix of matrixData.tileMatrixSetLimits.tileMatrixLimits) {
-            let currentMatrixLimits = {};
-            currentMatrixLimits[currentMatrix.tileMatrix] = {};
-            currentMatrixLimits[currentMatrix.tileMatrix].minTileRow = currentMatrix.minTileRow;
-            currentMatrixLimits[currentMatrix.tileMatrix].maxTileRow = currentMatrix.maxTileRow;
-            currentMatrixLimits[currentMatrix.tileMatrix].minTileCol = currentMatrix.minTileCol;
-            currentMatrixLimits[currentMatrix.tileMatrix].maxTileCol = currentMatrix.maxTileCol;
-            Object.assign(tileMatrixSetLimitsObject, currentMatrixLimits);
-          }
-        }
-        layerData.tileMatrixSetLinks[matrixData.tileMatrixSet].tileMatrixSetLimits = tileMatrixSetLimitsObject;
+      if (tileMatrixLimitsArray.length === 0) {
+        setLinksObject.tileMatrixLimits = undefined;
+      } else {
+        setLinksObject.tileMatrixLimits = tileMatrixLimitsArray;
       }
+      layerData.tileMatrixSetLinks.push(setLinksObject);
+    }
 
-
-      if (dataset.value.resourceURL) {
-        layerData.resourceUrls = [];
-        for (let resource of dataset.value.resourceURL) {
-          let thisResource = {};
-          thisResource.format = resource.format;
-          thisResource.resourceType = resource.resourceType;
-          thisResource.template = resource.template;
-          layerData.resourceUrls.push(thisResource);
-        }
+    if (dataset.value.resourceURL) {
+      layerData.resourceUrls = [];
+      for (let resource of dataset.value.resourceURL) {
+        let thisResource = {};
+        thisResource.format = resource.format;
+        thisResource.resourceType = resource.resourceType;
+        thisResource.template = resource.template;
+        layerData.resourceUrls.push(thisResource);
       }
     }
     serverConfig.layers.push(layerData);
@@ -284,12 +312,38 @@ function parse1_0(url, capabilities) {
 
   let layerMatrix = capabilities.contents.tileMatrixSet;
   if (layerMatrix) {
+    // Sometimes the bounding box data is stored in the TileMatrixSet, so we need to populate the bounding box
+    // of the layers here instead
+    if (!serverConfig.layers[0].boundingBox) {
+      for (let layer of serverConfig.layers) {
+        for (let tileMatrixSet of layer.tileMatrixSetLinks) {
+          // TODO If the layer has a link to the current tile matrix set AND there isn't already a bounding box, add the bounding box to the layer
+          for (let tileMatrixSetId of layerMatrix) {
+            if (tileMatrixSet.tileMatrixSet === tileMatrixSetId.identifier.value) {
+              console.log('Match');
+              if (tileMatrixSetId.boundingBox) {
+                let currentTileMatrixBox = tileMatrixSetId.boundingBox;
+                console.log('boundingBox found, and is being added to:');
+                console.log(layer);
+                layer.boundingBox = {};
+                if (currentTileMatrixBox.name && currentTileMatrixBox.value) {
+                  layer.boundingBox = populateBoundingBox(currentTileMatrixBox);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     serverConfig.tileMatrixSets = {};
     let matrixSets = serverConfig.tileMatrixSets;
     for (let matrixSet of layerMatrix) {
       let thisMatrixSet = matrixSets[matrixSet.identifier.value] = {};
-      thisMatrixSet.projection = matrixSet.supportedCRS
-        .replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+      thisMatrixSet.projection = convertCrs(matrixSet.supportedCRS);
+      console.log(thisMatrixSet.projection);
+      if (thisMatrixSet.projection === 'OGC:CRS84') {
+        thisMatrixSet.projection = 'EPSG:4326';
+      }
 
       thisMatrixSet.tileMatrices = [];
       for (let tile of matrixSet.tileMatrix) {
@@ -421,39 +475,105 @@ function parseKeywords(keywords) {
  * @return {Object}
  */
 function parseDimensions(dimensions) {
-  let dimensionsObject = {};
+  let dimensionsArray = [];
   if (dimensions !== undefined) {
     if (dimensions !== []) {
       for (let dimension of dimensions) {
-        dimensionsObject[dimension.identifier.value] = {};
+        // Contains all the information for one dimension
+        let dimensionObject = {identifier: dimension.identifier.value};
         if (dimension.title) {
-          dimensionsObject[dimension.identifier.value].title = parseTitles(dimension.title);
+          dimensionObject.title = parseTitles(dimension.title);
         }
         if (dimension._abstract) {
-          dimensionsObject[dimension.identifier.value].abstract = parseAbstracts(dimension._abstract);
+          dimensionObject.abstract = parseAbstracts(dimension._abstract);
         }
         if (dimension.keywords) {
-          dimensionsObject[dimension.identifier.value].keywords = parseKeywords(dimension.keywords);
+          dimensionObject.keywords = parseKeywords(dimension.keywords);
         }
         if (dimension.uom) {
-          dimensionsObject[dimension.identifier.value].uom = dimension.uom.value;
+          dimensionObject.uom = dimension.uom.value;
         }
         if (dimension.unitSymbol) {
-          dimensionsObject[dimension.identifier.value].unitSymbol = dimension.unitSymbol;
+          dimensionObject.unitSymbol = dimension.unitSymbol;
         }
 
         // Default is a mandatory property
         let dimDefault = dimension._default || dimension.default;
-        dimensionsObject[dimension.identifier.value].default = dimDefault;
+        dimensionObject.default = dimDefault;
 
         if (dimension.current) {
-          dimensionsObject[dimension.identifier.value].current = dimension.current;
+          dimensionObject.current = dimension.current;
         }
 
         // Value is a mandatory property
-        dimensionsObject[dimension.identifier.value].value = dimension.value;
+        dimensionObject.value = dimension.value;
+
+        dimensionsArray.push(dimensionObject);
       }
     }
   }
-  return dimensionsObject;
+  return dimensionsArray;
+}
+
+/**
+ * Converts the crs from the long OGC specification style into a normal crs string.
+ * @param {String}  crs The crs in OGC specification style, e.g. 'urn:ogc:def:crs:OGC:2:84'.
+ * @return {String}     The crs in normal style, e.g. 'OGC:84'.
+ */
+function convertCrs(crs) {
+  return crs.replace(/urn:ogc:def:crs:(\w+):(.*:)?(\w+)$/, '$1:$3');
+}
+
+/**
+ * Populates and returns an Object containing bounding box data
+ * with the correct axis orientation, projection code and dimensions.
+ * @param {Object}  box The bounding box
+ * @return {Object}     The bounding box data as an Object
+ */
+function populateBoundingBox(box) {
+  let boundingBox;
+  if (box.name.localPart === 'WGS84BoundingBox') {
+    boundingBox = {
+      minLat: box.value.lowerCorner[1],
+      minLon: box.value.lowerCorner[0],
+      maxLat: box.value.upperCorner[1],
+      maxLon: box.value.upperCorner[0],
+      style: 'wgs84BoundingBox',
+      dimensions: box.value.dimensions,
+    };
+    if (box.value.crs) {
+      boundingBox.projection = convertCrs(box.value.crs);
+    }
+  } else {
+    // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
+    console.log('box.value.crs:');
+    console.log(box.value.crs);
+    let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
+    if (xyOrientation === 'en') {
+      boundingBox = {
+        minLat: box.value.lowerCorner[1],
+        minLon: box.value.lowerCorner[0],
+        maxLat: box.value.upperCorner[1],
+        maxLon: box.value.upperCorner[0],
+        style: 'boundingBox',
+        dimensions: box.value.dimensions,
+      };
+      if (box.value.crs) {
+        boundingBox.projection = convertCrs(box.value.crs);
+      }
+    } else {
+      boundingBox = {
+        minLat: box.value.lowerCorner[0],
+        minLon: box.value.lowerCorner[1],
+        maxLat: box.value.upperCorner[0],
+        maxLon: box.value.upperCorner[1],
+        style: 'boundingBox',
+        dimensions: box.value.dimensions,
+      };
+      if (box.value.crs) {
+        boundingBox.projection = convertCrs(box.value.crs);
+      }
+    }
+  }
+  return boundingBox;
 }

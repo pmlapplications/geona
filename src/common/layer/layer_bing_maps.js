@@ -12,7 +12,7 @@ export default class LayerBingMaps extends LayerVisible {
    */
   constructor(layerConfig) {
     super(layerConfig);
-    this.PROTOCOL = 'bingMaps';
+    this.protocol = 'bingMaps';
     this.imagerySet = layerConfig.imagerySet;
   }
 }

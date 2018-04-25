@@ -8,11 +8,13 @@ import LayerWmts from '../layer_wmts';
 export default class LayerServer {
   /**
    * Instantiate a new LayerServer
-   * @param  {Object} serverConfig The config to instantiate the server with. See class diagram for possible options
+   * @param {Object} serverConfig    The config to instantiate the server with. See class diagram for possible options.
+   * @param {String} identifier      String to use as the unique id for this LayerServer.
    */
-  constructor(serverConfig) {
+  constructor(serverConfig, identifier) {
     this.layers = [];
-    // let layers = [];
+
+    this.identifier = identifier;
 
     this.protocol = serverConfig.protocol;
     this.version = serverConfig.version;
@@ -28,18 +30,11 @@ export default class LayerServer {
       switch (serverConfig.protocol) {
         case 'wms':
           this.layers.push(new LayerWms(layer, this));
-          // layers.push(new LayerWms(layer, this));
           break;
         case 'wmts':
           this.layers.push(new LayerWmts(layer, this));
-          // layers.push(new LayerWmts(layer, this));
           break;
       }
     }
-
-    console.log(serverConfig);
-
-    window.testingLayer = this.layers[0];
-    window.testingSerCon = this;
   }
 }

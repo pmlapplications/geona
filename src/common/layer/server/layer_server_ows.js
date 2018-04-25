@@ -11,8 +11,8 @@ export default class LayerServerOws extends LayerServer {
    * Instantiate a new LayerServerOws
    * @param  {Object} serverConfig The server config. See the class diagram.
    */
-  constructor(serverConfig) {
-    super(serverConfig);
+  constructor(serverConfig, identifier) {
+    super(serverConfig, identifier);
 
     this.operationsMetadata = serverConfig.operationsMetadata;
   }

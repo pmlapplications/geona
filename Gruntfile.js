@@ -1,6 +1,8 @@
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
 
+  // grunt.loadNpmTasks('grunt-karma');
+
   let clientBundle = {
     'static/js/bundle.js': 'src/client/js/geona.js',
   };
@@ -13,6 +15,19 @@ module.exports = function(grunt) {
     'static/js/loader.js': 'src/client_loader/loader.js',
   };
 
+  let clientTestsBundle = {
+    // 'static/js/client_tests.js': 'test/client/js/map_leaflet.js',
+    'static/js/client_tests.js': 'test/client/js/map_openlayers.js',
+    // 'static/js/client_tests.js': 'test/client/js/map_common.js',
+  };
+
+  let clientMapCommonBundle = {
+    'static/js/map_common_es5.js': 'src/client/js/map_common.js',
+  };
+
+  let clientMapLeafletBundle = {
+    'static/js/map_leaflet_es5.js': 'src/client/js/map_leaflet.js',
+  };
   let clientVendorLibs = [
     'babel-runtime/regenerator',
     'convict',
@@ -143,6 +158,42 @@ module.exports = function(grunt) {
         },
       },
 
+      // Make the client tests bundle
+      clientTests: {
+        files: clientTestsBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientTests',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
+      // Make the client map common bundle
+      clientMapCommon: {
+        files: clientMapCommonBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientMapCommon',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
+      // Make the client map leaflet bundle
+      clientMapLeaflet: {
+        files: clientMapLeafletBundle,
+        options: {
+          browserifyOptions: {
+            standalone: 'geonaClientMapLeaflet',
+            debug: true,
+          },
+          watch: true,
+        },
+      },
+
       // Make the main vendor bundle with all the common libraries
       vendor: {
         src: ['.'],
@@ -205,6 +256,16 @@ module.exports = function(grunt) {
             cwd: 'src/server/templates',
             src: ['**/*'],
             dest: 'lib/server/templates',
+          },
+        ],
+      },
+      test: {
+        files: [
+          {
+            expand: true,
+            cwd: 'test/client',
+            src: ['index.html'],
+            dest: 'static/test',
           },
         ],
       },
@@ -292,6 +353,21 @@ module.exports = function(grunt) {
       },
     },
 
+    // karma: {
+    //   options: {
+    //     configFile: 'karma-conf.js',
+    //     files: [
+    //       'test/client/index.html',
+    //     ],
+    //   },
+    //   unit: {
+    //     singleRun: true,
+    //   },
+    //   dev: {
+    //     singleRun: false,
+    //   },
+    // },
+
     sass: {
       development: {
         options: {
@@ -371,6 +447,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('browserifyOther', [
     'browserify:loader',
+    'browserify:clientTests',
+    'browserify:clientMapCommon',
+    'browserify:clientMapLeaflet',
     'browserify:vendor',
     'browserify:clientAdmin',
     'browserify:admin_vendor',

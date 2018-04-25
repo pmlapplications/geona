@@ -13,12 +13,13 @@ export class SplashScreen {
    */
   constructor(gui, config) {
     this.gui = gui;
+    this.geona = gui.geona;
 
     this.gui.parentDiv.append(templates.splash_screen({splashMessage: config.content}));
     this.gui.parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(this.gui.eventManager, this.gui.parentDiv);
-    registerBindings(this.gui.eventManager, this);
+    registerTriggers(this.geona.eventManager, this.gui.parentDiv);
+    registerBindings(this.geona.eventManager, this);
   }
 
   /**
@@ -32,7 +33,7 @@ export class SplashScreen {
    * TODO Removes the splash screen and places the saved map items on the map.
    */
   loadPreviousMap() {
-    // variable only set to stop eslint from complaining about using 'this' - can be removed with the alert.
+    // variable only set to stop eslint from complaining about using 'this' - can be removed along with the alert.
     this.eslintPleaser = alert('Need to save maps first. This alert is located in splash_screen.js');
   }
 }

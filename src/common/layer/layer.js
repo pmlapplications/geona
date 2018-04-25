@@ -6,14 +6,14 @@
 export default class Layer {
   /**
    * Instantiate a new Layer
-   * @param  {Object}      layerConfig The config for the layer
-   * @param  {LayerServer} layerServer (optional) The server that provides this layer.
-   *                                              Not all layer types require a server
+   * @param  {Object}      layerConfig   The config for the layer
+   * @param  {LayerServer} [layerServer] The server that provides this layer. Not all layer types require a server
    */
   constructor(layerConfig, layerServer) {
-    this.PROTOCOL = null;
-
-    this.layerServer = layerServer;
+    this.protocol = null;
+    if (layerServer !== undefined) {
+      this.layerServer = layerServer.identifier;
+    }
 
     this.title = layerConfig.title;
     this.abstract = layerConfig.abstract;
@@ -26,17 +26,16 @@ export default class Layer {
 
     this.boundingBox = layerConfig.boundingBox;
     this.projections = layerConfig.projections || [];
+    this.styles = layerConfig.styles;
 
     this.isTemporal = layerConfig.isTemporal;
     this.firstTime = layerConfig.firstTime;
     this.lastTime = layerConfig.lastTime;
 
     this.dimensions = layerConfig.dimensions;
-
-    // TODO: This is probably a bit not obvious and potentially confusing
-    // if (this.layerServer) {
-    //   this.layerServer.layers.push(this);
-    // }
+    if (this.dimensions && this.dimensions.time) {
+      this.dimensions.time.values.sort();
+    }
 
     // this.crs = ['EPSG:4326', 'CRS:84', 'EPSG:41001', 'EPSG:27700', 'EPSG:3408',
     // 'EPSG:3409', 'EPSG:3857', 'EPSG:900913', 'EPSG:32661', 'EPSG:32761'];

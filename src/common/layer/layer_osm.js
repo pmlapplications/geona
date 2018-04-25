@@ -12,6 +12,6 @@ export default class LayerOsm extends LayerVisible {
    */
   constructor(layerConfig) {
     super(layerConfig);
-    this.PROTOCOL = 'osm';
+    this.protocol = 'osm';
   }
 }

@@ -25,7 +25,7 @@ export function parseWmsCapabilities(url) {
 }
 
 /**
- * Parse an XML WMTS capabilitise document.
+ * Parse an XML WMS capabilities document.
  * @param  {String} xml The XML document as a string
  * @param  {String} url (optional) The url of the service
  * @return {Object}     A LayerServer config Object
@@ -34,7 +34,6 @@ export function parseWmsCapabilities(url) {
  */
 export function parseLocalWmsCapabilities(xml, url) {
   let jsonCapabilities;
-
   try {
     jsonCapabilities = jsonifyCapabilities('wms', xml);
   } catch (err) {
@@ -44,19 +43,22 @@ export function parseLocalWmsCapabilities(xml, url) {
   let capabilities = jsonCapabilities.value;
 
   let result;
-
   switch (capabilities.version) {
+    case '1':
+    case '1.0':
     case '1.0.0':
       throw new Error('No support for WMS 1.0.0 currently');
+    case '1.1':
     case '1.1.0':
+      throw new Error('No support for WMS 1.1.0 currently');
     case '1.1.1':
       result = parse1_1(url, capabilities);
       break;
+    case '1.3':
     case '1.3.0':
       result = parse1_3(url, capabilities);
       break;
   }
-
   return result;
 }
 
@@ -226,8 +228,8 @@ function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
       break;
   }
 
-  // If this layer has a name, and therefore supports getMap, add it to the array of layers
-  if (thisLayer.name) {
+  // If this layer has an identifier, and therefore supports getMap, add it to the array of layers
+  if (thisLayer.identifier) {
     layers.push(thisLayer);
   }
 
@@ -250,16 +252,18 @@ function digForWmsLayers(wmsVersion, layer, parentLayer = {}) {
 function parseLayerCommon(layer, parentLayer = {}) {
   // Create thisLayer with the basic non-inheritable properties
   let thisLayer = {
-    name: layer.name,
+    identifier: layer.name,
     title: {und: layer.title},
     abstract: {und: layer._abstract},
   };
 
   // Load the keywords
   if (layer.keywordList) {
-    thisLayer.keywords = {und: []};
-    for (let keyword of layer.keywordList.keyword) {
-      thisLayer.keywords.und.push(keyword.value);
+    if (layer.keywordList.keyword) {
+      thisLayer.keywords = {und: []};
+      for (let keyword of layer.keywordList.keyword) {
+        thisLayer.keywords.und.push(keyword.value);
+      }
     }
   }
 
@@ -286,6 +290,46 @@ function parseLayerCommon(layer, parentLayer = {}) {
     }
   } else if (parentLayer.attribution) {
     thisLayer.attribution = parentLayer.attribution;
+  }
+
+  // Load the layer styles
+  if (layer.style) {
+    thisLayer.styles = [];
+    for (let style of layer.style) {
+      let styleObject = {};
+      styleObject.identifier = style.name;
+      if (style.title) {
+        styleObject.title = {};
+        styleObject.title.und = style.title;
+      }
+      if (style._abstract) {
+        styleObject.abstract = {};
+        styleObject.abstract.und = style._abstract;
+      }
+      if (style.legendURL) {
+        styleObject.legendUrl = [];
+        for (let legend of style.legendURL) {
+          let legendObject = {};
+          legendObject.width = legend.width;
+          legendObject.height = legend.height;
+          // WMS version 1.1.1 will have an object with JSONix tag and value, but version 1.3.0 just has a string.
+          if (legend.format.value) {
+            legendObject.format = legend.format.value;
+          } else {
+            legendObject.format = legend.format;
+          }
+          if (legend.onlineResource) {
+            if (legend.onlineResource.type || legend.onlineResource.href) {
+              legendObject.onlineResource = {};
+              legendObject.onlineResource.type = legend.onlineResource.type;
+              legendObject.onlineResource.href = legend.onlineResource.href;
+            }
+          }
+          styleObject.legendUrl.push(legendObject);
+        }
+      }
+      thisLayer.styles.push(styleObject);
+    }
   }
 
   // Load the authorities with 'replace' inheritance
@@ -370,34 +414,36 @@ function parseLayer1_1(layer, parentLayer = {}) {
       };
     }
 
-    for (let extent of layer.extent) {
-      let dimension = thisLayer.dimensions[extent.name];
-      dimension.default = extent._default;
-      dimension.multipleValues = extent.multipleValues === 1 || extent.multipleValues === '1';
-      dimension.nearestValue = extent.nearestValue === 1 || extent.nearestValue === '1';
-      dimension.current = extent.current === 1 || extent.current === '1';
-      dimension.values = extent.value;
+    if (layer.extent) {
+      for (let extent of layer.extent) {
+        let dimension = thisLayer.dimensions[extent.name];
+        dimension.default = extent._default;
+        dimension.multipleValues = extent.multipleValues === 1 || extent.multipleValues === '1';
+        dimension.nearestValue = extent.nearestValue === 1 || extent.nearestValue === '1';
+        dimension.current = extent.current === 1 || extent.current === '1';
+        dimension.values = extent.value;
 
-      if (dimension.values) {
-        dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
-      }
-
-      for (let value of dimension.values) {
-        if (value.includes('/')) {
-          if (!dimension.intervals) {
-            dimension.intervals = [];
-          }
-          let minMaxResolution = value.split('/');
-          dimension.intervals.push({
-            min: minMaxResolution[0],
-            max: minMaxResolution[1],
-            resolution: minMaxResolution[2],
-          });
+        if (dimension.values) {
+          dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
         }
-      }
 
-      if (dimension.intervals) {
-        dimension.values = undefined;
+        for (let value of dimension.values) {
+          if (value.includes('/')) {
+            if (!dimension.intervals) {
+              dimension.intervals = [];
+            }
+            let minMaxResolution = value.split('/');
+            dimension.intervals.push({
+              min: minMaxResolution[0],
+              max: minMaxResolution[1],
+              resolution: minMaxResolution[2],
+            });
+          }
+        }
+
+        if (dimension.intervals) {
+          dimension.values = undefined;
+        }
       }
     }
   }

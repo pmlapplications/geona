@@ -13,12 +13,13 @@ export class TermsAndConditions {
    */
   constructor(gui, config) {
     this.gui = gui;
+    this.geona = gui.geona;
 
     this.gui.parentDiv.html(templates.terms_and_conditions());
     this.gui.parentDiv.find('.js-geona-terms-and-conditions').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(this.gui.eventManager, this.gui.parentDiv);
-    registerBindings(this.gui.eventManager, this);
+    registerTriggers(this.geona.eventManager, this.gui.parentDiv);
+    registerBindings(this.geona.eventManager, this);
   }
 
   /**
