@@ -4,7 +4,7 @@ import fs from 'fs';
 import $ from 'jquery';
 import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
-import { urlToFilename } from '../../common/map';
+import {urlToFilename} from '../../common/map';
 import request from 'request';
 import LayerWms from '../../common/layer/layer_wms';
 import LayerWmts from '../../common/layer/layer_wmts';

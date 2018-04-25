@@ -7,7 +7,7 @@ import {
 } from './map_common';
 import $ from 'jquery';
 
-import { registerBindings } from './map_leaflet_bindings';
+import {registerBindings} from './map_leaflet_bindings';
 
 let L;
 
@@ -47,20 +47,20 @@ export class LMap extends GeonaMap {
       weight: 1,
       lineDash: [2, 3],
       zoomInterval: [
-        { start: 2, end: 2, interval: 20 },
-        { start: 3, end: 3, interval: 10 },
-        { start: 4, end: 4, interval: 5 },
-        { start: 5, end: 5, interval: 2 },
-        { start: 6, end: 6, interval: 1 },
-        { start: 7, end: 7, interval: 0.5 },
-        { start: 8, end: 8, interval: 0.2 },
-        { start: 9, end: 9, interval: 0.1 },
-        { start: 10, end: 20, interval: 0.05 },
+        {start: 2, end: 2, interval: 20},
+        {start: 3, end: 3, interval: 10},
+        {start: 4, end: 4, interval: 5},
+        {start: 5, end: 5, interval: 2},
+        {start: 6, end: 6, interval: 1},
+        {start: 7, end: 7, interval: 0.5},
+        {start: 8, end: 8, interval: 0.2},
+        {start: 9, end: 9, interval: 0.1},
+        {start: 10, end: 20, interval: 0.05},
       ],
-      latFormatTickLabel: function (latitude) {
+      latFormatTickLabel: function(latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lngFormatTickLabel: function (longitude) {
+      lngFormatTickLabel: function(longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -110,7 +110,7 @@ export class LMap extends GeonaMap {
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       let layer = this.availableLayers[this.config.basemap];
       let layerServer = this.availableLayerServers[layer.layerServer];
-      this.addLayer(layer, layerServer, { modifier: 'basemap' });
+      this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // TODO don't do this if there is an overlay 'do you want to load or make new map'
     // Adds all defined data layers to the map
@@ -120,7 +120,7 @@ export class LMap extends GeonaMap {
           let layer = this.availableLayers[layerIdentifier];
           let layerServer = this.availableLayerServers[layer.layerServer];
           if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(layer, layerServer, { modifier: 'hasTime' });
+            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
           } else {
             this.addLayer(layer, layerServer);
           }
@@ -131,7 +131,7 @@ export class LMap extends GeonaMap {
     if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
       let layer = this.availableLayers[this.config.borders.identifier];
       let layerServer = this.availableLayerServers[layer.layerServer];
-      this.addLayer(layer, layerServer, { modifier: 'borders', requestedStyle: this.config.borders.style });
+      this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
 
     this.loadConfig_();
@@ -451,7 +451,7 @@ export class LMap extends GeonaMap {
 
     // Merge custom options with defaults
     let options = Object.assign({},
-      { modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true },
+      {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
       settings
     );
 
@@ -1208,7 +1208,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function () {
+    mapJs.onload = function() {
       import('leaflet')
         .then((leaflet) => {
           L = leaflet;

@@ -6,7 +6,7 @@ import {
   loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage,
   findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
-import { registerBindings } from './map_openlayers_bindings';
+import {registerBindings} from './map_openlayers_bindings';
 
 import proj4 from 'proj4';
 
@@ -54,10 +54,10 @@ export class OlMap extends GeonaMap {
         width: 1,
         lineDash: [1, 4],
       }),
-      latLabelFormatter: function (latitude) {
+      latLabelFormatter: function(latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lonLabelFormatter: function (longitude) {
+      lonLabelFormatter: function(longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -108,7 +108,7 @@ export class OlMap extends GeonaMap {
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
       let layer = this.availableLayers[this.config.basemap];
       let layerServer = this.availableLayerServers[layer.layerServer];
-      this.addLayer(layer, layerServer, { modifier: 'basemap' });
+      this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
     // TODO don't do this if there is an overlay 'do you want to load or make new map'
@@ -118,7 +118,7 @@ export class OlMap extends GeonaMap {
           let layer = this.availableLayers[layerIdentifier];
           let layerServer = this.availableLayerServers[layer.layerServer];
           if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(layer, layerServer, { modifier: 'hasTime' });
+            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
           } else {
             this.addLayer(layer, layerServer);
           }
@@ -129,7 +129,7 @@ export class OlMap extends GeonaMap {
     if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
       let layer = this.availableLayers[this.config.borders.identifier];
       let layerServer = this.availableLayerServers[layer.layerServer];
-      this.addLayer(layer, layerServer, { modifier: 'borders', requestedStyle: this.config.borders.style });
+      this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
 
     this.loadConfig_();
@@ -253,7 +253,7 @@ export class OlMap extends GeonaMap {
         throw new Error('Layer ' + layer.get('identifier') + ' does not support projection type ' + projection + '.');
       }
     }
-    this.setView({ projection: projection });
+    this.setView({projection: projection});
     this.config.projection = projection;
   }
 
@@ -292,7 +292,7 @@ export class OlMap extends GeonaMap {
 
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
-    let center = options.center || { lat: currentCenterLatLon[0], lon: currentCenterLatLon[1] };
+    let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
     let fitExtent = options.fitExtent; // || this.config.viewSettings.fitExtent; TODO extent fixes
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
@@ -338,7 +338,7 @@ export class OlMap extends GeonaMap {
 
     // Fit the map in the fitExtent
     if (fitExtent) {
-      this._map.getView().fit(fitExtent, { size: ol.extent.getSize(fitExtent) });
+      this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
       if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
         this._map.getView().setZoom(zoom);
         this._map.getView().setCenter(center);
@@ -376,7 +376,7 @@ export class OlMap extends GeonaMap {
 
     // Merge custom options with defaults
     let options = Object.assign({},
-      { modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true },
+      {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
       settings
     );
 
@@ -412,7 +412,7 @@ export class OlMap extends GeonaMap {
       }
     }
 
-    let updateOptions = { options: {} };
+    let updateOptions = {options: {}};
 
     // As the active layers have unique identifiers, a layer with the same identifier will just be updating options
     if (this.activeLayers[geonaLayer.identifier] !== undefined) {
@@ -639,9 +639,9 @@ export class OlMap extends GeonaMap {
       },
     });
 
-    let settings = { time: time };
+    let settings = {time: time};
 
-    return { source: source, options: settings };
+    return {source: source, options: settings};
   }
 
   /**
@@ -659,8 +659,8 @@ export class OlMap extends GeonaMap {
     title = selectPropertyLanguage(geonaLayer.title);
     source = wmtsSourceFromLayer(geonaLayer, geonaLayerServer, this._map.getView().getProjection().getCode());
     // TODO needs checking with a time layer
-    let settings = { time: source.getDimensions().time };
-    return { source: source, options: settings };
+    let settings = {time: source.getDimensions().time};
+    return {source: source, options: settings};
   }
 
   /**
@@ -713,7 +713,7 @@ export class OlMap extends GeonaMap {
       default:
         throw new Error('Layer protocol is ' + geonaLayer.protocol);
     }
-    return { source: sourceAndOptions.source, options: updatedOptions };
+    return {source: sourceAndOptions.source, options: updatedOptions};
   }
 
   /**
@@ -1120,7 +1120,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function () {
+    mapJs.onload = function() {
       import('openlayers')
         .then((olLib) => {
           ol = olLib;
@@ -1353,7 +1353,7 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
   let switchOriginXy = axisOrientation.substr(0, 2) === 'ne';
 
   // Sort the array of tileMatrices by their scaleDenominators
-  matrixSet.tileMatrices.sort(function (a, b) {
+  matrixSet.tileMatrices.sort(function(a, b) {
     return b.scaleDenominator - a.scaleDenominator;
   });
 

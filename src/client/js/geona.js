@@ -6,9 +6,9 @@ import * as templates from '../templates/compiled';
 import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
-import { initI18n } from './i18n';
-import { Gui } from './gui/gui';
-import { EventManager } from '../../common/event_manager';
+import {initI18n} from './i18n';
+import {Gui} from './gui/gui';
+import {EventManager} from '../../common/event_manager';
 
 // TODO These are for testing only
 window.templates = templates;

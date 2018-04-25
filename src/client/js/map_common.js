@@ -6,7 +6,7 @@ import request from 'request';
 import moment from 'moment';
 import _ from 'lodash';
 
-import { urlToFilename } from '../../common/map';
+import {urlToFilename} from '../../common/map';
 import LayerWms from '../../common/layer/layer_wms';
 import LayerWmts from '../../common/layer/layer_wmts';
 
