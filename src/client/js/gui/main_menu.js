@@ -3,14 +3,14 @@
 import $ from 'jquery';
 import moment from 'moment';
 import * as templates from '../../templates/compiled';
-import { registerTriggers } from './main_menu_triggers';
-import { registerBindings } from './main_menu_bindings';
+import {registerTriggers} from './main_menu_triggers';
+import {registerBindings} from './main_menu_bindings';
 
-import { selectPropertyLanguage, getLayerServer, urlInCache } from '../map_common';
+import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
 import LayerWms from '../../../common/layer/layer_wms';
 import LayerWmts from '../../../common/layer/layer_wmts';
 
-import { Scalebar } from './scalebar';
+import {Scalebar} from './scalebar';
 
 // TODO separate mainMenu into individual files for each panel
 // TODO layer panel items should be classes of their own
@@ -184,7 +184,6 @@ export class MainMenu {
    * @param {String} url The URL currently in the input box
    */
   autoselectService(url) {
-    // todo why don't we just use regex.test()?
     // Regex for case-insensitive 'wms' or 'wmts'
     let result = /((w|W)(m|M)(s|S))|((w|W)(m|M)(t|T)(s|S))/.exec(url);
     if (result !== null) {
@@ -309,7 +308,7 @@ export class MainMenu {
             throw new Error('Unsupported layer protocol: ' + layer.protocol.toLowerCase());
         }
         if (layer.dimension && layer.dimension.time) {
-          this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer, { modifier: 'hasTime' });
+          this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer, {modifier: 'hasTime'});
         } else {
           this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer);
         }
@@ -325,7 +324,7 @@ export class MainMenu {
     let layer = this.geona.map.availableLayers[layerIdentifier];
     let layerServer = this.geona.map.availableLayerServers[layer.layerServer];
     if (layer.modifier === 'hasTime') {
-      this.geona.map.addLayer(layer, layerServer, { modifier: 'hasTime' });
+      this.geona.map.addLayer(layer, layerServer, {modifier: 'hasTime'});
     } else {
       this.geona.map.addLayer(layer, layerServer);
     }
@@ -390,7 +389,7 @@ export class MainMenu {
    * Adds a layer item to the layers panel list.
    * @param {String} layerIdentifier The identifier for the data layer we want to create an item for.
    */
-  addLayerItem(layerIdentifier) {
+  addLayerItem(layerIdentifier) { // todo add layers to the list when they're added to the map
     let modifier = this.geona.map.layerGet(layerIdentifier, 'modifier');
     if (modifier === 'basemap' || modifier === 'borders') {
       throw new Error('Cannot add a map layer item to the GUI for a basemap or borders layer! Use a layer with no modifier or a \'hasTime\' modifier instead.');
@@ -399,7 +398,7 @@ export class MainMenu {
       // Get the data in the correct format from the geona layer
       let data = this._compileLayerData(geonaLayer);
       // Insert layer data object at the top of the list - higher on the list means higher on the map
-      this.geonaDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({ data: data }));
+      this.geonaDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
       let item = this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
       this.layersPanelItemList.unshift(data.info.identifier);
 
@@ -580,22 +579,17 @@ export class MainMenu {
   reorderLayers(item) {
     // Reset the list
     this.layersPanelItemList.length = 0;
+
     // Repopulate the list
     for (let layerBox of this.geonaDiv.find('.js-geona-layers-list').children()) {
       this.layersPanelItemList.unshift(layerBox.dataset.identifier);
     }
 
-    let basemapActive = false; // todo change to 'if config.basemap is truthy' (and tbh this block can be removed and just use that in the if below)
-    for (let layerIdentifier of Object.keys(this.geona.map.activeLayers)) {
-      if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'basemap') {
-        basemapActive = true;
-      }
-    }
-
+    // Reorder the layers
     for (let index = 0; index < this.layersPanelItemList.length; index++) {
       if (this.layersPanelItemList[index] === item.dataset.identifier) {
         // If there's a basemap we need to increase the index by 1 (layersPanelItemList does not track basemaps)
-        if (basemapActive === true) {
+        if (this.geona.map.config.basemap !== 'none') {
           this.geona.map.reorderLayers(item.dataset.identifier, index + 1);
         } else {
           this.geona.map.reorderLayers(item.dataset.identifier, index);
@@ -1065,7 +1059,7 @@ export class MainMenu {
    */
   constructOptionsPanel() {
     let data = this._compileOptionsData();
-    this.geonaDiv.find('.js-geona-panel').prepend(templates.options_panel({ data: data }));
+    this.geonaDiv.find('.js-geona-panel').prepend(templates.options_panel({data: data}));
 
     // Sets the selected dropdown value to match the map's basemap
     for (let basemap of data.basemaps) {
@@ -1151,7 +1145,7 @@ export class MainMenu {
       // Add the new basemap
       let geonaLayer = this.geona.map.availableLayers[basemapIdentifier];
       let geonaLayerServer = this.geona.map.availableLayerServers[geonaLayer.layerServer];
-      this.geona.map.addLayer(geonaLayer, geonaLayerServer, { modifier: 'basemap' });
+      this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'basemap'});
       // Select the correct projection dropdown option
       let projection = this.geona.map.config.projection;
       this.selectProjection(projection);
@@ -1171,7 +1165,7 @@ export class MainMenu {
 
       let geonaLayer = this.geona.map.availableLayers[bordersIdentifier];
       let geonaLayerServer = this.geona.map.availableLayerServers[geonaLayer.layerServer];
-      this.geona.map.addLayer(geonaLayer, geonaLayerServer, { modifier: 'borders', requestedStyle: bordersStyle });
+      this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'borders', requestedStyle: bordersStyle});
     }
   }
 
