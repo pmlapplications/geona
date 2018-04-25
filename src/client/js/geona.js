@@ -6,9 +6,9 @@ import * as templates from '../templates/compiled';
 import Config from './config';
 import * as leaflet from './map_leaflet';
 import * as ol from './map_openlayers';
-import {initI18n} from './i18n';
-import {Gui} from './gui/gui';
-import {EventManager} from '../../common/event_manager';
+import { initI18n } from './i18n';
+import { Gui } from './gui/gui';
+import { EventManager } from '../../common/event_manager';
 
 // TODO These are for testing only
 window.templates = templates;
@@ -38,14 +38,15 @@ export class Geona {
     this.geonaServer = this.config.get('geonaServer');
 
     // Initialize i18n and then the GUI
-    initI18n(this.geonaServer).then(() =>{
+    initI18n(this.geonaServer).then(() => {
       this.gui.init(() => {
-        if (this.config.get('onReadyCallback')) {
+        let onReadyCallback = this.config.get('onReadyCallback');
+        if (onReadyCallback) {
           // If a onReadyCallback is defined in the config, try to call it
           try {
             // TODO add support for onReadyCallback being a function instead of a string
             // so that the function can just be called, else we assume it's attached to the window
-            window[this.config.get('onReadyCallback')](this);
+            window[onReadyCallback](this);
           } catch (e) {
             console.error('Failed to call onReadyCallback: ' + e);
           }

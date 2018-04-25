@@ -1,3 +1,5 @@
+/** @module splash_screen */
+
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './splash_screen_triggers';
 import {registerBindings} from './splash_screen_bindings';

@@ -7,7 +7,7 @@ import {
 } from './map_common';
 import $ from 'jquery';
 
-import {registerBindings} from './map_leaflet_bindings';
+import { registerBindings } from './map_leaflet_bindings';
 
 let L;
 
@@ -30,11 +30,11 @@ export class LMap extends GeonaMap {
     this.eventManager = geona.eventManager;
     this.geonaDiv = geona.geonaDiv;
     /**  @type {Object} The available map layers */
-    this._availableLayers = {};// todo this shouldn't be private
-    this._availableLayerServers = {}; // todo this shouldn't be private
+    this.availableLayers = {};
+    this.availableLayerServers = {};
     /**  @type {L.featureGroup} The layers on the map */
     this._mapLayers = L.featureGroup();
-    this._activeLayers = {};// todo this shouldn't be private
+    this.activeLayers = {};
     this._activeLayerGeneratedTimes = {};
     /** @type {String} The time the map is set to */
     this._mapTime = undefined;
@@ -47,20 +47,20 @@ export class LMap extends GeonaMap {
       weight: 1,
       lineDash: [2, 3],
       zoomInterval: [
-        {start: 2, end: 2, interval: 20},
-        {start: 3, end: 3, interval: 10},
-        {start: 4, end: 4, interval: 5},
-        {start: 5, end: 5, interval: 2},
-        {start: 6, end: 6, interval: 1},
-        {start: 7, end: 7, interval: 0.5},
-        {start: 8, end: 8, interval: 0.2},
-        {start: 9, end: 9, interval: 0.1},
-        {start: 10, end: 20, interval: 0.05},
+        { start: 2, end: 2, interval: 20 },
+        { start: 3, end: 3, interval: 10 },
+        { start: 4, end: 4, interval: 5 },
+        { start: 5, end: 5, interval: 2 },
+        { start: 6, end: 6, interval: 1 },
+        { start: 7, end: 7, interval: 0.5 },
+        { start: 8, end: 8, interval: 0.2 },
+        { start: 9, end: 9, interval: 0.1 },
+        { start: 10, end: 20, interval: 0.05 },
       ],
-      latFormatTickLabel: function(latitude) {
+      latFormatTickLabel: function (latitude) {
         return latLonLabelFormatter(latitude, 'N', 'S');
       },
-      lngFormatTickLabel: function(longitude) {
+      lngFormatTickLabel: function (longitude) {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
@@ -103,24 +103,24 @@ export class LMap extends GeonaMap {
 
     // Load the default basemaps, borders layers, and data layers.
     let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config, this.geona.geonaServer);
-    this._availableLayers = loadedServersAndLayers.availableLayers;
-    this._availableLayerServers = loadedServersAndLayers.availableLayerServers;
+    this.availableLayers = loadedServersAndLayers.availableLayers;
+    this.availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
     // Adds any defined basemap to the map
     if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
-      let layer = this._availableLayers[this.config.basemap];
-      let layerServer = this._availableLayerServers[layer.layerServer];
-      this.addLayer(layer, layerServer, {modifier: 'basemap'});
+      let layer = this.availableLayers[this.config.basemap];
+      let layerServer = this.availableLayerServers[layer.layerServer];
+      this.addLayer(layer, layerServer, { modifier: 'basemap' });
     }
     // TODO don't do this if there is an overlay 'do you want to load or make new map'
     // Adds all defined data layers to the map
     if (this.config.data !== undefined) {
       if (this.config.data.length !== 0) {
         for (let layerIdentifier of this.config.data) {
-          let layer = this._availableLayers[layerIdentifier];
-          let layerServer = this._availableLayerServers[layer.layerServer];
-          if (this._availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
+          let layer = this.availableLayers[layerIdentifier];
+          let layerServer = this.availableLayerServers[layer.layerServer];
+          if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
+            this.addLayer(layer, layerServer, { modifier: 'hasTime' });
           } else {
             this.addLayer(layer, layerServer);
           }
@@ -129,9 +129,9 @@ export class LMap extends GeonaMap {
     }
     // Adds any defined borders layer to the map
     if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
-      let layer = this._availableLayers[this.config.borders.identifier];
-      let layerServer = this._availableLayerServers[layer.layerServer];
-      this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
+      let layer = this.availableLayers[this.config.borders.identifier];
+      let layerServer = this.availableLayerServers[layer.layerServer];
+      this.addLayer(layer, layerServer, { modifier: 'borders', requestedStyle: this.config.borders.style });
     }
 
     this.loadConfig_();
@@ -237,8 +237,8 @@ export class LMap extends GeonaMap {
         if (layer._crs !== undefined) {
           this.removeLayer(layer.options.identifier);
           // We add the same layer, but now the map projection will have changed.
-          let geonaLayer = this._availableLayers[layer.options.identifier];
-          let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+          let geonaLayer = this.availableLayers[layer.options.identifier];
+          let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
           let options = {
             modifier: layer.options.modifier,
             requestedTime: layer.options.layerTime,
@@ -283,7 +283,7 @@ export class LMap extends GeonaMap {
         maxLon: Infinity,
       };
       for (let layer of this._mapLayers.getLayers()) {
-        let geonaLayer = this._availableLayers[layer.options.identifier];
+        let geonaLayer = this.availableLayers[layer.options.identifier];
         if (geonaLayer.viewSettings) {
           if (geonaLayer.viewSettings.maxExtent) {
             this.config.viewSettings.maxExtent = constructExtent(
@@ -355,7 +355,7 @@ export class LMap extends GeonaMap {
         maxLon: 180,
       };
       for (let layer of this._mapLayers.getLayers()) {
-        let geonaLayer = this._availableLayers[layer.options.identifier];
+        let geonaLayer = this.availableLayers[layer.options.identifier];
         if (geonaLayer.viewSettings) {
           if (geonaLayer.viewSettings.fitExtent) {
             this.config.viewSettings.fitExtent = constructExtent(
@@ -423,7 +423,7 @@ export class LMap extends GeonaMap {
 
   /**
    * Create a Leaflet map layer from a Geona layer definition, and add to the map.
-   * Will also add a Geona layer to the _availableLayers if not already included.
+   * Will also add a Geona layer to the availableLayers if not already included.
    *
    * @param {Layer}       geonaLayer       A Geona Layer, defined by parsing the GetCapabilities request from a server.
    * @param {LayerServer} geonaLayerServer The LayerServer corresponding to the layer
@@ -445,13 +445,13 @@ export class LMap extends GeonaMap {
       throw new Error('layerServer property of geonaLayer parameter is undefined');
     } else if (geonaLayerServer.identifier === undefined) {
       throw new Error('identifier property of geonaLayerServer parameter is undefined');
-    } else if (this._activeLayers[geonaLayer.identifier] !== undefined) {
+    } else if (this.activeLayers[geonaLayer.identifier] !== undefined) {
       throw new Error('Layer with identifier ' + geonaLayer.identifier + ' is already active on the map.');
     }
 
     // Merge custom options with defaults
     let options = Object.assign({},
-      {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
+      { modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true },
       settings
     );
 
@@ -608,13 +608,13 @@ export class LMap extends GeonaMap {
 
     // Save the Layer with its modifier
     geonaLayer.modifier = options.modifier;
-    this._availableLayers[geonaLayer.identifier] = geonaLayer;
+    this.availableLayers[geonaLayer.identifier] = geonaLayer;
 
     // Save the LayerServer if not already saved
-    if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+    if (this.availableLayerServers[geonaLayerServer.identifier] === undefined) {
       let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
       delete layerServerCopy.layers;
-      this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
+      this.availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
     }
 
     // Sets the map time if this is the first layer
@@ -627,7 +627,7 @@ export class LMap extends GeonaMap {
         this._clearBasemap();
         layer.addTo(this._map);
         this._mapLayers.addLayer(layer);
-        this._activeLayers[geonaLayer.identifier] = layer;
+        this.activeLayers[geonaLayer.identifier] = layer;
         this.reorderLayers(layer.options.identifier, 0);
         this.config.basemap = layer.options.identifier;
         break;
@@ -635,7 +635,7 @@ export class LMap extends GeonaMap {
         this._clearBorders();
         layer.addTo(this._map);
         this._mapLayers.addLayer(layer);
-        this._activeLayers[geonaLayer.identifier] = layer;
+        this.activeLayers[geonaLayer.identifier] = layer;
         this.config.borders.identifier = layer.options.identifier;
         this.config.borders.style = style;
         break;
@@ -643,7 +643,7 @@ export class LMap extends GeonaMap {
         this.removeLayer(layer.identifier);
         layer.addTo(this._map);
         this._mapLayers.addLayer(layer);
-        this._activeLayers[geonaLayer.identifier] = layer;
+        this.activeLayers[geonaLayer.identifier] = layer;
         if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._mapLayers.getLayers().length - 2);
           this.config.data.push(geonaLayer.identifier);
@@ -681,7 +681,7 @@ export class LMap extends GeonaMap {
       if (layer.options.identifier === layerIdentifier) {
         this._mapLayers.removeLayer(layer);
         layer.remove();
-        delete this._activeLayers[layerIdentifier];
+        delete this.activeLayers[layerIdentifier];
         if (!retainTimes) {
           delete this._activeLayerGeneratedTimes[layerIdentifier];
         }
@@ -758,14 +758,14 @@ export class LMap extends GeonaMap {
    * @param {String} layerIdentifier The identifier for the layer being shown.
    */
   showLayer(layerIdentifier) {
-    if (this._activeLayers[layerIdentifier] !== undefined) {
+    if (this.activeLayers[layerIdentifier] !== undefined) {
       // We don't want to reveal the layer if it's been hidden due to invalid time
-      if (this._activeLayers[layerIdentifier].options.timeHidden === false) {
+      if (this.activeLayers[layerIdentifier].options.timeHidden === false) {
         // Make the layer visible again, setting the opacity to the stored value
-        this._activeLayers[layerIdentifier].setOpacity(this._activeLayers[layerIdentifier].options.opacity);
+        this.activeLayers[layerIdentifier].setOpacity(this.activeLayers[layerIdentifier].options.opacity);
       }
       // A layer hidden due to being having no data at the current time will be shown again once there is data available
-      this._activeLayers[layerIdentifier].options.shown = true;
+      this.activeLayers[layerIdentifier].options.shown = true;
     }
   }
 
@@ -774,15 +774,15 @@ export class LMap extends GeonaMap {
    * @param {String} layerIdentifier The identifier for the layer being hidden.
    */
   hideLayer(layerIdentifier) {
-    if (this._activeLayers[layerIdentifier] !== undefined) {
+    if (this.activeLayers[layerIdentifier] !== undefined) {
       // setOpacity overrides the opacity options, but we might want to hide a translucent layer
-      let opacityCache = this._activeLayers[layerIdentifier].options.opacity;
+      let opacityCache = this.activeLayers[layerIdentifier].options.opacity;
       // This changes all the tiles of the layer to be completely see-through
-      this._activeLayers[layerIdentifier].setOpacity(0);
+      this.activeLayers[layerIdentifier].setOpacity(0);
       // Reapply the opacity, to keep the opacity on load without actually making the layer visible now
-      this._activeLayers[layerIdentifier].options.opacity = opacityCache;
+      this.activeLayers[layerIdentifier].options.opacity = opacityCache;
       // A layer hidden due to being having no data at the current time will remain hidden once there is data available
-      this._activeLayers[layerIdentifier].options.shown = false;
+      this.activeLayers[layerIdentifier].options.shown = false;
     }
   }
 
@@ -802,14 +802,14 @@ export class LMap extends GeonaMap {
     }
 
     // Set the opacity using the safe opacity
-    if (this._activeLayers[layerIdentifier] !== undefined) {
-      if (this._activeLayers[layerIdentifier].options.shown) {
+    if (this.activeLayers[layerIdentifier] !== undefined) {
+      if (this.activeLayers[layerIdentifier].options.shown) {
         // This changes all the tiles of the layer to the opacity
-        this._activeLayers[layerIdentifier].setOpacity(safeOpacity);
+        this.activeLayers[layerIdentifier].setOpacity(safeOpacity);
       }
 
       // There is no corresponding getOpacity() method so we have to update our options manually
-      this._activeLayers[layerIdentifier].options.opacity = safeOpacity;
+      this.activeLayers[layerIdentifier].options.opacity = safeOpacity;
     }
   }
 
@@ -819,8 +819,8 @@ export class LMap extends GeonaMap {
    * @return {Number}                 The opacity, between 0 and 1.
    */
   getLayerOpacity(layerIdentifier) {
-    if (this._activeLayers[layerIdentifier] !== undefined) {
-      return this._activeLayers[layerIdentifier].options.opacity;
+    if (this.activeLayers[layerIdentifier] !== undefined) {
+      return this.activeLayers[layerIdentifier].options.opacity;
     } else {
       throw new Error('There is no layer currently on the map with the identifier: ' + layerIdentifier);
     }
@@ -907,13 +907,13 @@ export class LMap extends GeonaMap {
   loadNearestValidTime(layerIdentifier, requestedTime) {
     // TODO set the layertime to undefined if out of bounds
     // We use time values from the Geona layer object
-    let geonaLayer = this._availableLayers[layerIdentifier];
+    let geonaLayer = this.availableLayers[layerIdentifier];
     if (geonaLayer === undefined) {
       throw new Error('No Geona layer with this identifier has been loaded.');
-    } else if (this._activeLayers[layerIdentifier] === undefined) {
+    } else if (this.activeLayers[layerIdentifier] === undefined) {
       throw new Error('No layer with this identifier is on the map.');
-    } else if (this._activeLayers[layerIdentifier].options.modifier !== 'hasTime') {
-      let modifier = this._activeLayers[layerIdentifier].options.modifier;
+    } else if (this.activeLayers[layerIdentifier].options.modifier !== 'hasTime') {
+      let modifier = this.activeLayers[layerIdentifier].options.modifier;
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
@@ -921,28 +921,28 @@ export class LMap extends GeonaMap {
       if (time === undefined) {
         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
-        this._activeLayers[layerIdentifier].setOpacity(0);
-        this._activeLayers[layerIdentifier].options.opacity = 0;
-        this._activeLayers[layerIdentifier].options.timeHidden = true;
+        this.activeLayers[layerIdentifier].setOpacity(0);
+        this.activeLayers[layerIdentifier].options.opacity = 0;
+        this.activeLayers[layerIdentifier].options.timeHidden = true;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
-        let zIndex = this._activeLayers[layerIdentifier].options.zIndex;
+        let zIndex = this.activeLayers[layerIdentifier].options.zIndex;
         // We define the layer options so that only the time changes
         let layerOptions = {
           modifier: 'hasTime',
-          requestedStyle: this._activeLayers[layerIdentifier].options.styles,
+          requestedStyle: this.activeLayers[layerIdentifier].options.styles,
           // We save the layer's 'shown' value so the layer's state of visibility is kept upon changing time
-          shown: this._activeLayers[layerIdentifier].options.shown,
+          shown: this.activeLayers[layerIdentifier].options.shown,
           requestedTime: time,
         };
 
         this.removeLayer(layerIdentifier, true);
-        let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+        let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
         this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
-        this._activeLayers[layerIdentifier].options.timeHidden = false;
+        this.activeLayers[layerIdentifier].options.timeHidden = false;
 
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
         this._mapTime = time;
@@ -971,10 +971,10 @@ export class LMap extends GeonaMap {
    */
   loadLayersToNearestValidTime(requestedTime) {
     // layersAtStart holds the identifiers for the layers before we start changing all their times.
-    let layersAtStart = Object.keys(this._activeLayers);
+    let layersAtStart = Object.keys(this.activeLayers);
 
     for (let layerIdentifier of layersAtStart) {
-      if (this._activeLayers[layerIdentifier].options.modifier === 'hasTime') {
+      if (this.activeLayers[layerIdentifier].options.modifier === 'hasTime') {
         this.loadNearestValidTime(layerIdentifier, requestedTime);
       }
     }
@@ -986,8 +986,8 @@ export class LMap extends GeonaMap {
    * @param {String} styleIdentifier The identifier for the desired style.
    */
   changeLayerStyle(layerIdentifier, styleIdentifier) {
-    let layer = this._activeLayers[layerIdentifier];
-    let geonaLayer = this._availableLayers[layerIdentifier];
+    let layer = this.activeLayers[layerIdentifier];
+    let geonaLayer = this.availableLayers[layerIdentifier];
 
     if (geonaLayer === undefined) {
       throw new Error('The layer ' + layerIdentifier + ' is not loaded into this Geona instance.');
@@ -1013,7 +1013,7 @@ export class LMap extends GeonaMap {
           let zIndex = layer.options.zIndex;
 
           this.removeLayer(layerIdentifier);
-          let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+          let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
           this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
           this.reorderLayers(layerIdentifier, zIndex);
         } else {
@@ -1034,7 +1034,7 @@ export class LMap extends GeonaMap {
    * @return {*}                      The value for the requested key.
    */
   layerGet(layerIdentifier, key) {
-    return this._activeLayers[layerIdentifier].options[key];
+    return this.activeLayers[layerIdentifier].options[key];
   }
 
   /**
@@ -1046,7 +1046,7 @@ export class LMap extends GeonaMap {
    * @return {*}                      The value for the requested key.
    */
   layerSourceGet(layerIdentifier, key) {
-    let layerSource = this._activeLayers[layerIdentifier].wmsParams;
+    let layerSource = this.activeLayers[layerIdentifier].wmsParams;
     switch (key) {
       case 'style':
         return layerSource.styles;
@@ -1068,7 +1068,7 @@ export class LMap extends GeonaMap {
   getActiveLayerDatetimes(layerIdentifier) {
     // If there are only normal values return them
     if (!this._activeLayerGeneratedTimes[layerIdentifier]) {
-      return this._availableLayers[layerIdentifier].dimensions.time.values;
+      return this.availableLayers[layerIdentifier].dimensions.time.values;
     } else {
       // Return the merged and sorted array that was created when the layer was added.
       return this._activeLayerGeneratedTimes[layerIdentifier];
@@ -1093,7 +1093,7 @@ export class LMap extends GeonaMap {
    * @param {Object} newParams       The new params to use in the source.
    */
   updateSourceParams(layerIdentifier, newParams) { // todo untested
-    let layer = this._activeLayers[layerIdentifier];
+    let layer = this.activeLayers[layerIdentifier];
     let params = layer.wmsParams;
     for (let param of Object.keys(newParams)) {
       switch (param) {
@@ -1208,7 +1208,7 @@ export function init(geonaServer, next) {
   } else {
     let head = document.getElementsByTagName('head')[0];
     let mapJs = document.createElement('script');
-    mapJs.onload = function() {
+    mapJs.onload = function () {
       import('leaflet')
         .then((leaflet) => {
           L = leaflet;

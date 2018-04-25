@@ -1,36 +1,36 @@
+/** @module main_menu */
+
 import $ from 'jquery';
 import moment from 'moment';
 import * as templates from '../../templates/compiled';
-import {registerTriggers} from './main_menu_triggers';
-import {registerBindings} from './main_menu_bindings';
+import { registerTriggers } from './main_menu_triggers';
+import { registerBindings } from './main_menu_bindings';
 
-import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
+import { selectPropertyLanguage, getLayerServer, urlInCache } from '../map_common';
 import LayerWms from '../../../common/layer/layer_wms';
 import LayerWmts from '../../../common/layer/layer_wmts';
 
-import {Scalebar} from './scalebar';
-
-/* Type definitions for this class */
-/**
- * A 'this' context, which may be different from this Class instance's 'this' context.
- * @typedef {this} This
- */
+import { Scalebar } from './scalebar';
 
 // TODO separate mainMenu into individual files for each panel
 // TODO layer panel items should be classes of their own
 // TODO consider refactoring validateScale() because it calls updateScale() by itself and I don't really like that
+// TODO WMTS layers are not properly supported currently
 /**
  * Loads the templates and defines the functions relating to the main menu.
  */
 export class MainMenu {
   /**
    * Creates an instance of a MainMenu element to put on the GUI.
-   * @param {Gui} gui                The parent Gui of this MainMenu.
-   * @param {Object} menuConfigOptions The config settings relating to the main menu.
+   * @param {Gui}               gui               The parent Gui of this MainMenu.
+   * @param {MenuConfigOptions} menuConfigOptions The config settings relating to the main menu.
    */
   constructor(gui, menuConfigOptions) {
+    /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
     this.gui = gui;
+    /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
     this.geona = gui.geona;
+    /** @type {MenuConfigOptions} @desc The options to configure the main menu. */
     this.config = menuConfigOptions;
     this.geonaDiv = gui.geonaDiv;
 
@@ -65,7 +65,7 @@ export class MainMenu {
 
 
     // Sets up menu toggle control
-    if (this.config.collapsible) {
+    if (this.config.allowToggle) {
       this.geonaDiv.find('.js-geona-menu-bar').append(templates.menu_toggle());
     }
 
@@ -169,8 +169,8 @@ export class MainMenu {
     }
 
     // Populate available layers dropdown
-    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
-      let layer = this.geona.map._availableLayers[layerIdentifier];
+    for (let layerIdentifier of Object.keys(this.geona.map.availableLayers)) {
+      let layer = this.geona.map.availableLayers[layerIdentifier];
       if (layer.modifier !== 'basemap' && layer.modifier !== 'borders') {
         this.geonaDiv.find('.js-geona-explore-panel-content__available-layers').append(
           '<option value="' + layerIdentifier + '">' + layerIdentifier + ' - ' + selectPropertyLanguage(layer.title) + '</option>'
@@ -309,7 +309,7 @@ export class MainMenu {
             throw new Error('Unsupported layer protocol: ' + layer.protocol.toLowerCase());
         }
         if (layer.dimension && layer.dimension.time) {
-          this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer, {modifier: 'hasTime'});
+          this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer, { modifier: 'hasTime' });
         } else {
           this.geona.map.addLayer(geonaLayer, layerServerInfoDeepCopy.layerServer);
         }
@@ -322,10 +322,10 @@ export class MainMenu {
    * @param {String} layerIdentifier The layer identifier for a Geona layer
    */
   addAvailableLayerToMap(layerIdentifier) {
-    let layer = this.geona.map._availableLayers[layerIdentifier];
-    let layerServer = this.geona.map._availableLayerServers[layer.layerServer];
+    let layer = this.geona.map.availableLayers[layerIdentifier];
+    let layerServer = this.geona.map.availableLayerServers[layer.layerServer];
     if (layer.modifier === 'hasTime') {
-      this.geona.map.addLayer(layer, layerServer, {modifier: 'hasTime'});
+      this.geona.map.addLayer(layer, layerServer, { modifier: 'hasTime' });
     } else {
       this.geona.map.addLayer(layer, layerServer);
     }
@@ -361,10 +361,11 @@ export class MainMenu {
   /**
    * Populates the layers panel with the active layer information.
    */
-  constructLayersPanel() { // todo do all this for wmts layers :(
+  constructLayersPanel() {
+    // Appends the layers panel itself
     this.geonaDiv.find('.js-geona-panel').append(templates.layers_panel());
 
-    let activeLayersKeys = Object.keys(this.geona.map._activeLayers);
+    let activeLayersKeys = Object.keys(this.geona.map.activeLayers);
     // Double loop used to find the zIndex of a layer so the list can be populated correctly
     for (let index = 0; index < activeLayersKeys.length; index++) {
       // Loop through the active layers on the map and populate the layers list
@@ -375,11 +376,6 @@ export class MainMenu {
           this.addLayerItem(activeLayerKey);
         }
       }
-    }
-
-    this.layersPanelItemList.length = 0;
-    for (let layerBox of this.geonaDiv.find('.js-geona-layers-list').children()) {
-      this.layersPanelItemList.unshift(layerBox.dataset.identifier);
     }
 
     // Find the topmost HTML element in the list to use for the default active layer
@@ -399,12 +395,13 @@ export class MainMenu {
     if (modifier === 'basemap' || modifier === 'borders') {
       throw new Error('Cannot add a map layer item to the GUI for a basemap or borders layer! Use a layer with no modifier or a \'hasTime\' modifier instead.');
     } else {
-      let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+      let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
       // Get the data in the correct format from the geona layer
       let data = this._compileLayerData(geonaLayer);
       // Insert layer data object at the top of the list - higher on the list means higher on the map
-      this.geonaDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
+      this.geonaDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({ data: data }));
       let item = this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + data.info.identifier + '"]');
+      this.layersPanelItemList.unshift(data.info.identifier);
 
       let scalebar = new Scalebar(this, {
         layersPanelItem: item,
@@ -415,6 +412,7 @@ export class MainMenu {
       // fixme race condition from GetMetadata - results in scale ticks being NaN amongst other things
       scalebar.drawScalebar();
 
+      // Update the elements on the item to reflect the current layer options
       // Update the logarithmic checkbox
       if (data.settings.logarithmic) {
         $(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', true);
@@ -493,10 +491,9 @@ export class MainMenu {
   /**
    * Takes a Geona layer and constructs an object to use when displaying layer information on the layers list
    * @param {Layer}   geonaLayer The Geona layer definition to get information from.
-   * @return {Object}            Object containing information used by the layer item template
+   * @return {LayerData}            Object containing information used by the layer item template
    */
   _compileLayerData(geonaLayer) {
-    // todo typedef for LayerData
     // Compile data for the settings panel
     let layerSettings = {};
 
@@ -555,7 +552,7 @@ export class MainMenu {
           layerInfo.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' only.';
         } else {
           layerInfo.dateRange = moment.utc(sortedDates[0]).format('YYYY-MM-DD') + ' to ' +
-          moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD');
+            moment.utc(sortedDates[sortedDates.length - 1]).format('YYYY-MM-DD');
         }
       }
     }
@@ -564,7 +561,7 @@ export class MainMenu {
       layerInfo.abstract = selectPropertyLanguage(geonaLayer.abstract);
     }
     // Contact Information
-    let layerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+    let layerServer = this.geona.map.availableLayerServers[geonaLayer.layerServer];
     if (layerServer.service && layerServer.service.contactInformation) {
       layerInfo.contactInformation = layerServer.service.contactInformation;
     }
@@ -588,8 +585,8 @@ export class MainMenu {
       this.layersPanelItemList.unshift(layerBox.dataset.identifier);
     }
 
-    let basemapActive = false;
-    for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+    let basemapActive = false; // todo change to 'if config.basemap is truthy' (and tbh this block can be removed and just use that in the if below)
+    for (let layerIdentifier of Object.keys(this.geona.map.activeLayers)) {
       if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'basemap') {
         basemapActive = true;
       }
@@ -695,7 +692,7 @@ export class MainMenu {
    */
   applyAutoScale(item) {
     let layerIdentifier = item.dataset.identifier;
-    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
 
     this.layersPanelScalebars[layerIdentifier].getAutoScale()
       .then((minMaxObject) => {
@@ -812,7 +809,7 @@ export class MainMenu {
       this.removeChangesBufferButton(layerIdentifier);
     } else {
       throw new Error('Changes buffer has not been initialised for layer ' + layerIdentifier +
-      '. Add a function to the buffer first.');
+        '. Add a function to the buffer first.');
     }
   }
 
@@ -872,7 +869,7 @@ export class MainMenu {
    * @param {String} optionValue     The value returned from the dropdown option.
    */
   setBelowMinColor(layerIdentifier, optionValue) {
-    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
 
     // Regex for matching '0x' followed by a valid hex code
     if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue) || optionValue === 'transparent') {
@@ -895,7 +892,7 @@ export class MainMenu {
    * @param {String} optionValue     The value returned from the dropdown option.
    */
   setAboveMaxColor(layerIdentifier, optionValue) {
-    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
 
     // Regex for matching '0x' followed by a valid hex code
     if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue) || optionValue === 'transparent') {
@@ -968,7 +965,7 @@ export class MainMenu {
 
     // Set the new option for the Geona Layer
     let layerIdentifier = item.dataset.identifier;
-    let geonaLayer = this.geona.map._availableLayers[layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
     geonaLayer.scale.numColorBands = numColorBands;
 
     // Add the function to update scalebar to the buffer
@@ -1068,7 +1065,7 @@ export class MainMenu {
    */
   constructOptionsPanel() {
     let data = this._compileOptionsData();
-    this.geonaDiv.find('.js-geona-panel').prepend(templates.options_panel({data: data}));
+    this.geonaDiv.find('.js-geona-panel').prepend(templates.options_panel({ data: data }));
 
     // Sets the selected dropdown value to match the map's basemap
     for (let basemap of data.basemaps) {
@@ -1108,8 +1105,8 @@ export class MainMenu {
     let borders = [];
 
     // Loop through the available layers on the map
-    for (let layerIdentifier of Object.keys(this.geona.map._availableLayers)) {
-      let layer = this.geona.map._availableLayers[layerIdentifier];
+    for (let layerIdentifier of Object.keys(this.geona.map.availableLayers)) {
+      let layer = this.geona.map.availableLayers[layerIdentifier];
       // We only take data from basemap and borders layers
       switch (layer.modifier) {
         case 'basemap': {
@@ -1152,9 +1149,9 @@ export class MainMenu {
       this.geona.map._clearBasemap();
     } else {
       // Add the new basemap
-      let geonaLayer = this.geona.map._availableLayers[basemapIdentifier];
-      let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
-      this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'basemap'});
+      let geonaLayer = this.geona.map.availableLayers[basemapIdentifier];
+      let geonaLayerServer = this.geona.map.availableLayerServers[geonaLayer.layerServer];
+      this.geona.map.addLayer(geonaLayer, geonaLayerServer, { modifier: 'basemap' });
       // Select the correct projection dropdown option
       let projection = this.geona.map.config.projection;
       this.selectProjection(projection);
@@ -1172,9 +1169,9 @@ export class MainMenu {
     } else {
       this.geona.map._clearBorders();
 
-      let geonaLayer = this.geona.map._availableLayers[bordersIdentifier];
-      let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
-      this.geona.map.addLayer(geonaLayer, geonaLayerServer, {modifier: 'borders', requestedStyle: bordersStyle});
+      let geonaLayer = this.geona.map.availableLayers[bordersIdentifier];
+      let geonaLayerServer = this.geona.map.availableLayerServers[geonaLayer.layerServer];
+      this.geona.map.addLayer(geonaLayer, geonaLayerServer, { modifier: 'borders', requestedStyle: bordersStyle });
     }
   }
 
@@ -1291,7 +1288,68 @@ function forceCssReflow(element) {
   void element.offsetWidth; // eslint-disable-line no-void
 }
 
-/* Type definitions for class */
+
+/* Type definitions for this class */
+
+/**
+ * @typedef {Object} MenuConfigOptions
+ *   @property {Boolean} opened      Whether to load the menu opened or closed.
+ *   @property {Boolean} allowToggle Whether to allow the menu to be toggled open or closed.
+ */
+
+/**
+ * A 'this' context, which may be different from this Class instance's 'this' context.
+ * @typedef {this} This
+ */
+
+/**
+ * Contains information about data layers in the current Geona instance. Used when creating a Layers panel item on the
+ * main menu.
+ * @typedef {Object} LayerData
+ *   @property {LayerDataSettings} settings Contains information needed to populate the settings tab for a layer.
+ *   @property {LayerDataInfo}     info     Contains information needed to populate the info tab for a layer.
+ */
+/**
+ * Contains all the information needed to populate the settings tab for a layer.
+ * @typedef {Object} LayerDataSettings
+ *   @property {Number}   min            The current minimum scale value.
+ *   @property {Number}   max            The current maximum scale value.
+ *   @property {Boolean}  logarithmic    Whether the scale is logarithmic or not.
+ *   @property {Number}   opacityReal    The opacity as a Number between 0 and 1.
+ *   @property {Number}   opacityPercent The opacity as a Number between 0 and 100.
+ *   @property {String[]} styles         The identifiers for the styles for the layer.
+ *   @property {String}   currentStyle   The currently-used style for the layer.
+ *   @property {String}   belowMinColor  The color to use for values below the minimum value.
+ *   @property {String}   aboveMaxColor  The color to use for values above the maximum value.
+ *   @property {Number}   numColorBands  The number of color bands used in the scale.
+ */
+/**
+ * Contains all the information needed to populate the info tab for a layer.
+ * @typedef {Object} LayerDataInfo
+ *   @property {String}            identifier           The identifier for the layer.
+ *   @property {String}            [title]              The title or display name in the appropriate language.
+ *   @property {BoundingBox}       [boundingBox]        The bounding box for the layer.
+ *   @property {String}            [dateRange]          The date range for the layer in format 'X to Y' or 'X only'.
+ *   @property {String}            [abstract]           The abstract in the appropriate language.
+ *   @property {ContactInfomation} [contactInformation] The contact details of the data provider.
+ */
+/**
+ * Contains North, East, South and West values to represent the bounding box for the layer.
+ * @typedef {Object} BoundingBox
+ *   @property {Number} north The highest latitude covered for the layer.
+ *   @property {Number} east  The greatest longitude covered for the layer.
+ *   @property {Number} south The lowest latitude covered for the layer.
+ *   @property {Number} west  The lowest longitude covered for the layer.
+ */
+// todo check what's missing and what's optional in ContactInformation
+/**
+ * Contains contact details for the data provider.
+ * @typedef {Object} ContactInfomation
+ *   @property {String[]} email  The email addresses for the data provider.
+ *   @property {String}   person The name of the data provider.
+ *   @property {String[]} phone  The phone numbers for the data provider.
+ */
+
 /**
  * Contains information about basemap and borders layers in the current Geona instance. Used when creating the Options
  * panel on the main menu.
@@ -1312,3 +1370,4 @@ function forceCssReflow(element) {
  *   @property {String}   title      The correct-language title for the borders layer.
  *   @property {String[]} styles     The identifiers for the styles for the borders layer.
  */
+

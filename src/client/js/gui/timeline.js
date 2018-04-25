@@ -1,3 +1,5 @@
+/** @module timeline */
+
 import 'jquery';
 import * as d3 from 'd3';
 import tippy from 'tippy.js';

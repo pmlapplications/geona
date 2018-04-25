@@ -6,7 +6,7 @@ import request from 'request';
 import moment from 'moment';
 import _ from 'lodash';
 
-import {urlToFilename} from '../../common/map';
+import { urlToFilename } from '../../common/map';
 import LayerWms from '../../common/layer/layer_wms';
 import LayerWmts from '../../common/layer/layer_wmts';
 
@@ -304,7 +304,7 @@ export function loadDefaultLayersAndLayerServers(config, geonaServer) {
       uniqueLayerServers[layerServer.identifier] = layerServer;
     } else { // Merge the layers from both
       uniqueLayerServers[layerServer.identifier].layers =
-          uniqueLayerServers[layerServer.identifier].layers.concat(layerServer.layers);
+        uniqueLayerServers[layerServer.identifier].layers.concat(layerServer.layers);
     }
   }
   // Extract the layers from all the layerServers
@@ -329,8 +329,8 @@ export function loadDefaultLayersAndLayerServers(config, geonaServer) {
           } else {
             throw new Error(
               'Layer ' + layer.identifier + ' in LayerServer ' + layerServer.identifier +
-                ' has different LayerServer property (' + layer.layerServer +
-                '). Please ensure the Layer\'s layerServer property matches the identifier for its LayerServer.'
+              ' has different LayerServer property (' + layer.layerServer +
+              '). Please ensure the Layer\'s layerServer property matches the identifier for its LayerServer.'
             );
           }
         } else {

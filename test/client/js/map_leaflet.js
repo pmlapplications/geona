@@ -2354,12 +2354,12 @@ describe('client/js/map_leaflet', function() {
     it('should find that the variable \'geona\' points to the Geona object on the window', function() {
       expect(geona).to.deep.equal(window.geonaLeafTest);
     });
-    it('should find eight layers in _availableLayers', function() {
-      let availableLayersArray = Object.keys(geona.map._availableLayers);
+    it('should find eight layers in availableLayers', function() {
+      let availableLayersArray = Object.keys(geona.map.availableLayers);
       expect(availableLayersArray.length).to.equal(8);
     });
-    it('should find four layerServers in _availableLayerServers', function() {
-      let availableLayerServersArray = Object.keys(geona.map._availableLayerServers);
+    it('should find four layerServers in availableLayerServers', function() {
+      let availableLayerServersArray = Object.keys(geona.map.availableLayerServers);
       expect(availableLayerServersArray.length).to.equal(4);
     });
     it('should find attribution prefix', function() {
@@ -2369,25 +2369,25 @@ describe('client/js/map_leaflet', function() {
     after(function() {
     // Shorthand for the available layers, used to keep tests shorter and more readable
     // Basemaps
-      terrainLight = geona.map._availableLayers['terrain-light'];
-      gebco08Grid = geona.map._availableLayers.gebco_08_grid;
+      terrainLight = geona.map.availableLayers['terrain-light'];
+      gebco08Grid = geona.map.availableLayers.gebco_08_grid;
       // Borders
-      rsgFull10mBorders = geona.map._availableLayers['rsg:full_10m_borders'];
+      rsgFull10mBorders = geona.map.availableLayers['rsg:full_10m_borders'];
       // Data
-      rrs412 = geona.map._availableLayers.Rrs_412;
-      rrs443 = geona.map._availableLayers.Rrs_443;
-      rrs490 = geona.map._availableLayers.Rrs_490;
-      chlorA = geona.map._availableLayers.chlor_a;
+      rrs412 = geona.map.availableLayers.Rrs_412;
+      rrs443 = geona.map.availableLayers.Rrs_443;
+      rrs490 = geona.map.availableLayers.Rrs_490;
+      chlorA = geona.map.availableLayers.chlor_a;
 
       // Shorthand for the available layerServers, used to keep tests shorter and more readable
       // Basemaps
-      eox = geona.map._availableLayerServers['https__tiles.maps.eox.at_wms__wms_1.1.1_getcapabilities'];
-      gebco = geona.map._availableLayerServers['https__www.gebco.net_data_and_products_gebco_web_services_web_map_service_mapserv__wms_1.1.1_getcapabilities'];
+      eox = geona.map.availableLayerServers['https__tiles.maps.eox.at_wms__wms_1.1.1_getcapabilities'];
+      gebco = geona.map.availableLayerServers['https__www.gebco.net_data_and_products_gebco_web_services_web_map_service_mapserv__wms_1.1.1_getcapabilities'];
       // Borders
-      rsgGeoserver = geona.map._availableLayerServers['https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities'];
+      rsgGeoserver = geona.map.availableLayerServers['https__rsg.pml.ac.uk_geoserver_wms__wms_1.1.0_getcapabilities'];
       // Data
-      rsgCci = geona.map._availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities'];
-      rsgCci315 = geona.map._availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities'];
+      rsgCci = geona.map.availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities'];
+      rsgCci315 = geona.map.availableLayerServers['https__rsg.pml.ac.uk_thredds_wms_cci_all-v3.1-5day__wms_1.3.0_getcapabilities'];
     });
   });
 
@@ -2404,8 +2404,8 @@ describe('client/js/map_leaflet', function() {
       // Also tests that there isn't another layer on the map (index 0 should be the only one with data)
       expect(mapLayers.getLayers()[0].options.identifier).to.equal(rrs412.identifier);
     });
-    it('should have added that layer to _availableLayers', function() {
-      expect(geona.map._availableLayers[rrs412.identifier]).to.not.be.undefined;
+    it('should have added that layer to availableLayers', function() {
+      expect(geona.map.availableLayers[rrs412.identifier]).to.not.be.undefined;
     });
     it('should have added that layer to _mapLayers', function() {
       let identifiedLayer;
@@ -2475,7 +2475,7 @@ describe('client/js/map_leaflet', function() {
     it('should remove the previous borders when a new borders layer is added', function() {
       geona.map.addLayer(rsgFull10mBorders, rsgGeoserver, {modifier: 'borders', requestedStyle: 'line'});
       // Amount of expects might be a bit overkill
-      expect(geona.map._activeLayers['rsg:full_10m_borders'].options.styles).to.equal('line');
+      expect(geona.map.activeLayers['rsg:full_10m_borders'].options.styles).to.equal('line');
       let numberOfBordersModifiers = 0;
       for (let layer of geona.map._mapLayers.getLayers()) {
         if (layer.options.modifier === 'borders') {
@@ -2984,39 +2984,39 @@ describe('client/js/map_leaflet', function() {
       }).to.throw(Error);
     });
     it('should find that the layer time for the first layer added is set to the default', function() {
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs412Active.options.layerTime).to.equal('2015-12-27T00:00:00.000Z');
     });
     it('should find that the layer time for the second layer added is set to the nearest valid time as the first layer', function() {
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs490Active.options.layerTime).to.equal('2015-12-27T00:00:00.000Z');
     });
     it('should change the Rrs_412 layer time to 1998-01-01T00:00:00.000Z', function() {
       geona.map.loadNearestValidTime('Rrs_412', '1998-01-01T00:00:00.000Z');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs412Active.options.layerTime).to.equal('1998-01-01T00:00:00.000Z');
     });
     it('should change the Rrs_490 layer time to 2001-04-01T00:00:00.000Z', function() {
       geona.map.loadNearestValidTime('Rrs_490', '2001-04-01T00:00:00.000Z');
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs490Active.options.layerTime).to.equal('2001-04-01T00:00:00.000Z');
     });
     it('should hide the layers because there is no valid time', function() {
       geona.map.loadNearestValidTime('Rrs_490', '1900-12-27T00:00:00.000Z');
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs490Active.options.opacity).to.equal(0);
       expect(rrs490Active.options.shown).to.equal(true);
 
       // For the purposes of the next tests, we will hide this layer before moving it to the invalid time
       geona.map.hideLayer('Rrs_412');
       geona.map.loadNearestValidTime('Rrs_412', '1900-12-27T00:00:00.000Z');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs412Active.options.opacity).to.equal(0);
       expect(rrs412Active.options.shown).to.equal(false);
     });
     it('should keep the layer times the same as their previous time after being hidden', function() {
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs490Active.options.layerTime).to.equal('2001-04-01T00:00:00.000Z');
       expect(rrs412Active.options.layerTime).to.equal('1998-01-01T00:00:00.000Z');
     });
@@ -3025,7 +3025,7 @@ describe('client/js/map_leaflet', function() {
     });
     it('should make the layer visible', function() {
       geona.map.loadNearestValidTime('Rrs_490', '2010-01-01T00:00:00.000Z');
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs490Active.options.opacity).to.equal(1);
       expect(rrs490Active.options.shown).to.equal(true);
     });
@@ -3034,13 +3034,13 @@ describe('client/js/map_leaflet', function() {
     });
     it('should keep the layer hidden if the layer is out of valid time', function() {
       geona.map.showLayer('Rrs_412');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs412Active.options.opacity).to.equal(0);
     });
     it('should keep the layer hidden if the layer had been hidden prior to moving out of valid time', function() {
       geona.map.hideLayer('Rrs_412');
       geona.map.loadNearestValidTime('Rrs_412', '1998-01-01T00:00:00.000Z');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs412Active.options.shown).to.equal(false);
     });
 
@@ -3063,8 +3063,8 @@ describe('client/js/map_leaflet', function() {
 
     it('should set the layers to valid times', function() {
       geona.map.loadLayersToNearestValidTime('2001-04-01T00:00:00.000Z');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs412Active.options.layerTime).to.equal('1998-01-01T00:00:00.000Z');
       expect(rrs490Active.options.layerTime).to.equal('2001-04-01T00:00:00.000Z');
     });
@@ -3073,8 +3073,8 @@ describe('client/js/map_leaflet', function() {
     });
     it('should hide both layers', function() {
       geona.map.loadLayersToNearestValidTime('1900-01-01T00:00:00.000Z');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs412Active.options.opacity).to.equal(0);
       expect(rrs490Active.options.opacity).to.equal(0);
     });
@@ -3083,8 +3083,8 @@ describe('client/js/map_leaflet', function() {
     });
     it('should hide both layers', function() {
       geona.map.loadLayersToNearestValidTime('2200-01-01T00:00:00.000Z');
-      let rrs412Active = geona.map._activeLayers.Rrs_412;
-      let rrs490Active = geona.map._activeLayers.Rrs_490;
+      let rrs412Active = geona.map.activeLayers.Rrs_412;
+      let rrs490Active = geona.map.activeLayers.Rrs_490;
       expect(rrs412Active.options.opacity).to.equal(0);
       expect(rrs490Active.options.opacity).to.equal(0);
     });
@@ -3111,12 +3111,12 @@ describe('client/js/map_leaflet', function() {
       geona.map.addLayer(rrs490, rsgCci, {modifier: 'hasTime'});
     });
 
-    it('should throw an error that the layer isn\'t in _availableLayers', function() {
+    it('should throw an error that the layer isn\'t in availableLayers', function() {
       expect(function() {
         geona.map.changeLayerStyle('', 'boxfill/occam');
       }).to.throw(Error);
     });
-    it('should throw an error that the layer isn\'t in _activeLayers', function() {
+    it('should throw an error that the layer isn\'t in activeLayers', function() {
       expect(function() {
         geona.map.changeLayerStyle('Rrs_443', 'boxfill/occam');
       }).to.throw(Error);
@@ -3135,12 +3135,12 @@ describe('client/js/map_leaflet', function() {
     // Defined in the next test, used elsewhere
     let initialZIndex;
     it('should change the layer style', function() {
-      rrs412Active = geona.map._activeLayers.Rrs_412;
+      rrs412Active = geona.map.activeLayers.Rrs_412;
       initialZIndex = rrs412Active.options.zIndex;
 
       let initialStyle = rrs412Active.options.styles;
       geona.map.changeLayerStyle('Rrs_412', 'boxfill/occam');
-      rrs412Active = geona.map._activeLayers.Rrs_412;
+      rrs412Active = geona.map.activeLayers.Rrs_412;
       expect(rrs412Active.options.styles).to.equal('boxfill/occam');
       expect(rrs412Active.options.styles).to.not.equal(initialStyle);
     });
@@ -3154,7 +3154,7 @@ describe('client/js/map_leaflet', function() {
       let initialTime = rrs412Active.options.layerTime;
       geona.map.loadNearestValidTime('Rrs_412', '2002-01-01T00:00:00.000Z');
 
-      rrs412Active = geona.map._activeLayers.Rrs_412;
+      rrs412Active = geona.map.activeLayers.Rrs_412;
       let currentStyle = rrs412Active.options.styles;
       let currentTime = rrs412Active.options.layerTime;
       expect(currentStyle).to.equal(initialStyle);

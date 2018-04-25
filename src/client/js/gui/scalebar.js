@@ -1,3 +1,5 @@
+/** @module scalebar */
+
 import * as templates from '../../templates/compiled';
 import $ from 'jquery';
 
@@ -19,7 +21,7 @@ export class Scalebar {
 
     /** @type {HTMLElement} @desc The item this scalebar belongs to. */
     this.layersPanelItem = scalebarConfigOptions.layersPanelItem;
-    /** @type {HTMLElement} @desc The identifier for the layer this scalebar represents. */
+    /** @type {String} @desc The identifier for the layer this scalebar represents. */
     this.layerIdentifier = scalebarConfigOptions.layerIdentifier;
 
     /** @type {Number} @desc CONST - The number of divisions to search when finding the min and max scale values. */
@@ -31,7 +33,7 @@ export class Scalebar {
    * @return {ScalebarDetails} The information needed to draw a scalebar.
    */
   getScalebarDetails() {
-    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     let activeStyle = this.geona.map.layerSourceGet(this.layerIdentifier, 'style');
 
     if (!geonaLayer) {
@@ -209,7 +211,7 @@ export class Scalebar {
     if (baseUrl.length > 1) {
       return baseUrl + requestParameters;
     } else {
-      let serverUrl = this.geona.map._availableLayerServers[geonaLayer.layerServer].url;
+      let serverUrl = this.geona.map.availableLayerServers[geonaLayer.layerServer].url;
       if (serverUrl.indexOf('?') === -1) {
         serverUrl = serverUrl + '?';
       }
@@ -225,8 +227,8 @@ export class Scalebar {
    */
   getAutoScale() {
     return new Promise((resolve, reject) => {
-      let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
-      let geonaLayerServer = this.geona.map._availableLayerServers[geonaLayer.layerServer];
+      let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
+      let geonaLayerServer = this.geona.map.availableLayerServers[geonaLayer.layerServer];
       let baseUrl = geonaLayerServer.url;
 
       // We need the baseUrl to have a '?' before the request parameters
@@ -264,7 +266,7 @@ export class Scalebar {
    * Resets the scale to its original values.
    */
   resetScale() { // todo should this be a 'getResetScale' to be then manually used with validateScale()?
-    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     let min = geonaLayer.scale.minDefault;
     let max = geonaLayer.scale.maxDefault;
     let log = geonaLayer.scale.logarithmicDefault;
@@ -279,7 +281,7 @@ export class Scalebar {
    * @param {Boolean}       [instant]   If True, will immediately apply the change instead of asking to confirm changes.
    */
   validateScale(min, max, logarithmic, instant = false) {
-    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     let newMin = parseFloat(min);
     let newMax = parseFloat(max);
     let isLogarithmic = logarithmic;
@@ -332,9 +334,9 @@ export class Scalebar {
    * scalebar to be redrawn.
    */
   updateScalebar() {
-    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     // todo these need to be set at the start as well (in OL and L map libraries)
-    // fixme these options all need to be set somewhere (e.g. above max color is never set)
+    // todo these options all need to be set somewhere (e.g. above max color is never set)
     let params = {
       colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
       logScale: geonaLayer.scale.logarithmic,
@@ -353,8 +355,8 @@ export class Scalebar {
   /**
    * Draws a scalebar based on the current settings. Will replace the currently-displayed scalebar if there is one.
    */
-  drawScalebar() { // todo make sure min and max (and all info actually) are correctly defaulting
-    let geonaLayer = this.geona.map._availableLayers[this.layerIdentifier];
+  drawScalebar() {
+    let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
 
     let scalebarDetails = this.getScalebarDetails();
 
@@ -412,6 +414,13 @@ function convertToStandardForm(number) {
 }
 
 /* Type definitions for this class */
+
+/**
+ * @typedef {Object} ScalebarConfigOptions
+ *   @property {HTMLElement} layersPanelItem The item which contains this scalebar.
+ *   @property {String}      layerIdentifier The identifier for the layer this scalebar represents.
+ */
+
 /**
  * A ScalebarDetails object contains all the information needed to make a call for a new scalebar.
  * @typedef {Object} ScalebarDetails

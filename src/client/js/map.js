@@ -59,7 +59,7 @@ export default class GeonaMap {
 
   /**
    * Add the specified data layer onto the map, using the specified options.
-   * Will also add a Geona layer to the _availableLayers if not already included.
+   * Will also add a Geona layer to the availableLayers if not already included.
    *
    * @param {Layer}   geonaLayer               The Geona Layer object to be created as an OpenLayers layer on the map.
    * @param {Object}  [options]                A list of options that affect the layers being added

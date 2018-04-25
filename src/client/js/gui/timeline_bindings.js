@@ -6,11 +6,11 @@
 export function registerBindings(eventManager, timeline) {
   // Change time
   eventManager.bind('mainMenu.addUrlLayerToMap', (layerIdentifier) => {
-    let layer = timeline.geona.map._availableLayers[layerIdentifier];
+    let layer = timeline.geona.map.availableLayers[layerIdentifier];
     timeline.addTimelineLayer(layer);
   });
   eventManager.bind('mainMenu.addAvailableLayerToMap', (layerIdentifier) => {
-    let layer = timeline.geona.map._availableLayers[layerIdentifier];
+    let layer = timeline.geona.map.availableLayers[layerIdentifier];
     timeline.addTimelineLayer(layer);
   });
   eventManager.bind('mainMenu.removeLayer', (item) => {

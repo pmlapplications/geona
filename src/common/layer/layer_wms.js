@@ -15,6 +15,7 @@ export default class LayerWms extends LayerVisible {
   constructor(geonaServer, layerConfig, layerServer) {
     super(layerConfig, layerServer);
     this.protocol = 'wms';
+    this.metadataRetrieved = undefined;
     this.scale = {};
 
     if (layerConfig.scale) {
@@ -93,8 +94,12 @@ export default class LayerWms extends LayerVisible {
           if (!this.scale.rotationAngle) {
             this.scale.rotationAngle = 0;
           }
-        }
-        );
+
+          this.metadataRetrieved = true;
+          // todo trigger event
+        }).catch((err) => {
+          this.metadataRetrieved = false;
+        });
     }
   }
 }

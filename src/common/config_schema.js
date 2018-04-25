@@ -77,7 +77,7 @@ export let client = {
         format: Boolean,
         default: true,
       },
-      collapsible: {
+      allowToggle: {
         doc: 'Whether the controls to show and hide the menu are shown.',
         format: Boolean,
         default: true,
@@ -89,10 +89,20 @@ export let client = {
         format: Boolean,
         default: true,
       },
-      collapsible: {
+      openedWithNoLayers: {
+        doc: 'Whether the timeline is displayed on load when there are no active layers.',
+        format: Boolean,
+        default: false,
+      },
+      allowToggle: {
         doc: 'Whether the controls to show and hide the timeline are shown.',
         format: Boolean,
         default: true,
+      },
+      allowToggleWithNoLayers: {
+        doc: 'Whether the controls to show and hide the timeline are shown when there are no active data layers.',
+        format: Boolean,
+        default: false,
       },
       openOnLayerLoad: {
         doc: 'Whether the timeline should be opened when a layer is added to the map.',
@@ -154,11 +164,15 @@ export let client = {
     },
     // Takes an identifier and a style (for no borders, just set both to 'none')
     borders: {
-      doc: 'Which country borders to display, or \'none\'.',
-      format: Object,
-      default: {
-        identifier: 'rsg:full_10m_borders',
-        style: 'line_black',
+      identifier: {
+        doc: 'The identifier for the borders layer, or \'none\'.',
+        format: String,
+        default: 'none',
+      },
+      style: {
+        doc: 'The identifier for the requested style of the layer, or \'none\'.',
+        format: String,
+        default: 'none',
       },
     },
     bordersLayers: {
@@ -200,7 +214,8 @@ export let client = {
     data: {
       doc: 'The identifier for the data layers to put on the map by default.',
       format: Array,
-      default: ['Rrs_412', 'chlor_a'],
+      default: [],
+      // default: ['Rrs_412', 'chlor_a'],
       // default: ['chlor_a', 'Rrs_412'],
     },
     dataLayers: {

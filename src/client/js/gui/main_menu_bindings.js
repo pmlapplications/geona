@@ -82,7 +82,7 @@ export function registerBindings(eventManager, menu) {
     try {
       menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
     } catch (err) {
-      let geonaLayer = menu.geona.map._availableLayers[layerIdentifier];
+      let geonaLayer = menu.geona.map.availableLayers[layerIdentifier];
       switch (err.name) {
         case 'MinValueInvalidError':
           menu.setScalebarInputs(item, geonaLayer.scale.min, max, log);

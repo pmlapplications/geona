@@ -4,7 +4,7 @@ import fs from 'fs';
 import $ from 'jquery';
 import LayerServer from '../../common/layer/server/layer_server';
 import LayerServerWmts from '../../common/layer/server/layer_server_wmts';
-import {urlToFilename} from '../../common/map';
+import { urlToFilename } from '../../common/map';
 import request from 'request';
 import LayerWms from '../../common/layer/layer_wms';
 import LayerWmts from '../../common/layer/layer_wmts';
@@ -158,7 +158,7 @@ export function resetParameterTypes(parameters) {
     // If the param is a number
     if (!isNaN(param)) {
       // If the param contains a decimal point or the word 'Infinity'
-      if (/\.|Infinity/.test(param) === true ) {
+      if (/\.|Infinity/.test(param) === true) {
         convertedParameters.push(parseFloat(param));
       } else { // Param is an int
         convertedParameters.push(parseInt(param, 10));

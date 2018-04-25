@@ -1,3 +1,5 @@
+/** @module time_panel */
+
 import 'jquery';
 import * as templates from '../../templates/compiled';
 import Pikaday from 'pikaday-time';
@@ -20,6 +22,7 @@ export class TimePanel {
    */
   constructor(gui, timelineConfigOptions) {
     // TODO make all instances of 'date' or 'time' into 'datetime'
+    // TODO need to account for config options (allow toggle, and variants with no active layers
     this.gui = gui;
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
@@ -55,7 +58,7 @@ export class TimePanel {
     if (!this.config.opened) {
       this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
     }
-    if (!this.config.collapsible) {
+    if (!this.config.allowToggle) {
       this.geonaDiv.find('.js-geona-time-panel-toggle').remove();
     }
 
@@ -95,9 +98,9 @@ export class TimePanel {
         elementId: instanceId + '-timeline-container',
       });
 
-      for (let layerIdentifier of Object.keys(this.geona.map._activeLayers)) {
+      for (let layerIdentifier of Object.keys(this.geona.map.activeLayers)) {
         if (this.geona.map.layerGet(layerIdentifier, 'modifier') === 'hasTime') {
-          let availableLayer = this.geona.map._availableLayers[layerIdentifier];
+          let availableLayer = this.geona.map.availableLayers[layerIdentifier];
           this.timeline.addTimelineLayer(availableLayer);
         }
       }

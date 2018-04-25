@@ -1,3 +1,5 @@
+/** @module terms_and_conditions */
+
 import * as templates from '../../templates/compiled';
 import {registerBindings} from './terms_and_conditions_bindings';
 import {registerTriggers} from './terms_and_conditions_triggers';
