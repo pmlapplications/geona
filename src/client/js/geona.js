@@ -21,7 +21,7 @@ window.$ = $;
 export class Geona {
   /**
    * Create a new Geona instance, optionally providing a client config.
-   * @param  {Object} clientConfig A JSON client config.
+   * @param {Object} [clientConfig] A JSON client config.
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);

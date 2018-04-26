@@ -67,11 +67,12 @@ export function getServersideLayerServer(req, res) { // TODO rename whole chain 
 
 /**
  * Gets the server config from cache or from URL
- * @param  {String}  url      URL for service request
- * @param  {String}  protocol Explicitly-defined lowercase service type
- * @param  {Boolean} save     Whether to save the retrieved config to cache
- * @param  {Boolean} useCache Whether to retrieve from cache or to fetch from the web and overwrite
- * @return {Array}            List of layers found from the request
+ * @param  {String}  geonaServer The address of the server that Geona should query.
+ * @param  {String}  url         URL for service request.
+ * @param  {String}  protocol    Explicitly-defined lowercase service type.
+ * @param  {Boolean} save        Whether to save the retrieved config to cache.
+ * @param  {Boolean} useCache    Whether to retrieve from cache or to fetch from the web and overwrite.
+ * @return {Array}               List of layers found from the request.
  */
 export function getLayerServerFromCacheOrUrl(geonaServer, url, protocol, save, useCache) {
   return new Promise((resolve, reject) => {

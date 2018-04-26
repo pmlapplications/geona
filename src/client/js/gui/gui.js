@@ -23,21 +23,21 @@ export class Gui {
    * @param {Geona} geona The Geona instance for this GUI.
    */
   constructor(geona) {
-    /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
+    /** This instance of Geona. Used to gain access to the map from the GUI. @type {Geona} */
     this.geona = geona;
-    /** @type {HTMLElement} @desc The div containing this instance of Geona. Used to find the correct GUI elements. */
+    /** The div containing this instance of Geona. Used to find the correct GUI elements. @type {HTMLElement} */
     this.geonaDiv = this.geona.geonaDiv;
 
-    /** @type {TermsAndConditions} @desc The terms and conditions class which displays Ts&Cs before loading the map. */
+    /** The terms and conditions class which displays Ts&Cs before loading the map. @type {TermsAndConditions} */
     this.termsAndConditions = undefined;
-    /** @type {SplashScreen} @desc The splash screen class which displays an overlay on top of the map on load. */
+    /** The splash screen class which displays an overlay on top of the map on load. @type {SplashScreen} */
     this.splashScreen = undefined;
-    /** @type {MainMenu} @desc The main menu class which displays the main menu on top of the map. */
+    /** The main menu class which displays the main menu on top of the map. @type {MainMenu} */
     this.mainMenu = undefined;
-    /** @type {TimePanel} @desc The time panel class which displays timeline controls on top of the map. */
+    /** The time panel class which displays timeline controls on top of the map. @type {TimePanel} */
     this.timePanel = undefined;
 
-    /** @type {String} @private @desc The name of a window function to call once the map has finished initialising.  */
+    /** The name of a window function to call once the map has finished initialising. @type {String} @private */
     this._onReadyCallback = undefined;
   }
 
@@ -73,7 +73,7 @@ export class Gui {
     let mapDiv = this.geonaDiv.find('.geona-map')[0];
 
     // Load the map
-    let mapPromise = this.geona.loadMap(mapDiv);
+    let mapPromise = this.geona.loadMap(mapDiv); // todo I feel like this should go outside the GUI somehow, just for separation concerns
 
     let splashScreenConfig = this.geona.config.get('intro.splashScreen');
     if (splashScreenConfig.display) {

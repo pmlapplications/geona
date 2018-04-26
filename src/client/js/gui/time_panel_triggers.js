@@ -71,7 +71,7 @@ export function registerTriggers(eventManager, geonaDiv, timePanel) {
 
     // If this Geona instance is the active element
     if (instanceActive) {
-      // TODO if the overlay is not visible and the collaboration overlay is not visible (from GISPortal)
+      // TODO if the overlay is not visible and the collaboration overlay is not visible (from GISPortal - timeline.js, line 379)
       // if () {
       // If the timeline is instantiated and accepting keyboard commands
       if (timePanel.timeline
@@ -85,7 +85,7 @@ export function registerTriggers(eventManager, geonaDiv, timePanel) {
             eventManager.trigger('timePanel.stepChangeTime', 'next-short');
         }
       }
-    // }
+      // }
     }
   });
 }

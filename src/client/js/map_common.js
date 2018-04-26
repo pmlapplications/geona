@@ -131,11 +131,12 @@ export function urlInCache(geonaServer, url) {
 
 /**
  * Fetches layers for all supported services.
- * @param  {String}  url        URL for service request
- * @param  {String}  service    Explicitly-defined service type
- * @param  {Boolean} [save]     Whether to save the retrieved config to cache
- * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
- * @return {Array}              List of layers found from the request
+ * @param  {String}  geonaServer The address of the server that Geona should send queries to.
+ * @param  {String}  url         URL for service request.
+ * @param  {String}  service     Explicitly-defined service type.
+ * @param  {Boolean} [save]      Whether to save the retrieved config to cache.
+ * @param  {Boolean} [useCache]  Whether to retrieve from cache or to fetch from the web and overwrite.
+ * @return {Array}               List of layers found from the request.
  */
 export function getLayerServer(geonaServer, url, service, save = false, useCache = false) {
   return new Promise((resolve, reject) => {
@@ -159,13 +160,11 @@ export function getLayerServer(geonaServer, url, service, save = false, useCache
  * @return {String|undefined}       The nearest valid time to the requested time.
  */
 export function findNearestValidTime(times, requestedTime) {
-  // TODO remove the sort - map_libraries should sort instead
-  let sortedTimes = times.sort();
   // We set this to the earliest as a starting point
-  let nearestValidTime = sortedTimes[0];
+  let nearestValidTime = times[0];
   // We use Date objects for easy comparison
-  let dateNearestValidTime = new Date(sortedTimes[0]);
-  let dateLatestValidTime = new Date(sortedTimes[sortedTimes.length - 1]);
+  let dateNearestValidTime = new Date(times[0]);
+  let dateLatestValidTime = new Date(times[times.length - 1]);
   let dateRequestedTime = new Date(requestedTime);
 
   // If the requested time is earlier than the earliest possible or later than the latest possible

@@ -142,7 +142,7 @@ function registerExploreTriggers(eventManager, geonaDiv) {
     // Whether to load the config from the cache folder
     let useCache = false;
     if (geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked') ||
-    geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('removed')) {
+      geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('removed')) {
       save = true;
     } else {
       useCache = true;

@@ -742,7 +742,7 @@ export class MainMenu {
    * @param {String}   layerIdentifier The identifier for the layer we are making changes to.
    * @param {Function} func            The function to call once the buffer has timed out.
    * @param {This}     context         The 'this' context to use with the function.
-   * @param {*[]}      [params]        The parameters to call with the function.
+   * @param {Array}    [params]        The parameters to call with the function.
    */
   addToChangesBuffer(layerIdentifier, func, context, params) {
     // If this is the first time an operation is being buffered for this layer, we'll initialise its buffer

@@ -23,8 +23,9 @@ let ol;
 export class OlMap extends GeonaMap {
   /**
    * Instantiate a new OlMap and create a new OpenLayers map.
-   * @param  {Object} config The map config to load
+   * @param {Object}      config The map config to load
    * @param {HTMLElement} mapDiv The div to put the map in
+   * @param {Geona}       geona  The current Geona instance that this map belongs to
    */
   constructor(config, mapDiv, geona) {
     super();
@@ -1074,7 +1075,7 @@ export class OlMap extends GeonaMap {
    * @param {String} layerIdentifier The identifier for the layer we want to update.
    * @param {Object} newParams       The new params to use in the source.
    */
-  updateSourceParams(layerIdentifier, newParams) { // todo untested
+  updateSourceParams(layerIdentifier, newParams) {
     let layerSource = this.activeLayers[layerIdentifier].getSource();
     let params = layerSource.getParams();
     for (let param of Object.keys(newParams)) {

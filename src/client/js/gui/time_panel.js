@@ -90,7 +90,7 @@ export class TimePanel {
    */
   drawTimeline() {
     if (this.timeline === undefined) {
-    // Assign ID to this instance's timeline container
+      // Assign ID to this instance's timeline container
       let instanceId = this.geonaDiv.attr('id');
       this.geonaDiv.find('.js-geona-time-panel-timeline').attr('id', instanceId + '-timeline-container');
 
@@ -143,7 +143,6 @@ export class TimePanel {
    * @param {String|Date} endDate   The date to set as the maximum.
    */
   setPikadayRange(startDate, endDate) {
-    // TODO nothing calls this currently - should happen when a new timeline layer is added I guess
     this.pikaday.setMinDate(new Date(startDate));
     this.pikaday.setMaxDate(new Date(endDate));
   }
@@ -168,7 +167,7 @@ export class TimePanel {
    * Changes the pikaday date without changing the map layers.
    * @param {String|Date} time The datetime to set the current date box to.
    */
-  pikadayUpdateGraphic(time) {
+  pikadayUpdateGraphic(time) { // fixme if we start with no layers, the pikaday box time is wrong
     // FIXME format doesn't work
     // let formattedTime = moment(time).format('YYYY-MM-DD HH:mm').toString();
     // console.log(formattedTime);
