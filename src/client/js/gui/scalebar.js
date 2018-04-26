@@ -6,7 +6,15 @@ import $ from 'jquery';
 /**
  * A class used to instantiate and control a scalebar for a layer.
  *
- * todo Talk about minmax
+ * Information about MinMax:
+ * The MINMAX_SEARCH_DENSITY specifies a width/height ratio to use when finding the minmax metadata. To save resources,
+ * the operation doesn't search every single value, and instead applies a grid over the data and searches the center
+ * point of each grid square. The higher the grid density, the more accurate the scale, but the longer the operation
+ * takes to return. The density of 1000 takes about 1 second to return.
+ * More information can be found on the NCWMS guide:
+ * https://reading-escience-centre.gitbooks.io/ncwms-user-guide/content/04-usage.html#getmetadata
+ * and on this GitHub issue:
+ * https://github.com/Reading-eScience-Centre/ncwms/issues/29
  */
 export class Scalebar {
   /**
@@ -244,12 +252,12 @@ export class Scalebar {
 
       // The minmax operation gets approximate min and max values for the scale at the selected datetime
       let minMaxRequestParameters = 'request=GetMetadata&item=minmax&layers=' + geonaLayer.identifier
-         + '&time=' + this.geona.map.layerGet(geonaLayer.identifier, 'layerTime')
-         + '&bbox=' + bbox
-         + '&elevation=' + (geonaLayer.elevation || -1)
-         + '&srs=' + this.geona.map.config.projection
-         + '&width=' + this.MINMAX_SEARCH_DENSITY
-         + '&height=' + this.MINMAX_SEARCH_DENSITY;
+        + '&time=' + this.geona.map.layerGet(geonaLayer.identifier, 'layerTime')
+        + '&bbox=' + bbox
+        + '&elevation=' + (geonaLayer.elevation || -1)
+        + '&srs=' + this.geona.map.config.projection
+        + '&width=' + this.MINMAX_SEARCH_DENSITY
+        + '&height=' + this.MINMAX_SEARCH_DENSITY;
 
       // Make the request for the min and max scale values
       $.ajax(baseUrl + minMaxRequestParameters)
