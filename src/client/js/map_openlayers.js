@@ -1369,7 +1369,8 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     // }
 
     matrixIds.push(matrix.identifier);
-    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit; // Magic
+    // We don't understand the value of 0.28E-3 below. It was taken from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/tilegrid/wmts.js#L122
+    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit;
     let tileWidth = matrix.tileWidth;
     let tileHeight = matrix.tileHeight;
 

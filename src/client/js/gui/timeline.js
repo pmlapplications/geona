@@ -1182,11 +1182,11 @@ export class Timeline {
     if (new Date(this.selectorDate) > new Date(listOfDates[listOfDates.length - 1])) {
       startingIndex = listOfDates.length + 1; // If starting date is after the last time, we decrement to the last index downwards.
     } else // If the current time is less than or equal to the minimum time in the list, there isn't a time to move to
-      if (new Date(startingDate) <= new Date(listOfDates[0]) || startingDate === undefined) {
-        return undefined;
-      } else {
-        startingIndex = listOfDates.indexOf(startingDate);
-      }
+    if (new Date(startingDate) <= new Date(listOfDates[0]) || startingDate === undefined) {
+      return undefined;
+    } else {
+      startingIndex = listOfDates.indexOf(startingDate);
+    }
 
     // If the layer which contains the startingDate is currently out of bounds, we want to include the starting date as
     // one of the dates to count past (so that if we are out of bounds and go back 1, we set to the end date)

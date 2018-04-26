@@ -61,7 +61,7 @@ i18next
 
 
 /*
- * Setup express, the hbs (handlebars) template engine, and i18next handling and multiload backend route
+ * Set up express; the hbs (handlebars) template engine; and i18next handling and multiload backend route
  */
 
 let app = express();

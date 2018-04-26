@@ -4,16 +4,18 @@
   <select class="js-geona-options-panel-content__basemaps">
     <option>{{t 'menu:options-panel.none'}}</option>
     {{#each data.basemaps}}
-    <option value={{this.identifier}}>{{this.identifier}} - {{this.title}}</option>
+      <option value= {{this.identifier}}>{{this.identifier}} - {{this.title}}</option>
     {{/each}}
   </select>
   <br>
   <label>{{t 'menu:options-panel.borders'}}</label>
   <select class="js-geona-options-panel-content__borders">
     <option>{{t 'menu:options-panel.none'}}</option>
-    {{#each data.borders}} {{#each this.styles}}
-    <option value={{../this.identifier}} data-style={{this}}>{{../this.identifier}} ({{this}}) - {{../this.title}}</option>
-    {{/each}} {{/each}}
+    {{#each data.borders}}
+      {{#each this.styles}}
+        <option value= {{../this.identifier}} data-style= {{this}}>{{../this.identifier}} ({{this}}) - {{../this.title}}</option>
+      {{/each}}
+    {{/each}}
   </select>
   <br>
   <label>{{t 'menu:options-panel.graticule'}}</label>
