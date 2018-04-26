@@ -29,12 +29,13 @@ import {registerBindings} from './timeline_bindings';
  */
 export class Timeline {
   // TODO redraw on window resize is bugged (see Geona issue 97)
+  // https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/97
 
-  // TODO new feature - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
-  // TODO new feature - should layers reorder if layers are reordered on GUI?
-  // TODO new feature - timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
-  // TODO new feature - active layer can be selected, so controls consider only that layer (GUI should update to show which layer is the current layer)
-  // TODO new feature - extended keyboard shortcuts (select time period, select active layer)
+  // New feature suggestion - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
+  // New feature suggestion - should layers reorder if layers are reordered on GUI?
+  // New feature suggestion - timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
+  // New feature suggestion - active layer can be selected, so controls consider only that layer (GUI should update to show which layer is the current layer)
+  // New feature suggestion - extended keyboard shortcuts (select time period, select active layer)
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
@@ -168,7 +169,7 @@ export class Timeline {
       .attr('transform', 'translate(' +
         this.options.timelineMargins.left + ', ' +
         this.options.timelineMargins.top +
-      ')')
+        ')')
       .call(this.zoomBehavior)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
         this.clickDate(this.timeline.node());
@@ -181,7 +182,7 @@ export class Timeline {
       .attr('transform', 'translate(' +
         (this.Y_AXIS_LABEL_WIDTH) + ', ' +
         (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) +
-      ')')
+        ')')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
       .on('click', (dateLabel) => {
@@ -258,8 +259,8 @@ export class Timeline {
   }
 
   /**
-   * Adds the specified layer to the timeline
-   * @param {Layer} layerToAdd A Geona layer definition
+   * Adds the specified layer to the timeline.
+   * @param {Layer} layerToAdd A Geona layer definition.
    */
   addTimelineLayer(layerToAdd) {
     // Add this layer's times to the Set of all layer times
@@ -421,6 +422,10 @@ export class Timeline {
     for (let layer of this.timelineCurrentLayers) {
       this._addTimeStepMarkers(layer, this.geona.map.getActiveLayerDatetimes(layer.identifier));
     }
+
+    // Update the pikaday max range
+    let dates = Array.from(this._allLayerDates);
+    this.eventManager.trigger('timePanel.setPikadayRange', [dates[0], dates[dates.length - 1]]);
   }
 
   /**
@@ -447,7 +452,7 @@ export class Timeline {
         // We will check each date to see if it would be drawn on the same x pixel as another date
         let xPixel = Math.floor(this.xScale(new Date(date).getTime()));
         if (!uniquePixels.has(xPixel)) {
-        // This pixel is currently free, so we will draw a line for this date
+          // This pixel is currently free, so we will draw a line for this date
           uniquePixels.add(xPixel);
           filteredDates.push(date);
         }
@@ -575,6 +580,10 @@ export class Timeline {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
       })
       .raise();
+
+    // Update the pikaday max range
+    let dates = Array.from(this._allLayerDates);
+    this.eventManager.trigger('timePanel.setPikadayRange', [dates[0], dates[dates.length - 1]]);
   }
 
   /**
@@ -958,7 +967,7 @@ export class Timeline {
   }
 
   /**
-   * TODO Currently not working properly (see Geona issue 97)
+   * Currently not working properly (see Geona issue 97) https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/97
    * Redraws the Timeline elements for a new window width. Called when the window resizes.
    */
   resizeTimeline() {
@@ -1147,7 +1156,7 @@ export class Timeline {
    * @param  {Number} intervals         Number of times to traverse forwards before returning.
    * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
    *
-   * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
+   * @return {IntervalDate|undefined}   The date found on the final interval, and the layer(s) whose times will update.
    */
   findPastDate(intervals, layerIdentifier) {
     // TODO write tests for this
@@ -1173,11 +1182,11 @@ export class Timeline {
     if (new Date(this.selectorDate) > new Date(listOfDates[listOfDates.length - 1])) {
       startingIndex = listOfDates.length + 1; // If starting date is after the last time, we decrement to the last index downwards.
     } else // If the current time is less than or equal to the minimum time in the list, there isn't a time to move to
-    if (new Date(startingDate) <= new Date(listOfDates[0]) || startingDate === undefined) {
-      return undefined;
-    } else {
-      startingIndex = listOfDates.indexOf(startingDate);
-    }
+      if (new Date(startingDate) <= new Date(listOfDates[0]) || startingDate === undefined) {
+        return undefined;
+      } else {
+        startingIndex = listOfDates.indexOf(startingDate);
+      }
 
     // If the layer which contains the startingDate is currently out of bounds, we want to include the starting date as
     // one of the dates to count past (so that if we are out of bounds and go back 1, we set to the end date)
@@ -1188,7 +1197,7 @@ export class Timeline {
         let valueIndex = values.findIndex((value) => {
           return new Date(startingDate).getTime() === new Date(value).getTime();
         });
-        if (valueIndex !== -1 && valueIndex !== values.length - 1 ) {
+        if (valueIndex !== -1 && valueIndex !== values.length - 1) {
           loadedLayers++;
         }
       }
@@ -1290,3 +1299,11 @@ function checkBrowser() {
     };
   }
 }
+
+/* Type definitions for this class */
+
+/**
+ * @typedef {Object} IntervalDate
+ *   @property {String}   date   A datetime in ISO 8601 format.
+ *   @property {String[]} layers The titles for the layers which will be updated.
+ */
