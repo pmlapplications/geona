@@ -66,8 +66,10 @@ function parse1_0(url, capabilities) {
   };
 
   if (url) {
-    serverConfig.url = url.replace(/\?.*/g, '');
+    serverConfig.url = url.replace(/\?.*/g, ''); // Regex to remove all request parameters from the URL (including '?')
   }
+
+  // WMTS supports multiple languages for some information, so we parse and separate them into languages
   if (serviceId.title) {
     serverConfig.service.title = parseTitles(serviceId.title);
   }
@@ -158,7 +160,7 @@ function parse1_0(url, capabilities) {
     serverConfig.operationsMetadata = {};
     for (let operation of opsMetadata.operation) {
       serverConfig.operationsMetadata[operation.name] = {};
-      // While WMTS only supports HTTP DCP, we just take the first (and only) item from the array.
+      // Currently WMTS only supports HTTP DCP, so we just take the first (and only) item from the array.
       for (let getOrPost of operation.dcp[0].http.getOrPost) {
         if (getOrPost.name.localPart === 'Get') {
           if (serverConfig.operationsMetadata[operation.name].get === undefined) {
@@ -364,7 +366,7 @@ function parse1_0(url, capabilities) {
  * @param {Array} titles An array of titles with value and optional lang properties.
  * @return {Object}      Object with language separated titles.
  */
-function parseTitles(titles) {
+function parseTitles(titles) { // todo copy typedef from other place
   let titleObject = {};
   if (titles !== undefined) {
     if (titles !== []) {
@@ -401,7 +403,7 @@ function parseTitles(titles) {
  * @param {Array} abstracts An array of abstracts with value and optional lang properties.
  * @return {Object}         Object with language-separated abstracts.
  */
-function parseAbstracts(abstracts) {
+function parseAbstracts(abstracts) {// todo copy typedef from other place
   let abstractObject = {};
   if (abstracts !== undefined) {
     if (abstracts !== []) {
@@ -438,7 +440,7 @@ function parseAbstracts(abstracts) {
  * @param {Array} keywords An array of keywords with value and optional lang properties.
  * @return {Object}        Object with language-separated keyword arrays.
  */
-function parseKeywords(keywords) {
+function parseKeywords(keywords) {// todo copy typedef from other place
   let keywordObject = {};
   if (keywords !== undefined) {
     if (keywords !== []) {
