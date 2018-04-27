@@ -130,6 +130,7 @@ export class TimePanel {
    */
   hideTimePanel() {
     this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
+    this.geona.map.adjustAttributionHeight();
   }
 
   /**
@@ -137,6 +138,7 @@ export class TimePanel {
    */
   showTimePanel() {
     this.geonaDiv.find('.js-geona-time-panel').removeClass('removed');
+    this.geona.map.adjustAttributionHeight();
   }
 
   /**
