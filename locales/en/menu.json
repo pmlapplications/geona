@@ -27,6 +27,7 @@
       "scale-auto-scale": "Auto scale",
       "scale-reset": "Reset",
       "opacity": "Layer Opacity",
+      "elevation": "Elevation",
       "style": "Layer Style",
       "below-minimum": "Below Min Colour",
       "above-maximum": "Above Max Colour",
