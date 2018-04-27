@@ -56,14 +56,25 @@ export default class Layer {
     this.modifier = layerConfig.modifier;
 
     this.dimensions = layerConfig.dimensions;
-    if (this.dimensions && this.dimensions.time) {
-      // There is no need to sort if we still have times to generate
-      if (!this.dimensions.time.intervals ) {
-        this.dimensions.time.values.sort();
+    if (this.dimensions) {
+      if (this.dimensions.time) {
+        // There is no need to sort if we still have times to generate
+        if (!this.dimensions.time.intervals) {
+          this.dimensions.time.values.sort();
+        }
+        // We set the modifier here, unless it has been specified already
+        if (!this.modifier) {
+          this.modifier = 'hasTime';
+        }
       }
-      // We set the modifier here, unless it has been specified already
-      if (!this.modifier) {
-        this.modifier = 'hasTime';
+
+      if (this.dimensions.elevation) {
+        this.currentElevation = parseFloat(this.dimensions.elevation.default);
+      } else if (this.dimensions.depth) {
+        // We normalise the variable names to elevation
+        this.currentElevation = parseFloat(this.dimensions.depth.default);
+        this.dimensions.elevation = layerConfig.dimensions.depth;
+        delete this.dimensions.depth;
       }
     }
 
