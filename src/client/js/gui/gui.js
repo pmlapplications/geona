@@ -80,13 +80,15 @@ export class Gui {
       this.splashScreen = new SplashScreen(this, splashScreenConfig);
     }
 
-    let menuConfig = this.geona.config.get('controls.menu');
-    this.mainMenu = new MainMenu(this, menuConfig);
-
-    let timelineConfig = this.geona.config.get('controls.timeline');
-    this.timePanel = new TimePanel(this, timelineConfig);
-
     // When the map is ready, call the onReadyCallback
-    mapPromise.then(this._onReadyCallback);
+    mapPromise.then(() => {
+      let menuConfig = this.geona.config.get('controls.menu');
+      this.mainMenu = new MainMenu(this, menuConfig);
+
+      let timelineConfig = this.geona.config.get('controls.timeline');
+      this.timePanel = new TimePanel(this, timelineConfig);
+
+      this._onReadyCallback();
+    });
   }
 }

@@ -17,6 +17,14 @@ export function registerBindings(eventManager, timePanel) {
   eventManager.bind('timePanel.hideTimePanel', () => {
     timePanel.hideTimePanel();
   });
+  // Show timePanel toggle control
+  eventManager.bind('timePanel.showTimePanelToggleControl', () => {
+    timePanel.showTimePanel();
+  });
+  // Hide timePanel toggle control
+  eventManager.bind('timePanel.hideTimePanelToggleControl', () => {
+    timePanel.hideTimePanel();
+  });
 
   // Show pikaday
   eventManager.bind('timePanel.showPikaday', () => {
@@ -25,6 +33,11 @@ export function registerBindings(eventManager, timePanel) {
   // Hide pikaday
   eventManager.bind('timePanel.hidePikaday', () => {
     timePanel.hidePikaday();
+  });
+
+  // Update pikaday range
+  eventManager.bind('timePanel.setPikadayRange', ([startDate, endDate]) => {
+    timePanel.setPikadayRange(startDate, endDate);
   });
 
   // Change the non-timeline elements
@@ -45,5 +58,38 @@ export function registerBindings(eventManager, timePanel) {
   // Change the map layers and other elements, triggered by the steps
   eventManager.bind('timePanel.stepChangeTime', (step) => {
     timePanel.stepChangeTime(step);
+  });
+
+  // Bindings for time panel
+  let activeDataLayers = timePanel.geona.map.config.data;
+  // Add layer from URL
+  eventManager.bind('mainMenu.addUrlLayerToMap', () => {
+    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) {
+      timePanel.showTimePanel();
+
+      if (!timePanel.config.allowToggleWithNoLayers) {
+        timePanel.showTimePanelToggleControl();
+      }
+    }
+  });
+  // Add layer from available layers
+  eventManager.bind('mainMenu.addAvailableLayerToMap', () => {
+    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) {
+      timePanel.showTimePanel();
+
+      if (!timePanel.config.allowToggleWithNoLayers) {
+        timePanel.showTimePanelToggleControl();
+      }
+    }
+  });
+  // Remove layer
+  eventManager.bind('mainMenu.removeLayer', () => {
+    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 1 && timePanel.config.allowToggle) {
+      timePanel.hideTimePanel();
+
+      if (!timePanel.config.allowToggleWithNoLayers) {
+        timePanel.hideTimePanelToggleControl();
+      }
+    }
   });
 }

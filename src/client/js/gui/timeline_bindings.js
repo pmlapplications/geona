@@ -19,8 +19,4 @@ export function registerBindings(eventManager, timeline) {
     let layerIdentifier = item[0].dataset.identifier;
     timeline.removeTimelineLayer(layerIdentifier);
   });
-  // Update pikaday range
-  eventManager.bind('timePanel.setPikadayRange', ([startDate, endDate]) => {
-    timeline.timePanel.setPikadayRange(startDate, endDate);
-  });
 }

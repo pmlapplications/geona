@@ -951,7 +951,7 @@ export class Timeline {
    * Only affects the displayed text - the yScale will still use the full titles.
    * @param {d3.Selection} yAxisLabels The selection of y-axis 'text' elements
    */
-  _trimYAxisLabels(yAxisLabels) {
+  _trimYAxisLabels(yAxisLabels) { // fixme this does not work if the timeline starts removed, then is revealed when a layer is added (see issue 112) https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/112
     for (let textElement of yAxisLabels.nodes()) {
       if (textElement.getComputedTextLength() > this.Y_AXIS_LABEL_WIDTH) {
         // Gives us the percentage of text which is contained within the label area

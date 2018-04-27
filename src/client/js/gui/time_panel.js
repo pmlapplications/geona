@@ -22,7 +22,6 @@ export class TimePanel {
    */
   constructor(gui, timelineConfigOptions) {
     // TODO make all instances of 'date' or 'time' into 'datetime'
-    // TODO need to account for config options (allow toggle, and variants with no active layers
     this.gui = gui;
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
@@ -55,11 +54,26 @@ export class TimePanel {
     this.activeLayer = undefined; // Currently there are no GUI controls for this, but the appropriate functions should be ready for use from the console
 
     this.geonaDiv.append(templates.time_panel());
+    // Hide on load in all cases
     if (!this.config.opened) {
-      this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
+      this.hideTimePanel();
     }
+    // Hide on load with no layers
+    if (!this.config.openedWithNoLayers && this.geona.map.config.data.length === 0) {
+      this.hideTimePanel();
+    }
+    // Disallow toggle in all cases
     if (!this.config.allowToggle) {
       this.geonaDiv.find('.js-geona-time-panel-toggle').remove();
+
+      // If we always hide the timepanel on load, and always disallow toggle, we remove the time panel completely
+      if (!this.config.opened) {
+        this.geonaDiv.find('.js-geona-time-panel-container').remove();
+      }
+    }
+    // Disallow toggle with no layers
+    if (!this.config.allowToggleWithNoLayers && this.geona.map.config.data.length === 0) {
+      this.hideTimePanelToggleControl();
     }
 
     // Pikaday widget - instantiated blank
@@ -106,21 +120,37 @@ export class TimePanel {
       }
 
       this.pikadayUpdateGraphic(this.timeline.selectorDate);
+    } else {
+      throw new Error('Attempted to draw timeline when one was already instantiated!');
     }
   }
 
   /**
-   * Removes the timeline from view, but not from the DOM.
+   * Removes the time panel from view, but not from the DOM.
    */
   hideTimePanel() {
     this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
   }
 
   /**
-   * Shows the timeline on the GUI.
+   * Shows the time panel on the GUI.
    */
   showTimePanel() {
     this.geonaDiv.find('.js-geona-time-panel').removeClass('removed');
+  }
+
+  /**
+   * Removes the time panel toggle control from view, but not from the DOM.
+   */
+  hideTimePanelToggleControl() {
+    this.geonaDiv.find('.js-geona-time-panel-toggle').addClass('removed');
+  }
+
+  /**
+   * Shows the time panel control on the GUI.
+   */
+  showTimePanelToggleControl() {
+    this.geonaDiv.find('.js-geona-time-panel-toggle').removeClass('removed');
   }
 
   /**
