@@ -78,7 +78,8 @@
       "select-placeholder": "Vous n'avez pas encore de fichiers, veuillez en ajouter",
       "select-download": "Télécharger",
       "select-new-plot": "Faire un nouveau complot",
-      "select-clear": "Effacer la sélection"
+      "select-clear": "Effacer la sélection",
+      "elevation": "FR Choose a layer elevation"
     }
   },
   "options-panel": {

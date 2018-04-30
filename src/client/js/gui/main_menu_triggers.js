@@ -292,7 +292,7 @@ function registerLayersTriggers(eventManager, geonaDiv) {
     let layerIdentifier = item.dataset.identifier;
     let elevation = $(item).find('.js-geona-layers-list__item-body-settings-elevation-select').val();
     eventManager.trigger('mainMenu.changeElevationStyle', [layerIdentifier, elevation]);
-  });
+  }); // todo also change the layer elevation in the analysis tab
 
   // Change layer style
   geonaDiv.find('.js-geona-layers-list__item-body-settings-styles-select').change((jQueryEvent) => {

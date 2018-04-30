@@ -503,6 +503,15 @@ export class MainMenu {
    * @return {LayerData}            Object containing information used by the layer item template
    */
   _compileLayerData(geonaLayer) {
+    // Compile data used in multiple tabs
+    let layerCommon = {};
+    // Elevation values
+    if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
+      layerCommon.elevation = {};
+      layerCommon.elevation.units = geonaLayer.dimensions.elevation.units;
+      layerCommon.elevation.values = geonaLayer.dimensions.elevation.values;
+    }
+
     // Compile data for the settings panel
     let layerSettings = {};
 
@@ -516,13 +525,6 @@ export class MainMenu {
     // Opacity
     layerSettings.opacityReal = this.geona.map.layerGet(geonaLayer.identifier, 'opacity');
     layerSettings.opacityPercent = Math.round(layerSettings.opacityReal * 100);
-
-    // Elevation values
-    if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
-      layerSettings.elevation = {};
-      layerSettings.elevation.units = geonaLayer.dimensions.elevation.units;
-      layerSettings.elevation.values = geonaLayer.dimensions.elevation.values;
-    }
 
     // Styles
     if (geonaLayer.styles) {
@@ -584,6 +586,7 @@ export class MainMenu {
 
     // Return all
     return {
+      common: layerCommon,
       settings: layerSettings,
       info: layerInfo,
     };
@@ -914,9 +917,9 @@ export class MainMenu {
   }
 
   /**
-   * 
-   * @param {*} item 
-   * @param {*} colorCode 
+   * Updates the GUI elements for choosing a custom below min color.
+   * @param {HTMLElement} item      The item for the layer we want to update.
+   * @param {HexColor}    colorCode The hexadecimal code for the color we want to change to.
    */
   updateBelowMinColorGraphic(item, colorCode) {
     $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').val(colorCode);
@@ -952,6 +955,11 @@ export class MainMenu {
     this.addToChangesBuffer(layerIdentifier, scalebar.updateScalebar, scalebar);
   }
 
+  /**
+   * Updates the GUI elements for choosing a custom above max color.
+   * @param {HTMLElement} item      The item for the layer we want to update.
+   * @param {HexColor}    colorCode The hexadecimal code for the color we want to change to.
+   */
   updateAboveMaxColorGraphic(item, colorCode) {
     $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val(colorCode);
     $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker').val('#' + colorCode);
@@ -1419,3 +1427,7 @@ function forceCssReflow(element) {
  *   @property {String[]} styles     The identifiers for the styles for the borders layer.
  */
 
+/**
+  * A String containing 3 or 6 numbers and letters from 0 to 'f', representing red, green and blue (e.g. 00ff99)
+  * @typedef {String} HexColor
+  */

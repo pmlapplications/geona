@@ -28,12 +28,12 @@
       <span class="js-geona-layers-list__item-body-settings-opacity-heading">{{t 'menu:layers-panel.settings.opacity'}} - {{data.settings.opacityPercent}}%</span>
       <br>
       <input class="js-geona-layers-list__item-body-settings-opacity-range" type="range" min="0" max="1" step="0.01" value="{{data.settings.opacityReal}}">
-      {{#if data.settings.elevation}}
+      {{#if data.common.elevation}}
         <br> {{t 'menu:layers-panel.settings.elevation'}}
         <br>
         <select class="js-geona-layers-list__item-body-settings-elevation-select">
-          {{#each data.settings.elevation.values}}
-            <option value= {{this}}>{{this}} {{../data.settings.elevation.units}}</option>
+          {{#each data.common.elevation.values}}
+            <option value= {{this}}>{{this}} {{../data.common.elevation.units}}</option>
           {{/each}}
         </select>
       {{/if}}
@@ -179,7 +179,17 @@
       <button>{{t 'menu:layers-panel.analysis.select-new-plot'}}</button>
       <br>
       <button>
-        <span class="icon-eraser"></span>{{t 'menu:layers-panel.analysis.select-clear'}}</button>
+        <span class="icon-eraser"></span>
+        {{t 'menu:layers-panel.analysis.select-clear'}}
+      </button>
+      <br> {{t 'menu:layers-panel.analysis.elevation'}}
+      <br>
+      <select class="js-geona-layers-list__item-body-analysis-elevation-select">
+        {{#each data.common.elevation.values}}
+          <option value= {{this}}>{{this}} {{../data.common.elevation.units}}</option>
+        {{/each}}
+      </select>
+
     </div>
   </div>
 </li>

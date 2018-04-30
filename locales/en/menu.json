@@ -78,7 +78,8 @@
       "select-placeholder": "You have no files yet, please add some",
       "select-download": "Download",
       "select-new-plot": "Make new plot",
-      "select-clear": "Clear selection"
+      "select-clear": "Clear selection",
+      "elevation": "Choose a layer elevation"
     }
   },
   "options-panel": {
