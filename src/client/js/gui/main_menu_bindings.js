@@ -115,6 +115,10 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
     menu.changeLayerOpacity(item, opacity);
   });
+  // Change layer elevation
+  eventManager.bind('mainMenu.changeElevationStyle', ([layerIdentifier, elevation]) => {
+    menu.changeLayerElevation(layerIdentifier, elevation);
+  });
   // Change layer style
   eventManager.bind('mainMenu.changeLayerStyle', ([item, style]) => { // Item is the list item that contained the select
     menu.changeLayerStyle(item, style);
@@ -123,9 +127,17 @@ export function registerBindings(eventManager, menu) {
   eventManager.bind('mainMenu.setBelowMinColor', ([layerIdentifier, option]) => {
     menu.setBelowMinColor(layerIdentifier, option);
   });
+  // Set below min color graphics
+  eventManager.bind('mainMenu.updateBelowMinColorGraphic', ([item, colorCode]) => {
+    menu.updateBelowMinColorGraphic(item, colorCode);
+  });
   // Select above max color
   eventManager.bind('mainMenu.setAboveMaxColor', ([layerIdentifier, option]) => {
     menu.setAboveMaxColor(layerIdentifier, option);
+  });
+  // Set above max color graphics
+  eventManager.bind('mainMenu.updateAboveMaxColorGraphic', ([item, colorCode]) => {
+    menu.updateAboveMaxColorGraphic(item, colorCode);
   });
   // Show below min color input
   eventManager.bind('mainMenu.showBelowMinColorInput', (item) => {

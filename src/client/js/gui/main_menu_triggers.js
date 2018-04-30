@@ -262,7 +262,7 @@ function registerLayersTriggers(eventManager, geonaDiv) {
     let max = item.find('.js-geona-layers-list__item-body-settings__scale-max').val();
     let log = $(jQueryEvent.target).prop('checked');
     eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [item, layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable
-    eventManager.trigger('mainMenu.reEnableAutoScale', item); // todo can attempt to check, which removes auto scale, but it rejects logarithmic, so it's still autoscale
+    eventManager.trigger('mainMenu.reEnableAutoScale', item); // todo https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/109
   });
 
   // Apply layer autoscale
@@ -286,6 +286,14 @@ function registerLayersTriggers(eventManager, geonaDiv) {
     eventManager.trigger('mainMenu.changeLayerOpacity', [item, value]);
   });
 
+  // Change layer elevation
+  geonaDiv.find('.js-geona-layers-list__item-body-settings-elevation-select').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let layerIdentifier = item.dataset.identifier;
+    let elevation = $(item).find('.js-geona-layers-list__item-body-settings-elevation-select').val();
+    eventManager.trigger('mainMenu.changeElevationStyle', [layerIdentifier, elevation]);
+  });
+
   // Change layer style
   geonaDiv.find('.js-geona-layers-list__item-body-settings-styles-select').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li')[0];
@@ -301,15 +309,33 @@ function registerLayersTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.showBelowMinColorInput', item);
     } else {
       eventManager.trigger('mainMenu.hideBelowMinColorInput', item);
-      eventManager.trigger('mainMenu.setBelowMinColor', [item.dataset.identifier, option]);
+      eventManager.trigger('mainMenu.setBelowMinColor', [item, option]);
     }
   });
+  // Set custom below min color
   geonaDiv.find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li')[0];
     let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').val();
     let option = '0x' + customColorHex;
-    eventManager.trigger('mainMenu.setBelowMinColor', [item.dataset.identifier, option]);
+    eventManager.trigger('mainMenu.setBelowMinColor', [item, option]);
   });
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker')
+    .change((jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+
+      let option = '0x' + customColorHex;
+      eventManager.trigger('mainMenu.setBelowMinColor', [item, option]);
+    })
+    .on('input', (jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+      eventManager.trigger('mainMenu.updateBelowMinColorGraphic', [item, customColorHex]);
+    });
 
   // Set above max color - contains show/hide above max color input
   geonaDiv.find('.js-geona-layers-list__item-body-settings__above-max-color').change((jQueryEvent) => {
@@ -321,15 +347,32 @@ function registerLayersTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.showAboveMaxColorInput', item);
     } else {
       eventManager.trigger('mainMenu.hideAboveMaxColorInput', item);
-      eventManager.trigger('mainMenu.setAboveMaxColor', [item.dataset.identifier, option]);
+      eventManager.trigger('mainMenu.setAboveMaxColor', [item, option]);
     }
   });
   geonaDiv.find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').change((jQueryEvent) => {
     let item = $(jQueryEvent.target).closest('li')[0];
     let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val();
     let option = '0x' + customColorHex;
-    eventManager.trigger('mainMenu.setAboveMaxColor', [item.dataset.identifier, option]);
+    eventManager.trigger('mainMenu.setAboveMaxColor', [item, option]);
   });
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker')
+    .change((jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+
+      let option = '0x' + customColorHex;
+      eventManager.trigger('mainMenu.setAboveMaxColor', [item, option]);
+    })
+    .on('input', (jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+      eventManager.trigger('mainMenu.updateAboveMaxColorGraphic', [item, customColorHex]);
+    });
 
   // Set number of color bands
   geonaDiv.find('.js-geona-layers-list__item-body-settings__color-bands-text').change((jQueryEvent) => {

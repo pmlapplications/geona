@@ -32,6 +32,14 @@ export default class LayerWms extends LayerVisible {
       this.scale.numColorBandsDefault = layerConfig.scale.numColorBandsDefault;
       this.scale.logarithmicDefault = layerConfig.scale.logarithmicDefault;
       this.scale.rotationAngle = layerConfig.scale.rotationAngle;
+
+      if (!this.modifier || this.modifier === 'hasTime') {
+        this.scale.aboveMaxColorDefault = layerConfig.aboveMaxColorDefault || '0x000000';
+        this.scale.belowMinColorDefault = layerConfig.belowMinColorDefault || '0x000000';
+
+        this.scale.aboveMaxColor = layerConfig.aboveMaxColor || this.scale.aboveMaxColorDefault;
+        this.scale.belowMinColor = layerConfig.belowMinColor || this.scale.belowMinColorDefault;
+      }
     }
 
     // Basemaps and borders do not have metadata, so we only find it for data layers

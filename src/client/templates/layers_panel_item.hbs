@@ -33,7 +33,7 @@
         <br>
         <select class="js-geona-layers-list__item-body-settings-elevation-select">
           {{#each data.settings.elevation.values}}
-            <option value="{{this}}">{{this}} {{../data.settings.elevation.units}}</option>
+            <option value= {{this}}>{{this}} {{../data.settings.elevation.units}}</option>
           {{/each}}
         </select>
       {{/if}}
@@ -48,33 +48,33 @@
       <div>
         <h4>{{t 'menu:layers-panel.settings.below-minimum'}}</h4>
         <select class="js-geona-layers-list__item-body-settings__below-min-color">
-          <option>Default</option>
-          <option value="0x000000">Black</option>
-          <option value="0xffffff">White</option>
-          <option value="transparent">Transparent</option>
-          <option>Custom</option>
+          <option value="Default">{{t 'menu:layers-panel.settings.default'}}</option>
+          <option value="0x000000">{{t 'menu:layers-panel.settings.black'}}</option>
+          <option value="0xffffff">{{t 'menu:layers-panel.settings.white'}}</option>
+          <option value="transparent">{{t 'menu:layers-panel.settings.transparent'}}</option>
+          <option>{{t 'menu:layers-panel.settings.custom'}}</option>
         </select>
         <div class="js-geona-layers-list__item-body-settings__below-min-color-input removed">
-          Could add support to use colour picker?
-          <input type="color">
-          <br> or enter colour in hexadecimal format
-          <input class="js-geona-layers-list__item-body-settings__below-min-color-input__text" type="text" placeholder="rrggbb">
+          {{t 'menu:layers-panel.settings.color-picker'}}
+          <input class="js-geona-layers-list__item-body-settings__below-min-color-input__picker" type="color" value= {{data.settings.belowMinColor}}>
+          <br> {{t 'menu:layers-panel.settings.color-input'}}
+          <input class="js-geona-layers-list__item-body-settings__below-min-color-input__text" type="text" placeholder= {{t 'menu:layers-panel.settings.rrggbb'}}>
         </div>
       </div>
       <div>
         <h4>{{t 'menu:layers-panel.settings.above-maximum'}}</h4>
         <select class="js-geona-layers-list__item-body-settings__above-max-color">
-          <option>Default</option>
-          <option value="0x000000">Black</option>
-          <option value="0xffffff">White</option>
-          <option value="transparent">Transparent</option>
-          <option>Custom</option>
+          <option value="Default">{{t 'menu:layers-panel.settings.default'}}</option>
+          <option value="0x000000">{{t 'menu:layers-panel.settings.black'}}</option>
+          <option value="0xffffff">{{t 'menu:layers-panel.settings.white'}}</option>
+          <option value="transparent">{{t 'menu:layers-panel.settings.transparent'}}</option>
+          <option>{{t 'menu:layers-panel.settings.custom'}}</option>
         </select>
         <div class="js-geona-layers-list__item-body-settings__above-max-color-input removed">
-          Could add support to use colour picker?
-          <input type="color">
-          <br> or enter colour in hexadecimal format
-          <input class="js-geona-layers-list__item-body-settings__above-max-color-input__text" type="text" placeholder="rrggbb">
+          {{t 'menu:layers-panel.settings.color-picker'}}
+          <input class="js-geona-layers-list__item-body-settings__above-max-color-input__picker" type="color" value= {{data.settings.aboveMaxColor}}>
+          <br> {{t 'menu:layers-panel.settings.color-input'}}
+          <input class="js-geona-layers-list__item-body-settings__above-max-color-input__text" type="text" placeholder= {{t 'menu:layers-panel.settings.rrggbb'}}>
         </div>
       </div>
       <br> {{t 'menu:layers-panel.settings.color-bands'}}:

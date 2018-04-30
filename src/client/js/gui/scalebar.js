@@ -6,7 +6,7 @@ import $ from 'jquery';
 /**
  * A class used to instantiate and control a scalebar for a layer.
  *
- * Information about MinMax:
+ * Information about MinMax (used for auto scale):
  * The MINMAX_SEARCH_DENSITY specifies a width/height ratio to use when finding the minmax metadata. To save resources,
  * the operation doesn't search every single value, and instead applies a grid over the data and searches the center
  * point of each grid square. The higher the grid density, the more accurate the scale, but the longer the operation
@@ -258,6 +258,11 @@ export class Scalebar {
         + '&srs=' + this.geona.map.config.projection
         + '&width=' + this.MINMAX_SEARCH_DENSITY
         + '&height=' + this.MINMAX_SEARCH_DENSITY;
+
+      // Include elevation if appropriate
+      if (geonaLayer.currentElevation) {
+        minMaxRequestParameters += '&elevation=' + geonaLayer.currentElevation;
+      }
 
       // Make the request for the min and max scale values
       $.ajax(baseUrl + minMaxRequestParameters)

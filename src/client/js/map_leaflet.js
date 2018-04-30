@@ -432,6 +432,7 @@ export class LMap extends GeonaMap {
    *   @param {String}  settings.requestedTime  The time requested for this layer.
    *   @param {String}  settings.requestedStyle The identifier of the style requested for this layer.
    *   @param {Boolean} settings.shown          Whether to show or hide the layer when it is first put on the map.
+   *   @param {Number}  settings.elevation      The elevation to use for this layer.
    */
   addLayer(geonaLayer, geonaLayerServer, settings) {
     // Parameter checking
@@ -474,10 +475,11 @@ export class LMap extends GeonaMap {
     let projection;
     let style;
     let time;
+    let elevation;
 
     switch (geonaLayer.protocol) {
       case 'wms': {
-        // FIXME fix parser so this doesn't happen
+        // FIXME fix parser so geonaLayer.styles will be undefined instead of {}
         if ($.isEmptyObject(geonaLayer.styles)) {
           geonaLayer.styles = undefined;
         }
@@ -507,11 +509,32 @@ export class LMap extends GeonaMap {
             }
           }
           if (!requestedStyleIsValid) {
-            throw new Error('Requested style ' + options.requestedStyle + ' does not appear in the list of styles for this layer. Please ensure the layer\'s styles array contains any requested style. Current style array: ' + JSON.stringify(geonaLayer.styles));
+            throw new Error('Requested style ' + options.requestedStyle + ' does not appear in the list of styles for layer ' + geonaLayer.identifier + '. Please ensure the layer\'s styles array contains any requested style. Current style array: ' + JSON.stringify(geonaLayer.styles));
           }
         } else if (geonaLayer.styles) {
           // If we aren't setting a requested style, we'll keep the same, or if that's not set yet, use a default.
           style = geonaLayer.currentStyle || geonaLayer.defaultStyle || '';
+        }
+
+        // Select appropriate elevation if needed
+        if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
+          if (options.elevation) {
+            let elevationIsValid = false;
+            for (let value of geonaLayer.dimensions.elevation.values) {
+              if (value === options.elevation) {
+                elevationIsValid = true;
+                elevation = options.elevation;
+                geonaLayer.currentElevation = elevation;
+              }
+            }
+            if (!elevationIsValid) {
+              throw new Error('Elevation of ' + options.elevation + ' does not appear in the list of elevation values for layer ' + geonaLayer.identifier + '. Please ensure the layer\'s elevation values array contains any requested elevation. Current elevation array: ' + geonaLayer.dimensions.elevation.values);
+            }
+          } else {
+            elevation = geonaLayer.dimensions.elevation.default;
+          }
+        } else if (options.elevation) {
+          throw new Error('Elevation of ' + options.elevation + ' was supplied for layer ' + geonaLayer.identifier + ' with no elevation dimensions.');
         }
 
         // At this stage of the method, only basemaps might have different projections.
@@ -586,6 +609,7 @@ export class LMap extends GeonaMap {
           opacity: 1,
           timeHidden: false,
           numcolorbands: 255,
+          elevation: elevation,
         };
 
         // Leaflet doesn't officially support time, but all the parameters get put into the URL anyway
@@ -908,12 +932,13 @@ export class LMap extends GeonaMap {
     // TODO set the layertime to undefined if out of bounds
     // We use time values from the Geona layer object
     let geonaLayer = this.availableLayers[layerIdentifier];
+    let activeLayer = this.activeLayers[layerIdentifier];
     if (geonaLayer === undefined) {
       throw new Error('No Geona layer with this identifier has been loaded.');
-    } else if (this.activeLayers[layerIdentifier] === undefined) {
+    } else if (activeLayer === undefined) {
       throw new Error('No layer with this identifier is on the map.');
-    } else if (this.activeLayers[layerIdentifier].options.modifier !== 'hasTime') {
-      let modifier = this.activeLayers[layerIdentifier].options.modifier;
+    } else if (activeLayer.options.modifier !== 'hasTime') {
+      let modifier = activeLayer.options.modifier;
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
@@ -921,28 +946,29 @@ export class LMap extends GeonaMap {
       if (time === undefined) {
         // If the requested time is earlier than the earliest possible time for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
-        this.activeLayers[layerIdentifier].setOpacity(0);
-        this.activeLayers[layerIdentifier].options.opacity = 0;
-        this.activeLayers[layerIdentifier].options.timeHidden = true;
+        activeLayer.setOpacity(0);
+        activeLayer.options.opacity = 0;
+        activeLayer.options.timeHidden = true;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
-        let zIndex = this.activeLayers[layerIdentifier].options.zIndex;
+        let zIndex = activeLayer.options.zIndex;
         // We define the layer options so that only the time changes
         let layerOptions = {
           modifier: 'hasTime',
-          requestedStyle: this.activeLayers[layerIdentifier].options.styles,
+          requestedStyle: activeLayer.options.styles,
           // We save the layer's 'shown' value so the layer's state of visibility is kept upon changing time
-          shown: this.activeLayers[layerIdentifier].options.shown,
+          shown: activeLayer.options.shown,
           requestedTime: time,
+          elevation: activeLayer.options.elevation,
         };
 
         this.removeLayer(layerIdentifier, true);
         let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
         this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
-        this.activeLayers[layerIdentifier].options.timeHidden = false;
+        activeLayer.options.timeHidden = false;
 
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
         this._mapTime = time;
@@ -1001,13 +1027,14 @@ export class LMap extends GeonaMap {
             validStyle = true;
           }
         }
-        if (validStyle === true) {
+        if (validStyle === true) { // todo this and layers like it can just update the geonaLayer options and then call updateSourceParams() (see how changeLayerElevation works)
           // Save the layer options for re-adding
           let layerOptions = {
             modifier: layer.options.modifier,
             requestedTime: layer.options.layerTime,
             shown: layer.options.shown,
             requestedStyle: styleIdentifier,
+            elevation: layer.options.elevation,
           };
           // Save the z-index so the layer remains in position
           let zIndex = layer.options.zIndex;
@@ -1021,6 +1048,33 @@ export class LMap extends GeonaMap {
         }
       } else {
         throw new Error('There are no styles specified for the layer ' + layerIdentifier + '.');
+      }
+    }
+  }
+
+  /**
+   * Changes the elevation of the specified layer.
+   * @param {String} layerIdentifier The identifier for an active map layer.
+   * @param {Number} elevation       The desired elevation.
+   */
+  changeLayerElevation(layerIdentifier, elevation) {
+    let layer = this.activeLayers[layerIdentifier];
+    let geonaLayer = this.availableLayers[layerIdentifier];
+
+    if (geonaLayer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not loaded into this Geona instance.');
+    } else if (layer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not active on the map.');
+    } else {
+      if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
+        if (geonaLayer.dimensions.elevation.values.includes(elevation)) {
+          geonaLayer.currentElevation = elevation;
+          this.updateSourceParams(layerIdentifier, {elevation: elevation});
+        } else {
+          throw new Error('Specified elevation ' + elevation + ' is not valid for the layer ' + layerIdentifier + '.');
+        }
+      } else {
+        throw new Error('Elevation is not specified for the layer ' + layerIdentifier + '.');
       }
     }
   }

@@ -76,14 +76,15 @@ export default class Layer {
         this.dimensions.elevation = layerConfig.dimensions.depth;
         delete this.dimensions.depth;
       }
-    }
-
-    if (!this.modifier || this.modifier === 'hasTime') {
-      this.aboveMaxColor = undefined;
-      this.belowMinColor = undefined;
-
-      this.aboveMaxColorDefault = undefined;
-      this.belowMinColorDefault = undefined;
+      // The values get saved as Strings, we change them to Numbers
+      if (this.dimensions.elevation) { // todo fix parsers so values are saved as numbers
+        this.dimensions.elevation.default = parseFloat(this.dimensions.elevation.default);
+        let elevationValuesAsNumbers = [];
+        for (let value of this.dimensions.elevation.values) {
+          elevationValuesAsNumbers.push(parseFloat(value));
+        }
+        this.dimensions.elevation.values = elevationValuesAsNumbers;
+      }
     }
 
     // this.crs = ['EPSG:4326', 'CRS:84', 'EPSG:41001', 'EPSG:27700', 'EPSG:3408',

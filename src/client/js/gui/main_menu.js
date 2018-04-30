@@ -13,7 +13,7 @@ import LayerWmts from '../../../common/layer/layer_wmts';
 import {Scalebar} from './scalebar';
 
 // TODO separate mainMenu into individual files for each panel
-// TODO layer panel items should be classes of their own
+// TODO layer panel items should be classes of their own - this means that triggers will not have to find the item by closest li element, and can just find the instance in a list
 // TODO consider refactoring validateScale() because it calls updateScale() by itself and I don't really like that
 // TODO WMTS layers are not properly supported currently
 /**
@@ -339,7 +339,8 @@ export class MainMenu {
   /**
    * Clears current panel content and adds layers currently on map to the list of layers.
    */
-  displayLayersPanel() {
+  displayLayersPanel() { // todo add depth/elevation info to settings and analysis
+    // todo add layer datetime in nice format to display next to scalebar
     // Switch the layers tab to be active
     this.geonaDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
     this.geonaDiv.find('.js-geona-menu__layers').addClass('geona-menu__tab--active');
@@ -406,7 +407,7 @@ export class MainMenu {
         layersPanelItem: item,
         layerIdentifier: data.info.identifier,
       });
-      this.layersPanelScalebars[data.info.identifier] = scalebar; // todo write https://gitlab.rsg.pml.ac.uk/web-development/geona/wikis/contribution-guide/style-guides/hbs-(handlebars)
+      this.layersPanelScalebars[data.info.identifier] = scalebar;
 
       // fixme race condition from GetMetadata - results in scale ticks being NaN amongst other things
       scalebar.drawScalebar();
@@ -415,6 +416,15 @@ export class MainMenu {
       // Update the logarithmic checkbox
       if (data.settings.logarithmic) {
         $(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', true);
+      }
+
+      // Update the layer elevation selected value
+      let elevationSelect = $(item).find('.js-geona-layers-list__item-body-settings-elevation-select');
+      let elevationOptions = elevationSelect.find('option');
+      for (let option of elevationOptions) {
+        if (option.value === geonaLayer.currentElevation) {
+          elevationSelect.val(option.value).prop('selected', true);
+        }
       }
 
       // Update the layer style selected value
@@ -429,15 +439,15 @@ export class MainMenu {
       // Update the below min selected value
       let belowMinSelect = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color');
       switch (geonaLayer.scale.belowMinColor) {
-        case undefined: {
+        case geonaLayer.scale.aboveMaxColorDefault: {
           belowMinSelect.val('Default').prop('selected', true);
           break;
         }
-        case 'black': {
+        case '0x000000': {
           belowMinSelect.val('0x000000').prop('selected', true);
           break;
         }
-        case 'white': {
+        case '0xffffff': {
           belowMinSelect.val('0xffffff').prop('selected', true);
           break;
         }
@@ -456,15 +466,15 @@ export class MainMenu {
       // Update the above max selected value
       let aboveMaxSelect = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color');
       switch (geonaLayer.scale.aboveMaxColor) {
-        case undefined: {
+        case geonaLayer.scale.aboveMaxColorDefault: {
           aboveMaxSelect.val('Default').prop('selected', true);
           break;
         }
-        case 'black': {
+        case '0x000000': {
           aboveMaxSelect.val('0x000000').prop('selected', true);
           break;
         }
-        case 'white': {
+        case '0xffffff': {
           aboveMaxSelect.val('0xffffff').prop('selected', true);
           break;
         }
@@ -507,6 +517,13 @@ export class MainMenu {
     layerSettings.opacityReal = this.geona.map.layerGet(geonaLayer.identifier, 'opacity');
     layerSettings.opacityPercent = Math.round(layerSettings.opacityReal * 100);
 
+    // Elevation values
+    if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
+      layerSettings.elevation = {};
+      layerSettings.elevation.units = geonaLayer.dimensions.elevation.units;
+      layerSettings.elevation.values = geonaLayer.dimensions.elevation.values;
+    }
+
     // Styles
     if (geonaLayer.styles) {
       layerSettings.styles = [];
@@ -518,9 +535,9 @@ export class MainMenu {
     layerSettings.currentStyle = geonaLayer.currentStyle;
 
     // Below min color
-    layerSettings.belowMinColor = geonaLayer.scale.belowMinColor;
+    layerSettings.belowMinColor = '#' + geonaLayer.scale.belowMinColor.slice(2); // Removes the '0x' from the color code
     // Above max color
-    layerSettings.aboveMaxColor = geonaLayer.scale.aboveMaxColor;
+    layerSettings.aboveMaxColor = '#' + geonaLayer.scale.aboveMaxColor.slice(2); // Removes the '0x' from the color code
 
     // Number of color bands
     layerSettings.numColorBands = geonaLayer.scale.numColorBands;
@@ -544,7 +561,7 @@ export class MainMenu {
       };
     }
     // Time min and max, formatted as YYYY-MM-DD
-    if (geonaLayer.dimensions !== undefined) {
+    if (geonaLayer.dimensions) {
       if (geonaLayer.dimensions.time) {
         let sortedDates = this.geona.map.getActiveLayerDatetimes(geonaLayer.identifier);
         if (sortedDates.length === 1) {
@@ -725,7 +742,17 @@ export class MainMenu {
     this.geona.map.setLayerOpacity(layerIdentifier, opacity);
   }
 
-  // TODO do we need this? Or should we just call the map method?
+  /**
+   * Changes the layer elevation for the specified layer.
+   * @param {String} layerIdentifier The identifier for the layer we want to update.
+   * @param {Number} elevation       The elevation to change to.
+   */
+  changeLayerElevation(layerIdentifier, elevation) { // todo just trigger map function?
+    // fixme add to layer changes buffer
+    this.geona.map.changeLayerElevation(layerIdentifier, parseFloat(elevation));
+  }
+
+  // todo should this operate in the same way as changing min max log? As in, call scalebar.updateScalebar()?
   /**
    * Changes the layer style.
    * @param {HTMLElement} item  The list item which contains the select which was clicked.
@@ -859,48 +886,75 @@ export class MainMenu {
 
   /**
    * Sets the color which should be returned from the server for data values below the current scale minimum.
-   * @param {String} layerIdentifier The identifier for the layer we are altering.
-   * @param {String} optionValue     The value returned from the dropdown option.
+   * @param {String} item        The item for the layer we are altering.
+   * @param {String} colorOption The value returned from the dropdown option.
    */
-  setBelowMinColor(layerIdentifier, optionValue) {
+  setBelowMinColor(item, colorOption) {
+    let layerIdentifier = item.dataset.identifier;
     let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
 
     // Regex for matching '0x' followed by a valid hex code
-    if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue) || optionValue === 'transparent') {
-      geonaLayer.scale.belowMinColor = optionValue;
-    } else if (/(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue)) { // Regex for matching a valid hex code
-      geonaLayer.scale.belowMinColor = '0x' + optionValue;
-    } else if (optionValue === 'Default') {
-      geonaLayer.scale.belowMinColor = undefined;
+    if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(colorOption) || colorOption === 'transparent') {
+      geonaLayer.scale.belowMinColor = colorOption;
+    } else if (/(?:[0-9a-fA-F]{3}){1,2}/.test(colorOption)) { // Regex for matching a valid hex code
+      geonaLayer.scale.belowMinColor = '0x' + colorOption;
+    } else if (colorOption === 'Default') {
+      geonaLayer.scale.belowMinColor = geonaLayer.scale.belowMinColorDefault;
     } else {
-      throw new Error('belowMinColor value of ' + optionValue + ' is not valid! Values must be one of \'0x[valid hex code]\', \'[valid hex code]\', \'transparent\' or \'Default\'.');
+      throw new Error('belowMinColor value of ' + colorOption + ' is not valid! Values must be one of \'0x[valid hex code]\', \'[valid hex code]\', \'transparent\' or \'Default\'.');
     }
 
+    // Update the custom option color picker and input field
+    let colorCode = geonaLayer.scale.belowMinColor.slice(2);
+    this.updateBelowMinColorGraphic(item, colorCode);
+
+    // Update the layer's below min color
     let scalebar = this.layersPanelScalebars[layerIdentifier];
     this.addToChangesBuffer(layerIdentifier, scalebar.updateScalebar, scalebar);
   }
 
   /**
-   * Sets the color which should be returned from the server for data values above the current scale maximum.
-   * @param {String} layerIdentifier The identifier for the layer we are altering.
-   * @param {String} optionValue     The value returned from the dropdown option.
+   * 
+   * @param {*} item 
+   * @param {*} colorCode 
    */
-  setAboveMaxColor(layerIdentifier, optionValue) {
+  updateBelowMinColorGraphic(item, colorCode) {
+    $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').val(colorCode);
+    $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker').val('#' + colorCode);
+  }
+
+  /**
+   * Sets the color which should be returned from the server for data values above the current scale maximum.
+   * @param {String} item        The item for the layer we are altering.
+   * @param {String} colorOption The value returned from the dropdown option.
+   */
+  setAboveMaxColor(item, colorOption) {
+    let layerIdentifier = item.dataset.identifier;
     let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
 
     // Regex for matching '0x' followed by a valid hex code
-    if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue) || optionValue === 'transparent') {
-      geonaLayer.scale.aboveMaxColor = optionValue;
-    } else if (/(?:[0-9a-fA-F]{3}){1,2}/.test(optionValue)) { // Regex for matching a valid hex code
-      geonaLayer.scale.aboveMaxColor = '0x' + optionValue;
-    } else if (optionValue === 'Default') {
+    if (/0x(?:[0-9a-fA-F]{3}){1,2}/.test(colorOption) || colorOption === 'transparent') {
+      geonaLayer.scale.aboveMaxColor = colorOption;
+    } else if (/(?:[0-9a-fA-F]{3}){1,2}/.test(colorOption)) { // Regex for matching a valid hex code
+      geonaLayer.scale.aboveMaxColor = '0x' + colorOption;
+    } else if (colorOption === 'Default') {
       geonaLayer.scale.aboveMaxColor = undefined;
     } else {
-      throw new Error('aboveMaxColor value of ' + optionValue + ' is not valid! Values must be one of \'0x[valid hex code]\', \'[valid hex code]\', \'transparent\' or \'Default\'.');
+      throw new Error('aboveMaxColor value of ' + colorOption + ' is not valid! Values must be one of \'0x[valid hex code]\', \'[valid hex code]\', \'transparent\' or \'Default\'.');
     }
 
+    // Update the GUI color picker and input field
+    let colorCode = geonaLayer.scale.belowMinColor.slice(2);
+    this.updateAboveMaxColorGraphic(item, colorCode);
+
+    // Update the layer's above max color
     let scalebar = this.layersPanelScalebars[layerIdentifier];
     this.addToChangesBuffer(layerIdentifier, scalebar.updateScalebar, scalebar);
+  }
+
+  updateAboveMaxColorGraphic(item, colorCode) {
+    $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val(colorCode);
+    $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker').val('#' + colorCode);
   }
 
   /**
