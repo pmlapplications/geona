@@ -9,13 +9,15 @@ import $ from 'jquery';
 export default class LayerWms extends LayerVisible {
   /**
    * Instantiate a new LayerWms
-   * @param  {Object}      layerConfig   The config for the layer
-   * @param  {LayerServer} [layerServer] The server that provides this layer. Not all layer types require a server
+   * @param {String}      geonaServer   The URL that this instance of Geona should query for serverside functions.
+   * @param {Object}      layerConfig   The config for the layer.
+   * @param {LayerServer} [layerServer] The server that provides this layer. Not all layer types require a server.
    */
   constructor(geonaServer, layerConfig, layerServer) {
     super(layerConfig, layerServer);
     this.protocol = 'wms';
-    this.metadataRetrieved = undefined;
+    this.wcsUrl = layerConfig.wcsUrl;
+    this.metadataRetrieved = undefined; // todo this is here as a hangover from an attempt to fix the getMetadata() race condition. It doesn't work (currently).
     this.scale = {};
 
     if (layerConfig.scale) {
@@ -114,8 +116,9 @@ export default class LayerWms extends LayerVisible {
 
 /**
  * Fetches layers for all supported services.
- * @param  {String} url             URL for service request.
- * @param  {String} layerIdentifier The identifier of the layer to get metadata for.
+ * @param {String} geonaServer     The URL that this instance of Geona should query for serverside functions.
+ * @param {String} url             URL for service request.
+ * @param {String} layerIdentifier The identifier of the layer to get metadata for.
  *
  * @return {Array}                  List of layers found from the request
  */
