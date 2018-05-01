@@ -171,6 +171,11 @@ export function registerBindings(eventManager, menu) {
     menu.executeChangesBuffer(layerIdentifier);
   });
 
+  // Submit WCS URL
+  eventManager.bind('mainMenu.submitWcsUrl', ([item, url]) => {
+    menu.submitWcsUrl(item, url);
+  });
+
   /*
    * Analysis Panel
    */

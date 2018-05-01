@@ -392,6 +392,13 @@ function registerLayersTriggers(eventManager, geonaDiv) {
     let layerIdentifier = item.dataset.identifier;
     eventManager.trigger('mainMenu.executeChangesBuffer', layerIdentifier);
   });
+
+  // Submit WCS URL
+  geonaDiv.find('.js-geona-layers-list__item-body-analysis__no-wcs-url__submit-url').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let url = $(item).find('.js-geona-layers-list__item-body-analysis__no-wcs-url__wcs-url').val();
+    eventManager.trigger('mainMenu.submitWcsUrl', [item, url]);
+  });
 }
 
 /**
