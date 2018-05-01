@@ -6,8 +6,7 @@ import tippy from 'tippy.js';
 
 import {selectPropertyLanguage, findNearestValidTime} from '../map_common';
 
-// import {registerTriggers} from './timeline_triggers';
-import {registerBindings} from './timeline_bindings';
+import {registerBindings} from './timeline_bindings'; // Triggers are set within this Class' methods
 
 /**
  * An SVG timeline, built using D3 version 4.
@@ -47,7 +46,6 @@ export class Timeline {
    *   @param {Object}  [settings.paddingPercentage] The % to pad when setting the view or showing the first layer.
    */
   constructor(timePanel, settings) {
-    window.d3 = d3;
     this.timePanel = timePanel;
     this.geonaDiv = timePanel.geonaDiv;
     this.geona = timePanel.geona;
@@ -254,7 +252,6 @@ export class Timeline {
     });
 
     checkBrowser();
-    // registerTriggers(); // TODO move all triggers into here?
     registerBindings(this.eventManager, this);
   }
 
@@ -733,7 +730,6 @@ export class Timeline {
     } else if (date > this.layerDateExtent.max) {
       validDate = this.layerDateExtent.max;
     }
-    // TODO is trigger in correct way?
     this.eventManager.trigger('timePanel.timelineChangeTime', new Date(validDate));
   }
 

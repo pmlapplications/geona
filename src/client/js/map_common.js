@@ -153,7 +153,8 @@ export function getLayerServer(geonaServer, url, service, save = false, useCache
 }
 
 /**
- * Gets the nearest possible time prior to or matching the requested time.
+ * Gets the nearest possible time prior to or matching the requested time. If the requestedTime is outside the bounds of
+ * the minimum or maximum time for the list of times, will return undefined.
  * @param  {String[]} times         The list of times to get the time from.
  * @param  {String}   requestedTime The requested time in ISO 8601 format.
  *
