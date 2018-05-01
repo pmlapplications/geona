@@ -1073,6 +1073,35 @@ export class MainMenu {
   }
 
   /**
+   * Verifies and submits a valid WCS URL, revealing the analysis controls for the corresponding layer. Also updates the
+   * WCS URL for every layer on with the same layer server.
+   * @param {HTMLElement} item The item for the layer we are updating.
+   * @param {String}      url  The WCS URL that is being submitted.
+   */
+  submitWcsUrl(item, url) { // todo doesn't update other layer items that have already been loaded
+    // todo add a bit of text saying 'WMTS layers cannot be analysed currently' to the GUI
+    if (/(http:\/\/)|(https:\/\/)/.test(url)) { // regex to match 'http://' or 'https://'
+      // Show the analysis controls
+      $(item).find('.js-geona-layers-list__item-body-analysis__controls').removeClass('removed');
+      $(item).find('.js-geona-layers-list__item-body-analysis__no-wcs-url').addClass('removed');
+
+      // Update the WCS URL of the layers belonging to the same server as this item
+      let layerIdentifier = item.dataset.identifier;
+      let layerServer = this.geona.map.availableLayers[layerIdentifier].layerServer;
+
+      for (let identifier of Object.keys(this.geona.map.availableLayers)) {
+        let layer = this.geona.map.availableLayers[identifier];
+        if (layer.layerServer === layerServer) {
+          layer.wcsUrl = url;
+        }
+      }
+    } else {
+      console.error('WCS URL must begin with "http://" or "https://"');
+      alert('WCS URL must begin with "http://" or "https://"');
+    }
+  }
+
+  /**
    * ------------------------------------
    * Analysis Panel
    * ------------------------------------
