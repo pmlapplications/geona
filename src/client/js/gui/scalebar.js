@@ -2,6 +2,7 @@
 
 import * as templates from '../../templates/compiled';
 import $ from 'jquery';
+import moment from 'moment';
 
 /**
  * A class used to instantiate and control a scalebar for a layer.
@@ -404,9 +405,17 @@ export class Scalebar {
       labels: geonaLayer.scale.scaleTicks,
     };
 
+    let currentLayerTime = this.geona.map.layerGet(this.layerIdentifier, 'layerTime');
+    let formattedDatetime;
+    if (currentLayerTime) {
+      formattedDatetime = moment(currentLayerTime).format('YYYY-MM-DD HH:mm:ss');
+    } else {
+      formattedDatetime = 'Invalid Time'; // todo should be i18n-compatible
+    }
+
     // Add the scalebar to this layers panel item
     $(this.layersPanelItem).find('.js-geona-layers-list__item-scalebar')
-      .html(templates.scalebar({scalebarData: scalebarData}));
+      .html(templates.scalebar({scalebarData: scalebarData, formattedDatetime: formattedDatetime}));
   }
 }
 
