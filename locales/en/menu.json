@@ -58,6 +58,9 @@
       "email": "Email"
     },
     "analysis": {
+      "no-wcs": "There is currently no record of the WCS (Web Coverage Service) URL for this layer, please specify this below as we need this to create a plot",
+      "wcs-url": "WCS URL",
+      "submit-url": "Submit WCS URL",
       "analysis-title": "Analysis",
       "analysis-description": "To refine the data before analysis you can",
       "draw-title": "Draw",
