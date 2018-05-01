@@ -6,6 +6,11 @@ import $ from 'jquery';
  * @param {TimePanel}    timePanel    The Geona TimePanel these triggers correspond to.
  */
 export function registerTriggers(eventManager, geonaDiv, timePanel) {
+  /**
+   * Some triggers are set within the main TimePanel methods:
+   *  - 'timePanel.timeChanged' - pikadayChangeTime(), timelineChangeTime(), stepChangeTime()
+   */
+
   // Toggle timePanel visibility
   geonaDiv.find('.js-geona-time-panel-toggle').click(() => {
     if (geonaDiv.find('.js-geona-time-panel').hasClass('removed')) {

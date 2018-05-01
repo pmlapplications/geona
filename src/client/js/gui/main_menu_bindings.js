@@ -111,6 +111,11 @@ export function registerBindings(eventManager, menu) {
     menu.layersPanelScalebars[layerIdentifier].resetScale();
   });
 
+  // Change layer datetime display
+  eventManager.bind('timePanel.timeChanged', () => {
+    menu.updateLayersDatetimeGraphic();
+  });
+
   // Change layer opacity
   eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
     menu.changeLayerOpacity(item, opacity);

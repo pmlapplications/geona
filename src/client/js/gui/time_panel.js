@@ -189,17 +189,19 @@ export class TimePanel {
 
     // Update map layers
     let utcDate = moment.utc(date);
-    this.geona.map.loadLayersToNearestValidTime(utcDate);
+    this.mapChangeTime(utcDate);
 
     // Update timeline display
     this.timelineUpdateGraphic(date);
+
+    this.geona.eventManager.trigger('timePanel.timeChanged');
   }
 
   /**
    * Changes the pikaday date without changing the map layers.
    * @param {String|Date} time The datetime to set the current date box to.
    */
-  pikadayUpdateGraphic(time) { // fixme if we start with no layers, the pikaday box time is wrong
+  pikadayUpdateGraphic(time) { // fixme if we start with no layers, the pikaday box time is wrong until the time is changed
     // FIXME format doesn't work
     // let formattedTime = moment(time).format('YYYY-MM-DD HH:mm').toString();
     // console.log(formattedTime);
@@ -217,6 +219,7 @@ export class TimePanel {
     // update buttons
     this.geonaDiv.find('.js-geona-time-panel-options-current-date').val(time);
     this.mapChangeTime(time);
+    this.geona.eventManager.trigger('timePanel.timeChanged');
   }
 
   /**
@@ -341,8 +344,7 @@ export class TimePanel {
       this.geonaDiv.find('.js-geona-time-panel-options-current-date').val(data.date);
       this.mapChangeTime(data.date);
 
-      // Time has changed so no longer valid
-      this._resetStepTimes();
+      this.geona.eventManager.trigger('timePanel.timeChanged');
     }
   }
 
