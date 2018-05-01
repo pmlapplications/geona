@@ -110,9 +110,11 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
 }
 
 /**
- * Checks if the url has been saved in the cache previously
- * @param {String} url The URL to check the cache for
- * @return {Boolean}   True if the URL has been saved previously
+ * Checks if the url has been saved in the cache previously.
+ * @param {String} geonaServer The server that this instance of Geona should query.
+ * @param {String} url         The URL to check the cache for.
+ *
+ * @return {Boolean} True if the URL has been saved previously.
  */
 export function urlInCache(geonaServer, url) {
   return new Promise((resolve, reject) => {
@@ -121,7 +123,9 @@ export function urlInCache(geonaServer, url) {
       if (err) {
         reject(err);
       } else if (response.statusCode === 200) {
-        resolve(true);
+        let jsonResponse = JSON.parse(response.body);
+        // Resolve the datetime that the layer server was cached
+        resolve(jsonResponse.cacheDatetime);
       } else {
         resolve(false);
       }

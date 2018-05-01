@@ -217,16 +217,18 @@ export class MainMenu {
     }, 3000);
 
     urlInCache(this.geona.geonaServer, url)
-      .then((inCache) => {
+      .then((cacheContent) => {
         // Re-enable button
         this.geonaDiv.find('.js-geona-explore-panel-content__add-url').prop('disabled', false);
         this.geonaDiv.find('.js-geona-explore-panel-content__cache-checking').addClass('removed');
 
-        if (inCache === true) {
-          // Show the label and checkbox
+        if (cacheContent) {
+          // Show the label (with last cache time) and checkbox
           this.geonaDiv.find('.js-geona-explore-panel-content__cache-notification').removeClass('removed');
+          let datetime = moment(cacheContent).toString();
+          this.geonaDiv.find('.js-geona-explore-panel-content__cache-previous-datetime').html(datetime);
           this.geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').removeClass('removed');
-          this.changeAddUrlButtonText(false);
+          this.changeAddUrlButtonText(false); // todo change the name of this method
         } else {
           this.geonaDiv.find('.js-geona-explore-panel-content__cache-notification').addClass('removed');
           this.geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').addClass('removed');
@@ -261,7 +263,12 @@ export class MainMenu {
     getLayerServer(this.geona.geonaServer, url, service, save, useCache)
       .then((layerServerJson) => {
         let layerServerInfo = JSON.parse(layerServerJson);
+        if (useCache) {
+          // If the layer server was cached, it will be stored inside an Object, alongside the cache date
+          layerServerInfo = JSON.parse(layerServerInfo.layerServerInfo);
+        }
 
+        // Show and populate the layer select dropdown and 'add layer' button
         this.geonaDiv.find('.js-geona-explore-panel-content__layer-select').removeClass('removed');
         this.geonaDiv.find('.js-geona-explore-panel-content__add-layer').removeClass('removed');
         let dropdown = this.geonaDiv.find('.js-geona-explore-panel-content__layer-select');

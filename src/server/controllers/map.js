@@ -135,7 +135,13 @@ export function getLayerServerFromCacheOrUrl(geonaServer, url, protocol, save, u
           layerServerInfo = JSON.stringify(layerServerInfo);
 
           if (save === true) {
-            fs.writeFileSync(filepath, layerServerInfo, 'utf8');
+            // We save the layer server in an Object alongside the current datetime
+            let cachedInfo = {
+              layerServerInfo: layerServerInfo,
+              cacheDatetime: new Date().toISOString(),
+            };
+            cachedInfo = JSON.stringify(cachedInfo);
+            fs.writeFileSync(filepath, cachedInfo, 'utf8');
           }
           resolve(layerServerInfo);
         });
