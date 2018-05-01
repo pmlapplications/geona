@@ -1,4 +1,5 @@
 <span>{{t 'menu:layers-panel.scalebar.units'}} - {{scalebarData.scale.units}}</span>
+<span class="js-geona-layers-list__item-scalebar-datetime">{{formattedDatetime}}</span>
 <br>
 <img class="geona-layers-list__item-scalebar-img" src="{{scalebarData.scalebar.src}}" alt="{{t 'menu:layers-panel.scalebar.alt-text.intro'}}
   {{scalebarData.scale.identifier}} {{t 'menu:layers-panel.scalebar.alt-text.between'}}
@@ -7,11 +8,11 @@
   {{scalebarData.scale.units}}."></img>
 <br>
 {{#if scalebarData.scalebar.colorBarOnly}}
-<div class="geona-layers-list__item-scalebar-labels">
-  <span class="geona-layers-list__item-scalebar-labels__label min" title="{{scalebarData.labels.[0].real}}">{{scalebarData.labels.[0].standardForm}}</span>
-  <span class="geona-layers-list__item-scalebar-labels__label centermin" title="{{scalebarData.labels.[1].real}}">{{scalebarData.labels.[1].standardForm}}</span>
-  <span class="geona-layers-list__item-scalebar-labels__label center" title="{{scalebarData.labels.[2].real}}">{{scalebarData.labels.[2].standardForm}}</span>
-  <span class="geona-layers-list__item-scalebar-labels__label centermax" title="{{scalebarData.labels.[3].real}}">{{scalebarData.labels.[3].standardForm}}</span>
-  <span class="geona-layers-list__item-scalebar-labels__label max" title="{{scalebarData.labels.[4].real}}">{{scalebarData.labels.[4].standardForm}}</span>
-</div>
+  <div class="geona-layers-list__item-scalebar-labels">
+    <span class="geona-layers-list__item-scalebar-labels__label min" title="{{scalebarData.labels.[0].real}}">{{scalebarData.labels.[0].standardForm}}</span>
+    <span class="geona-layers-list__item-scalebar-labels__label centermin" title="{{scalebarData.labels.[1].real}}">{{scalebarData.labels.[1].standardForm}}</span>
+    <span class="geona-layers-list__item-scalebar-labels__label center" title="{{scalebarData.labels.[2].real}}">{{scalebarData.labels.[2].standardForm}}</span>
+    <span class="geona-layers-list__item-scalebar-labels__label centermax" title="{{scalebarData.labels.[3].real}}">{{scalebarData.labels.[3].standardForm}}</span>
+    <span class="geona-layers-list__item-scalebar-labels__label max" title="{{scalebarData.labels.[4].real}}">{{scalebarData.labels.[4].standardForm}}</span>
+  </div>
 {{/if}}
