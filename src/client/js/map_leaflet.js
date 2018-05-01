@@ -929,7 +929,6 @@ export class LMap extends GeonaMap {
      * @param {String} requestedTime   The target time in ISO 8601 format.
      */
   loadNearestValidTime(layerIdentifier, requestedTime) {
-    // TODO set the layertime to undefined if out of bounds
     // We use time values from the Geona layer object
     let geonaLayer = this.availableLayers[layerIdentifier];
     let activeLayer = this.activeLayers[layerIdentifier];
@@ -949,6 +948,8 @@ export class LMap extends GeonaMap {
         activeLayer.setOpacity(0);
         activeLayer.options.opacity = 0;
         activeLayer.options.timeHidden = true;
+        // We set the layerTime to undefined because it's now off the map
+        activeLayer.options.layerTime = undefined;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
@@ -1107,7 +1108,7 @@ export class LMap extends GeonaMap {
       case 'format':
         return layerSource.format;
       case 'numColorBands':
-        return this.layerGet(layerIdentifier, 'numcolorbands'); // todo just remove this, duh
+        return this.layerGet(layerIdentifier, 'numcolorbands'); // todo just remove this after finding where it's used, because why would you not just use layerGet?
       default:
         throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numColorBands\']');
     }

@@ -911,7 +911,6 @@ export class OlMap extends GeonaMap {
    * @param {String} requestedTime   The target time in ISO 8601 format.
    */
   loadNearestValidTime(layerIdentifier, requestedTime) {
-    // TODO set the layertime to undefined if out of bounds
     // We use time values from the Geona layer object
     let geonaLayer = this.availableLayers[layerIdentifier];
     let activeLayer = this.activeLayers[layerIdentifier];
@@ -930,6 +929,8 @@ export class OlMap extends GeonaMap {
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
         activeLayer.setVisible(false);
         activeLayer.set('timeHidden', true);
+        // We set the layerTime to undefined because it's now off the map
+        activeLayer.set('layerTime', undefined);
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
         this._mapTime = requestedTime;
         // TODO throw error?? But it might stop execution of whole loadLayersToNearestValidTime() method; use try/catch in that method?
