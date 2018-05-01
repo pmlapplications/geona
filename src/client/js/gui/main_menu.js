@@ -734,6 +734,31 @@ export class MainMenu {
   }
 
   /**
+   * Updates the datetime displayed above the scalebar for the specified layer item. Sets the displayed datetime to the
+   * current layer time, or 'Invalid Time'.
+   */
+  updateLayersDatetimeGraphic() {
+    // We will update each layer's time if needed
+    for (let layerIdentifier of this.layersPanelItemList) {
+      // Find the current layer time (this is the time which will be shown)
+      let datetime = this.geona.map.layerGet(layerIdentifier, 'layerTime');
+
+      // Datetime might be undefined, so we'll either format the date nicely, or just set an 'Invalid Time' message
+      let formattedDatetime;
+      if (datetime) {
+        formattedDatetime = moment(datetime).format('YYYY-MM-DD HH:mm:ss');
+      } else {
+        formattedDatetime = 'Invalid Time'; // todo should be i18n-compatible
+      }
+
+      // Find the HTML Element to manipulate and update the displayed datetime
+      let item = this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + layerIdentifier + '"]');
+      item.find('.js-geona-layers-list__item-scalebar-datetime')
+        .html(formattedDatetime);
+    }
+  }
+
+  /**
    * Changes the layer opacity for the layer which corresponds to the given item.
    * @param {HTMLElement} item    The layers panel item which was clicked.
    * @param {Number}      opacity The value for the opacity between 0 and 1.
