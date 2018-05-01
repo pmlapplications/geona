@@ -497,6 +497,13 @@ export class MainMenu {
         }
       }
 
+      // Show or hide analysis controls
+      if (geonaLayer.wcsUrl) {
+        $(item).find('.js-geona-layers-list__item-body-analysis__no-wcs-layer').addClass('removed');
+      } else {
+        $(item).find('.js-geona-layers-list__item-body-analysis__controls').addClass('removed');
+      }
+
       // Hide all panels
       $(item).find('.js-geona-layers-list__item-body-settings').addClass('removed');
       $(item).find('.js-geona-layers-list__item-body-info').addClass('removed');
