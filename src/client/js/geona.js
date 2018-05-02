@@ -79,4 +79,37 @@ export class Geona {
       }
     });
   }
+
+  /**
+   * Saves the necessary options to recreate an instance of Geona in an identical form as when the method was called.
+   * This includes (bu is not limited to) the layers on the map, the available layers, the current zoom and extent, and
+   * the GUI panels which are open.
+   */
+  saveGeonaState() {
+    // Compiles all required options into a config Object
+    let geonaState = {};
+
+    // Map options
+    geonaState.map = {};
+    let mapConfig = this.map.config;
+
+    geonaState.map.basemapLayers = mapConfig.basemapLayers;
+    geonaState.map.basemap = mapConfig.basemap;
+    geonaState.map.bordersLayers = mapConfig.bordersLayers;
+    geonaState.map.borders = mapConfig.borders;
+    geonaState.map.dataLayers = mapConfig.dataLayers;
+    geonaState.map.data = mapConfig.data;
+    geonaState.map.graticule = mapConfig.graticule;
+    geonaState.map.projection = mapConfig.projection;
+    geonaState.map.additionalBasemaps = mapConfig.additionalBasemaps;
+    geonaState.map.viewSettings = mapConfig.viewSettings;
+    geonaState.map.zoomToExtent = mapConfig.zoomToExtent;
+
+    // GUI options
+    this.geonaState.gui = {};
+
+    // geonaState.gui.
+
+    // Save the state into the browser cache (or database?)
+  }
 }
