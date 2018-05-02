@@ -448,7 +448,9 @@ export class OlMap extends GeonaMap {
       }
 
       // Save the Layer with its modifier
-      geonaLayer.modifier = options.modifier;
+      if (options.modifier) {
+        geonaLayer.modifier = options.modifier;
+      }
       this.availableLayers[geonaLayer.identifier] = geonaLayer;
 
       // Save the LayerServer if not already saved
@@ -464,7 +466,7 @@ export class OlMap extends GeonaMap {
       viewSettings: geonaLayer.viewSettings,
       projections: geonaLayer.projections,
       source: source,
-      modifier: options.modifier,
+      modifier: geonaLayer.modifier,
       // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
       // This is to compensate for the fact that the layer has not been added to the map yet.
       zIndex: updateOptions.options.zIndex || this._map.getLayers().getArray().length,
@@ -480,7 +482,7 @@ export class OlMap extends GeonaMap {
     }
 
     // Add the layer to the map
-    switch (options.modifier) {
+    switch (geonaLayer.modifier) {
       case 'basemap':
         this._clearBasemap();
         this._map.addLayer(layer);
@@ -501,8 +503,8 @@ export class OlMap extends GeonaMap {
         this.activeLayers[geonaLayer.identifier] = layer;
         if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._map.getLayers().getArray().length - 2);
-          this.config.data.push(geonaLayer.identifier);
         }
+        this.config.data.push(geonaLayer.identifier);
     }
 
     if (options.shown === false) {

@@ -603,7 +603,7 @@ export class LMap extends GeonaMap {
           crs: projection,
           projections: geonaLayer.projections,
           zIndex: this._mapLayers.getLayers().length,
-          modifier: options.modifier,
+          modifier: options.modifier || geonaLayer.modifier,
           layerTime: time,
           shown: options.shown,
           opacity: 1,
@@ -631,7 +631,9 @@ export class LMap extends GeonaMap {
     }
 
     // Save the Layer with its modifier
-    geonaLayer.modifier = options.modifier;
+    if (options.modifier) {
+      geonaLayer.modifier = options.modifier;
+    }
     this.availableLayers[geonaLayer.identifier] = geonaLayer;
 
     // Save the LayerServer if not already saved
