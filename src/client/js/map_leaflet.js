@@ -19,8 +19,9 @@ let L;
 export class LMap extends GeonaMap {
   /**
    * Instantiate a new LMap and create a new Leaflet map.
-   * @param  {Object} config The map config to load
-   * @param {HTMLElement} mapDiv The div to put the map in
+   * @param {Object}      config The map config to load.
+   * @param {HTMLElement} mapDiv The div to put the map in.
+   * @param {Geona}       geona  The current Geona instance.
    */
   constructor(config, mapDiv, geona) {
     super();
@@ -155,7 +156,7 @@ export class LMap extends GeonaMap {
 
   /**
    * Clears the basemap if it exists and changes the projection if required.
-   * @param {L.tileLayer.wms} [layer] The layer created in addLayer()
+   * @param {L.tileLayer.wms} [layer] The layer whose projection we want to change to.
    */
   _clearBasemap(layer) {
     if (this.config.basemap !== 'none') {

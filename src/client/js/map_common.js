@@ -11,7 +11,7 @@ import LayerWms from '../../common/layer/layer_wms';
 import LayerWmts from '../../common/layer/layer_wmts';
 
 
-// TODO some of these functions perhaps shouldn't be in here
+// TODO some of these functions shouldn't be in here (e.g. urlInCache)
 /**
  * Variables and functions common to all map types.
  */
@@ -282,8 +282,9 @@ export function generateDatetimesFromIntervals(geonaLayer) {
 
 /**
  * Loads the default/config Geona Layers and their corresponding LayerServers
- * @param  {Object} config The config for the map
- * @return {Object}           The availableLayers and availableLayerServers
+ * @param  {Object} config      The config for the map.
+ * @param  {String} geonaServer The address to query for server-side Geona functions.
+ * @return {Object}             The availableLayers and availableLayerServers.
  */
 export function loadDefaultLayersAndLayerServers(config, geonaServer) {
   // TODO actually instantiate some layer servers instead of just using the Objects

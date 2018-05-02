@@ -13,6 +13,8 @@ import {rotate} from '../utils/rotation';
  * @param  {Object} res Express response
  */
 export function wcsGetLayers(req, res) {
+  // These getCapabilities requests are kept for checking changes to the parser files
+
   // getCapabilities('wcs', req.params.url)
   //   .then((jsonCapabilities) => {
   //     res.json(jsonifyCapabilities('wcs', jsonCapabilities));
@@ -22,7 +24,7 @@ export function wcsGetLayers(req, res) {
   parseWcsCapabilities(req.params.url)
     .then((layer) => {
       res.json(layer);
-    // console.log(JSON.stringify(layer));
+      // console.log(JSON.stringify(layer));
     }).catch((err) => {
       console.error(err);
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
@@ -44,7 +46,7 @@ export function wfsGetLayers(req, res) {
   parseWfsCapabilities(req.params.url)
     .then((layer) => {
       res.json(layer);
-    // console.log(JSON.stringify(layer));
+      // console.log(JSON.stringify(layer));
     }).catch((err) => {
       console.error(err);
       res.status(500).json({error: 'Error processing XML: ' + err.message + ' ' + err.stack});
@@ -57,6 +59,8 @@ export function wfsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function wmsGetLayers(req, res) {
+  // These getCapabilities requests are kept for checking changes to the parser files
+
   // getCapabilities('wms', req.params.url)
   //   .then((jsonCapabilities) => {
   //     res.json(jsonifyCapabilities('wms', jsonCapabilities));
@@ -93,6 +97,8 @@ export function wmsGetMetadata(req, res) {
  * @param  {Object} res Express response
  */
 export function wmtsGetLayers(req, res) {
+  // These getCapabilities requests are kept for checking changes to the parser files
+
   // getCapabilities('wmts', req.params.url).then((jsonCapabilities) => {
   //   res.json(jsonifyCapabilities('wmts', jsonCapabilities));
   //   console.log(JSON.stringify(jsonCapabilities));
@@ -113,6 +119,8 @@ export function wmtsGetLayers(req, res) {
  * @param  {Object} res Express response
  */
 export function sosGetLayers(req, res) {
+  // These getCapabilities requests are kept for checking changes to the parser files
+
   getCapabilities('sos', req.params.url)
     .then((jsonCapabilities) => {
       res.json(jsonifyCapabilities('sos', jsonCapabilities));

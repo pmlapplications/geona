@@ -468,9 +468,9 @@ function parseKeywords(keywords) {// todo copy typedef from other place
 }
 
 /**
- *
- * @param {Array} dimensions
- * @return {Object}
+ * Parses the dimensions for a WMTS layer, and sorts extra data with language code.
+ * @param {Array} dimensions A list of dimensions (e.g. time, elevation) to parse.
+ * @return {Object}          A Geona-friendly list of WMTS dimensions.
  */
 function parseDimensions(dimensions) {
   let dimensionsArray = [];

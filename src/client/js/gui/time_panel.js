@@ -94,7 +94,7 @@ export class TimePanel {
       this.drawTimeline();
     }
 
-    registerTriggers(this.geona.eventManager, this.geonaDiv, this);
+    registerTriggers(this.geona.eventManager, this.geonaDiv, this); // todo triggers drawtimeline as well
     registerBindings(this.geona.eventManager, this);
   }
 

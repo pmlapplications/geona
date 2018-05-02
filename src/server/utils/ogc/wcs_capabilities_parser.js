@@ -29,8 +29,9 @@ export function parseWcsCapabilities(url) {
 
 /**
  * Parse a WCS DescribeCoverage from a url
- * @param {*} url
- * @param {*} capabilities
+ * @param  {String}  url             The DescribeCoverage URL to query.
+ * @param  {String}  capabilitiesXml The XML returned from a GetCapabilities request for this server.
+ * @return {Promise}                 The DescribeCoverage for the supplied URL.
  */
 function _parseWcsCoverage(url, capabilitiesXml) {
   return new Promise((resolve, reject) => {
@@ -48,8 +49,9 @@ function _parseWcsCoverage(url, capabilitiesXml) {
 
 /**
  * Parse an XML WCS capabilities document.
- * @param  {String} xml The XML document as a string
- * @param  {String} url (optional) The url of the service
+ * @param  {String} capabilitiesXml The capabilities XML as a string.
+ * @param  {String} coverageXml     The coverage XML as a string.
+ * @param  {String} [url]           The url of the service.
  * @return {Object}     A LayerServer config Object
  *
  * @throws Throws any error thrown by jsonifyCapabilities, and an error if the WCS version is unsupported.
@@ -100,7 +102,8 @@ export function parseLocalWcsCapabilities(capabilitiesXml, coverageXml, url) {
  * @return {Object}              The server config
  */
 function parseCommon(url, capabilities) {
-  // what need here
+  // When more than just v1.0 is supported use this method
+  return undefined;
 }
 
 /**
@@ -190,7 +193,7 @@ function parse1_0(url, capabilities, coverage) {
   return serverConfig;
 }
 
-// TODO this uses xml-js rather than jsonix. Change?
+// TODO this uses xml-js rather than jsonix. Change if you can figure out a working jsonix context for WCS
 /**
  * Populates an array for all the layer definitions found.
  * @param  {JSON}  coverage The coverage for all layers from a WCS DescribeCoverage request

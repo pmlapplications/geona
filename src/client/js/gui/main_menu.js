@@ -1120,7 +1120,7 @@ export class MainMenu {
    */
 
   /**
-   *
+   * Shows the analysis panel on the GUI.
    */
   displayAnalysisPanel() {
     this.geonaDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
@@ -1138,6 +1138,9 @@ export class MainMenu {
     }
   }
 
+  /**
+   * Creates the analysis panel using the corresponding template.
+   */
   constructAnalysisPanel() {
     this.geonaDiv.find('.js-geona-panel').prepend(templates.analysis_panel());
   }
@@ -1149,7 +1152,7 @@ export class MainMenu {
    */
 
   /**
-   *
+   * Opens the login panel on the GUI.
    */
   displayLoginPanel() {
     this.geonaDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
@@ -1167,6 +1170,9 @@ export class MainMenu {
     }
   }
 
+  /**
+   * Creates the login panel using the corresponding template.
+   */
   constructLoginPanel() {
     this.geonaDiv.find('.js-geona-panel').prepend(templates.login_panel());
   }
@@ -1197,7 +1203,7 @@ export class MainMenu {
   }
 
   /**
-   * 
+   * Creates the options panel using the corresponding template and data.
    */
   constructOptionsPanel() {
     let data = this._compileOptionsData();
@@ -1353,7 +1359,7 @@ export class MainMenu {
    */
 
   /**
-   *
+   * Shows the help panel on the GUI.
    */
   displayHelpPanel() {
     this.geonaDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
@@ -1385,7 +1391,7 @@ export class MainMenu {
    */
 
   /**
-   *
+   * Shows the share panel on the GUI.
    */
   displaySharePanel() {
     this.geonaDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
