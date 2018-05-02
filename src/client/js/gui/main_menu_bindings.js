@@ -38,8 +38,8 @@ export function registerBindings(eventManager, menu) {
     menu.getLayerServer(url, service, save, useCache);
   });
   // Change add URL text
-  eventManager.bind('mainMenu.changeAddUrlButtonText', (checked) => {
-    menu.changeAddUrlButtonText(checked);
+  eventManager.bind('mainMenu.addLayerButtonTextAsUrl', (checked) => {
+    menu.addLayerButtonTextAsUrl(checked);
   });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', (layerIdentifier) => {

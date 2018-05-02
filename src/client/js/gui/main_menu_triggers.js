@@ -10,6 +10,11 @@ export function registerTriggers(eventManager, geonaDiv) {
   // Tracks the last tab that was clicked
   let lastTabClicked = '';
 
+  // fixme the triggers are set multiple times and don't overwrite themselves
+  // let exploreTriggersSet = false;
+  // let layersTriggersSet = false;
+  // let optionsTriggersSet = false;
+
   // Open/close menu
   geonaDiv.find('.js-geona-menu-toggle').click(() => {
     if (geonaDiv.find('.js-geona-menu').hasClass('removed')) {
@@ -29,7 +34,10 @@ export function registerTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
+      // if (!exploreTriggersSet) {
       registerExploreTriggers(eventManager, geonaDiv);
+      // exploreTriggersSet = true;
+      // }
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
@@ -44,7 +52,10 @@ export function registerTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLayersPanel');
+      // if (!layersTriggersSet) {
       registerLayersTriggers(eventManager, geonaDiv);
+      // layersTriggersSet = true;
+      // }
     }
     lastTabClicked = 'js-geona-menu__layers';
   });
@@ -84,7 +95,10 @@ export function registerTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayOptionsPanel');
+      // if (!optionsTriggersSet) {
       registerOptionsTriggers(eventManager, geonaDiv);
+      // optionsTriggersSet = true;
+      // }
     }
     lastTabClicked = 'js-geona-menu__options';
   });
@@ -154,9 +168,9 @@ function registerExploreTriggers(eventManager, geonaDiv) {
   geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').click(() => {
     let checked = geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked');
     if (checked === true) {
-      eventManager.trigger('mainMenu.changeAddUrlButtonText', true);
+      eventManager.trigger('mainMenu.addLayerButtonTextAsUrl', true);
     } else {
-      eventManager.trigger('mainMenu.changeAddUrlButtonText', false);
+      eventManager.trigger('mainMenu.addLayerButtonTextAsUrl', false);
     }
   });
 
