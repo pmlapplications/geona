@@ -146,13 +146,16 @@
     </table>
 
     <div class="js-geona-layers-list__item-body-analysis">
-      <div class="js-geona-layers-list__item-body-analysis__no-wcs-url">
+      <div class="js-geona-layers-list__item-body-analysis__not-wms removed">
+        {{t 'menu:layers-panel.analysis.not-wms'}}
+      </div>
+      <div class="js-geona-layers-list__item-body-analysis__no-wcs-url removed">
         {{t 'menu:layers-panel.analysis.no-wcs'}}:
         <br>
         <input class="js-geona-layers-list__item-body-analysis__no-wcs-url__wcs-url" type="text" placeholder= {{t 'menu:layers-panel.analysis.wcs-url'}}>
         <button class="js-geona-layers-list__item-body-analysis__no-wcs-url__submit-url">{{t 'menu:layers-panel.analysis.submit-url'}}</button>
       </div>
-      <div class="js-geona-layers-list__item-body-analysis__controls">
+      <div class="js-geona-layers-list__item-body-analysis__controls removed">
         <h4>{{t 'menu:layers-panel.analysis.analysis-title'}}</h4>
         {{t 'menu:layers-panel.analysis.analysis-description'}}:
         <h4>{{t 'menu:layers-panel.analysis.draw-title'}}</h4>
