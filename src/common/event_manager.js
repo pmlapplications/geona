@@ -10,9 +10,9 @@ export class EventManager {
    * Defines the Geona-specific names for useful functions.
    */
   constructor() {
-    this.emitter_ = new EventEmitter();
-    this.bind = this.emitter_.on.bind(this.emitter_);
-    this.bindOnce = this.emitter_.once.bind(this.emitter_);
-    this.trigger = this.emitter_.emit.bind(this.emitter_);
+    this._emitter = new EventEmitter();
+    this.bind = this._emitter.on.bind(this._emitter);
+    this.bindOnce = this._emitter.once.bind(this._emitter);
+    this.trigger = this._emitter.emit.bind(this._emitter);
   }
 }
