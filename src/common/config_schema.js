@@ -82,6 +82,23 @@ export let client = {
         format: Boolean,
         default: true,
       },
+      activePanel: {
+        panel: {
+          doc: 'The menu panel that should be displayed when the menu is opened.',
+          format: ['none', 'explore', 'layers', 'analysis', 'login', 'options', 'help', 'share'],
+          default: 'none',
+        },
+        item: {
+          doc: 'Used if panel is set to \'layers\' and tab is not set to \'none\'. The layer item on the layers panel which should be open',
+          format: String,
+          default: '',
+        },
+        tab: {
+          doc: 'Used if panel is set to \'layers\' and item is not set to \'\'. The tab that should be open for the layer item.',
+          format: ['none', 'settings', 'info', 'analysis'],
+          default: 'none',
+        },
+      },
     },
     timeline: {
       opened: {

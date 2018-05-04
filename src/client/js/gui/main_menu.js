@@ -38,8 +38,8 @@ export class MainMenu {
     this.requestLayerServer = undefined;
     /** @type {String[]} @desc Holds the order of the layers in the layers list, using identifiers. */
     this.layersPanelItemList = [];
-    /** @type {HTMLElement} @desc The currently open layer element - defaults to first layer element. */
-    this.layersPanelActiveItemPanel = undefined;
+    /** @type {HTMLElement} @desc The currently open layer item tab - defaults to first layer item's info tab. */
+    this.layersPanelActiveItemTab = undefined;
 
     /** @type {HTMLElement} @desc Holds the explore panel after creation so it can be displayed again easily. */
     this.explorePanel = undefined;
@@ -64,29 +64,55 @@ export class MainMenu {
     this.layersPanelScalebars = {};
 
 
-    // Sets up menu toggle control
-    if (this.config.allowToggle) {
-      this.geonaDiv.find('.js-geona-menu-bar').append(templates.menu_toggle());
-    }
+    // We only draw the menu if it will ever be visible
+    if (this.config.allowToggle || this.config.opened) {
+      // Sets up menu toggle control
+      if (this.config.allowToggle) {
+        this.geonaDiv.find('.js-geona-menu-bar').append(templates.menu_toggle());
+      }
 
-    // Sets up menu
-    this.geonaDiv.find('.js-geona-menu-bar').append(templates.menu());
-    this.geonaDiv.find('.js-geona-menu')
-      .addClass('removed')
-      .append(templates.panel());
-    this.geonaDiv.find('.js-geona-panel').addClass('removed');
-    if (this.config.opened) {
-      this.geonaDiv.find('.js-geona-menu').removeClass('removed');
-      this.geonaDiv.find('.js-geona-menu-toggle__icon')
-        .removeClass('icon-arrow-65')
-        .addClass('icon-arrow-66');
-      this.geonaDiv.find('.js-geona-menu-toggle__text-open').addClass('removed');
-      this.geonaDiv.find('.js-geona-menu-toggle__text-close').removeClass('removed');
-    }
+      // Sets up menu
+      this.geonaDiv.find('.js-geona-menu-bar').append(templates.menu());
+      this.geonaDiv.find('.js-geona-menu')
+        .addClass('removed')
+        .append(templates.panel());
 
-    // Sets the triggers and bindings for this Menu.
-    registerTriggers(this.geona.eventManager, this.geonaDiv);
-    registerBindings(this.geona.eventManager, this);
+      // Hide menu by default
+      this.geonaDiv.find('.js-geona-panel').addClass('removed');
+      if (this.config.opened) {
+        // Show the menu
+        this.openMenu();
+      }
+
+      // Show specific panel if possible
+      switch (this.config.activePanel.panel) {
+        case 'explore':
+          this.displayExplorePanel();
+          break;
+        case 'layers':
+          this.displayLayersPanel(); // todo update to show item and tab
+          break;
+        case 'analysis':
+          this.displayAnalysisPanel();
+          break;
+        case 'login':
+          this.displayLoginPanel();
+          break;
+        case 'options':
+          this.displayOptionsPanel();
+          break;
+        case 'help':
+          this.displayHelpPanel();
+          break;
+        case 'share':
+          this.displaySharePanel();
+          break;
+      }
+
+      // Sets the triggers and bindings for this Menu.
+      registerTriggers(this.geona.eventManager, this.geonaDiv);
+      registerBindings(this.geona.eventManager, this);
+    }
   }
 
   /**
@@ -99,6 +125,8 @@ export class MainMenu {
       .addClass('icon-arrow-66');
     this.geonaDiv.find('.js-geona-menu-toggle__text-open').addClass('removed');
     this.geonaDiv.find('.js-geona-menu-toggle__text-close').removeClass('removed');
+
+    this.config.opened = true;
   }
 
   /**
@@ -111,10 +139,12 @@ export class MainMenu {
       .addClass('icon-arrow-65');
     this.geonaDiv.find('.js-geona-menu-toggle__text-close').addClass('removed');
     this.geonaDiv.find('.js-geona-menu-toggle__text-open').removeClass('removed');
+
+    this.config.opened = false;
   }
 
   /**
-   * Removes panel element from the GUI, but not from the DOM.
+   * Removes panel container element from the GUI, but not from the DOM.
    */
   closePanel() {
     this.geonaDiv.find('.geona-menu__tab--active').removeClass('geona-menu__tab--active');
@@ -130,6 +160,12 @@ export class MainMenu {
     // Make the panel itself visible
     this.geonaDiv.find('.js-geona-panel')
       .removeClass('removed');
+
+    this.config.activePanel = {
+      panel: 'none',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
@@ -157,6 +193,13 @@ export class MainMenu {
       // Add the explore panel
       this.explorePanel.classList.remove('removed');
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'explore',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
@@ -370,6 +413,31 @@ export class MainMenu {
         // Show the already-made layers panel
         this.layersPanel.classList.remove('removed');
       }
+
+      // The tab element being displayed
+      let tabElement = this.gui.mainMenu.layersPanelActiveItemTab;
+      let item = '';
+      let tab = 'none';
+      if (tabElement) {
+        // The item which holds the tab
+        item = $(tabElement).closest('li')[0];
+
+        // The tab name to put in the config
+        if (tabElement.classList.contains('js-geona-layers-list__item-body-settings')) { // Settings tab
+          tab = 'settings';
+        } else if (tabElement.classList.contains('js-geona-layers-list__item-body-info')) { // Info tab
+          tab = 'info';
+        } else if (tabElement.classList.contains('js-geona-layers-list__item-body-analysis')) { // Analysis tab
+          tab = 'analysis';
+        }
+      }
+
+      // Update the config
+      this.config.activePanel = {
+        panel: 'layers',
+        item: item.dataset.identifier,
+        tab: tab,
+      };
     } else {
       console.warn('Blocked the layers panel from opening as there are no active layers. It would be better to block the GUI (grey out the layers button) instead.');
     }
@@ -395,12 +463,25 @@ export class MainMenu {
       }
     }
 
-    // Find the topmost HTML element in the list to use for the default active layer
-    let topmostItem = this.geonaDiv.find('.js-geona-layers-list').children()[0];
-    this.layersPanelActiveItemPanel = $(topmostItem).find('.js-geona-layers-list__item-body-info')[0];
+    // Set the active item tab
+    // If we have it in the config we'll use that
+    if (this.config.activePanel.item) {
+      if (this.config.activePanel.tab === 'none') {
+        this.layersPanelActiveItemTab = undefined;
+      } else {
+        // Find the list element for the config item
+        let item = this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + this.config.activePanel.item + '"]');
+        // Find the tab that should be opened for th
+        this.layersPanelActiveItemTab = item.find('.js-geona-layers-list__item-body-' + this.config.activePanel.tab)[0];
+      }
+    } else {
+      // Otherwise just find the topmost HTML element in the list to use for the default active layer
+      let topmostItem = this.geonaDiv.find('.js-geona-layers-list').children()[0];
+      this.layersPanelActiveItemTab = $(topmostItem).find('.js-geona-layers-list__item-body-info')[0];
+    }
 
     // Make its contents visible
-    this.layersPanelActiveItemPanel.classList.remove('removed');
+    this.layersPanelActiveItemTab.classList.remove('removed');
   }
 
   /**
@@ -645,24 +726,35 @@ export class MainMenu {
   }
 
   /**
-   * Opens the specified panel of the specified item.
-   * @param {HTMLElement} item  The item in the layers list.
-   * @param {String}      panel The name of the panel to open ('settings', 'info', 'analysis').
+   * Opens the specified tab of the specified item.
+   * @param {HTMLElement} item The item in the layers list.
+   * @param {String}      tab  The name of the tab to open ('settings', 'info', 'analysis').
    */
-  toggleLayersPanelItemPanel(item, panel) {
-    let itemPanelToToggle = $(item).find('.js-geona-layers-list__item-body-' + panel)[0];
+  toggleLayersPanelItemTab(item, tab) {
+    let itemTabToToggle = $(item).find('.js-geona-layers-list__item-body-' + tab)[0];
+    let configItem = item;
+    let configTab = tab;
 
-    // If the item we want to toggle is the currently active panel, just close it
-    if (itemPanelToToggle.isEqualNode(this.layersPanelActiveItemPanel)) {
-      itemPanelToToggle.classList.add('removed');
-      this.layersPanelActiveItemPanel = undefined;
+    // If the item we want to toggle is the currently active tab, just close it
+    if (itemTabToToggle.isEqualNode(this.layersPanelActiveItemTab)) {
+      itemTabToToggle.classList.add('removed');
+      this.layersPanelActiveItemTab = undefined;
+      configItem = '';
+      configTab = 'none';
     } else {
-      if (this.layersPanelActiveItemPanel !== undefined) {
-        this.layersPanelActiveItemPanel.classList.add('removed'); // Close the current panel
+      if (this.layersPanelActiveItemTab !== undefined) {
+        this.layersPanelActiveItemTab.classList.add('removed'); // Close the current tab
       }
-      itemPanelToToggle.classList.remove('removed'); // Open the new panel
-      this.layersPanelActiveItemPanel = itemPanelToToggle;
+      itemTabToToggle.classList.remove('removed'); // Open the new tab
+      this.layersPanelActiveItemTab = itemTabToToggle;
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'layers',
+      item: configItem,
+      tab: configTab,
+    };
   }
 
   /**
@@ -1136,6 +1228,13 @@ export class MainMenu {
       // Add the analysis panel
       this.analysisPanel.classList.remove('removed');
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'analysis',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
@@ -1168,6 +1267,13 @@ export class MainMenu {
       // Add the login panel
       this.loginPanel.classList.remove('removed');
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'login',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
@@ -1200,6 +1306,13 @@ export class MainMenu {
       // Add the options panel
       this.optionsPanel.classList.remove('removed');
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'options',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
@@ -1375,6 +1488,13 @@ export class MainMenu {
       // Add the help panel
       this.helpPanel.classList.remove('removed');
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'help',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
@@ -1407,6 +1527,13 @@ export class MainMenu {
       // Add the share panel
       this.sharePanel.classList.remove('removed');
     }
+
+    // Update the config
+    this.config.activePanel = {
+      panel: 'share',
+      item: '',
+      tab: 'none',
+    };
   }
 
   /**
