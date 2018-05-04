@@ -21,7 +21,7 @@ import {registerBindings} from './timeline_bindings'; // Triggers are set within
  * - The timeline can be scrolled on in order to adjust the zoom level.
  * - The timeline can be dragged in order to pan forwards and backwards along the x-axis.
  *
- * There are also controls in the TimePanel for:
+ * There are also controls in the TimePanel:
  * - Buttons to move a set number of intervals forwards and backwards in time.
  * - A Pikaday date picker to jump to a specific datetime.
  * - Keydown listeners to trigger the command to move a set number of intervals forwards and backwards in time.

@@ -64,7 +64,7 @@ export function registerBindings(eventManager, timePanel) {
   let activeDataLayers = timePanel.geona.map.config.data;
   // Add layer from URL
   eventManager.bind('mainMenu.addUrlLayerToMap', () => { // FIXME logic is wrong, I think activeDataLayers has a race condition where it will be 1
-    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) {
+    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) { // fixme use config.timeline.openOnLayerLoad
       timePanel.showTimePanel();
 
       if (!timePanel.config.allowToggleWithNoLayers) {

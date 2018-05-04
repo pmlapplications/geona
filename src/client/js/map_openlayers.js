@@ -325,7 +325,7 @@ export class OlMap extends GeonaMap {
       center = ol.extent.getCenter(maxExtent);
     }
 
-    // TODO check for undefined errors? Would let people know if their definitions were wrong (+ stop OL from hanging)
+    // TODO check for undefined errors (Would let people know if their definitions were wrong + stop OL from hanging)
 
     let newView = new ol.View({
       center: center,
@@ -339,6 +339,7 @@ export class OlMap extends GeonaMap {
     this._map.setView(newView);
 
     // Fit the map in the fitExtent
+    // todo check for if zoomToExtent === true
     if (fitExtent) {
       this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
       if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
