@@ -6,7 +6,9 @@
 export function registerBindings(eventManager, timePanel) {
   // Load timePanel (trigger set in Geona class)
   eventManager.bind('map.initialized', () => {
-    timePanel.drawTimeline();
+    if (!timePanel.timeline) { // There can only be one Timeline per instance of Geona
+      timePanel.drawTimeline();
+    }
   });
 
   // Show timePanel
