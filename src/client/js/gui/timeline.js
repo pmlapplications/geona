@@ -91,8 +91,10 @@ export class Timeline {
     this.SELECTOR_TOOL_CORRECTION = this.SELECTOR_TOOL_WIDTH / 2;
     /** @type {Number} @desc CONST - The amount of pixels off the edge of the timeline before markers are not drawn */
     this.TIME_MARKER_DRAW_MARGIN = 5;
-    /** @type {Number} @desc CONST - The time in ms to add to each side if the first timeline layer only has a single time*/
+    /** @type {Number} @desc CONST - The time (ms) to add to each side if the first timeline layer has a single time */
     this.SINGLE_TIME_EXTENT_MARGIN = 15638400000; // 6 months in ms
+    /** @type {Number} @desc CONST - The time (ms) that a transition should take (e.g. selector tool moving) */
+    this.TRANSITION_DURATION = 500;
 
     /** @type {Array} @desc The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
@@ -749,7 +751,7 @@ export class Timeline {
     // Move the selector (optionally animated)
     if (this.options.animateSelector) {
       this.selectorTool
-        .transition().duration(500)
+        .transition().duration(this.TRANSITION_DURATION)
         .attr('x', () => {
           return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
         });
@@ -827,7 +829,7 @@ export class Timeline {
     let pxRatio = this.dataWidth / pxDatesDifferenceAtCurrentScale;
     // Scale in or out by the ratio
     if (animate) {
-      this.zoomBehavior.scaleBy(this.timeline.transition().duration(500), pxRatio);
+      this.zoomBehavior.scaleBy(this.timeline.transition().duration(this.TRANSITION_DURATION), pxRatio);
     } else {
       this.zoomBehavior.scaleBy(this.timeline, pxRatio);
     }
@@ -840,7 +842,9 @@ export class Timeline {
     // so that they are based off the scale movement at k = 1.
     if (animate) {
       this.zoomBehavior.translateBy(
-        this.timeline.transition().duration(500), (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0
+        this.timeline
+          .transition()
+          .duration(this.TRANSITION_DURATION), (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0
       );
     } else {
       this.zoomBehavior.translateBy(this.timeline, (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0);
