@@ -81,12 +81,12 @@ export function registerTriggers(eventManager, geonaDiv, timePanel) {
       // If the timeline is instantiated and accepting keyboard commands
       if (timePanel.timeline
         && timePanel.timeline.options.keydownListenerEnabled
-        && timePanel.timeline.timelineCurrentLayers.length > 0) {
+        && timePanel.timeline.timelineCurrentLayers.length > 0) { // TODO replace key.keyCode (deprecated) https://stackoverflow.com/questions/35394937/javascript-keycode-deprecated-what-does-this-mean-in-practice
         switch (key.keyCode) {
-          case 37:
+          case 37: // Left arrow key
             eventManager.trigger('timePanel.stepChangeTime', 'prev-short');
             break;
-          case 39:
+          case 39: // Right arrow key
             eventManager.trigger('timePanel.stepChangeTime', 'next-short');
         }
       }
