@@ -67,6 +67,7 @@ export class OlMap extends GeonaMap {
     /** @type {Boolean} Tracks whether the map has been initialized */
     this.initialized = false;
 
+    console.log(this.config.viewSettings.maxExtent);
     /** @private @type {ol.Map} The OpenLayers map */
     this._map = new ol.Map({
       view: new ol.View(
@@ -108,34 +109,31 @@ export class OlMap extends GeonaMap {
     this.availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
     // Adds any defined basemap to the map
-    if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
+    if (this.config.basemap !== 'none') {
       let layer = this.availableLayers[this.config.basemap];
       let layerServer = this.availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
     // TODO don't do this if there is an overlay 'do you want to load or make new map'
-    if (this.config.data !== undefined) {
-      if (this.config.data.length !== 0) {
-        for (let layerIdentifier of this.config.data) {
-          let layer = this.availableLayers[layerIdentifier];
-          let layerServer = this.availableLayerServers[layer.layerServer];
-          if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
-          } else {
-            this.addLayer(layer, layerServer);
-          }
+    if (this.config.data.length !== 0) {
+      for (let layerIdentifier of this.config.data) {
+        let layer = this.availableLayers[layerIdentifier];
+        let layerServer = this.availableLayerServers[layer.layerServer];
+        if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
+          this.addLayer(layer, layerServer, {modifier: 'hasTime'});
+        } else {
+          this.addLayer(layer, layerServer);
         }
       }
     }
     // Adds any defined borders layer to the map
-    if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
+    if (this.config.borders.identifier !== 'none') {
       let layer = this.availableLayers[this.config.borders.identifier];
       let layerServer = this.availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
 
-    console.log(this.config.viewSettings);
     this.loadConfig_();
 
     registerTriggers(this.eventManager, this.geonaDiv, this._map);
@@ -250,7 +248,7 @@ export class OlMap extends GeonaMap {
 
   /**
    * Set the projection, if supported by the current basemap.
-   * @param  {String} projection The projection to use, such as 'EPSG:4326'.
+   * @param {String} projection The projection to use, such as 'EPSG:4326'.
    */
   setProjection(projection) {
     for (let layer of this._map.getLayers().getArray()) {
@@ -272,11 +270,12 @@ export class OlMap extends GeonaMap {
    *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection, such as 'EPSG:4326'
+   * @param {String}  options.projection The projection code, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
     console.log(options);
+    console.log(this.config);
     // TODO extent fixes
     // this.config.viewSettings.maxExtent = {
     //   minLat: -90,
@@ -300,7 +299,6 @@ export class OlMap extends GeonaMap {
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
-    console.log(center);
     let fitExtent = options.fitExtent; // || this.config.viewSettings.fitExtent; TODO extent fixes
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
@@ -519,7 +517,10 @@ export class OlMap extends GeonaMap {
         if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._map.getLayers().getArray().length - 2);
         }
-        this.config.data.push(geonaLayer.identifier);
+        // If the data is specified in the config we don't need to add it again
+        if (!this.config.data.includes(geonaLayer.identifier)) {
+          this.config.data.push(geonaLayer.identifier);
+        }
     }
 
     if (options.shown === false) {
