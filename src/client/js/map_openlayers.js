@@ -71,10 +71,10 @@ export class OlMap extends GeonaMap {
     this._map = new ol.Map({
       view: new ol.View(
         {
-          center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
+          center: [this.config.viewSettings.center.lon, this.config.viewSettings.center.lat],
           extent: [
-            this.config.viewSettings.maxExtent.minLat, this.config.viewSettings.maxExtent.minLon,
-            this.config.viewSettings.maxExtent.maxLat, this.config.viewSettings.maxExtent.maxLon,
+            this.config.viewSettings.maxExtent.minLon, this.config.viewSettings.maxExtent.minLat,
+            this.config.viewSettings.maxExtent.maxLon, this.config.viewSettings.maxExtent.maxLat,
           ],
           maxZoom: this.config.viewSettings.maxZoom,
           minZoom: this.config.viewSettings.minZoom,
@@ -135,6 +135,7 @@ export class OlMap extends GeonaMap {
       this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
 
+    console.log(this.config.viewSettings);
     this.loadConfig_();
 
     registerTriggers(this.eventManager, this.geonaDiv, this._map);
@@ -275,6 +276,7 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
+    console.log(options);
     // TODO extent fixes
     // this.config.viewSettings.maxExtent = {
     //   minLat: -90,
@@ -294,9 +296,11 @@ export class OlMap extends GeonaMap {
     //   }
     // }
 
+    // fixme can hang when changing centre (I used lat: 12, lon: 12 for hang)
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
+    console.log(center);
     let fitExtent = options.fitExtent; // || this.config.viewSettings.fitExtent; TODO extent fixes
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
@@ -316,22 +320,30 @@ export class OlMap extends GeonaMap {
     maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
       .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
 
-    if (fitExtent) {
-      fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
-        .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
-    }
+    // if (fitExtent) {
+    //   fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
+    //     .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
+    // }
+    console.log(center.lon);
+    console.log(center.lat);
+    console.log(projection);
+    console.log(ol.proj.fromLonLat([center.lon, center.lat], projection));
     center = ol.proj.fromLonLat([center.lon, center.lat], projection);
+    // center = center.reverse();
 
-    // Ensure that the center is within the maxExtent
-    if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
-      center = ol.extent.getCenter(maxExtent);
-    }
+    // todo Ensure that the center is within the maxExtent
+    // if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
+    //   center = ol.extent.getCenter(maxExtent);
+    // }
 
     // TODO check for undefined errors (Would let people know if their definitions were wrong + stop OL from hanging)
 
+    console.log(center);
+    console.log(maxExtent);
+    console.log(zoom);
     let newView = new ol.View({
       center: center,
-      extent: maxExtent,
+      // extent: maxExtent,
       maxZoom: maxZoom,
       minZoom: minZoom,
       projection: projection,
@@ -340,15 +352,15 @@ export class OlMap extends GeonaMap {
 
     this._map.setView(newView);
 
-    // Fit the map in the fitExtent
+    // todo Fit the map in the fitExtent
     // todo check for if zoomToExtent === true
-    if (fitExtent) {
-      this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
-      if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
-        this._map.getView().setZoom(zoom);
-        this._map.getView().setCenter(center);
-      }
-    }
+    // if (fitExtent) {
+    //   this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
+    //   if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
+    //     this._map.getView().setZoom(zoom);
+    //     this._map.getView().setCenter(center);
+    //   }
+    // }
   }
 
   /**
@@ -1172,7 +1184,9 @@ export class OlMap extends GeonaMap {
    * Gets the current state of the map and saves it to the config.
    */
   updateConfig() {
-    let center = this._map.getView().getCenter();
+    let currentCenter = this._map.getView().getCenter();
+    let projection = this._map.getView().getProjection().getCode();
+    let center = ol.proj.toLonLat(currentCenter, projection);
     this.config.viewSettings.center = {
       lon: center[0],
       lat: center[1],
