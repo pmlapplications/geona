@@ -113,46 +113,39 @@ export class Geona {
   loadGeonaState(geonaStateJson) {
     let geonaState = JSON.parse(geonaStateJson);
 
-    // Two things can happen - either we just update the current map, or we instantiate a completely new Geona with the
-    // state as the config
-
-    // We instantiate a new Geona if:
-    // - We are loading from a URL
-    //   - The state would be stored in a database
-    //   - I think this would just be like loading a webpage with a certain config, so it doesn't require any work?
-    // - The state library is different to the current instance's library
-    //   - This would require this instance of Geona loading another config into the same div, then destroying itself?
-
-    // console.log(geonaState.map.library);
-    // console.log(this.config.get('map.library'));
-    // if (geonaState.map.library !== this.config.get('map.library')) {
-    // Destroy the old map and create a new one
-    // }
-    // Load the 
-
-    // delete this.map;
-    // delete this.gui;
-
     this.map = undefined;
     this.gui = undefined;
+    this.eventManager = undefined;
 
     // TODO merge the configs (e.g. data layers)
 
 
     // Update the config
-    // this.config.map = geonaState.map;
-    // this.config.intro = geonaState.intro;
-    // this.config.controls = geonaState.controls;
-
     this.config.set('map', geonaState.map);
     this.config.set('intro', geonaState.intro);
     this.config.set('controls', geonaState.controls);
 
-    console.log(this.config.get('map'));
-
     this.geonaDiv.empty();
+    this.geonaDiv.removeClass();
+    this.geonaDiv.removeAttr('tabindex');
+    // this.geonaDiv.removeAttr('style');
 
+    //
+    this.layerNames = [];
+
+    // Get the Geona div and add the 'geona-container' class to it
+    /** @type {JQuery} */
+    // this.geonaDiv = $(this.config.get('divId'));
+    this.geonaDiv.toggleClass('geona-container', true);
+    // Adding a tabindex makes the div selectable as an activeElement - required for instance-specific keyboard commands
+    this.geonaDiv.attr('tabindex', 0);
+
+    this.eventManager = new EventManager();
     this.gui = new Gui(this);
+    // this.geonaServer = this.config.get('geonaServer');
+    //
+
+    // this.gui = new Gui(this);
 
     this.gui.init(() => {
       let onReadyCallback = this.config.get('onReadyCallback');
