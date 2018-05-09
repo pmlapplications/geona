@@ -6,6 +6,7 @@ import {
   loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage,
   findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
+import {registerTriggers} from './map_openlayers_triggers';
 import {registerBindings} from './map_openlayers_bindings';
 
 import proj4 from 'proj4';
@@ -136,6 +137,7 @@ export class OlMap extends GeonaMap {
 
     this.loadConfig_();
 
+    registerTriggers(this.eventManager, this.geonaDiv, this._map);
     registerBindings(this.eventManager, this);
 
     // Must come last in the method
@@ -1164,6 +1166,18 @@ export class OlMap extends GeonaMap {
       }
     }
     layerSource.updateParams(params);
+  }
+
+  /**
+   * Gets the current state of the map and saves it to the config.
+   */
+  updateConfig() {
+    let center = this._map.getView().getCenter();
+    this.config.viewSettings.center = {
+      lon: center[0],
+      lat: center[1],
+    };
+    this.config.viewSettings.zoom = this._map.getView().getZoom();
   }
 }
 
