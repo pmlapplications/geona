@@ -415,7 +415,7 @@ export class MainMenu {
       }
 
       // The tab element being displayed
-      let tabElement = this.gui.mainMenu.layersPanelActiveItemTab;
+      let tabElement = this.layersPanelActiveItemTab;
       let item = '';
       let tab = 'none';
       if (tabElement) {
@@ -446,7 +446,7 @@ export class MainMenu {
   /**
    * Populates the layers panel with the active layer information.
    */
-  constructLayersPanel() { // todo change to use config.data instead of activeLayersKeys double loop
+  constructLayersPanel() { // todo change to use map.config.data instead of activeLayersKeys double loop
     // Appends the layers panel itself
     this.geonaDiv.find('.js-geona-panel').append(templates.layers_panel());
 
