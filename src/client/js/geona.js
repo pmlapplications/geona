@@ -170,6 +170,7 @@ export class Geona {
    */
   loadGeonaState(geonaStateJson) {
     let geonaState = JSON.parse(geonaStateJson);
+    console.log(geonaState);
 
     // Infinity will get converted to null when stringified so we need to check all the viewSettings and sanitize them
     for (let basemapServer of geonaState.map.basemapLayers) {
@@ -233,20 +234,21 @@ export class Geona {
 
     // TODO merge the configs (e.g. data layers)
 
+    console.log(geonaState.controls);
 
     // Update the config
     this.config.set('map', geonaState.map);
     this.config.set('intro', geonaState.intro);
     this.config.set('controls', geonaState.controls);
 
-    console.log(this.config.get('map'));
+    console.log(this.config.get('controls'));
 
     this.geonaDiv.empty();
     this.geonaDiv.removeClass();
     this.geonaDiv.removeAttr('tabindex');
     // this.geonaDiv.removeAttr('style');
 
-    //
+    // todo removeme, I don't think it does anything
     this.layerNames = [];
 
     // Get the Geona div and add the 'geona-container' class to it

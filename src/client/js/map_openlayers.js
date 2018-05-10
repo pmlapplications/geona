@@ -121,7 +121,7 @@ export class OlMap extends GeonaMap {
         let layer = this.availableLayers[layerIdentifier];
         let layerServer = this.availableLayerServers[layer.layerServer];
         if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
-          this.addLayer(layer, layerServer, {modifier: 'hasTime'});
+          this.addLayer(layer, layerServer, {modifier: 'hasTime'}); // todo , requestedTime: layer.
         } else {
           this.addLayer(layer, layerServer);
         }
@@ -274,32 +274,29 @@ export class OlMap extends GeonaMap {
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    console.log(options);
-    console.log(this.config);
-    // TODO extent fixes
-    // this.config.viewSettings.maxExtent = {
-    //   minLat: -90,
-    //   minLon: -Infinity,
-    //   maxLat: 90,
-    //   maxLon: Infinity,
-    // };
-    // for (let layer of this._map.getLayers().getArray()) {
-    //   let geonaLayer = this.availableLayers[layer.get('identifier')];
-    //   if (geonaLayer.viewSettings) {
-    //     if (geonaLayer.viewSettings.maxExtent) {
-    //       this.config.viewSettings.maxExtent = constructExtent(
-    //         this.config.viewSettings.maxExtent,
-    //         geonaLayer.viewSettings.maxExtent
-    //       );
-    //     }
-    //   }
-    // }
+    this.config.viewSettings.maxExtent = {
+      minLat: -90,
+      minLon: -Infinity,
+      maxLat: 90,
+      maxLon: Infinity,
+    };
+    for (let layer of this._map.getLayers().getArray()) {
+      let geonaLayer = this.availableLayers[layer.get('identifier')];
+      if (geonaLayer.viewSettings) {
+        if (geonaLayer.viewSettings.maxExtent) {
+          this.config.viewSettings.maxExtent = constructExtent(
+            this.config.viewSettings.maxExtent,
+            geonaLayer.viewSettings.maxExtent
+          );
+        }
+      }
+    }
 
     // fixme can hang when changing centre (I used lat: 12, lon: 12 for hang)
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
-    let fitExtent = options.fitExtent; // || this.config.viewSettings.fitExtent; TODO extent fixes
+    let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
     let minZoom = options.minZoom || this._map.getView().getMinZoom();
@@ -313,45 +310,29 @@ export class OlMap extends GeonaMap {
     this.config.viewSettings.minZoom = minZoom;
     this.config.viewSettings.zoom = zoom;
 
-    // FIXME will currently just move to the new extent rather than zooming to fit all
     // Converts the min and max coordinates from LatLon to current projection
     maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
       .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
-
-    // if (fitExtent) {
-    //   fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
-    //     .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
-    // }
-    console.log(center.lon);
-    console.log(center.lat);
-    console.log(projection);
-    console.log(ol.proj.fromLonLat([center.lon, center.lat], projection));
     center = ol.proj.fromLonLat([center.lon, center.lat], projection);
-    // center = center.reverse();
 
-    // todo Ensure that the center is within the maxExtent
-    // if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
-    //   center = ol.extent.getCenter(maxExtent);
-    // }
+    // Ensure that the center is within the maxExtent
+    if (maxExtent && !ol.extent.containsCoordinate(maxExtent, center)) {
+      center = ol.extent.getCenter(maxExtent);
+    }
 
-    // TODO check for undefined errors (Would let people know if their definitions were wrong + stop OL from hanging)
-
-    console.log(center);
-    console.log(maxExtent);
-    console.log(zoom);
+    // Construct and set the new view
     let newView = new ol.View({
       center: center,
-      // extent: maxExtent,
+      extent: maxExtent,
       maxZoom: maxZoom,
       minZoom: minZoom,
       projection: projection,
       zoom: zoom,
     });
-
     this._map.setView(newView);
 
-    // todo Fit the map in the fitExtent
-    // todo check for if zoomToExtent === true
+    // todo Fit the map in the fitExtent - overrides zoom level
+    // todo check for if config.zoomToExtent === true
     // if (fitExtent) {
     //   this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
     //   if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {

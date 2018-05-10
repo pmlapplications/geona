@@ -10,11 +10,6 @@ export function registerTriggers(eventManager, geonaDiv) {
   // Tracks the last tab that was clicked
   let lastTabClicked = '';
 
-  // fixme the triggers are set multiple times and don't overwrite themselves
-  // let exploreTriggersSet = false;
-  // let layersTriggersSet = false;
-  // let optionsTriggersSet = false;
-
   // Open/close menu
   geonaDiv.find('.js-geona-menu-toggle').click(() => {
     if (geonaDiv.find('.js-geona-menu').hasClass('removed')) {
@@ -34,10 +29,6 @@ export function registerTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
-      // if (!exploreTriggersSet) {
-      registerExploreTriggers(eventManager, geonaDiv);
-      // exploreTriggersSet = true;
-      // }
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
@@ -52,10 +43,6 @@ export function registerTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLayersPanel');
-      // if (!layersTriggersSet) {
-      registerLayersTriggers(eventManager, geonaDiv);
-      // layersTriggersSet = true;
-      // }
     }
     lastTabClicked = 'js-geona-menu__layers';
   });
@@ -95,10 +82,6 @@ export function registerTriggers(eventManager, geonaDiv) {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayOptionsPanel');
-      // if (!optionsTriggersSet) {
-      registerOptionsTriggers(eventManager, geonaDiv);
-      // optionsTriggersSet = true;
-      // }
     }
     lastTabClicked = 'js-geona-menu__options';
   });
@@ -136,7 +119,7 @@ export function registerTriggers(eventManager, geonaDiv) {
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-function registerExploreTriggers(eventManager, geonaDiv) {
+export function registerExploreTriggers(eventManager, geonaDiv) {
   // Scans for pre-cached URLs
   geonaDiv.find('.js-geona-explore-panel-content__layer-url').on('input', () => {
     // The current input
@@ -195,7 +178,7 @@ function registerExploreTriggers(eventManager, geonaDiv) {
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-function registerLayersTriggers(eventManager, geonaDiv) {
+export function registerLayersTriggers(eventManager, geonaDiv) {
   // Dragula reordering
   let dragger = dragula([geonaDiv.find('.js-geona-layers-list')[0]],
     {
@@ -421,7 +404,7 @@ function registerLayersTriggers(eventManager, geonaDiv) {
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-function registerOptionsTriggers(eventManager, geonaDiv) {
+export function registerOptionsTriggers(eventManager, geonaDiv) {
   // Select basemap
   geonaDiv.find('.js-geona-options-panel-content__basemaps').change(function() {
     let option = geonaDiv.find('.js-geona-options-panel-content__basemaps').val();

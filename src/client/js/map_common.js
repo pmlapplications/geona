@@ -199,10 +199,10 @@ export function findNearestValidTime(times, requestedTime) {
 export function constructExtent(extent1, extent2) {
   let newExtent = {};
 
-  if (extent1.minLat === undefined || extent1.minLon === undefined || extent1.maxLat === undefined || extent1.maxLon === undefined) { // eslint-disable-line max-len
+  if (!extent1.minLat || !extent1.minLon || !extent1.maxLat || !extent1.maxLon) {
     throw new Error('First parameter: ' + extent1 + ' contains undefined values.');
   }
-  if (extent2.minLat === undefined || extent2.minLon === undefined || extent2.maxLat === undefined || extent2.maxLon === undefined) { // eslint-disable-line max-len
+  if (!extent2.minLat || !extent2.minLon || !extent2.maxLat || !extent2.maxLon) {
     throw new Error('Second parameter: ' + extent2 + ' contains undefined values.');
   }
 

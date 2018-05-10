@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import moment from 'moment';
 import * as templates from '../../templates/compiled';
-import {registerTriggers} from './main_menu_triggers';
+import {registerTriggers, registerLayersTriggers, registerExploreTriggers, registerOptionsTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
 import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
@@ -31,8 +31,11 @@ export class MainMenu {
     /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
     this.geona = gui.geona;
     /** @type {MenuConfigOptions} @desc The options to configure the main menu. */
+    console.log('setting main menu config to:');
+    console.log(menuConfigOptions);
     this.config = menuConfigOptions;
     this.geonaDiv = gui.geonaDiv;
+    this.eventManager = this.geona.eventManager;
 
     /** @type {Object} Holds the layerServer found for the most recent WMS/WMTS request. */
     this.requestLayerServer = undefined;
@@ -90,7 +93,7 @@ export class MainMenu {
           this.displayExplorePanel();
           break;
         case 'layers':
-          this.displayLayersPanel(); // todo update to show item and tab
+          this.displayLayersPanel();
           break;
         case 'analysis':
           this.displayAnalysisPanel();
@@ -110,8 +113,8 @@ export class MainMenu {
       }
 
       // Sets the triggers and bindings for this Menu.
-      registerTriggers(this.geona.eventManager, this.geonaDiv);
-      registerBindings(this.geona.eventManager, this);
+      registerTriggers(this.eventManager, this.geonaDiv);
+      registerBindings(this.eventManager, this);
     }
   }
 
@@ -222,6 +225,9 @@ export class MainMenu {
         );
       }
     }
+
+    // Set triggers
+    registerExploreTriggers(this.eventManager, this.geonaDiv);
   }
 
   /**
@@ -432,6 +438,8 @@ export class MainMenu {
         }
       }
 
+      console.log('about to update the config with tab: ' + tab);
+
       // Update the config
       this.config.activePanel = {
         panel: 'layers',
@@ -465,20 +473,31 @@ export class MainMenu {
 
     // Set the active item tab
     // If we have it in the config we'll use that
+    console.log('Setting active item tab based on config:');
+    console.log(this.config);
     if (this.config.activePanel.item) {
+      console.log('found item: ' + this.config.activePanel.item);
       if (this.config.activePanel.tab === 'none') {
         this.layersPanelActiveItemTab = undefined;
       } else {
+        console.log('opening tab: ' + this.config.activePanel.tab);
         // Find the list element for the config item
+        console.log(this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + this.config.activePanel.item + '"]'));
         let item = this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + this.config.activePanel.item + '"]');
-        // Find the tab that should be opened for th
+        // Find the tab that should be opened for this item
         this.layersPanelActiveItemTab = item.find('.js-geona-layers-list__item-body-' + this.config.activePanel.tab)[0];
+        console.log(this.layersPanelActiveItemTab);
       }
     } else {
       // Otherwise just find the topmost HTML element in the list to use for the default active layer
       let topmostItem = this.geonaDiv.find('.js-geona-layers-list').children()[0];
       this.layersPanelActiveItemTab = $(topmostItem).find('.js-geona-layers-list__item-body-info')[0];
     }
+
+    // Set the triggers
+    // fixme this only sets triggers for the items at the start, not any added after construction. Setting them again,
+    //       however, sets the triggers multiple times for the items at the start.
+    registerLayersTriggers(this.eventManager, this.geonaDiv);
 
     // Make its contents visible
     this.layersPanelActiveItemTab.classList.remove('removed');
@@ -489,12 +508,12 @@ export class MainMenu {
    * @param {String} layerIdentifier The identifier for the data layer we want to create an item for.
    */
   addLayerItem(layerIdentifier) {
-    let modifier = this.geona.map.layerGet(layerIdentifier, 'modifier'); // todo why use layerGet and not availableLayers?
+    let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
+    let modifier = geonaLayer.modifier;
     if (modifier === 'basemap' || modifier === 'borders') {
       throw new Error('Cannot add a map layer item to the GUI for a basemap or borders layer! Use a layer with no modifier or a \'hasTime\' modifier instead.');
     } else {
-      let geonaLayer = this.geona.map.availableLayers[layerIdentifier];
-      // Get the data in the correct format from the geona layer
+      // Get the data in the correct format from the Geona layer
       let data = this._compileLayerData(geonaLayer);
       // Insert layer data object at the top of the list - higher on the list means higher on the map
       this.geonaDiv.find('.js-geona-layers-list').prepend(templates.layers_panel_item({data: data}));
@@ -512,6 +531,8 @@ export class MainMenu {
 
       // Update the elements on the item to reflect the current layer options
       // Update the logarithmic checkbox
+      console.log(data);
+      console.log($(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic'));
       if (data.settings.logarithmic) {
         $(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', true);
       }
@@ -732,7 +753,7 @@ export class MainMenu {
    */
   toggleLayersPanelItemTab(item, tab) {
     let itemTabToToggle = $(item).find('.js-geona-layers-list__item-body-' + tab)[0];
-    let configItem = item;
+    let configItem = item.dataset.identifier;
     let configTab = tab;
 
     // If the item we want to toggle is the currently active tab, just close it
@@ -1347,6 +1368,9 @@ export class MainMenu {
     // Select the correct projection dropdown option
     let projection = this.geona.map.config.projection;
     this.selectProjection(projection);
+
+    // Set triggers
+    registerOptionsTriggers(this.eventManager, this.geonaDiv);
   }
 
   /**

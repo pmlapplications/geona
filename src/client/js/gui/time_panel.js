@@ -119,6 +119,7 @@ export class TimePanel {
         }
       }
 
+      // Update the pikaday date display
       this.pikadayUpdateGraphic(this.timeline.selectorDate);
     } else {
       throw new Error('Attempted to draw timeline when one was already instantiated!');
@@ -131,6 +132,7 @@ export class TimePanel {
   hideTimePanel() {
     this.geonaDiv.find('.js-geona-time-panel').addClass('removed');
     this.geona.map.adjustAttributionHeight();
+    this.config.opened = false;
   }
 
   /**
@@ -139,6 +141,7 @@ export class TimePanel {
   showTimePanel() {
     this.geonaDiv.find('.js-geona-time-panel').removeClass('removed');
     this.geona.map.adjustAttributionHeight();
+    this.config.opened = true;
   }
 
   /**

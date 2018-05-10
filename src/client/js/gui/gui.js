@@ -15,7 +15,7 @@ registerHelpers(handlebars);
 /**
   * Manages the elements of the GUI. An element is a distinct part of the GUI.
   * For example, the main menu is a different element than the timeline, but the layers list is not a different element
-  * than the main menu.
+  * than the main menu. TODO Change this description once the main menu has been separated into different parts
   */
 export class Gui {
   /**
@@ -73,7 +73,7 @@ export class Gui {
     let mapDiv = this.geonaDiv.find('.geona-map')[0];
 
     // Load the map
-    let mapPromise = this.geona.loadMap(mapDiv); // todo I feel like this should go outside the GUI somehow, just for separation concerns
+    let mapPromise = this.geona.loadMap(mapDiv);
 
     let splashScreenConfig = this.geona.config.get('intro.splashScreen');
     if (splashScreenConfig.display) {
@@ -83,6 +83,8 @@ export class Gui {
     // When the map is ready, call the onReadyCallback
     mapPromise.then(() => {
       let menuConfig = this.geona.config.get('controls.menu');
+      console.log('menuConfig:');
+      console.log(menuConfig);
       this.mainMenu = new MainMenu(this, menuConfig);
 
       let timelineConfig = this.geona.config.get('controls.timeline');

@@ -65,8 +65,8 @@ export function registerBindings(eventManager, timePanel) {
   // Bindings for time panel
   let activeDataLayers = timePanel.geona.map.config.data;
   // Add layer from URL
-  eventManager.bind('mainMenu.addUrlLayerToMap', () => { // FIXME logic is wrong, I think activeDataLayers has a race condition where it will be 1
-    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) { // fixme use config.timeline.openOnLayerLoad
+  eventManager.bind('mainMenu.addUrlLayerToMap', () => { // todo - will open every time a new layer is added, maybe we only want it to happen for the first layer?
+    if (timePanel.config.allowToggle && timePanel.config.openOnLayerLoad) {
       timePanel.showTimePanel();
 
       if (!timePanel.config.allowToggleWithNoLayers) {
@@ -75,8 +75,8 @@ export function registerBindings(eventManager, timePanel) {
     }
   });
   // Add layer from available layers
-  eventManager.bind('mainMenu.addAvailableLayerToMap', () => {
-    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) {
+  eventManager.bind('mainMenu.addAvailableLayerToMap', () => { // todo - will open every time a new layer is added, maybe we only want it to happen for the first layer?
+    if (timePanel.config.allowToggle && timePanel.config.openOnLayerLoad) {
       timePanel.showTimePanel();
 
       if (!timePanel.config.allowToggleWithNoLayers) {
@@ -86,7 +86,8 @@ export function registerBindings(eventManager, timePanel) {
   });
   // Remove layer
   eventManager.bind('mainMenu.removeLayer', () => {
-    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 1 && timePanel.config.allowToggle) {
+    // fixme activeDataLayers is at risk of a race condition - if this gets run before the map removes the layer it will fail
+    if (!timePanel.config.openedWithNoLayers && activeDataLayers.length === 0 && timePanel.config.allowToggle) {
       timePanel.hideTimePanel();
 
       if (!timePanel.config.allowToggleWithNoLayers) {
