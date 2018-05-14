@@ -83,8 +83,6 @@ export class Gui {
     // When the map is ready, call the onReadyCallback
     mapPromise.then(() => {
       let menuConfig = this.geona.config.get('controls.menu');
-      console.log('menuConfig:');
-      console.log(menuConfig);
       this.mainMenu = new MainMenu(this, menuConfig);
 
       let timelineConfig = this.geona.config.get('controls.timeline');

@@ -8,7 +8,7 @@ import dragula from 'dragula';
  */
 export function registerTriggers(eventManager, geonaDiv) {
   // Tracks the last tab that was clicked
-  let lastTabClicked = '';
+  let lastTabClicked = ''; // fixme when loading from state this doesn't get updated (there's probably a better way anyway)
 
   // Open/close menu
   geonaDiv.find('.js-geona-menu-toggle').click(() => {

@@ -25,7 +25,6 @@ export class Geona {
    */
   constructor(clientConfig) {
     this.config = new Config(clientConfig);
-    this.layerNames = [];
 
     // Get the Geona div and add the 'geona-container' class to it
     /** @type {JQuery} */
@@ -35,6 +34,10 @@ export class Geona {
     this.geonaDiv.attr('tabindex', 0);
 
     this.eventManager = new EventManager();
+
+    // Set a flag for loading initial menu - this is used in MainMenu to stop the config getting overwritten on init
+    this.loadingInitialMenu = true;
+
     this.gui = new Gui(this);
     this.geonaServer = this.config.get('geonaServer');
 
@@ -172,8 +175,8 @@ export class Geona {
     let geonaState = JSON.parse(geonaStateJson);
     console.log(geonaState);
 
-    // Infinity will get converted to null when stringified so we need to check all the viewSettings and sanitize them
-    for (let basemapServer of geonaState.map.basemapLayers) {
+    // Infinity will get converted to null when stringified so we need to check all the viewSettings and unsanitize them
+    for (let basemapServer of geonaState.map.basemapLayers) { // All layers for each basemap server
       if (basemapServer.layers) {
         for (let basemap of basemapServer.layers) {
           if (basemap.viewSettings && basemap.viewSettings.maxExtent) {
@@ -189,7 +192,7 @@ export class Geona {
         }
       }
     }
-    for (let bordersServer of geonaState.map.bordersLayers) {
+    for (let bordersServer of geonaState.map.bordersLayers) { // All layers for each borders server
       if (bordersServer.layers) {
         for (let borders of bordersServer.layers) {
           if (borders.viewSettings && borders.viewSettings.maxExtent) {
@@ -205,7 +208,7 @@ export class Geona {
         }
       }
     }
-    for (let dataServer of geonaState.map.dataLayers) {
+    for (let dataServer of geonaState.map.dataLayers) { // All layers for each data server
       if (dataServer.layers) {
         for (let data of dataServer.layers) {
           if (data.viewSettings && data.viewSettings.maxExtent) {
@@ -221,6 +224,7 @@ export class Geona {
         }
       }
     }
+    // Main map view settings
     if (geonaState.map.viewSettings.maxExtent.minLon === 'sanitized.-Infinity') {
       geonaState.map.viewSettings.maxExtent.minLon = -Infinity;
     }
@@ -228,43 +232,39 @@ export class Geona {
       geonaState.map.viewSettings.maxExtent.maxLon = Infinity;
     }
 
+    // Reset the Geona variables ready for recreation
     this.map = undefined;
     this.gui = undefined;
     this.eventManager = undefined;
 
     // TODO merge the configs (e.g. data layers)
 
-    console.log(geonaState.controls);
-
     // Update the config
     this.config.set('map', geonaState.map);
     this.config.set('intro', geonaState.intro);
     this.config.set('controls', geonaState.controls);
 
-    console.log(this.config.get('controls'));
-
+    // Empty the Geona div so the current Map and GUI are now completely removed
     this.geonaDiv.empty();
-    this.geonaDiv.removeClass();
-    this.geonaDiv.removeAttr('tabindex');
+
+    // Removes classes and attributes added later in the process
+    this.geonaDiv.removeClass(); // todo not sure if need to remove (pretty sure we don't)
+    this.geonaDiv.removeAttr('tabindex'); // todo do we need to remove this? I don't think we do. Test when loading from state works
     // this.geonaDiv.removeAttr('style');
 
-    // todo removeme, I don't think it does anything
-    this.layerNames = [];
-
-    // Get the Geona div and add the 'geona-container' class to it
-    /** @type {JQuery} */
-    // this.geonaDiv = $(this.config.get('divId'));
     this.geonaDiv.toggleClass('geona-container', true);
     // Adding a tabindex makes the div selectable as an activeElement - required for instance-specific keyboard commands
     this.geonaDiv.attr('tabindex', 0);
 
+    // Instantiate a new event manager (prevents triggers from being set twice)
     this.eventManager = new EventManager();
+
+    // Set a flag for loading initial menu - this is used in MainMenu to stop the config getting overwritten on init
+    this.loadingInitialMenu = true;
+    // Instantiate a new GUI
     this.gui = new Gui(this);
-    // this.geonaServer = this.config.get('geonaServer');
-    //
 
-    // this.gui = new Gui(this);
-
+    // Call init in order to instantiate a new Map
     this.gui.init(() => {
       let onReadyCallback = this.config.get('onReadyCallback');
       if (onReadyCallback) {

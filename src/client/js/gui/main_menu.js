@@ -22,8 +22,8 @@ import {Scalebar} from './scalebar';
 export class MainMenu {
   /**
    * Creates an instance of a MainMenu element to put on the GUI.
-   * @param {Gui}               gui               The parent Gui of this MainMenu.
-   * @param {MenuConfigOptions} menuConfigOptions The config settings relating to the main menu.
+   * @param {Gui}               gui                 The parent Gui of this MainMenu.
+   * @param {MenuConfigOptions} [menuConfigOptions] The config settings relating to the main menu.
    */
   constructor(gui, menuConfigOptions) {
     /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
@@ -31,8 +31,6 @@ export class MainMenu {
     /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
     this.geona = gui.geona;
     /** @type {MenuConfigOptions} @desc The options to configure the main menu. */
-    console.log('setting main menu config to:');
-    console.log(menuConfigOptions);
     this.config = menuConfigOptions;
     this.geonaDiv = gui.geonaDiv;
     this.eventManager = this.geona.eventManager;
@@ -164,11 +162,13 @@ export class MainMenu {
     this.geonaDiv.find('.js-geona-panel')
       .removeClass('removed');
 
-    this.config.activePanel = {
-      panel: 'none',
-      item: '',
-      tab: 'none',
-    };
+    if (!this.geona.loadingInitialMenu) {
+      this.config.activePanel = {
+        panel: 'none',
+        item: '',
+        tab: 'none',
+      };
+    }
   }
 
   /**
@@ -196,6 +196,9 @@ export class MainMenu {
       // Add the explore panel
       this.explorePanel.classList.remove('removed');
     }
+
+    // At this stage of the method we have loaded the correct panels and can use normal behaviour
+    this.geona.loadingInitialMenu = false;
 
     // Update the config
     this.config.activePanel = {
@@ -438,7 +441,8 @@ export class MainMenu {
         }
       }
 
-      console.log('about to update the config with tab: ' + tab);
+      // At this stage of the method we have loaded the correct panels and can use normal behaviour
+      this.geona.loadingInitialMenu = false;
 
       // Update the config
       this.config.activePanel = {
@@ -473,20 +477,14 @@ export class MainMenu {
 
     // Set the active item tab
     // If we have it in the config we'll use that
-    console.log('Setting active item tab based on config:');
-    console.log(this.config);
     if (this.config.activePanel.item) {
-      console.log('found item: ' + this.config.activePanel.item);
       if (this.config.activePanel.tab === 'none') {
         this.layersPanelActiveItemTab = undefined;
       } else {
-        console.log('opening tab: ' + this.config.activePanel.tab);
         // Find the list element for the config item
-        console.log(this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + this.config.activePanel.item + '"]'));
         let item = this.geonaDiv.find('.js-geona-layers-list__item[data-identifier="' + this.config.activePanel.item + '"]');
         // Find the tab that should be opened for this item
         this.layersPanelActiveItemTab = item.find('.js-geona-layers-list__item-body-' + this.config.activePanel.tab)[0];
-        console.log(this.layersPanelActiveItemTab);
       }
     } else {
       // Otherwise just find the topmost HTML element in the list to use for the default active layer
@@ -531,8 +529,6 @@ export class MainMenu {
 
       // Update the elements on the item to reflect the current layer options
       // Update the logarithmic checkbox
-      console.log(data);
-      console.log($(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic'));
       if (data.settings.logarithmic) {
         $(item).find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked', true);
       }
@@ -1250,6 +1246,9 @@ export class MainMenu {
       this.analysisPanel.classList.remove('removed');
     }
 
+    // At this stage of the method we have loaded the correct panels and can use normal behaviour
+    this.geona.loadingInitialMenu = false;
+
     // Update the config
     this.config.activePanel = {
       panel: 'analysis',
@@ -1289,6 +1288,9 @@ export class MainMenu {
       this.loginPanel.classList.remove('removed');
     }
 
+    // At this stage of the method we have loaded the correct panels and can use normal behaviour
+    this.geona.loadingInitialMenu = false;
+
     // Update the config
     this.config.activePanel = {
       panel: 'login',
@@ -1327,6 +1329,9 @@ export class MainMenu {
       // Add the options panel
       this.optionsPanel.classList.remove('removed');
     }
+
+    // At this stage of the method we have loaded the correct panels and can use normal behaviour
+    this.geona.loadingInitialMenu = false;
 
     // Update the config
     this.config.activePanel = {
@@ -1513,6 +1518,9 @@ export class MainMenu {
       this.helpPanel.classList.remove('removed');
     }
 
+    // At this stage of the method we have loaded the correct panels and can use normal behaviour
+    this.geona.loadingInitialMenu = false;
+
     // Update the config
     this.config.activePanel = {
       panel: 'help',
@@ -1551,6 +1559,9 @@ export class MainMenu {
       // Add the share panel
       this.sharePanel.classList.remove('removed');
     }
+
+    // At this stage of the method we have loaded the correct panels and can use normal behaviour
+    this.geona.loadingInitialMenu = false;
 
     // Update the config
     this.config.activePanel = {
