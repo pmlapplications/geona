@@ -459,6 +459,17 @@ export class OlMap extends GeonaMap {
         delete layerServerCopy.layers;
         this.availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
       }
+      // Save to config
+      switch (geonaLayer.modifier) {
+        case 'basemap':
+          this.config.basemapLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.basemapLayers);
+          break;
+        case 'borders':
+          this.config.bordersLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.bordersLayers);
+          break;
+        default:
+          this.config.dataLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.dataLayers);
+      }
     }
 
     let layer = new ol.layer.Tile({
@@ -648,24 +659,14 @@ export class OlMap extends GeonaMap {
         }
       }
 
-      console.log('Time values for layer ' + geonaLayer.identifier);
-      console.log(timeValues);
-      console.log('Requested time for layer ' + geonaLayer.identifier + ': ' + options.requestedTime);
-      console.log('Loaded time for layer ' + geonaLayer.identifier + ': ' + geonaLayer.dimensions.time.loaded);
-      console.log('Current map time when adding layer ' + geonaLayer.identifier + ': ' + this.config.mapTime);
       // Selects the requested time, the closest to the map time, or the default layer time.
       if (options.requestedTime !== undefined) {
-        console.log('Using the requested time for layer ' + geonaLayer.identifier);
         time = findNearestValidTime(timeValues, options.requestedTime);
       } else if (options.modifier === 'hasTime' && geonaLayer.dimensions.time.loaded) {
-        console.log('Using the loaded time for layer ' + geonaLayer.identifier);
         time = findNearestValidTime(timeValues, geonaLayer.dimensions.time.loaded);
       } else if (options.modifier === 'hasTime' && this.config.mapTime !== '') {
-        console.log('Using the map time for layer ' + geonaLayer.identifier);
         time = findNearestValidTime(timeValues, this.config.mapTime);
-        console.log(time);
       } else if (options.modifier === 'hasTime') {
-        console.log('Using the default time for layer ' + geonaLayer.identifier);
         time = geonaLayer.dimensions.time.default;
       }
     }
@@ -1509,4 +1510,46 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     tileSizes: tileSizes,
     sizes: sizes,
   });
+}
+
+/**
+   * Saves a layer to the config, including the server if not already saved in the config.
+   * @param  {Layer}         geonaLayer       The layer we want to save in the config.
+   * @param  {LayerServer}   geonaLayerServer The layer server for the layer we want to save in the config.
+   * @param  {LayerServer[]} configLayersList The basemapLayers, bordersLayers or dataLayers array from the config.
+   * @return {LayerServer[]}                  The configLayersList with the layer added.
+   */
+function saveLayerToConfig(geonaLayer, geonaLayerServer, configLayersList) {
+  // Check if we need to save the layer server
+  let configLayerServer;
+  for (let i = 0; i < configLayersList.length; i++) {
+    let layerServer = configLayersList[i];
+    if (layerServer.identifier === geonaLayerServer.identifier) {
+      configLayerServer = layerServer;
+    }
+  }
+  // If the layer server has not been saved in the config previously, add it
+  if (!configLayerServer) {
+    configLayersList.push(geonaLayerServer);
+    configLayerServer = configLayersList[configLayersList.length - 1];
+  }
+
+  // The layer server might have a list of layers already. We'll save these too if it does
+  if (!configLayerServer.layers) {
+    configLayerServer.layers = [];
+  }
+  let layerExists = false;
+  // Check if the server's list of layers contains this layer (i.e. was added when the layerServer was saved to config)
+  for (let layer of configLayerServer.layers) {
+    if (layer.identifier === geonaLayer.identifier) {
+      layerExists = true;
+    }
+  }
+  // If the layer hasn't been added, put it in the config
+  if (!layerExists) {
+    configLayerServer.layers.push(geonaLayer);
+  }
+
+  // Return the updated config layers list
+  return configLayersList;
 }
