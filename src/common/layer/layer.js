@@ -59,10 +59,14 @@ export default class Layer {
     this.dimensions = layerConfig.dimensions;
     if (this.dimensions) {
       if (this.dimensions.time) {
-        // There is no need to sort if we still have times to generate
-        if (!this.dimensions.time.intervals) {
-          this.dimensions.time.values.sort();
-        }
+        let time = this.dimensions.time;
+        console.log(time);
+        // This sorted list may change if there are time values to calculate later from intervals
+        time.values.sort();
+        // // Set the currently-loaded time - will be set already if specified in the layer config
+        // if (!time.loaded) {
+        //   time.loaded = time.default || time.values[time.values.length - 1];
+        // }
         // We set the modifier here, unless it has been specified already
         if (!this.modifier) {
           this.modifier = 'hasTime';
@@ -73,7 +77,7 @@ export default class Layer {
         this.currentElevation = parseFloat(this.dimensions.elevation.default);
       } else if (this.dimensions.depth) {
         // We normalise the variable names to elevation
-        this.currentElevation = parseFloat(this.dimensions.depth.default);
+        this.currentElevation = parseFloat(this.dimensions.depth.default); // todo put currentElevation into this.dimensions.elevation
         this.dimensions.elevation = layerConfig.dimensions.depth;
         delete this.dimensions.depth;
       }

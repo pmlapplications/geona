@@ -876,7 +876,10 @@ export class MainMenu {
     // We will update each layer's time if needed
     for (let layerIdentifier of this.layersPanelItemList) {
       // Find the current layer time (this is the time which will be shown)
-      let datetime = this.geona.map.layerGet(layerIdentifier, 'layerTime');
+      let datetime;
+      if (this.geona.map.availableLayers[layerIdentifier].modifier === 'hasTime') {
+        datetime = this.geona.map.availableLayers[layerIdentifier].dimensions.time.loaded;
+      }
 
       // Datetime might be undefined, so we'll either format the date nicely, or just set an 'Invalid Time' message
       let formattedDatetime;

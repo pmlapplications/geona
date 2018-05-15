@@ -251,14 +251,24 @@ export class Scalebar {
         + geonaLayer.boundingBox.maxLon + ','
         + geonaLayer.boundingBox.maxLat;
 
+      // Get the current time if possible
+      let time;
+      if (geonaLayer.modifier === 'hasTime') {
+        time = geonaLayer.dimensions.time.loaded;
+      }
+
       // The minmax operation gets approximate min and max values for the scale at the selected datetime
       let minMaxRequestParameters = 'request=GetMetadata&item=minmax&layers=' + geonaLayer.identifier
-        + '&time=' + this.geona.map.layerGet(geonaLayer.identifier, 'layerTime')
         + '&bbox=' + bbox
         + '&elevation=' + (geonaLayer.elevation || -1)
         + '&srs=' + this.geona.map.config.projection
         + '&width=' + this.MINMAX_SEARCH_DENSITY
         + '&height=' + this.MINMAX_SEARCH_DENSITY;
+
+      // Include time if appropriate
+      if (time) {
+        minMaxRequestParameters += '&time=' + time;
+      }
 
       // Include elevation if appropriate
       if (geonaLayer.currentElevation) {
@@ -350,7 +360,6 @@ export class Scalebar {
   updateScalebar() {
     let geonaLayer = this.geona.map.availableLayers[this.layerIdentifier];
     // todo these need to be set at the start as well (in OL and L map libraries)
-    // todo these options all need to be set somewhere (e.g. above max color is never set)
     let params = {
       colorScaleRange: geonaLayer.scale.min + ',' + geonaLayer.scale.max,
       logScale: geonaLayer.scale.logarithmic,
@@ -405,7 +414,10 @@ export class Scalebar {
       labels: geonaLayer.scale.scaleTicks,
     };
 
-    let currentLayerTime = this.geona.map.layerGet(this.layerIdentifier, 'layerTime');
+    let currentLayerTime;
+    if (geonaLayer.modifier === 'hasTime') {
+      currentLayerTime = geonaLayer.dimensions.time.loaded;
+    }
     let formattedDatetime;
     if (currentLayerTime) {
       formattedDatetime = moment(currentLayerTime).format('YYYY-MM-DD HH:mm:ss');

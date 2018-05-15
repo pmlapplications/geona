@@ -118,6 +118,10 @@ export class TimePanel {
           this.timeline.addTimelineLayer(availableLayer);
         }
       }
+      // Move the selector tool to match the current map time
+      if (this.geona.map.config.mapTime) {
+        this.timeline.moveSelectorToDate(this.geona.map.config.mapTime);
+      }
 
       // Update the pikaday date display
       this.pikadayUpdateGraphic(this.timeline.selectorDate);

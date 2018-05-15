@@ -1251,6 +1251,11 @@ export let client = {
       format: ['EPSG:3857', 'EPSG:4326'],
       default: 'EPSG:4326',
     },
+    mapTime: {
+      doc: 'The current time that the entire map is set to. Individual layers may have different times loaded if they do not support the exact map time.',
+      format: String,
+      default: '',
+    },
 
     /* Other options */
     additionalBasemaps: {
