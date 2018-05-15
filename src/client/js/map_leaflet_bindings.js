@@ -8,4 +8,7 @@ export function registerBindings(eventManager, mapLeaflet) {
   eventManager.bind('timePanel.heightChanged', () => {
     mapLeaflet.adjustAttributionHeight();
   });
+  eventManager.bind('mapLeaflet.updateConfig', () => {
+    mapLeaflet.updateConfig();
+  });
 }

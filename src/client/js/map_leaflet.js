@@ -7,6 +7,7 @@ import {
 } from './map_common';
 import $ from 'jquery';
 
+import {registerTriggers} from './map_leaflet_triggers';
 import {registerBindings} from './map_leaflet_bindings';
 
 let L;
@@ -137,6 +138,7 @@ export class LMap extends GeonaMap {
 
     this.loadConfig_();
 
+    registerTriggers(this.eventManager, this.geonaDiv, this._map);
     registerBindings(this.eventManager, this);
     // Must come last in the constructor
     this.initialized = true;
@@ -1143,14 +1145,12 @@ export class LMap extends GeonaMap {
     attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
   }
 
-  // TODO set numcolorbands method
-
   /**
    * Updates the source params for the specified layer.
    * @param {String} layerIdentifier The identifier for the layer we want to update.
    * @param {Object} newParams       The new params to use in the source.
    */
-  updateSourceParams(layerIdentifier, newParams) { // todo untested
+  updateSourceParams(layerIdentifier, newParams) {
     let layer = this.activeLayers[layerIdentifier];
     let params = layer.wmsParams;
     for (let param of Object.keys(newParams)) {
@@ -1181,6 +1181,18 @@ export class LMap extends GeonaMap {
       }
     }
     layer.setParams(params);
+  }
+
+  /**
+   * Gets the current state of the map and saves it to the config.
+   */
+  updateConfig() {
+    let currentCenter = this._map.getCenter();
+    this.config.viewSettings.center = {
+      lon: currentCenter.lng,
+      lat: currentCenter.lat,
+    };
+    this.config.viewSettings.zoom = deLeafletizeZoom(this._map.getZoom());
   }
 }
 
