@@ -173,7 +173,6 @@ export class Geona {
    */
   loadGeonaState(geonaStateJson) {
     let geonaState = JSON.parse(geonaStateJson);
-    console.log(geonaState);
 
     // Infinity will get converted to null when stringified so we need to check all the viewSettings and unsanitize them
     for (let basemapServer of geonaState.map.basemapLayers) { // All layers for each basemap server
@@ -237,7 +236,47 @@ export class Geona {
     this.gui = undefined;
     this.eventManager = undefined;
 
-    // TODO merge the configs (e.g. data layers)
+    // Merge the configs for layers
+    let currentMapConfig = this.config.get('map');
+    // Remove duplicate layers from the current instance's config
+    for (let basemapLayer of geonaState.map.basemapLayers) {
+      for (let i = 0; i < currentMapConfig.basemapLayers.length; i++) {
+        let currentConfigBasemapLayer = currentMapConfig.basemapLayers[i];
+        if (currentConfigBasemapLayer.identifier === basemapLayer.identifier) {
+          currentMapConfig.basemapLayers.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    for (let bordersLayer of geonaState.map.bordersLayers) {
+      for (let i = 0; i < currentMapConfig.bordersLayers.length; i++) {
+        let currentConfigBordersLayer = currentMapConfig.bordersLayers[i];
+        if (currentConfigBordersLayer.identifier === bordersLayer.identifier) {
+          currentMapConfig.bordersLayers.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    for (let dataLayer of geonaState.map.dataLayers) {
+      for (let i = 0; i < currentMapConfig.dataLayers.length; i++) {
+        let currentConfigDataLayer = currentMapConfig.dataLayers[i];
+        if (currentConfigDataLayer.identifier === dataLayer.identifier) {
+          currentMapConfig.dataLayers.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    // Now that duplicates have been removed, add the remaining layers to the state's available layers
+    for (let basemapLayer of currentMapConfig.basemapLayers) {
+      geonaState.map.basemapLayers.push(basemapLayer);
+    }
+    for (let bordersLayer of currentMapConfig.bordersLayers) {
+      geonaState.map.bordersLayers.push(bordersLayer);
+    }
+    for (let dataLayer of currentMapConfig.dataLayers) {
+      geonaState.map.dataLayers.push(dataLayer);
+    }
 
     // Update the config
     this.config.set('map', geonaState.map);
