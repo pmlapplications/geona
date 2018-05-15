@@ -38,8 +38,8 @@ export function registerBindings(eventManager, menu) {
     menu.getLayerServer(url, service, save, useCache);
   });
   // Change add URL text
-  eventManager.bind('mainMenu.changeAddUrlButtonText', (checked) => {
-    menu.changeAddUrlButtonText(checked);
+  eventManager.bind('mainMenu.addLayerButtonTextAsUrl', (checked) => {
+    menu.addLayerButtonTextAsUrl(checked);
   });
   // Add layer from URL to map
   eventManager.bind('mainMenu.addUrlLayerToMap', (layerIdentifier) => {
@@ -58,25 +58,124 @@ export function registerBindings(eventManager, menu) {
     menu.displayLayersPanel();
   });
   // Reorder layers
-  // Item is the list item that was dragged and dropped
-  eventManager.bind('mainMenu.reorderLayers', (item) => {
+  eventManager.bind('mainMenu.reorderLayers', (item) => { // Item is the list item that was dragged and dropped
     menu.reorderLayers(item[0]);
   });
   // Show layer
-  // Item is the list item that contained the icon that was clicked
-  eventManager.bind('mainMenu.showLayer', (item) => {
-    menu.showLayer(item[0]);
+  eventManager.bind('mainMenu.showLayer', ([identifier, item]) => { // Item is the icon that was clicked
+    menu.showLayer(identifier, item);
   });
   // Hide layer
-  // Item is the list item that contained the icon that was clicked
-  eventManager.bind('mainMenu.hideLayer', (item) => {
-    menu.hideLayer(item[0]);
+  eventManager.bind('mainMenu.hideLayer', ([identifier, item]) => { // Item is the icon that was clicked
+    menu.hideLayer(identifier, item);
+  });
+  // Toggle layers panel item panel
+  eventManager.bind('mainMenu.toggleLayersPanelItemTab', ([item, panel]) => {
+    menu.toggleLayersPanelItemTab(item, panel);
   });
   // Remove layer
-  // Item is the list item that contained the icon that was clicked
-  eventManager.bind('mainMenu.removeLayer', (item) => {
+  eventManager.bind('mainMenu.removeLayer', (item) => { // Item is the list item that contained the icon that was clicked
     menu.removeLayer(item[0]);
   });
+  // Validate (calls update and draw) scale
+  eventManager.bind('mainMenu.layersPanelScalebars.validateScale', ([item, layerIdentifier, min, max, log, instant]) => {
+    try {
+      menu.layersPanelScalebars[layerIdentifier].validateScale(min, max, log, instant);
+    } catch (err) {
+      let geonaLayer = menu.geona.map.availableLayers[layerIdentifier];
+      switch (err.name) {
+        case 'MinValueInvalidError':
+          menu.setScalebarInputs(item, geonaLayer.scale.min, max, log);
+          break;
+        case 'MaxValueInvalidError':
+          menu.setScalebarInputs(item, min, geonaLayer.scale.max, log);
+          break;
+        case 'SwappedValuesError':
+          menu.setScalebarInputs(item, geonaLayer.scale.min, geonaLayer.scale.max, log);
+          break;
+        default:
+          throw err;
+      }
+    }
+  });
+  // Apply auto scale
+  eventManager.bind('mainMenu.applyAutoScale', (item) => {
+    menu.applyAutoScale(item);
+  });
+  // Re-enable auto scale
+  eventManager.bind('mainMenu.reEnableAutoScale', (item) => {
+    menu.reEnableAutoScale(item);
+  });
+  // Reset scale
+  eventManager.bind('mainMenu.layersPanelScalebars.resetScale', (layerIdentifier) => {
+    menu.layersPanelScalebars[layerIdentifier].resetScale();
+  });
+
+  // Change layer datetime display
+  eventManager.bind('timePanel.timeChanged', () => {
+    menu.updateLayersDatetimeGraphic();
+  });
+
+  // Change layer opacity
+  eventManager.bind('mainMenu.changeLayerOpacity', ([item, opacity]) => {
+    menu.changeLayerOpacity(item, opacity);
+  });
+  // Change layer elevation
+  eventManager.bind('mainMenu.changeElevationStyle', ([layerIdentifier, elevation]) => {
+    menu.changeLayerElevation(layerIdentifier, elevation);
+  });
+  // Change layer style
+  eventManager.bind('mainMenu.changeLayerStyle', ([item, style]) => { // Item is the list item that contained the select
+    menu.changeLayerStyle(item, style);
+  });
+  // Select below min color
+  eventManager.bind('mainMenu.setBelowMinColor', ([layerIdentifier, option]) => {
+    menu.setBelowMinColor(layerIdentifier, option);
+  });
+  // Set below min color graphics
+  eventManager.bind('mainMenu.updateBelowMinColorGraphic', ([item, colorCode]) => {
+    menu.updateBelowMinColorGraphic(item, colorCode);
+  });
+  // Select above max color
+  eventManager.bind('mainMenu.setAboveMaxColor', ([layerIdentifier, option]) => {
+    menu.setAboveMaxColor(layerIdentifier, option);
+  });
+  // Set above max color graphics
+  eventManager.bind('mainMenu.updateAboveMaxColorGraphic', ([item, colorCode]) => {
+    menu.updateAboveMaxColorGraphic(item, colorCode);
+  });
+  // Show below min color input
+  eventManager.bind('mainMenu.showBelowMinColorInput', (item) => {
+    menu.showBelowMinColorInput(item);
+  });
+  // Hide below min color input
+  eventManager.bind('mainMenu.hideBelowMinColorInput', (item) => {
+    menu.hideBelowMinColorInput(item);
+  });
+  // Show above max color input
+  eventManager.bind('mainMenu.showAboveMaxColorInput', (item) => {
+    menu.showAboveMaxColorInput(item);
+  });
+  // Hide above max color input
+  eventManager.bind('mainMenu.hideAboveMaxColorInput', (item) => {
+    menu.hideAboveMaxColorInput(item);
+  });
+  // Set number of color bands
+  eventManager.bind('mainMenu.setNumberOfColorBands', ([item, numColorBands]) => {
+    menu.setNumberOfColorBands(item, numColorBands);
+  });
+  // Zoom to data
+
+  // Execute changes buffer
+  eventManager.bind('mainMenu.executeChangesBuffer', (layerIdentifier) => {
+    menu.executeChangesBuffer(layerIdentifier);
+  });
+
+  // Submit WCS URL
+  eventManager.bind('mainMenu.submitWcsUrl', ([item, url]) => {
+    menu.submitWcsUrl(item, url);
+  });
+
   /*
    * Analysis Panel
    */

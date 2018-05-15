@@ -66,8 +66,10 @@ function parse1_0(url, capabilities) {
   };
 
   if (url) {
-    serverConfig.url = url.replace(/\?.*/g, '');
+    serverConfig.url = url.replace(/\?.*/g, ''); // Regex to remove all request parameters from the URL (including '?')
   }
+
+  // WMTS supports multiple languages for some information, so we parse and separate them into languages
   if (serviceId.title) {
     serverConfig.service.title = parseTitles(serviceId.title);
   }
@@ -158,7 +160,7 @@ function parse1_0(url, capabilities) {
     serverConfig.operationsMetadata = {};
     for (let operation of opsMetadata.operation) {
       serverConfig.operationsMetadata[operation.name] = {};
-      // While WMTS only supports HTTP DCP, we just take the first (and only) item from the array.
+      // Currently WMTS only supports HTTP DCP, so we just take the first (and only) item from the array.
       for (let getOrPost of operation.dcp[0].http.getOrPost) {
         if (getOrPost.name.localPart === 'Get') {
           if (serverConfig.operationsMetadata[operation.name].get === undefined) {
@@ -320,11 +322,8 @@ function parse1_0(url, capabilities) {
           // TODO If the layer has a link to the current tile matrix set AND there isn't already a bounding box, add the bounding box to the layer
           for (let tileMatrixSetId of layerMatrix) {
             if (tileMatrixSet.tileMatrixSet === tileMatrixSetId.identifier.value) {
-              console.log('Match');
               if (tileMatrixSetId.boundingBox) {
                 let currentTileMatrixBox = tileMatrixSetId.boundingBox;
-                console.log('boundingBox found, and is being added to:');
-                console.log(layer);
                 layer.boundingBox = {};
                 if (currentTileMatrixBox.name && currentTileMatrixBox.value) {
                   layer.boundingBox = populateBoundingBox(currentTileMatrixBox);
@@ -340,7 +339,6 @@ function parse1_0(url, capabilities) {
     for (let matrixSet of layerMatrix) {
       let thisMatrixSet = matrixSets[matrixSet.identifier.value] = {};
       thisMatrixSet.projection = convertCrs(matrixSet.supportedCRS);
-      console.log(thisMatrixSet.projection);
       if (thisMatrixSet.projection === 'OGC:CRS84') {
         thisMatrixSet.projection = 'EPSG:4326';
       }
@@ -368,7 +366,7 @@ function parse1_0(url, capabilities) {
  * @param {Array} titles An array of titles with value and optional lang properties.
  * @return {Object}      Object with language separated titles.
  */
-function parseTitles(titles) {
+function parseTitles(titles) { // todo copy typedef from other place
   let titleObject = {};
   if (titles !== undefined) {
     if (titles !== []) {
@@ -405,7 +403,7 @@ function parseTitles(titles) {
  * @param {Array} abstracts An array of abstracts with value and optional lang properties.
  * @return {Object}         Object with language-separated abstracts.
  */
-function parseAbstracts(abstracts) {
+function parseAbstracts(abstracts) {// todo copy typedef from other place
   let abstractObject = {};
   if (abstracts !== undefined) {
     if (abstracts !== []) {
@@ -442,7 +440,7 @@ function parseAbstracts(abstracts) {
  * @param {Array} keywords An array of keywords with value and optional lang properties.
  * @return {Object}        Object with language-separated keyword arrays.
  */
-function parseKeywords(keywords) {
+function parseKeywords(keywords) {// todo copy typedef from other place
   let keywordObject = {};
   if (keywords !== undefined) {
     if (keywords !== []) {
@@ -470,9 +468,9 @@ function parseKeywords(keywords) {
 }
 
 /**
- *
- * @param {Array} dimensions
- * @return {Object}
+ * Parses the dimensions for a WMTS layer, and sorts extra data with language code.
+ * @param {Array} dimensions A list of dimensions (e.g. time, elevation) to parse.
+ * @return {Object}          A Geona-friendly list of WMTS dimensions.
  */
 function parseDimensions(dimensions) {
   let dimensionsArray = [];
@@ -546,8 +544,6 @@ function populateBoundingBox(box) {
     }
   } else {
     // Gets the proj4 axis orientation, e.g. 'enu' and takes only the first two letters to get the x/y order
-    console.log('box.value.crs:');
-    console.log(box.value.crs);
     let xyOrientation = proj4(convertCrs(box.value.crs)).oProj.axis.substr(0, 2);
     if (xyOrientation === 'en') {
       boundingBox = {

@@ -1,7 +1,6 @@
 /** @module utils/ogc/wms_capabilities_parser */
 
 /* eslint camelcase: 0 */
-
 import {getCapabilities, jsonifyCapabilities} from './common';
 
 /**
@@ -427,7 +426,8 @@ function parseLayer1_1(layer, parentLayer = {}) {
           dimension.values = dimension.values.replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
         }
 
-        for (let value of dimension.values) {
+        for (let i = 0; i < dimension.values.length; i++) {
+          let value = dimension.values[i];
           if (value.includes('/')) {
             if (!dimension.intervals) {
               dimension.intervals = [];
@@ -438,10 +438,13 @@ function parseLayer1_1(layer, parentLayer = {}) {
               max: minMaxResolution[1],
               resolution: minMaxResolution[2],
             });
+            // Remove the interval from the values list
+            dimension.values.splice(i, 1);
+            i--; // To prevent skipping after splicing a value
           }
         }
 
-        if (dimension.intervals) {
+        if (dimension.intervals && dimension.values.length === 0) {
           dimension.values = undefined;
         }
       }
@@ -505,11 +508,13 @@ function parseLayer1_3(layer, parentLayer = {}) {
       };
 
       if (thisLayer.dimensions[dimension.name].values) {
+        // Removes all new lines (so strings are all on one line) and splits into comma-separated entries
         thisLayer.dimensions[dimension.name].values = thisLayer.dimensions[dimension.name].values
           .replace(/\r\n\s*/g, '').replace(/\n\s*/g, '').split(',');
       }
 
-      for (let value of thisLayer.dimensions[dimension.name].values) {
+      for (let i = 0; i < thisLayer.dimensions[dimension.name].values.length; i++) {
+        let value = thisLayer.dimensions[dimension.name].values[i];
         if (value.includes('/')) {
           if (!thisLayer.dimensions[dimension.name].intervals) {
             thisLayer.dimensions[dimension.name].intervals = [];
@@ -520,10 +525,13 @@ function parseLayer1_3(layer, parentLayer = {}) {
             max: minMaxResolution[1],
             resolution: minMaxResolution[2],
           });
+          // Remove the interval from the values list
+          thisLayer.dimensions[dimension.name].values.splice(i, 1);
+          i--; // To prevent skipping after splicing a value
         }
       }
 
-      if (thisLayer.dimensions[dimension.name].intervals) {
+      if (thisLayer.dimensions[dimension.name].intervals && thisLayer.dimensions[dimension.name].values.length === 0) {
         thisLayer.dimensions[dimension.name].values = undefined;
       }
     }

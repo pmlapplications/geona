@@ -1,3 +1,5 @@
+/** @module splash_screen */
+
 import * as templates from '../../templates/compiled';
 import {registerTriggers} from './splash_screen_triggers';
 import {registerBindings} from './splash_screen_bindings';
@@ -15,10 +17,10 @@ export class SplashScreen {
     this.gui = gui;
     this.geona = gui.geona;
 
-    this.gui.parentDiv.append(templates.splash_screen({splashMessage: config.content}));
-    this.gui.parentDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + config.backgroundImage + ')');
+    this.gui.geonaDiv.append(templates.splash_screen({splashMessage: config.content}));
+    this.gui.geonaDiv.find('.js-geona-splash-screen').css('background-image', 'url(' + config.backgroundImage + ')');
 
-    registerTriggers(this.geona.eventManager, this.gui.parentDiv);
+    registerTriggers(this.geona.eventManager, this.gui.geonaDiv);
     registerBindings(this.geona.eventManager, this);
   }
 
@@ -26,7 +28,7 @@ export class SplashScreen {
    * Removes the splash screen and presents a blank map.
    */
   startNewMap() {
-    this.gui.parentDiv.find('.js-geona-splash-screen').remove();
+    this.gui.geonaDiv.find('.js-geona-splash-screen').remove();
   }
 
   /**

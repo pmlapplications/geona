@@ -3,8 +3,11 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage, findNearestValidTime, constructExtent,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage,
+  findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
+import {registerTriggers} from './map_openlayers_triggers';
+import {registerBindings} from './map_openlayers_bindings';
 
 import proj4 from 'proj4';
 
@@ -13,32 +16,39 @@ import proj4 from 'proj4';
 // let ol = openlayers;
 
 let ol;
-// FIXME I think that the whole map will fail to load if one layer fails, and the same if it stalls (e.g. EOX basemap will not load if CCI data is bad)
 /**
  * Class for an OpenLayers map.
  *
  * @implements {GeonaMap}
  */
 export class OlMap extends GeonaMap {
+  // TODO WMTS elevation request
   /**
    * Instantiate a new OlMap and create a new OpenLayers map.
-   * @param  {Object} config The map config to load
+   * @param {Object}      config The map config to load
    * @param {HTMLElement} mapDiv The div to put the map in
+   * @param {Geona}       geona  The current Geona instance that this map belongs to
    */
-  constructor(config, mapDiv) {
+  constructor(config, mapDiv, geona) {
     super();
     /** @type {Object} The map config */
     this.config = config;
+    this.geona = geona;
+    this.eventManager = geona.eventManager;
+    this.geonaDiv = geona.geonaDiv;
+
     /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
     this.basemaps_ = {};
     /** @private @type {Object} The available map Layers, as Geona Layers */
-    this._availableLayers = {};
+    this.availableLayers = {};
     /** @private @type {Object} The available map LayerServers, as Geona LayerServers */
-    this._availableLayerServers = {};
+    this.availableLayerServers = {};
     /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
-    this._activeLayers = {};
-    /** @private @type {String} The latest time that the active map layers are set to */
-    this._mapTime = undefined;
+    this.activeLayers = {};
+    /** @private @type {Object} @desc The generated times for the active layers */
+    this._activeLayerGeneratedTimes = {};
+    /** @private @type {String} The time that the active map layers are set by */
+    this.config.mapTime = this.config.mapTime;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -54,17 +64,17 @@ export class OlMap extends GeonaMap {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
-    /** @private @type {Boolean} Tracks whether the map has been initialized */
-    this._initialized = false;
+    /** @type {Boolean} Tracks whether the map has been initialized */
+    this.initialized = false;
 
     /** @private @type {ol.Map} The OpenLayers map */
     this._map = new ol.Map({
       view: new ol.View(
         {
-          center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],
+          center: [this.config.viewSettings.center.lon, this.config.viewSettings.center.lat],
           extent: [
-            this.config.viewSettings.maxExtent.minLat, this.config.viewSettings.maxExtent.minLon,
-            this.config.viewSettings.maxExtent.maxLat, this.config.viewSettings.maxExtent.maxLon,
+            this.config.viewSettings.maxExtent.minLon, this.config.viewSettings.maxExtent.minLat,
+            this.config.viewSettings.maxExtent.maxLon, this.config.viewSettings.maxExtent.maxLat,
           ],
           maxZoom: this.config.viewSettings.maxZoom,
           minZoom: this.config.viewSettings.minZoom,
@@ -85,7 +95,7 @@ export class OlMap extends GeonaMap {
         }),
 
         new ol.control.Attribution({
-          collapsible: true,
+          allowToggle: true,
           collapsed: false,
         }),
 
@@ -93,45 +103,51 @@ export class OlMap extends GeonaMap {
       ],
     });
 
-    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config);
-    this._availableLayers = loadedServersAndLayers.availableLayers;
-    this._availableLayerServers = loadedServersAndLayers.availableLayerServers;
+    let loadedServersAndLayers = loadDefaultLayersAndLayerServers(this.config, this.geona.geonaServer);
+    this.availableLayers = loadedServersAndLayers.availableLayers;
+    this.availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
     // Adds any defined basemap to the map
-    if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
-      let layer = this._availableLayers[this.config.basemap];
-      let layerServer = this._availableLayerServers[layer.layerServer];
+    if (this.config.basemap !== 'none') {
+      let layer = this.availableLayers[this.config.basemap];
+      let layerServer = this.availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // Adds all defined data layers to the map
-    if (this.config.data !== undefined) {
-      if (this.config.data.length !== 0) {
-        for (let layerIdentifier of this.config.data) {
-          let layer = this._availableLayers[layerIdentifier];
-          let layerServer = this._availableLayerServers[layer.layerServer];
-          if (this._availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
+    // TODO don't do this if there is an overlay 'do you want to load or make new map'
+    if (this.config.data.length !== 0) {
+      for (let layerIdentifier of this.config.data) {
+        let layer = this.availableLayers[layerIdentifier];
+        let layerServer = this.availableLayerServers[layer.layerServer];
+        if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
+          if (this.config.mapTime) {
+            this.addLayer(layer, layerServer, {modifier: 'hasTime', requestedTime: this.config.mapTime});
           } else {
-            this.addLayer(layer, layerServer);
+            this.addLayer(layer, layerServer, {modifier: 'hasTime', requestedTime: layer.dimensions.time.loaded});
           }
+        } else {
+          this.addLayer(layer, layerServer);
         }
       }
     }
     // Adds any defined borders layer to the map
-    if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
-      let layer = this._availableLayers[this.config.borders.identifier];
-      let layerServer = this._availableLayerServers[layer.layerServer];
+    if (this.config.borders.identifier !== 'none') {
+      let layer = this.availableLayers[this.config.borders.identifier];
+      let layerServer = this.availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
     }
 
     this.loadConfig_();
 
+    registerTriggers(this.eventManager, this.geonaDiv, this._map);
+    registerBindings(this.eventManager, this);
+
     // Must come last in the method
-    this._initialized = true;
+    this.initialized = true;
 
     // wms
     // https://rsg.pml.ac.uk/thredds/wms/CCI_ALL-v3.0-5DAY?service=WMS&request=GetCapabilities
-    // $.ajax('http://127.0.0.1:7890/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wms/getLayers/https%3A%2F%2Frsg.pml.ac.uk%2Fthredds%2Fwms%2FCCI_ALL-v3.0-5DAY%3Fservice%3DWMS%26request%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServer(serverConfig);
     //   });
@@ -140,37 +156,37 @@ export class OlMap extends GeonaMap {
 
     // // wmts 3857 - success
     // http://www.ngi.be/cartoweb/1.0.0/WMTSCapabilities.xml
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fwww.ngi.be%2Fcartoweb%2F1.0.0%2FWMTSCapabilities.xml')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/http%3A%2F%2Fwww.ngi.be%2Fcartoweb%2F1.0.0%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 4326 - error
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Ftiles.maps.eox.at%2Fwmts%2F%3FSERVICE%3DWMTS%26REQUEST%3DGetCapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/https%3A%2F%2Ftiles.maps.eox.at%2Fwmts%2F%3FSERVICE%3DWMTS%26REQUEST%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/http%3A%2F%2Fsampleserver6.arcgisonline.com%2Farcgis%2Frest%2Fservices%2FWorldTimeZones%2FMapServer%2FWMTS%3Fservice%3DWMTS%26version%3D1.0.0%26request%3Dgetcapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/https%3A%2F%2Flabs.koordinates.com%2Fservices%3Bkey%3Dd740ea02e0c44cafb70dce31a774ca10%2Fwmts%2F1.0.0%2Flayer%2F7328%2FWMTSCapabilities.xml')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // wmts 4326 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/https%3A%2F%2Fgibs.earthdata.nasa.gov%2Fwmts%2Fepsg4326%2Fbest%2Fwmts.cgi%3FVERSION%3D1.0.0%26Request%3DGetCapabilities%26Service%3DWMTS')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/https%3A%2F%2Fgibs.earthdata.nasa.gov%2Fwmts%2Fepsg4326%2Fbest%2Fwmts.cgi%3FVERSION%3D1.0.0%26Request%3DGetCapabilities%26Service%3DWMTS')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
 
     // // WMTS 3857 - success
-    // $.ajax('http://127.0.0.1:7890/utils/wmts/getLayers/http%3A%2F%2Fviewer.globalland.vgt.vito.be%2Fmapcache%2Fwmts%3Fservice%3DWMTS%26request%3DGetCapabilities')
+    // $.ajax(this.geona.geonaServer + '/utils/wmts/getLayers/http%3A%2F%2Fviewer.globalland.vgt.vito.be%2Fmapcache%2Fwmts%3Fservice%3DWMTS%26request%3DGetCapabilities')
     //   .done((serverConfig) => {
     //     let keepingEslintHappy = new LayerServerWmts(serverConfig);
     //   });
@@ -205,7 +221,7 @@ export class OlMap extends GeonaMap {
    * @param {ol.Layer.Tile} [layer] Optional layer created in addLayer(), used for setting a new projection
    */
   _clearBasemap(layer = undefined) {
-    if (this._initialized === true && this.config.basemap !== 'none') {
+    if (this.initialized === true && this.config.basemap !== 'none') {
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'basemap') {
           this.removeLayer(currentLayer.get('identifier'));
@@ -222,7 +238,7 @@ export class OlMap extends GeonaMap {
    * Clear the country borders if active
    */
   _clearBorders() {
-    if (this._initialized === true && this.config.borders.identifier !== 'none') {
+    if (this.initialized === true && this.config.borders.identifier !== 'none') {
       for (let currentLayer of this._map.getLayers().getArray()) {
         if (currentLayer.get('modifier') === 'borders') {
           this.removeLayer(currentLayer.get('identifier'));
@@ -235,7 +251,7 @@ export class OlMap extends GeonaMap {
 
   /**
    * Set the projection, if supported by the current basemap.
-   * @param  {String} projection The projection to use, such as 'EPSG:4326'.
+   * @param {String} projection The projection to use, such as 'EPSG:4326'.
    */
   setProjection(projection) {
     for (let layer of this._map.getLayers().getArray()) {
@@ -257,33 +273,33 @@ export class OlMap extends GeonaMap {
    *                                     {minLat: <Number>, minLon: <Number>, maxLat: <Number>, maxLon: <Number>}
    * @param {Number}  options.maxZoom    The maximum allowed zoom
    * @param {Number}  options.minZoom    The minimum allowed zoom
-   * @param {String}  options.projection The projection, such as 'EPSG:4326'
+   * @param {String}  options.projection The projection code, such as 'EPSG:4326'
    * @param {Number}  options.zoom       The zoom
    */
   setView(options) {
-    // TODO extent fixes
-    // this.config.viewSettings.maxExtent = {
-    //   minLat: -90,
-    //   minLon: -Infinity,
-    //   maxLat: 90,
-    //   maxLon: Infinity,
-    // };
-    // for (let layer of this._map.getLayers().getArray()) {
-    //   let geonaLayer = this._availableLayers[layer.get('identifier')];
-    //   if (geonaLayer.viewSettings) {
-    //     if (geonaLayer.viewSettings.maxExtent) {
-    //       this.config.viewSettings.maxExtent = constructExtent(
-    //         this.config.viewSettings.maxExtent,
-    //         geonaLayer.viewSettings.maxExtent
-    //       );
-    //     }
-    //   }
-    // }
+    this.config.viewSettings.maxExtent = {
+      minLat: -90,
+      minLon: -Infinity,
+      maxLat: 90,
+      maxLon: Infinity,
+    };
+    for (let layer of this._map.getLayers().getArray()) {
+      let geonaLayer = this.availableLayers[layer.get('identifier')];
+      if (geonaLayer.viewSettings) {
+        if (geonaLayer.viewSettings.maxExtent) {
+          this.config.viewSettings.maxExtent = constructExtent(
+            this.config.viewSettings.maxExtent,
+            geonaLayer.viewSettings.maxExtent
+          );
+        }
+      }
+    }
 
+    // fixme can hang when changing centre (I used lat: 12, lon: 12 for hang)
     let currentCenterLatLon = ol.proj.toLonLat(this._map.getView().getCenter(), this._map.getView().getProjection()
       .getCode()).reverse();
     let center = options.center || {lat: currentCenterLatLon[0], lon: currentCenterLatLon[1]};
-    let fitExtent = options.fitExtent; // || this.config.viewSettings.fitExtent; TODO extent fixes
+    let fitExtent = options.fitExtent;
     let maxExtent = options.maxExtent || this.config.viewSettings.maxExtent;
     let maxZoom = options.maxZoom || this._map.getView().getMaxZoom();
     let minZoom = options.minZoom || this._map.getView().getMinZoom();
@@ -297,15 +313,9 @@ export class OlMap extends GeonaMap {
     this.config.viewSettings.minZoom = minZoom;
     this.config.viewSettings.zoom = zoom;
 
-    // FIXME will currently just move to the new extent rather than zooming to fit all
     // Converts the min and max coordinates from LatLon to current projection
     maxExtent = ol.proj.fromLonLat([maxExtent.minLon, maxExtent.minLat], projection)
       .concat(ol.proj.fromLonLat([maxExtent.maxLon, maxExtent.maxLat], projection));
-
-    if (fitExtent) {
-      fitExtent = ol.proj.fromLonLat([fitExtent.minLon, fitExtent.minLat], projection)
-        .concat(ol.proj.fromLonLat([fitExtent.maxLon, fitExtent.maxLat], projection));
-    }
     center = ol.proj.fromLonLat([center.lon, center.lat], projection);
 
     // Ensure that the center is within the maxExtent
@@ -313,8 +323,7 @@ export class OlMap extends GeonaMap {
       center = ol.extent.getCenter(maxExtent);
     }
 
-    // TODO check for undefined errors? Would let people know if their definitions were wrong (+ stop OL from hanging)
-
+    // Construct and set the new view
     let newView = new ol.View({
       center: center,
       extent: maxExtent,
@@ -323,22 +332,22 @@ export class OlMap extends GeonaMap {
       projection: projection,
       zoom: zoom,
     });
-
     this._map.setView(newView);
 
-    // Fit the map in the fitExtent
-    if (fitExtent) {
-      this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
-      if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
-        this._map.getView().setZoom(zoom);
-        this._map.getView().setCenter(center);
-      }
-    }
+    // todo Fit the map in the fitExtent - overrides zoom level
+    // todo check for if config.zoomToExtent === true
+    // if (fitExtent) {
+    //   this._map.getView().fit(fitExtent, {size: ol.extent.getSize(fitExtent)});
+    //   if (this._map.getView().getZoom() < minZoom || this._map.getView().getZoom() > maxZoom) {
+    //     this._map.getView().setZoom(zoom);
+    //     this._map.getView().setCenter(center);
+    //   }
+    // }
   }
 
   /**
    * Add the specified layer onto the map, using the specified options.
-   * Will also add a Geona layer to the_availableLayers if not already included (and also with the LayerServer).
+   * Will also add a Geona layer to the availableLayers if not already included (and also with the LayerServer).
    *
    * @param {Layer}       geonaLayer       The Geona Layer object to be created as an OpenLayers layer on the map.
    * @param {LayerServer} geonaLayerServer The Geona LayerServer object that corresponds to the Geona Layer.
@@ -356,8 +365,12 @@ export class OlMap extends GeonaMap {
         '\' for geonaLayer \'' + geonaLayer.identifier +
         '\' does not match identifier for geonaLayerServer\'' + geonaLayerServer.identifier + '\''
       );
-    } else if (geonaLayer.layerServer === undefined || geonaLayerServer.identifier === undefined) {
-      throw new Error('layerServer property of geonaLayer parameter or identifier property of geonaLayerServer parameter is undefined');
+    } else if (geonaLayer.layerServer === undefined) {
+      throw new Error('layerServer property of geonaLayer parameter is undefined');
+    } else if (geonaLayerServer.identifier === undefined) {
+      throw new Error('identifier property of geonaLayerServer parameter is undefined');
+    } else if (this.activeLayers[geonaLayer.identifier] !== undefined) {
+      throw new Error('Layer with identifier ' + geonaLayer.identifier + ' is already active on the map.');
     }
 
     // Merge custom options with defaults
@@ -365,11 +378,10 @@ export class OlMap extends GeonaMap {
       {modifier: undefined, requestedTime: undefined, requestedStyle: undefined, shown: true},
       settings
     );
+
     // Add 'hasTime' modifier if it doesn't already have a modifier
-    if (options.modifier === undefined && geonaLayer.dimensions) {
-      if (geonaLayer.dimensions.time) {
-        options.modifier = 'hasTime';
-      }
+    if (options.modifier === undefined && geonaLayer.dimensions && geonaLayer.dimensions.time) {
+      options.modifier = 'hasTime';
     }
 
     // Projection check
@@ -382,7 +394,7 @@ export class OlMap extends GeonaMap {
 
     let projection;
     let source;
-    let time; // Needs to be returned with sources
+    let time;
 
     // Select appropriate projection - at this stage of the method, only basemaps might have different projections.
     if (geonaLayer.projections.includes(this._map.getView().getProjection().getCode())) {
@@ -401,8 +413,8 @@ export class OlMap extends GeonaMap {
 
     let updateOptions = {options: {}};
 
-    // As the available layers have unique identifiers, a layer with the same identifier will just be updating options
-    if (this._activeLayers[geonaLayer.identifier] !== undefined) {
+    // As the active layers have unique identifiers, a layer with the same identifier will just be updating options
+    if (this.activeLayers[geonaLayer.identifier] !== undefined) {
       // Get a source with updated options
       updateOptions = this.getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection);
       source = updateOptions.source;
@@ -433,14 +445,30 @@ export class OlMap extends GeonaMap {
       }
 
       // Save the Layer with its modifier
-      geonaLayer.modifier = options.modifier;
-      this._availableLayers[geonaLayer.identifier] = geonaLayer;
+      if (options.modifier) {
+        geonaLayer.modifier = options.modifier;
+      }
+      if (geonaLayer.modifier === 'hasTime') {
+        geonaLayer.dimensions.time.loaded = time;
+      }
+      this.availableLayers[geonaLayer.identifier] = geonaLayer;
 
       // Save the LayerServer if not already saved
-      if (this._availableLayerServers[geonaLayerServer.identifier] === undefined) {
+      if (this.availableLayerServers[geonaLayerServer.identifier] === undefined) {
         let layerServerCopy = JSON.parse(JSON.stringify(geonaLayerServer));
         delete layerServerCopy.layers;
-        this._availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
+        this.availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
+      }
+      // Save to config
+      switch (geonaLayer.modifier) {
+        case 'basemap':
+          this.config.basemapLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.basemapLayers);
+          break;
+        case 'borders':
+          this.config.bordersLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.bordersLayers);
+          break;
+        default:
+          this.config.dataLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.dataLayers);
       }
     }
 
@@ -449,49 +477,58 @@ export class OlMap extends GeonaMap {
       viewSettings: geonaLayer.viewSettings,
       projections: geonaLayer.projections,
       source: source,
-      modifier: options.modifier,
+      modifier: geonaLayer.modifier,
       // The zIndex is set to the length here, rather than the length - 1 as with most 0-based indices.
       // This is to compensate for the fact that the layer has not been added to the map yet.
       zIndex: updateOptions.options.zIndex || this._map.getLayers().getArray().length,
-      layerTime: time,
       shown: updateOptions.options.shown || options.shown,
       timeHidden: updateOptions.options.timeHidden || false,
     });
 
 
     // Sets the map time if this is the first layer
-    if (this._mapTime === undefined && time !== undefined) {
-      this._mapTime = time;
+    if (this.config.mapTime === '' && time !== undefined) {
+      this.config.mapTime = time;
     }
 
     // Add the layer to the map
-    switch (options.modifier) {
+    switch (geonaLayer.modifier) {
       case 'basemap':
         this._clearBasemap();
         this._map.addLayer(layer);
-        this._activeLayers[geonaLayer.identifier] = layer;
+        this.activeLayers[geonaLayer.identifier] = layer;
         this.reorderLayers(geonaLayer.identifier, 0);
         this.config.basemap = geonaLayer.identifier;
         break;
+      // todo save the layer and server in the config
       case 'borders':
         this._clearBorders();
         this._map.addLayer(layer);
-        this._activeLayers[geonaLayer.identifier] = layer;
+        this.activeLayers[geonaLayer.identifier] = layer;
         this.config.borders.identifier = geonaLayer.identifier;
         this.config.borders.style = layer.getSource().getParams().STYLES;
         break;
+      // todo save the layer and server in the config
       default:
         this.removeLayer(layer.identifier);
         this._map.addLayer(layer);
-        this._activeLayers[geonaLayer.identifier] = layer;
-        if (this.config.borders.identifier !== 'none' && this._initialized === true) {
+        this.activeLayers[geonaLayer.identifier] = layer;
+        if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._map.getLayers().getArray().length - 2);
+        }
+        // If the data is specified in the config we don't need to add it again
+        if (!this.config.data.includes(geonaLayer.identifier)) {
           this.config.data.push(geonaLayer.identifier);
         }
+      // todo save the layer and server in the config
     }
 
     if (options.shown === false) {
       this.hideLayer(geonaLayer.identifier);
+    }
+    if (geonaLayer.modifier === 'hasTime' && geonaLayer.dimensions.time.loaded === undefined) {
+      layer.setVisible(false);
+      layer.set('timeHidden', true);
     }
 
     if (geonaLayer.viewSettings !== undefined) {
@@ -526,6 +563,7 @@ export class OlMap extends GeonaMap {
     let format;
     let style;
     let time;
+    let elevation;
 
     // FIXME fix parser so this doesn't happen
     if ($.isEmptyObject(geonaLayer.styles)) {
@@ -542,24 +580,49 @@ export class OlMap extends GeonaMap {
         format = geonaLayer.formats[0];
       }
     }
+
     // Select appropriate style
-    if (geonaLayer.styles !== undefined) {
-      // Default to the first style
-      style = geonaLayer.styles[0].identifier;
-      if (geonaLayer.styles[0].legendUrl !== undefined) {
-        format = geonaLayer.styles[0].legendUrl[0].format;
-      }
-      // Search for the requested style and set that as the style if found
-      // FIXME if the requested style is not available, throw an error and print out list of available styles
+    if (options.requestedStyle) {
+      let requestedStyleIsValid = false;
       for (let layerStyle of geonaLayer.styles) {
         if (layerStyle.identifier === options.requestedStyle) {
+          requestedStyleIsValid = true;
           style = options.requestedStyle;
-          if (layerStyle.legendUrl !== undefined) {
+          geonaLayer.currentStyle = style;
+          if (layerStyle.legendUrl) {
             format = layerStyle.legendUrl[0].format;
           }
         }
       }
+      if (!requestedStyleIsValid) {
+        throw new Error('Requested style ' + options.requestedStyle + ' does not appear in the list of styles for this layer. Please ensure the layer\'s styles array contains any requested style. Current style array: ' + JSON.stringify(geonaLayer.styles));
+      }
+    } else if (geonaLayer.styles) {
+      // If we aren't setting a requested style, we'll keep the same, or if that's not set yet, use a default.
+      style = geonaLayer.currentStyle || geonaLayer.defaultStyle || '';
     }
+
+    // Select appropriate elevation if needed
+    if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
+      if (options.elevation) {
+        let elevationIsValid = false;
+        for (let value of geonaLayer.dimensions.elevation.values) {
+          if (value === options.elevation) {
+            elevationIsValid = true;
+            elevation = options.elevation;
+            geonaLayer.currentElevation = elevation;
+          }
+        }
+        if (!elevationIsValid) {
+          throw new Error('Elevation of ' + options.elevation + ' does not appear in the list of elevation values for layer ' + geonaLayer.identifier + '. Please ensure the layer\'s elevation values array contains any requested elevation. Current elevation array: ' + geonaLayer.dimensions.elevation.values);
+        }
+      } else {
+        elevation = geonaLayer.dimensions.elevation.default;
+      }
+    } else if (options.elevation) {
+      throw new Error('Elevation of ' + options.elevation + ' was supplied for layer ' + geonaLayer.identifier + ' with no elevation dimensions.');
+    }
+
 
     if (geonaLayer.attribution) {
       if (geonaLayer.attribution.onlineResource) {
@@ -569,24 +632,42 @@ export class OlMap extends GeonaMap {
         attributions = geonaLayer.attribution.title;
       }
     }
-    // FIXME A not-very-good way of adding the Geona prefix to attributions in OpenLayers
-    // Not good because 'Geona' won't be displayed without any layers, if the layer it's attached to is
+    // TODO A not-very-good way of adding the Geona prefix to attributions in OpenLayers - not good
+    // because 'Geona' won't be displayed without any layers, if the layer it's attached to is
     // removed, and will be out of sequence if the layers are added in different orders
     if (this._map.getLayers().getArray().length === 0 || options.modifier === 'basemap') {
       attributions = 'Geona | ' + attributions;
     }
 
-    // Selects the requested time, the closest to the map time, or the default layer time.
-    if (options.requestedTime !== undefined) {
-      time = findNearestValidTime(geonaLayer.dimensions.time.values, options.requestedTime);
-    } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-      time = findNearestValidTime(geonaLayer.dimensions.time.values, this._mapTime);
-    } else if (options.modifier === 'hasTime') {
-      if (geonaLayer.dimensions) {
-        if (geonaLayer.dimensions.time) {
-          time = geonaLayer.dimensions.time.default;
-          geonaLayer.dimensions.time.values.sort();
+    if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
+      // We might need to generate datetimes for this layer (more information on wiki 'Layers and servers')
+      let timeValues = geonaLayer.dimensions.time.values.sort();
+      if (geonaLayer.dimensions.time.intervals) {
+        // We only want to generate the datetimes once
+        if (!this._activeLayerGeneratedTimes[geonaLayer.identifier]) {
+          let generatedDatetimes = generateDatetimesFromIntervals(geonaLayer);
+
+          if (timeValues !== undefined) {
+            timeValues = timeValues.concat(generatedDatetimes);
+          } else {
+            timeValues = generatedDatetimes;
+          }
+          timeValues.sort();
+          this._activeLayerGeneratedTimes[geonaLayer.identifier] = timeValues;
+        } else { // If they've been generated we just assign them
+          timeValues = this._activeLayerGeneratedTimes[geonaLayer.identifier];
         }
+      }
+
+      // Selects the requested time, the closest to the map time, or the default layer time.
+      if (options.requestedTime !== undefined) {
+        time = findNearestValidTime(timeValues, options.requestedTime);
+      } else if (options.modifier === 'hasTime' && geonaLayer.dimensions.time.loaded) {
+        time = findNearestValidTime(timeValues, geonaLayer.dimensions.time.loaded);
+      } else if (options.modifier === 'hasTime' && this.config.mapTime !== '') {
+        time = findNearestValidTime(timeValues, this.config.mapTime);
+      } else if (options.modifier === 'hasTime') {
+        time = geonaLayer.dimensions.time.default;
       }
     }
 
@@ -598,11 +679,12 @@ export class OlMap extends GeonaMap {
       params: {
         LAYERS: geonaLayer.identifier,
         FORMAT: format || geonaLayer.formats || 'image/png',
-        STYLES: style || geonaLayer.styles || '',
+        STYLES: style,
         time: time,
         wrapDateLine: true,
         NUMCOLORBANDS: 255,
         VERSION: geonaLayerServer.version,
+        elevation: elevation,
       },
     });
 
@@ -641,16 +723,18 @@ export class OlMap extends GeonaMap {
    */
   getUpdatedSourceAndOptions(geonaLayer, geonaLayerServer, options, projection) {
     // Copy options from current active layer
-    let currentLayer = this._activeLayers[geonaLayer.identifier];
+    let currentLayer = this.activeLayers[geonaLayer.identifier];
     let updatedOptions = {
-      modifier: currentLayer.get('modifier'),
-      time: currentLayer.get('layerTime'),
+      modifier: geonaLayer.modifier,
       style: currentLayer.getSource().getParams().STYLES,
       shown: currentLayer.get('shown'),
       zIndex: currentLayer.get('zIndex'),
       timeHidden: currentLayer.get('timeHidden'),
       opacity: currentLayer.get('opacity'),
     };
+    if (geonaLayer.modifier === 'hasTime') {
+      updatedOptions.time = geonaLayer.dimensions.time.loaded;
+    }
 
     // Update copy for newly-specified options
     if (options.modifier !== undefined) {
@@ -684,24 +768,25 @@ export class OlMap extends GeonaMap {
   }
 
   /**
-   * Remove the specified data layer from the map
-   * @param {String} layerIdentifier The id of the data layer being removed
+   * Remove the specified data layer from the map.
+   * @param {String}  layerIdentifier The id of the data layer being removed.
+   * @param {Boolean} [retainTimes]   If True, we will keep the generated times in memory for this layer.
    */
-  removeLayer(layerIdentifier) {
-    if (this._map.getLayers().getArray().includes(this._activeLayers[layerIdentifier])) {
-      this._map.removeLayer(this._activeLayers[layerIdentifier]);
-      if (this._activeLayers[layerIdentifier].get('modifier') === 'basemap') {
+  removeLayer(layerIdentifier, retainTimes = false) {
+    if (this._map.getLayers().getArray().includes(this.activeLayers[layerIdentifier])) {
+      this._map.removeLayer(this.activeLayers[layerIdentifier]);
+      if (this.activeLayers[layerIdentifier].get('modifier') === 'basemap') {
         this.config.basemap = 'none';
         // As we have removed the basemap, the zIndices should all be reduced by 1.
         for (let layer of this._map.getLayers().getArray()) {
           layer.set('zIndex', layer.get('zIndex') - 1);
         }
-      } else if (this._activeLayers[layerIdentifier].get('modifier') === 'borders') {
+      } else if (this.activeLayers[layerIdentifier].get('modifier') === 'borders') {
         this.config.borders.identifier = 'none';
         this.config.borders.style = 'none';
       } else {
         // We removed a data layer, so the layers above the removed layer should have their zIndex reduced by 1.
-        let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
+        let zIndex = this.activeLayers[layerIdentifier].get('zIndex');
         for (let layer of this._map.getLayers().getArray()) {
           if (layer.get('zIndex') > zIndex) {
             layer.set('zIndex', layer.get('zIndex') - 1);
@@ -722,9 +807,12 @@ export class OlMap extends GeonaMap {
         }
       }
       if (dataLayersCounter === 0) {
-        this._mapTime = undefined;
+        this.config.mapTime = '';
       }
-      delete this._activeLayers[layerIdentifier];
+      delete this.activeLayers[layerIdentifier];
+      if (!retainTimes) {
+        delete this._activeLayerGeneratedTimes[layerIdentifier];
+      }
     }
   }
 
@@ -733,11 +821,11 @@ export class OlMap extends GeonaMap {
    * @param {String} layerIdentifier The id of the data layer being made visible
    */
   showLayer(layerIdentifier) {
-    if (this._activeLayers[layerIdentifier] !== undefined) {
-      if (this._activeLayers[layerIdentifier].get('timeHidden') === false) {
-        this._activeLayers[layerIdentifier].setVisible(true);
+    if (this.activeLayers[layerIdentifier] !== undefined) {
+      if (this.activeLayers[layerIdentifier].get('timeHidden') === false) {
+        this.activeLayers[layerIdentifier].setVisible(true);
       }
-      this._activeLayers[layerIdentifier].set('shown', true);
+      this.activeLayers[layerIdentifier].set('shown', true);
     }
   }
 
@@ -746,9 +834,34 @@ export class OlMap extends GeonaMap {
    * @param {String} layerIdentifier The id of the data layer being made hidden
    */
   hideLayer(layerIdentifier) {
-    if (this._activeLayers[layerIdentifier] !== undefined) {
-      this._activeLayers[layerIdentifier].setVisible(false);
-      this._activeLayers[layerIdentifier].set('shown', false);
+    if (this.activeLayers[layerIdentifier] !== undefined) {
+      this.activeLayers[layerIdentifier].setVisible(false);
+      this.activeLayers[layerIdentifier].set('shown', false);
+    }
+  }
+
+  /**
+   * Sets the opacity of a layer on the map, making it invisible, translucent or opaque. Does not affect whether a layer
+   * is actually hidden or not.
+   * @param {String} layerIdentifier The identifier of the data layer being made hidden.
+   * @param {Number} opacity         The opacity, between 0 (invisible) and 1 (opaque).
+   */
+  setLayerOpacity(layerIdentifier, opacity) {
+    if (this.activeLayers[layerIdentifier] !== undefined) {
+      this.activeLayers[layerIdentifier].setOpacity(opacity);
+    }
+  }
+
+  /**
+   * Gets the opacity for the active layer with the specified identifier.
+   * @param  {String} layerIdentifier The identifier for the active OpenLayers layer we want to check.
+   * @return {Number}                 The opacity, between 0 and 1.
+   */
+  getLayerOpacity(layerIdentifier) {
+    if (this.activeLayers[layerIdentifier] !== undefined) {
+      return this.activeLayers[layerIdentifier].getOpacity();
+    } else {
+      throw new Error('There is no layer currently on the map with the identifier: ' + layerIdentifier);
     }
   }
 
@@ -769,19 +882,19 @@ export class OlMap extends GeonaMap {
    */
   reorderLayers(layerIdentifier, targetIndex) {
     let layer;
-    let layerModifier = this._activeLayers[layerIdentifier].get('modifier');
+    let layerModifier = this.activeLayers[layerIdentifier].get('modifier');
     let maxZIndex = this._map.getLayers().getArray().length - 1;
 
-    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this._initialized === true) {
+    if (this.config.basemap !== 'none' && targetIndex <= 0 && layerModifier !== 'basemap' && this.initialized === true) {
       // There is an active basemap, which must stay at index 0. 0 is the lowest sane index allowed.
       throw new Error('Attempt was made to move data layer below basemap. Basemaps must always be at position 0.');
-    } else if (this.config.basemap === 'none' && targetIndex < 0 && this._initialized === true) {
+    } else if (this.config.basemap === 'none' && targetIndex < 0 && this.initialized === true) {
       // There is no basemap, but the lowest allowed index is 0.
       throw new Error('Attempt was made to move layer below 0. The lowest layer must always be at position 0.');
-    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this._initialized === true) {
+    } else if (this.config.borders.identifier !== 'none' && targetIndex >= maxZIndex && layerModifier !== 'borders' && this.initialized === true) {
       // There is a borders layer, which must stay one position above the rest of the layers.
       throw new Error('Attempt was made to move data layer above borders. Borders must always be at the highest position.');
-    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this._initialized === true) {
+    } else if (this.config.borders.identifier === 'none' && targetIndex > maxZIndex && this.initialized === true) {
       // There is no borders layer, but the index is higher than the number of layers - 1.
       throw new Error('Attempt was made to move layer above the highest sane zIndex. The highest layer must always be one position above the rest.');
     } else {
@@ -824,64 +937,79 @@ export class OlMap extends GeonaMap {
    * @param {String} requestedTime   The target time in ISO 8601 format.
    */
   loadNearestValidTime(layerIdentifier, requestedTime) {
-    // TODO set the layertime to undefined if out of bounds
     // We use time values from the Geona layer object
-    let geonaLayer = this._availableLayers[layerIdentifier];
+    let geonaLayer = this.availableLayers[layerIdentifier];
+    let activeLayer = this.activeLayers[layerIdentifier];
     if (geonaLayer === undefined) {
       throw new Error('No Geona layer with this identifier has been loaded.');
-    } else if (this._activeLayers[layerIdentifier] === undefined) {
+    } else if (activeLayer === undefined) {
       throw new Error('No layer with this identifier is on the map.');
-    } else if (this._activeLayers[layerIdentifier].get('modifier') !== 'hasTime') {
-      let modifier = this._activeLayers[layerIdentifier].get('modifier');
+    } else if (activeLayer.get('modifier') !== 'hasTime') {
+      let modifier = activeLayer.get('modifier');
       throw new Error('Cannot change the time of a ' + modifier + ' layer.');
     } else {
       // We find the nearest, past valid time for this layer
-      let time = findNearestValidTime(geonaLayer.dimensions.time.values, requestedTime);
+      let time = findNearestValidTime(this.getActiveLayerDatetimes(layerIdentifier), requestedTime);
       if (time === undefined) {
         // If the requested time is invalid for the layer, we hide the layer
         // We don't use the hideLayer() method because we don't want to update the state of the 'shown' option
-        this._activeLayers[layerIdentifier].setVisible(false);
-        this._activeLayers[layerIdentifier].set('timeHidden', true);
+        activeLayer.setVisible(false);
+        activeLayer.set('timeHidden', true);
+        // We set the layer time to undefined because it's now off the map
+        geonaLayer.dimensions.time.loaded = undefined;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
-        this._mapTime = requestedTime;
+        this.config.mapTime = requestedTime;
         // TODO throw error?? But it might stop execution of whole loadLayersToNearestValidTime() method; use try/catch in that method?
         console.error('Time is outside the range of times for layer ' + layerIdentifier);
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to its current position when we re-add it
-        let zIndex = this._activeLayers[layerIdentifier].get('zIndex');
+        let zIndex = activeLayer.get('zIndex');
         // We define the layer options so that only the time changes
         let layerOptions = {
           modifier: 'hasTime',
-          requestedStyle: this._activeLayers[layerIdentifier].get('source').getParams().STYLES,
+          requestedStyle: activeLayer.get('source').getParams().STYLES,
           // We save the layer's 'shown' value so the layer's state of visibility is kept upon changing time
-          shown: this._activeLayers[layerIdentifier].get('shown'),
+          shown: activeLayer.get('shown'),
           requestedTime: time,
+          elevation: activeLayer.get('source').getParams().elevation,
         };
 
-        this.removeLayer(layerIdentifier);
-        let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+        this.removeLayer(layerIdentifier, true); // We use the optional true parameter so any generated times are kept
+        let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
         this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
         this.reorderLayers(layerIdentifier, zIndex);
-        this._activeLayers[layerIdentifier].set('timeHidden', false);
-
-        // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
-        this._mapTime = time;
+        activeLayer.set('timeHidden', false);
       }
 
-      // We now find the latest map time.
-      let mapTime = new Date(this._mapTime);
+      // We now find the latest map time
+      let loadedTimes = [];
+      console.log(requestedTime);
+      console.log(this.config.mapTime);
 
       // We compare the map data layers to find the latest time for the visible data layers
       for (let layer of this._map.getLayers().getArray()) {
         // We check for visibility so that the map time will be the requested time if all layers are hidden
-        if (layer.get('modifier') === 'hasTime' && layer.getVisible() === true) {
-          let layerTime = new Date(layer.get('layerTime'));
-          if (layerTime > mapTime) {
-            this._mapTime = layer.get('layerTime');
-            mapTime = new Date(layer.get('layerTime'));
+        // if (layer.get('modifier') === 'hasTime' && layer.getVisible() === true) {
+        if (layer.get('modifier') === 'hasTime') {
+          if (this.availableLayers[layer.get('identifier')].dimensions.time.loaded) {
+            loadedTimes.push(this.availableLayers[layer.get('identifier')].dimensions.time.loaded);
+            // let layerTime = new Date(geonaLayer.dimensions.time.loaded);
+            // if (!mapTime) {
+            //   mapTime = layerTime;
+            // }
+            // console.log('layerTime for ' + geonaLayer.identifier + ': ' + geonaLayer.dimensions.time.loaded);
+            // if (layerTime > mapTime) {
+            //   this.config.mapTime = geonaLayer.dimensions.time.loaded;
+            //   mapTime = new Date(geonaLayer.dimensions.time.loaded);
+            // }
           }
         }
       }
+      loadedTimes.sort();
+      console.log(loadedTimes);
+      this.config.mapTime = loadedTimes[loadedTimes.length - 1];
+      console.log('Map time at the end of loadNearestValidTime for layer ' + layerIdentifier);
+      console.log(this.config.mapTime);
     }
   }
 
@@ -891,10 +1019,10 @@ export class OlMap extends GeonaMap {
    */
   loadLayersToNearestValidTime(requestedTime) {
     // layersAtStart holds the identifiers for the layers before we start changing all their times.
-    let layersAtStart = Object.keys(this._activeLayers);
+    let layersAtStart = Object.keys(this.activeLayers);
 
     for (let layerIdentifier of layersAtStart) {
-      if (this._activeLayers[layerIdentifier].get('modifier') === 'hasTime') {
+      if (this.activeLayers[layerIdentifier].get('modifier') === 'hasTime') {
         this.loadNearestValidTime(layerIdentifier, requestedTime);
       }
     }
@@ -906,8 +1034,8 @@ export class OlMap extends GeonaMap {
    * @param {String} styleIdentifier The identifier for the desired style.
    */
   changeLayerStyle(layerIdentifier, styleIdentifier) {
-    let layer = this._activeLayers[layerIdentifier];
-    let geonaLayer = this._availableLayers[layerIdentifier];
+    let layer = this.activeLayers[layerIdentifier];
+    let geonaLayer = this.availableLayers[layerIdentifier];
 
     if (geonaLayer === undefined) {
       throw new Error('The layer ' + layerIdentifier + ' is not loaded into this Geona instance.');
@@ -921,19 +1049,22 @@ export class OlMap extends GeonaMap {
             validStyle = true;
           }
         }
-        if (validStyle === true) {
+        if (validStyle === true) { // todo this and layers like it can just update the geonaLayer options and then call updateSourceParams() (see how changeLayerElevation works)
           // Save the layer options for re-adding
           let layerOptions = {
-            modifier: layer.get('modifier'),
-            requestedTime: layer.get('layerTime'),
+            modifier: geonaLayer.modifier,
             shown: layer.get('shown'),
             requestedStyle: styleIdentifier,
+            elevation: layer.get('source').getParams().elevation,
           };
+          if (geonaLayer.dimensions && geonaLayer.dimensions.time) {
+            layerOptions.requestedTime = geonaLayer.dimensions.time.loaded;
+          }
           // Save the z-index so the layer remains in position
           let zIndex = layer.get('zIndex');
 
           this.removeLayer(layerIdentifier);
-          let geonaLayerServer = this._availableLayerServers[geonaLayer.layerServer];
+          let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
           this.addLayer(geonaLayer, geonaLayerServer, layerOptions);
           this.reorderLayers(layerIdentifier, zIndex);
         } else {
@@ -946,20 +1077,144 @@ export class OlMap extends GeonaMap {
   }
 
   /**
+ * Changes the elevation of the specified layer.
+ * @param {String} layerIdentifier The identifier for an active map layer.
+ * @param {Number} elevation       The desired elevation.
+ */
+  changeLayerElevation(layerIdentifier, elevation) {
+    let layer = this.activeLayers[layerIdentifier];
+    let geonaLayer = this.availableLayers[layerIdentifier];
+
+    if (geonaLayer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not loaded into this Geona instance.');
+    } else if (layer === undefined) {
+      throw new Error('The layer ' + layerIdentifier + ' is not active on the map.');
+    } else {
+      if (geonaLayer.dimensions && geonaLayer.dimensions.elevation) {
+        if (geonaLayer.dimensions.elevation.values.includes(elevation)) {
+          geonaLayer.currentElevation = elevation;
+          this.updateSourceParams(layerIdentifier, {elevation: elevation});
+        } else {
+          throw new Error('Specified elevation ' + elevation + ' is not valid for the layer ' + layerIdentifier + '.');
+        }
+      } else {
+        throw new Error('Elevation is not specified for the layer ' + layerIdentifier + '.');
+      }
+    }
+  }
+
+  /**
    * Translates a generic request for a layer key into an OpenLayers get() and returns the result.
    * Used for methods not specific to one map library (e.g. in the GUI).
-   * @param  {String|ol.layer.Tile} layerIdentifier The identifier for the map layer we want to check,
-   *                                                or the OpenLayers layer itself.
-   * @param  {String}               key             The key that we want to find the value of.
-   * @return {*}                                    The value for the requested key.
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of.
+   *
+   * @return {*}                      The value for the requested key.
    */
-  _layerGet(layerIdentifier, key) {
-    // Determine whether we've received a String or a Layer.Tile
-    if (typeof layerIdentifier === 'string') {
-      return this._activeLayers[layerIdentifier].get(key);
-    } else {
-      return layerIdentifier.get(key);
+  layerGet(layerIdentifier, key) {
+    return this.activeLayers[layerIdentifier].get(key);
+  }
+
+  /**
+   * Translates a generic request for a layer key into an OpenLayers getParams() and returns the result.
+   * Used for methods not specific to one map library (e.g. in the GUI).
+   * @param  {String} layerIdentifier The identifier for the map layer we want to check.
+   * @param  {String} key             The key that we want to find the value of ('style', 'format', 'numColorBands').
+   *
+   * @return {*}                      The value for the requested key.
+   */
+  layerSourceGet(layerIdentifier, key) {
+    let layerSource = this.activeLayers[layerIdentifier].getSource();
+    switch (key) {
+      case 'style':
+        return layerSource.getParams().STYLES;
+      case 'format':
+        return layerSource.getParams().FORMAT;
+      case 'numColorBands': // todo just remove this, duh
+        return layerSource.getParams().NUMCOLORBANDS;
+      default:
+        throw new Error('Key ' + key + ' is not a valid key - please use one of [\'style\', \'format\', \'numColorBands\']');
     }
+  }
+
+  /**
+   * Returns a single array containing all the datetimes for the specified layer, including normal values and values
+   * generated from intervals.
+   * @param  {String}   layerIdentifier The identifier for the layer whose datetimes we want to get.
+   * @return {String[]}                 An Array containing all of this layer's datetimes as Strings.
+   */
+  getActiveLayerDatetimes(layerIdentifier) {
+    // If there are only normal values return them
+    if (!this._activeLayerGeneratedTimes[layerIdentifier]) {
+      return this.availableLayers[layerIdentifier].dimensions.time.values;
+    } else {
+      // Return the merged and sorted array that was created when the layer was added.
+      return this._activeLayerGeneratedTimes[layerIdentifier];
+    }
+  }
+
+  /**
+   * Adjusts the height of the attribution bar so that it rests on top of the Timeline.
+   */
+  adjustAttributionHeight() {// todo this glitches offset up and down sometimes, but I don't know why
+    let attributionBar = this.geonaDiv.find('.ol-attribution');
+    let timePanelHeight = this.geonaDiv.find('.js-geona-time-panel').height();
+    // Change the height of the attribution bar
+    attributionBar.css('bottom', (timePanelHeight + 10) + 'px'); // +10 is the correct offset, but we don't know why
+  }
+
+  // TODO set numcolorbands method
+
+  /**
+   * Updates the source params for the specified layer.
+   * @param {String} layerIdentifier The identifier for the layer we want to update.
+   * @param {Object} newParams       The new params to use in the source.
+   */
+  updateSourceParams(layerIdentifier, newParams) {
+    let layerSource = this.activeLayers[layerIdentifier].getSource();
+    let params = layerSource.getParams();
+    for (let param of Object.keys(newParams)) {
+      switch (param) {
+        case 'style':
+          params.STYLES = newParams[param];
+          break;
+        case 'numColorBands':
+          params.numcolorbands = newParams[param];
+          break;
+        case 'logScale':
+          params.logscale = newParams[param];
+          break;
+        case 'colorScaleRange':
+          params.colorscalerange = newParams[param];
+          break;
+        case 'aboveMaxColor':
+          params.ABOVEMAXCOLOR = newParams[param];
+          break;
+        case 'belowMinColor':
+          params.BELOWMINCOLOR = newParams[param];
+          break;
+        case 'elevation':
+          params.ELEVATION = newParams[param];
+          break;
+        default:
+          throw new Error('Updating param ' + param + ' is not supported currently.');
+      }
+    }
+    layerSource.updateParams(params);
+  }
+
+  /**
+   * Gets the current state of the map and saves it to the config.
+   */
+  updateConfig() {
+    let currentCenter = this._map.getView().getCenter();
+    let projection = this._map.getView().getProjection().getCode();
+    let center = ol.proj.toLonLat(currentCenter, projection);
+    this.config.viewSettings.center = {
+      lon: center[0],
+      lat: center[1],
+    };
+    this.config.viewSettings.zoom = this._map.getView().getZoom();
   }
 }
 
@@ -1223,7 +1478,8 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     // }
 
     matrixIds.push(matrix.identifier);
-    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit; // Magic
+    // We don't understand the value of 0.28E-3 below. It was taken from https://github.com/openlayers/openlayers/blob/v4.3.2/src/ol/tilegrid/wmts.js#L122
+    let resolution = matrix.scaleDenominator * 0.28E-3 / metersPerUnit;
     let tileWidth = matrix.tileWidth;
     let tileHeight = matrix.tileHeight;
 
@@ -1254,4 +1510,46 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     tileSizes: tileSizes,
     sizes: sizes,
   });
+}
+
+/**
+   * Saves a layer to the config, including the server if not already saved in the config.
+   * @param  {Layer}         geonaLayer       The layer we want to save in the config.
+   * @param  {LayerServer}   geonaLayerServer The layer server for the layer we want to save in the config.
+   * @param  {LayerServer[]} configLayersList The basemapLayers, bordersLayers or dataLayers array from the config.
+   * @return {LayerServer[]}                  The configLayersList with the layer added.
+   */
+function saveLayerToConfig(geonaLayer, geonaLayerServer, configLayersList) {
+  // Check if we need to save the layer server
+  let configLayerServer;
+  for (let i = 0; i < configLayersList.length; i++) {
+    let layerServer = configLayersList[i];
+    if (layerServer.identifier === geonaLayerServer.identifier) {
+      configLayerServer = layerServer;
+    }
+  }
+  // If the layer server has not been saved in the config previously, add it
+  if (!configLayerServer) {
+    configLayersList.push(geonaLayerServer);
+    configLayerServer = configLayersList[configLayersList.length - 1];
+  }
+
+  // The layer server might have a list of layers already. We'll save these too if it does
+  if (!configLayerServer.layers) {
+    configLayerServer.layers = [];
+  }
+  let layerExists = false;
+  // Check if the server's list of layers contains this layer (i.e. was added when the layerServer was saved to config)
+  for (let layer of configLayerServer.layers) {
+    if (layer.identifier === geonaLayer.identifier) {
+      layerExists = true;
+    }
+  }
+  // If the layer hasn't been added, put it in the config
+  if (!layerExists) {
+    configLayerServer.layers.push(geonaLayer);
+  }
+
+  // Return the updated config layers list
+  return configLayersList;
 }

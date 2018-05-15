@@ -1,7 +1,7 @@
 {
   "toggle": {
-    "open": "Afficher<br>Menu",
-    "close": "Cachez<br>Menu"
+    "open": "Afficher Menu",
+    "close": "Cachez Menu"
   },
   "help": {
     "termsConditions": "FR Afficher les termes et conditions"
@@ -9,5 +9,91 @@
   "time-panel": {
     "heading": "FRTimeline",
     "description": "FR - Click and drag to move, use your mouse scroll wheel to zoom, click to select a date or enter your required date in the date field on the right"
+  },
+  "layers-panel": {
+    "scalebar": {
+      "units": "FR Scale",
+      "alt-text": {
+        "intro": "FR Scalebar representing data for layer",
+        "between": "FR between the values of",
+        "minimum": "FR minimum and",
+        "maximum": "FR maximum, in units of"
+      }
+    },
+    "settings": {
+      "scale-minimum": "minimum",
+      "scale-maximum": "maximum",
+      "scale-logarithmic": "logarithmique",
+      "scale-auto-scale": "échelle automatique",
+      "scale-reset": "réinitialiser",
+      "opacity": "Opacité de calque",
+      "elevation": "FR Elevation",
+      "style": "Style de calque",
+      "below-minimum": "En dessous de la couleur minimale",
+      "above-maximum": "Au-dessus de la couleur maximale",
+      "default": "FRDefault",
+      "black": "FRBlack",
+      "white": "FRWhite",
+      "transparent": "FRTransparent",
+      "custom": "FRCustom",
+      "color-picker": "FRSelect a colour with the colour picker",
+      "color-input": "FROr enter colour in hexadecimal format",
+      "rrggbb": "FRrrggbb",
+      "color-bands": "Bandes de couleur",
+      "apply-changes": "Appliquer les modifications",
+      "zoom-data": "Zoomer sur les données"
+    },
+    "info": {
+      "indicators": "Indicateurs",
+      "bounding-box": "Boîte de délimitation",
+      "north-abbr": "N",
+      "east-abbr": "E",
+      "south-abbr": "S",
+      "west-abbr": "O",
+      "date-range": "Plage de dates",
+      "date - date": "à",
+      "abstract": "Abstrait",
+      "contact": "Contact",
+      "phone": "Téléphone",
+      "email": "Email"
+    },
+    "analysis": {
+      "not-wms": "FR Analysis is currently only supported for WMS layers.",
+      "no-wcs": "FR There is currently no record of the WCS (Web Coverage Service) URL for this layer, please specify this below as we need this to create a plot",
+      "wcs-url": "FR WCS URL",
+      "submit-url": "FR Submit WCS URL",
+      "analysis-title": "Analyse",
+      "analysis-description": "Pour affiner les données avant l'analyse, vous pouvez",
+      "draw-title": "Dessiner",
+      "draw-description": "Dessiner une boîte de sélection sur la carte",
+      "draw-polygon": "Dessiner un polygone",
+      "draw-irregular-polygon": "Dessiner un polygone irrégulier",
+      "draw-coordinates": "Ou entrez les coordonnées",
+      "draw-coordinates-placeholder": "Gauche, Bas, Droite, Haut",
+      "draw-save": "Sauvegarder",
+      "upload-title": "Télécharger",
+      "upload-shape": "Télécharger un fichier de forme (nécessite les trois fichiers .shp, .shx et .dbf)",
+      "upload-or": "ou",
+      "upload-csv": "Télécharger un fichier CSV contenant des données ponctuelles, y compris des données de rapprochement à des fins de comparaison",
+      "upload-files": "Télécharger des fichiers",
+      "upload-drag-drop": "Alternativement, vous pouvez faire glisser et déposer des fichiers directement sur la carte!",
+      "select-title": "Sélectionner",
+      "select-description": "Utilisez cette liste déroulante pour sélectionner un polygone existant",
+      "select-placeholder": "Vous n'avez pas encore de fichiers, veuillez en ajouter",
+      "select-download": "Télécharger",
+      "select-new-plot": "Faire un nouveau complot",
+      "select-clear": "Effacer la sélection",
+      "elevation": "FR Choose a layer elevation"
+    }
+  },
+  "options-panel": {
+    "header": "FR Map Options",
+    "basemap": "FR Select basemap",
+    "none": "FR None",
+    "borders": "FR Select borders",
+    "graticule": "FR Display graticule",
+    "projection": "FR Select projection",
+    "epsg4326": "EPSG:4326",
+    "epsg3857": "EPSG:3857"
   }
 }

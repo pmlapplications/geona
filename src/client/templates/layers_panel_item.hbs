@@ -1,43 +1,207 @@
-<li class="js-geona-layers-list__item geona-layers-list__item" data-identifier="{{data.identifier}}">
-  <div class="geona-layers-list__item-header">
-    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-visibility icon-preview-1"></span>
-    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-information icon-information"></span>
-    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-remove geona-layers-list__item-remove icon-bin-2"></span>
+<li class="js-geona-layers-list__item geona-layers-list__item" data-identifier="{{data.info.identifier}}">
+  <div class="js-geona-layers-list__item-header geona-layers-list__item-header">
+    {{data.info.title}}
+    <br>
+    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-visibility-showing icon-preview-1"></span>
+    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-visibility-hiding icon-hide removed"></span>
+    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-settings icon-setting-adjustment"></span>
+    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-info icon-information"></span>
+    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-analysis icon-business-chart-2"></span>
+    <span class="geona-layers-list__item-header-icon js-geona-layers-list__item-header-icon-remove geona-layers-list__item-remove icon-bin-2"></span>
   </div>
-  <table>
-    <tr class="geona-layers-list__item-row">
-      <td>Title</td>
-      <td class="geona-layers-list__item-data">{{data.title}}</td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Indicators</td>
-      <td class="geona-layers-list__item-data">{{data.indicator}}</td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Bounding box</td>
-      <td class="geona-layers-list__item-data">
-        {{data.boundingBox.north}} N, {{data.boundingBox.east}} E, {{data.boundingBox.south}} S, {{data.boundingBox.west}} W,
-      </td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Date range</td>
-      <td class="geona-layers-list__item-data">{{data.dateRange.start}} to {{data.dateRange.end}}</td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Abstract</td>
-      <td class="geona-layers-list__item-data">{{data.abstract}}</td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Contact</td>
-      <td class="geona-layers-list__item-data">{{data.contact}}</td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Telephone</td>
-      <td class="geona-layers-list__item-data">{{data.phone}}</td>
-    </tr>
-    <tr class="geona-layers-list__item-row">
-      <td>Email</td>
-      <td class="geona-layers-list__item-data">{{data.email}}</td>
-    </tr>
-  </table>
+  <div class="js-geona-layers-list__item-scalebar"></div>
+  <div class="js-geona-layers-list__item-body">
+    <div class="js-geona-layers-list__item-body-settings">
+      <div>
+        <h4>{{t 'menu:layers-panel.settings.scale-minimum'}}:</h4>
+        <input type="text" class="js-geona-layers-list__item-body-settings__scale-min" value= {{data.settings.min}}>
+      </div>
+      <div>
+        <h4>{{t 'menu:layers-panel.settings.scale-maximum'}}:</h4>
+        <input type="text" class="js-geona-layers-list__item-body-settings__scale-max" value= {{data.settings.max}}>
+      </div>
+      <br>
+      <input type="checkbox" class="js-geona-layers-list__item-body-settings__scale-logarithmic">{{t 'menu:layers-panel.settings.scale-logarithmic'}}
+      <input type="checkbox" class="js-geona-layers-list__item-body-settings__scale-auto-scale">{{t 'menu:layers-panel.settings.scale-auto-scale'}}
+      <a class="js-geona-layers-list__item-body-settings__scale-reset">{{t 'menu:layers-panel.settings.scale-reset'}}</a>
+      <br>
+      <span class="js-geona-layers-list__item-body-settings-opacity-heading">{{t 'menu:layers-panel.settings.opacity'}} - {{data.settings.opacityPercent}}%</span>
+      <br>
+      <input class="js-geona-layers-list__item-body-settings-opacity-range" type="range" min="0" max="1" step="0.01" value="{{data.settings.opacityReal}}">
+      {{#if data.common.elevation}}
+        <br> {{t 'menu:layers-panel.settings.elevation'}}
+        <br>
+        <select class="js-geona-layers-list__item-body-settings-elevation-select">
+          {{#each data.common.elevation.values}}
+            <option value= {{this}}>{{this}} {{../data.common.elevation.units}}</option>
+          {{/each}}
+        </select>
+      {{/if}}
+      <br> {{t 'menu:layers-panel.settings.style'}}
+      <br>
+      <select class="js-geona-layers-list__item-body-settings-styles-select">
+        {{#each data.settings.styles}}
+          <option value= {{this}}>{{this}}</option>
+        {{/each}}
+      </select>
+      <br>
+      <div>
+        <h4>{{t 'menu:layers-panel.settings.below-minimum'}}</h4>
+        <select class="js-geona-layers-list__item-body-settings__below-min-color">
+          <option value="Default">{{t 'menu:layers-panel.settings.default'}}</option>
+          <option value="0x000000">{{t 'menu:layers-panel.settings.black'}}</option>
+          <option value="0xffffff">{{t 'menu:layers-panel.settings.white'}}</option>
+          <option value="transparent">{{t 'menu:layers-panel.settings.transparent'}}</option>
+          <option>{{t 'menu:layers-panel.settings.custom'}}</option>
+        </select>
+        <div class="js-geona-layers-list__item-body-settings__below-min-color-input removed">
+          {{t 'menu:layers-panel.settings.color-picker'}}
+          <input class="js-geona-layers-list__item-body-settings__below-min-color-input__picker" type="color" value= {{data.settings.belowMinColor}}>
+          <br> {{t 'menu:layers-panel.settings.color-input'}}
+          <input class="js-geona-layers-list__item-body-settings__below-min-color-input__text" type="text" placeholder= {{t 'menu:layers-panel.settings.rrggbb'}}>
+        </div>
+      </div>
+      <div>
+        <h4>{{t 'menu:layers-panel.settings.above-maximum'}}</h4>
+        <select class="js-geona-layers-list__item-body-settings__above-max-color">
+          <option value="Default">{{t 'menu:layers-panel.settings.default'}}</option>
+          <option value="0x000000">{{t 'menu:layers-panel.settings.black'}}</option>
+          <option value="0xffffff">{{t 'menu:layers-panel.settings.white'}}</option>
+          <option value="transparent">{{t 'menu:layers-panel.settings.transparent'}}</option>
+          <option>{{t 'menu:layers-panel.settings.custom'}}</option>
+        </select>
+        <div class="js-geona-layers-list__item-body-settings__above-max-color-input removed">
+          {{t 'menu:layers-panel.settings.color-picker'}}
+          <input class="js-geona-layers-list__item-body-settings__above-max-color-input__picker" type="color" value= {{data.settings.aboveMaxColor}}>
+          <br> {{t 'menu:layers-panel.settings.color-input'}}
+          <input class="js-geona-layers-list__item-body-settings__above-max-color-input__text" type="text" placeholder= {{t 'menu:layers-panel.settings.rrggbb'}}>
+        </div>
+      </div>
+      <br> {{t 'menu:layers-panel.settings.color-bands'}}:
+      <input class="js-geona-layers-list__item-body-settings__color-bands-text" type="number" min="1" max="255" value= {{data.settings.numColorBands}}>
+      <br>
+      <input class="js-geona-layers-list__item-body-settings__color-bands-slider" type="range" min="1" max="255" step="1" value= {{data.settings.numColorBands}}>
+      <br>
+      <button class="js-geona-layers-list__item-body-settings__apply-changes geona-layers-list__item-body-settings__apply-changes removed">
+        {{t 'menu:layers-panel.settings.apply-changes'}}
+        <span class="js-geona-layers-list__item-body-settings__apply-changes__time-indicator geona-layers-list__item-body-settings__apply-changes__time-indicator"></span>
+      </button>
+      <br> {{t 'menu:layers-panel.settings.zoom-data'}}
+    </div>
+
+    <table class="js-geona-layers-list__item-body-info">
+      {{#if data.info.indicator}}
+        <tr class="geona-layers-list__item-body-info-row">
+          <td>{{t 'menu:layers-panel.info.indicators'}}</td>
+          <td class="geona-layers-list__item-body-info-data">{{data.info.indicator}}</td>
+        </tr>
+      {{/if}}
+
+      {{#if data.info.boundingBox}}
+        <tr class="geona-layers-list__item-body-info-row">
+          <td>{{t 'menu:layers-panel.info.bounding-box'}}</td>
+          <td class="geona-layers-list__item-body-info-data">
+            {{data.info.boundingBox.north}} {{t 'menu:layers-panel.info.north-abbr'}}, {{data.info.boundingBox.east}} {{t 'menu:layers-panel.info.east-abbr'}},
+            {{data.info.boundingBox.south}} {{t 'menu:layers-panel.info.south-abbr'}}, {{data.info.boundingBox.west}} {{t 'menu:layers-panel.info.west-abbr'}},
+          </td>
+        </tr>
+      {{/if}}
+
+      {{#if data.info.dateRange}}
+        <tr class="geona-layers-list__item-body-info-row">
+          <td>{{t 'menu:layers-panel.info.date-range'}}</td>
+          <td class="geona-layers-list__item-body-info-data">{{data.info.dateRange}}</td>
+        </tr>
+      {{/if}}
+
+      {{#if data.info.abstract}}
+        <tr class="geona-layers-list__item-body-info-row">
+          <td>{{t 'menu:layers-panel.info.abstract'}}</td>
+          <td class="geona-layers-list__item-body-info-data">{{data.info.abstract}}</td>
+        </tr>
+      {{/if}}
+
+      {{#if data.info.contactInformation}}
+        {{#if data.info.contactInformation.person}}
+          <tr class="geona-layers-list__item-body-info-row">
+            <td>{{t 'menu:layers-panel.info.contact'}}</td>
+            <td class="geona-layers-list__item-body-info-data">{{data.info.contactInformation.person}}</td>
+          </tr>
+        {{/if}}
+
+        {{#if data.info.contactInformation.phone}}
+          <tr class="geona-layers-list__item-body-info-row">
+            <td>{{t 'menu:layers-panel.info.phone'}}</td>
+            <td class="geona-layers-list__item-body-info-data">{{data.info.contactInformation.phone}}</td>
+          </tr>
+        {{/if}}
+
+        {{#if data.info.contactInformation.email}}
+          <tr class="geona-layers-list__item-body-info-row">
+            <td>{{t 'menu:layers-panel.info.email'}}</td>
+            <td class="geona-layers-list__item-body-info-data">{{data.info.contactInformation.email}}</td>
+          </tr>
+        {{/if}}
+      {{/if}}
+    </table>
+
+    <div class="js-geona-layers-list__item-body-analysis">
+      <div class="js-geona-layers-list__item-body-analysis__not-wms removed">
+        {{t 'menu:layers-panel.analysis.not-wms'}}
+      </div>
+      <div class="js-geona-layers-list__item-body-analysis__no-wcs-url removed">
+        {{t 'menu:layers-panel.analysis.no-wcs'}}:
+        <br>
+        <input class="js-geona-layers-list__item-body-analysis__no-wcs-url__wcs-url" type="text" placeholder= {{t 'menu:layers-panel.analysis.wcs-url'}}>
+        <button class="js-geona-layers-list__item-body-analysis__no-wcs-url__submit-url">{{t 'menu:layers-panel.analysis.submit-url'}}</button>
+      </div>
+      <div class="js-geona-layers-list__item-body-analysis__controls removed">
+        <h4>{{t 'menu:layers-panel.analysis.analysis-title'}}</h4>
+        {{t 'menu:layers-panel.analysis.analysis-description'}}:
+        <h4>{{t 'menu:layers-panel.analysis.draw-title'}}</h4>
+        {{t 'menu:layers-panel.analysis.draw-description'}}
+        <br>
+        <button>
+          <span class="icon-anchor-point-1"></span>{{t 'menu:layers-panel.analysis.draw-polygon'}}</button>
+        <button>
+          <span class="icon-network-1-1"></span>{{t 'menu:layers-panel.analysis.draw-irregular-polygon'}}</button>
+        <br>{{t 'menu:layers-panel.analysis.draw-coordinates'}}
+        <br>
+        <input type="text" placeholder="{{t 'menu:layers-panel.analysis.draw-coordinates-placeholder'}}"></input>
+        <button>{{t 'menu:layers-panel.analysis.draw-save'}}</button>
+        <h4>{{t 'menu:layers-panel.analysis.upload-title'}}</h4>
+        {{t 'menu:layers-panel.analysis.upload-shape'}}
+        <br>{{t 'menu:layers-panel.analysis.upload-or'}}
+        <br>{{t 'menu:layers-panel.analysis.upload-csv'}}
+        <br>
+        <button>
+          <span class="icon-file-upload"></span>{{t 'menu:layers-panel.analysis.upload-files'}}</button>
+        <br>{{t 'menu:layers-panel.analysis.upload-drag-drop'}} (GPX, GeoJSON, IGC, KML, TopoJSON)
+        <h4>{{t 'menu:layers-panel.analysis.select-title'}}</h4>
+        {{t 'menu:layers-panel.analysis.select-description'}}:
+        <select>
+          <option value="default" selected disabled>{{t 'menu:layers-panel.analysis.select-placeholder'}}.</option>
+        </select>
+        <br>
+        <br>
+        <button>
+          <span class="icon-cloud-download"></span>{{t 'menu:layers-panel.analysis.select-download'}} netCDF</button>
+        <button>{{t 'menu:layers-panel.analysis.select-new-plot'}}</button>
+        <br>
+        <button>
+          <span class="icon-eraser"></span>
+          {{t 'menu:layers-panel.analysis.select-clear'}}
+        </button>
+        <br> {{t 'menu:layers-panel.analysis.elevation'}}
+        <br>
+        {{#if data.common.elevation}}
+          <select>
+            {{#each data.common.elevation.values}}
+              <option value= {{this}}>{{this}} {{../data.common.elevation.units}}</option>
+            {{/each}}
+          </select>
+        {{/if}}
+      </div>
+    </div>
+  </div>
 </li>

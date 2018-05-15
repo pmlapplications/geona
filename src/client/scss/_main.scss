@@ -75,12 +75,21 @@
 
 .geona-menu-toggle__icon{
   font-size: 18px;
-  display: inline-block;
   padding-top: 9px;
+  width: 18px;
+  display: inline-block;
+
+  &:before{
+    width: 18px;
+  }
 }
 
 .geona-menu-toggle__text{
   font-size: 11px;
+  word-wrap: break-word;
+  width: 37px;
+  text-align: right;
+  overflow: auto;
   float: right;
   padding-top: 3px;
 }
@@ -161,6 +170,12 @@
   border: 1px solid #000;
   margin: 1px;
   font-size: 11px;
+  overflow-wrap: break-word;
+}
+
+.geona-layers-list__item-header{
+  background-color: $panel-content-header;
+  color: #fff;
 }
 
 .geona-layers-list__item-header-icon{
@@ -172,12 +187,111 @@
     float: right;
   }
 }
+
+.geona-layers-list__item-scalebar-img {
+  max-width: 100%;
+  height: 100%;
+}
+
+.geona-layers-list__item-scalebar-labels {
+  // position: relative;
+  display: flex;
+}
+
+.geona-layers-list__item-scalebar-labels__label { // fixme - not at 0, 25, 50, 75, 100
+  flex: 5;
+  text-align: center;
+
+  &.min {
+    text-align: left;
+  }
+
+  &.max {
+    text-align: right;
+  }
+}
+
+.geona-layers-list__item-scalebar-labels__label::before { //fixme
+  content: ' ';
+    width: 1px;
+    height: 7px;
+    background-color: #000;
+    position: relative;
+    bottom: 100%;
+    left: 50%;
+
+    &.min {
+      left: 0%;
+      background-color: red;
+    }
+
+    &.max {
+      left: 100%;
+      background-color: green;
+    }
+}
+
+/**
+&:before {
+    content: ' ';
+    width: 1px;
+    height: 7px;
+    background-color: #000;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+  }
+
+&:before{
+      // position: absolute;
+      left: 0;
+      background-color: red;
+    }
+
+    &:before{
+      left: 100%;
+    }
+ */
+
+.geona-layers-list__item-body-settings__apply-changes{
+  position: relative;
+  background-color: $button-background;
+  z-index: 1;
+
+  &.animating{
+    background-color: transparentize($button-background, 0.6)
+  }
+
+}
+
+.geona-layers-list__item-body-settings__apply-changes__time-indicator{
+  position: absolute;
+  background-color: $button-background;
+  bottom: 0;
+  left: 0;
+  right: 100%;
+  top: 0;
+  z-index: -1;
+
+  &.animating {
+    animation-name: applyChanges;
+    animation-timing-function: linear;
+    // animation-duration is set to match the CHANGES_BUFFER_TIME in the main_menu JavaScript
+  }
+}
+
+@keyframes applyChanges {
+  from {right: 100%;}
+  to   {right: 0;}
+}
+
+
 // TODO not working
-.geona-layers-list__item-row{
+.geona-layers-list__item-body-info-row{
   border-bottom: 1px solid #000000;
 }
 // TODO not working
-.geona-layers-list__item-data{
+.geona-layers-list__item-body-info-data{
   overflow-wrap: break-word;
   table-layout: fixed;
 }
@@ -190,6 +304,7 @@
   bottom: 0;
   position: absolute;
   width: 100%;
+  pointer-events: none; // TODO not a big fan of this, is there a better way?
 }
 
 .geona-time-panel-toggle{
@@ -197,6 +312,7 @@
   height: auto;
   background-color: #fff;
   text-align: center;
+  pointer-events: all;
 }
 
 .geona-time-panel{
@@ -204,6 +320,7 @@
   height: auto;
   background-color: #fff;
   padding: 5px;
+  pointer-events: all;
 }
 
 .geona-time-panel__heading{
@@ -224,6 +341,7 @@
 .geona-time-panel-timeline {
   width: auto;
   display: inline-block;
+  overflow: hidden;
 }
 
 .geona-time-panel-options-prev-next span{
@@ -278,6 +396,10 @@
 
 .geona-timeline-y-axis-background {
   fill: #ffffff;
+}
+
+.geona-timeline-x-axis {
+  shape-rendering: crispEdges;
 }
 
 .geona-timeline-x-axis .tick:hover text {

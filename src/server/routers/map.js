@@ -8,4 +8,4 @@ const router = express.Router();
 export default router;
 
 router.get('/getCache/:url', map.getCache);
-router.get('/getLayerServer/:url/:service/:save/:useCache', map.getServersideLayerServer);
+router.get('/getLayerServer/:geonaServer/:url/:service/:save/:useCache', map.getServersideLayerServer);

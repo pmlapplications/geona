@@ -1,53 +1,69 @@
-import $ from 'jquery';
+/** @module timeline */
+
+import 'jquery';
 import * as d3 from 'd3';
 import tippy from 'tippy.js';
 
 import {selectPropertyLanguage, findNearestValidTime} from '../map_common';
 
-// import {registerTriggers} from './timeline_triggers';
-import {registerBindings} from './timeline_bindings';
+import {registerBindings} from './timeline_bindings'; // Triggers are set within this Class' methods
 
 /**
  * An SVG timeline, built using D3 version 4.
  * Used to select times for layers on the map.
+ *
+ * The Timeline can be controlled in a variety of ways:
+ * - Clicking on a bar will move the selector to that position, and load the closest previous time.
+ * - Clicking on an x-axis label will move the selector to the label date and load the closest previous time.
+ * - The method moveSelectorToDate() can be called programmatically to change the location of the selector tool.
+ *     Note that this does not actually affect the map layers, which are controlled with their map library methods.
+ * - The method setView() can be called programmatically to set the pan and zoom.
+ * - The timeline can be scrolled on in order to adjust the zoom level.
+ * - The timeline can be dragged in order to pan forwards and backwards along the x-axis.
+ *
+ * There are also controls in the TimePanel:
+ * - Buttons to move a set number of intervals forwards and backwards in time.
+ * - A Pikaday date picker to jump to a specific datetime.
+ * - Keydown listeners to trigger the command to move a set number of intervals forwards and backwards in time.
  */
 export class Timeline {
-  // TODO redraw on window resize
-  // TODO write full list of controls - scroll, drag, click, tickClick, programmatic, keydown (and mention that the buttons and pikaday are in timepanel)
-  // TODO on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip (not in current portal)
-  // TODO x-axis line needs to be crispEdges (see firefox)
-  // TODO should layers reorder if layers are reordered on GUI?
-  // TODO timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
-  // TODO classes do not have 'js' at the beginning
-  // TODO if time is changed to a time not in view, the view should move along so the selector stays visible
+  // TODO redraw on window resize is bugged (see Geona issue 97)
+  // https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/97
+
+  // New feature suggestion - on hover, tooltip of time which will be loaded? e.g. get the nearestPreviousTime and show in a tooltip
+  // New feature suggestion - should layers reorder if layers are reordered on GUI?
+  // New feature suggestion - timeline rects that draw from the selector tool back to the time marker for the current time on each layer to show which time is currently shown
+  // New feature suggestion - active layer can be selected, so controls consider only that layer (GUI should update to show which layer is the current layer)
+  // New feature suggestion - extended keyboard shortcuts (select time period, select active layer)
   /**
    * Initialise the Timeline's class variables and some SVG elements, such as the axes, without displaying any data.
    *
    * @param {TimePanel} timePanel An instance of a TimePanel which the Timeline will be displayed within.
    * @param {Object}    settings  A collection of settings which affect the Timeline.
-   *   @param {String}  settings.elementId         The id of the element into which the Timeline will be inserted.
-   *   @param {Object}  [settings.timelineMargins] The margins in px (top, left, right, bottom) around the timeline.
-   *   @param {Boolean} [settings.animateSelector] If true, the selector will animate between positions on the timeline.
-   *   @param {Object}  [settings.initialPaddingPercentage] The % to pad each side of the first layer bar.
+   *   @param {String}  settings.elementId           The id of the element into which the Timeline will be inserted.
+   *   @param {Object}  [settings.timelineMargins]   The margins in px (top, left, right, bottom) around the timeline.
+   *   @param {Boolean} [settings.animateSelector]   If True, the selector tool will animate between positions.
+   *   @param {Object}  [settings.paddingPercentage] The % to pad when setting the view or showing the first layer.
    */
   constructor(timePanel, settings) {
     this.timePanel = timePanel;
-    this.parentDiv = timePanel.parentDiv;
+    this.geonaDiv = timePanel.geonaDiv;
     this.geona = timePanel.geona;
     this.eventManager = timePanel.geona.eventManager;
 
     // Default options will be merged with the settings parameter
     let defaultOptions = {
       animateSelector: true,
+      paddingPercentage: {
+        left: 10,
+        right: 10,
+      },
+      keydownListenerEnabled: true,
       timelineMargins: {
         top: 5,
         left: 0,
         right: 200,
         bottom: 0,
-      },
-      initialPaddingPercentage: {
-        left: 10,
-        right: 10,
       },
     };
     /** @type {Object} @desc Default options with custom settings if defined */
@@ -73,6 +89,12 @@ export class Timeline {
     this.SELECTOR_TOOL_RY = 6;
     /** @type {Number} @desc CONST - The correction on the x-axis needed to center the selector tool */
     this.SELECTOR_TOOL_CORRECTION = this.SELECTOR_TOOL_WIDTH / 2;
+    /** @type {Number} @desc CONST - The amount of pixels off the edge of the timeline before markers are not drawn */
+    this.TIME_MARKER_DRAW_MARGIN = 5;
+    /** @type {Number} @desc CONST - The time (ms) to add to each side if the first timeline layer has a single time */
+    this.SINGLE_TIME_EXTENT_MARGIN = 15638400000; // 6 months in ms
+    /** @type {Number} @desc CONST - The time (ms) that a transition should take (e.g. selector tool moving) */
+    this.TRANSITION_DURATION = 500;
 
     /** @type {Array} @desc The currently active layer definitions shown on the timeline */
     this.timelineCurrentLayers = [];
@@ -99,7 +121,7 @@ export class Timeline {
         new Date('2010-01-01'),
         new Date('2011-01-01'),
       ]);
-    this.xScale2 = d3.scaleTime() // TODO is there any alternative to this? Maybe create a new one in zoom, with the properties taken from this one (using getters etc.)?
+    this.xScale2 = d3.scaleTime()
       .range([this.Y_AXIS_LABEL_WIDTH, this.fullWidth])
       .domain([
         new Date('2010-01-01'),
@@ -112,8 +134,8 @@ export class Timeline {
       .tickFormat(getDateFormat);
 
 
-    /** @type {d3.scaleBand} @desc The scale to use for the y-axis - translates px to layer title */
-    this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added
+    /** @type {d3.scaleBand} @desc The scale to use for the y-axis - translates px to layer title/display name */
+    this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added and removed
       .range([0, this.dataHeight])
       .paddingInner(this.LAYER_PADDING);
 
@@ -122,22 +144,22 @@ export class Timeline {
       .ticks(this.timelineCurrentLayers.length)
       .tickSize(0);
 
+    /** @type {Object} @desc The full labels for the current layers - used so we don't get display name, server again */
+    this.yAxisFullLabels = {};
+
 
     /** @type {Object} @desc The minimum and maximum dates after checking every layer on the timeline */
     this.layerDateExtent = { // Set to the domain for default
-      min: this.xScale.domain()[0], // TODO make everything either a string or a date in storage
+      min: this.xScale.domain()[0],
       max: this.xScale.domain()[1],
     };
 
 
     /** @type {d3.zoom} @desc The zoom behaviour to be used for panning and zooming the timeline data */
-    let zoom = d3.zoom()
+    this.zoomBehavior = d3.zoom()
       .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       });
-
-    /** @type {Number} @desc Used in this.zoom() to determine whether we should redraw time markers */
-    this.previousZoomScale = 1;
 
     /** @type {SVGElement} @desc The main SVG element used for the timeline */
     this.timeline = d3.select('#' + this.options.elementId) // Selects the main element to insert the timeline into
@@ -147,10 +169,10 @@ export class Timeline {
       .attr('transform', 'translate(' +
         this.options.timelineMargins.left + ', ' +
         this.options.timelineMargins.top +
-      ')')
-      .call(zoom)
+        ')')
+      .call(this.zoomBehavior)
       .on('click', () => { // Uses arrow function to prevent 'this' context changing within clickDate()
-        this.clickDate(this.timeline.node()); // FIXME we only want clicks on the x-axis and data area to call clickDate
+        this.clickDate(this.timeline.node());
       });
 
 
@@ -160,34 +182,32 @@ export class Timeline {
       .attr('transform', 'translate(' +
         (this.Y_AXIS_LABEL_WIDTH) + ', ' +
         (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) +
-      ')')
+        ')')
       .call(this.xAxis);
     this.timelineXAxisGroup.selectAll('.tick') // Set clickable axis labels
-      .on('click', (dateLabel) => { // TODO check all of these and remove one at a time to see if it actually breaks (i.e. which click assignments are actually needed)
+      .on('click', (dateLabel) => {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate);
+        this.moveSelectorToDate(this.selectorDate);
       });
 
 
     /** @type {SVGElement} @desc The SVG g element which holds the y-axis elements */
     this.timelineYAxisGroup = this.timeline.append('g')
-      .attr('class', 'geona-timeline-y-axis')
       .call(this.yAxis)
       .on('click', () => { // Prevents the click functions from being triggered when y-axis is clicked
         d3.event.stopPropagation();
       });
     this.timelineYAxisGroup // Adds plain background to go behind labels
       .append('rect')
-      .attr('class', 'geona-timeline-y-axis-background')
+      .attr('class', 'js-geona-timeline-y-axis-background geona-timeline-y-axis-background')
       .attr('width', this.Y_AXIS_LABEL_WIDTH)
       .attr('height', this.fullHeight);
 
 
     /** @type {SVGElement} @desc The SVG g element which holds the timeline data (layers) */
-    this.timelineData = this.timeline.append('g')
-      .attr('class', 'geona-timeline-data');
+    this.timelineData = this.timeline.append('g');
 
 
     /** @type {d3.drag} @desc The drag behaviour to be used for dragging the selector tool */
@@ -211,7 +231,7 @@ export class Timeline {
       .attr('y', this.SELECTOR_TOOL_Y)
       .attr('width', this.SELECTOR_TOOL_WIDTH)
       .attr('height', this.dataHeight)
-      .attr('rx', this.SELECTOR_TOOL_RX) // TODO move to css?
+      .attr('rx', this.SELECTOR_TOOL_RX)
       .attr('ry', this.SELECTOR_TOOL_RY)
       .call(drag);
 
@@ -223,29 +243,31 @@ export class Timeline {
       .attr('y1', 0); // y2, x1, x2 are set when the first layer is added
 
     /** @type {Date} @desc Today's date - only changes on page reload */
-    this.todayDate = new Date(); // TODO Make string?
+    this.todayDate = new Date();
 
     /** @type {Set} @desc A Set of the dates from all layers, used for findFutureDate() and findPastDate() */
     this._allLayerDates = new Set();
 
     // Set triggers and bindings
-    $(window).resize(() => { // TODO move into triggers?
+    window.addEventListener('resize', () => {
       this.resizeTimeline();
     });
 
-    // registerTriggers(); // TODO move all triggers into here?
+    checkBrowser();
     registerBindings(this.eventManager, this);
   }
 
   /**
-   * Adds the specified layer to the timeline
-   * @param {Layer} layerToAdd A Geona layer definition
+   * Adds the specified layer to the timeline.
+   * @param {Layer} layerToAdd A Geona layer definition.
    */
   addTimelineLayer(layerToAdd) {
     // Add this layer's times to the Set of all layer times
-    for (let date of layerToAdd.dimensions.time.values) {
-      this._allLayerDates.add(date);
+    let allDatetimes = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
+    for (let datetime of allDatetimes) {
+      this._allLayerDates.add(datetime);
     }
+
     // Sort the Set
     let setCopy = Array.from(this._allLayerDates).sort();
     this._allLayerDates = new Set(setCopy);
@@ -258,53 +280,88 @@ export class Timeline {
 
 
     // Update xScale domain to show first layer's full extent
-    if (this.timelineCurrentLayers.length === 1) { // FIXME set to the layerdateextent if that's undefined thing
-      let allDates = layerToAdd.dimensions.time.values;
+    if (this.timelineCurrentLayers.length === 1) {
+      let allDates = this.geona.map.getActiveLayerDatetimes(layerToAdd.identifier);
       if (allDates.length > 1) {
         this._updateXScaleDomain(allDates);
+      } else {
+        let singleDomain = [
+          new Date(allDates[0]).getTime() - this.SINGLE_TIME_EXTENT_MARGIN,
+          new Date(allDates[0]).getTime() + this.SINGLE_TIME_EXTENT_MARGIN,
+        ];
+        this._updateXScaleDomain(singleDomain);
       }
+
       if (layerToAdd.dimensions.time.default) {
         this.selectorDate = layerToAdd.dimensions.time.default;
       }
     }
+
+
     // Update yScale range and domain
+    // We need to check if any of the y-axis labels will be the same - if they are, we need to display the server too
+    let allLayerLabels = [];
+    for (let layer of this.timelineCurrentLayers) {
+      allLayerLabels.push(selectPropertyLanguage(layer.getTitleOrDisplayName()));
+    }
+    let duplicateLayerLabels = new Set(); // We will put any elements which occur more than once in here
+    for (let i = 0; i < allLayerLabels.length; i++) {
+      let label = allLayerLabels[i];
+      if (allLayerLabels.lastIndexOf(label) !== i) {
+        duplicateLayerLabels.add(label);
+      }
+    }
+
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        return selectPropertyLanguage(layer.title);
+        let label = selectPropertyLanguage(layer.getTitleOrDisplayName());
+        // If this was found to be a duplicate, we want to get the label with source appended
+        if (duplicateLayerLabels.has(label)) {
+          if (layer.layerServer) {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier + ' - ' + layer.layerServer;
+          } else {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier;
+          }
+        }
+        this.yAxisFullLabels[layer.identifier] = label;
+        return label;
       }));
 
 
-    this.timelineLayerSelection = this.timelineData.selectAll('.geona-timeline-layer');
+    this.timelineLayerSelection = this.timelineData.selectAll('.js-geona-timeline-layer');
     // Create a g for each layer
     this.timelineLayerBars = this.timelineLayerSelection
       .remove().exit()
       .data(this.timelineCurrentLayers)
       .enter().append('g')
-      .attr('class', 'geona-timeline-layer')
+      .attr('class', 'js-geona-timeline-layer geona-timeline-layer')
       .attr('data-layer-identifier', (layer) => { // Adds the identifier as a data attribute
         return layer.identifier;
       })
       .attr('transform', (layer) => {
-        let title = selectPropertyLanguage(layer.title);
-        return 'translate(0, ' + this.yScale(title) + ')';
+        let label = this.yAxisFullLabels[layer.identifier];
+        return 'translate(0, ' + this.yScale(label) + ')';
       })
       // Within the g create a rect
       .append('rect')
-      .attr('class', 'geona-timeline-layer-bar')
+      .attr('class', 'js-geona-timeline-layer-bar geona-timeline-layer-bar')
       .attr('x', (layer) => {
-        let allDates = layer.dimensions.time.values;
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         return this.xScale(new Date(allDates[0]).getTime());
       })
       .attr('y', 0) // Alignment is relative to the group, so 0 always refers to the top position of the group.
       .attr('height', this.LAYER_HEIGHT)
       .attr('width', (layer) => {
-        let allDates = layer.dimensions.time.values;
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDateXPosition = this.xScale(new Date(allDates[0]).getTime());
         let endDateXPosition = this.xScale(new Date(allDates[allDates.length - 1]).getTime());
         return endDateXPosition - startDateXPosition;
       });
 
     this.timeline.attr('height', this.fullHeight); // Increase the height of the SVG element so we can view all layers
+    // After changing the height we fire an event to indicate this fact
+    this.eventManager.trigger('timePanel.heightChanged', this.geonaDiv);
+
     this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
@@ -313,13 +370,13 @@ export class Timeline {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate);
+        this.moveSelectorToDate(this.selectorDate);
       });
 
     this.timelineYAxisGroup
       .call(this.yAxis)
       .raise()
-      .select('.geona-timeline-y-axis-background')
+      .select('.js-geona-timeline-y-axis-background')
       .attr('height', this.fullHeight);
 
     // Trim the visible title to prevent overspill onto the layer bars
@@ -330,9 +387,9 @@ export class Timeline {
       .call((yAxisLabels) => {
         this._trimYAxisLabels(yAxisLabels);
       })
-      .attr('class', 'geona-timeline-title-tippy')
+      .attr('class', 'js-geona-timeline-title-tippy')
       .on('mouseover', () => { // Set a tooltip to appear with the full title if we mouseover the trimmed title
-        tippy('.geona-timeline-title-tippy', {
+        tippy('.js-geona-timeline-title-tippy', {
           arrow: true,
           placement: 'top-start',
           animation: 'fade',
@@ -362,15 +419,19 @@ export class Timeline {
 
     // Add the time step markers to each layer
     for (let layer of this.timelineCurrentLayers) {
-      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
+      this._addTimeStepMarkers(layer, this.geona.map.getActiveLayerDatetimes(layer.identifier));
     }
+
+    // Update the pikaday max range
+    let dates = Array.from(this._allLayerDates);
+    this.eventManager.trigger('timePanel.setPikadayRange', [dates[0], dates[dates.length - 1]]);
   }
 
   /**
    * @private
    *
    * Adds the time step marker elements for the specified layer. Filters the dates used so only one line is drawn for
-   * a particular pixel (prevents overlapping lines).
+   * a particular pixel (prevents overlapping lines). Only draws time markers which are visible to improve performance.
    * @param {Object} layer    The definition for the layer we are using.
    * @param {Array}  allDates The collection of dates to insert markers for.
    */
@@ -380,13 +441,20 @@ export class Timeline {
     // Only holds dates which will be drawn on different x pixels
     let filteredDates = [];
 
-    // We will check each date to see if it would be drawn on the same x pixel as another date
+    // Sets the cutoff points - only dates for pixels between these cutoffs will be drawn
+    let minimumCutoff = this.Y_AXIS_LABEL_WIDTH - this.TIME_MARKER_DRAW_MARGIN;
+    let maximumCutoff = this.Y_AXIS_LABEL_WIDTH + this.dataWidth + this.TIME_MARKER_DRAW_MARGIN;
+
     for (let date of allDates) {
-      let xPixel = Math.floor(this.xScale(new Date(date).getTime()));
-      if (!uniquePixels.has(xPixel)) {
-        // This pixel is currently free, so we will draw a line for this date
-        uniquePixels.add(xPixel);
-        filteredDates.push(date);
+      // Check that the marker should be drawn
+      if (this.xScale(new Date(date)) > minimumCutoff && this.xScale(new Date(date)) < maximumCutoff) {
+        // We will check each date to see if it would be drawn on the same x pixel as another date
+        let xPixel = Math.floor(this.xScale(new Date(date).getTime()));
+        if (!uniquePixels.has(xPixel)) {
+          // This pixel is currently free, so we will draw a line for this date
+          uniquePixels.add(xPixel);
+          filteredDates.push(date);
+        }
       }
     }
 
@@ -394,7 +462,7 @@ export class Timeline {
     this.timelineData.select('[data-layer-identifier = ' + layer.identifier + ']').selectAll('line')
       .data(filteredDates)
       .enter().append('line')
-      .attr('class', 'geona-timeline-layer-time-marker')
+      .attr('class', 'js-geona-timeline-layer-time-marker geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
         let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
@@ -417,15 +485,18 @@ export class Timeline {
       .remove().exit();
 
     // Remove the layer from the current layers array
-    let layerToRemove = this._findActiveLayerDefinition(layerIdentifier);
+    let layerToRemove = this._findCurrentLayerDefinition(layerIdentifier);
     let layerIndex = this.timelineCurrentLayers.indexOf(layerToRemove);
     this.timelineCurrentLayers.splice(layerIndex, 1);
+
+    // Remove the title from the yAxisFullLabels
+    delete this.yAxisFullLabels[layerIdentifier];
 
 
     // Regenerate the Set of layer times
     let regeneratedSetDates = [];
     for (let layer of this.timelineCurrentLayers) {
-      regeneratedSetDates = regeneratedSetDates.concat(layer.dimensions.time.values);
+      regeneratedSetDates = regeneratedSetDates.concat(this.geona.map.getActiveLayerDatetimes(layer.identifier));
     }
     regeneratedSetDates.sort();
     this._allLayerDates = new Set(regeneratedSetDates);
@@ -435,26 +506,51 @@ export class Timeline {
     this.updateLayerDateExtent();
 
     // Update yScale range and domain
+    // We need to check if any of the y-axis labels will be the same - if they are, we need to display the server too
+    let allLayerLabels = [];
+    for (let layer of this.timelineCurrentLayers) {
+      allLayerLabels.push(selectPropertyLanguage(layer.getTitleOrDisplayName()));
+    }
+    let duplicateLayerLabels = new Set(); // We will put any elements which occur more than once in here
+    for (let i = 0; i < allLayerLabels.length; i++) {
+      let label = allLayerLabels[i];
+      if (allLayerLabels.lastIndexOf(label) !== i) {
+        duplicateLayerLabels.add(label);
+      }
+    }
     this.yScale.range([0, this.dataHeight])
       .domain(this.timelineCurrentLayers.map((layer) => {
-        return selectPropertyLanguage(layer.title);
+        let label = selectPropertyLanguage(layer.getTitleOrDisplayName());
+        // If this was found to be a duplicate, we want to get the label with source appended
+        if (duplicateLayerLabels.has(label)) {
+          if (layer.layerServer) {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.layerServer;
+          } else {
+            label = selectPropertyLanguage(layer.getTitleOrDisplayName()) + ' - ' + layer.identifier;
+          }
+        }
+        this.yAxisFullLabels[layer.identifier] = label;
+        return label;
       }));
 
     this.timeline.attr('height', this.fullHeight); // Decrease the height of the SVG element
-    this.timelineXAxisGroup // TODO should this go in its own method? (i.e. is it duplicated elsewhere?)
+    // After changing the height we fire an event to indicate this fact
+    this.eventManager.trigger('timePanel.heightChanged', this.geonaDiv);
+
+    this.timelineXAxisGroup
       .attr('transform', 'translate(0, ' + (this.dataHeight + this.X_AXIS_SEPARATION - this.options.timelineMargins.bottom) + ')')
       .call(this.xAxis);
     this.timelineYAxisGroup
       .call(this.yAxis)
       .raise()
-      .select('.geona-timeline-y-axis-background')
+      .select('.js-geona-timeline-y-axis-background')
       .attr('height', this.fullHeight);
 
     // Vertically-align each layer bar with its title on the y-axis
-    this.timelineData.selectAll('.geona-timeline-layer')
+    this.timelineData.selectAll('.js-geona-timeline-layer')
       .attr('transform', (layer) => {
-        let title = selectPropertyLanguage(layer.title);
-        return 'translate(0, ' + this.yScale(title) + ')';
+        let label = this.yAxisFullLabels[layer.identifier];
+        return 'translate(0, ' + this.yScale(label) + ')';
       });
 
     // Trim the visible title to prevent overspill onto the layer bars
@@ -483,6 +579,10 @@ export class Timeline {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
       })
       .raise();
+
+    // Update the pikaday max range
+    let dates = Array.from(this._allLayerDates);
+    this.eventManager.trigger('timePanel.setPikadayRange', [dates[0], dates[dates.length - 1]]);
   }
 
   /**
@@ -497,7 +597,7 @@ export class Timeline {
     let rightPadding = 0;
 
     // Calculate the padding amount for each side
-    let paddingPercent = this.options.initialPaddingPercentage;
+    let paddingPercent = this.options.paddingPercentage;
     if (padding === true && (paddingPercent.left || paddingPercent.right)) {
       let startDateMs = new Date(allDates[0]).getTime();
       let endDateMs = new Date(allDates[allDates.length - 1]).getTime();
@@ -521,12 +621,12 @@ export class Timeline {
    * Updates the dataWidth and fullWidth variables to keep the correct proportions for the window size.
    */
   _calculateWidths() {
-    this.fullWidth = this.parentDiv.find('.js-geona-time-panel-container').width() -
+    this.fullWidth = this.geonaDiv.find('.js-geona-time-panel-container').width() -
       this.options.timelineMargins.left - this.options.timelineMargins.right;
 
     this.dataWidth = this.fullWidth - this.Y_AXIS_LABEL_WIDTH;
 
-    this.xAxisTicks = this.dataWidth / 160; // More information can be found on the Geona wiki
+    this.xAxisTicks = this.dataWidth / 165; // More information can be found on the Geona wiki
   }
 
   /**
@@ -544,34 +644,27 @@ export class Timeline {
   zoom() {
     // We translate each layer along the x axis, and scale each layer horizontally
     // Update the domain based on the newly-transformed scale
-    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain()); // TODO see if there's a nice way of updating this.xScale2 around the place
+    this.xScale.domain(d3.event.transform.rescaleX(this.xScale2).domain());
 
     // Update the x-axis display
     this.timelineXAxisGroup.call(this.xAxis);
 
     // Adjust the positioning of the layer bars
-    this.timelineData.selectAll('.geona-timeline-layer-bar')
+    this.timelineData.selectAll('.js-geona-timeline-layer-bar')
       .attr('x', (layer) => {
-        let allDates = layer.dimensions.time.values;
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
         return this.xScale(new Date(startDate).getTime());
       })
       .attr('width', (layer) => {
-        let allDates = layer.dimensions.time.values;
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
         let endDate = allDates[allDates.length - 1];
         return this.xScale(new Date(endDate).getTime()) - this.xScale(new Date(startDate).getTime());
       });
 
-    // Check if we have zoomed - if we have we must redraw the time markers
-    if (d3.event.transform.k !== this.previousZoomScale) {
-      // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-      this._redrawTimeMarkers();
-      // Save the zoom scale
-      this.previousZoomScale = d3.event.transform.k;
-    } else { // We only need to translate the markers
-      this._translateTimeMarkers();
-    }
+    // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
+    this._redrawTimeMarkers();
 
     // Adjust positioning of today line and selector tool
     this._translateTodayLine();
@@ -583,7 +676,7 @@ export class Timeline {
         d3.event.stopPropagation(); // Stops the click event on this.timeline from also firing
         this.selectorDate = dateLabel;
         this.triggerMapDateChange(this.selectorDate);
-        this._moveSelectorToDate(this.selectorDate);
+        this.moveSelectorToDate(this.selectorDate);
       });
   }
 
@@ -597,7 +690,7 @@ export class Timeline {
     // Use the xScale to convert the x-coordinate to a date
     this.selectorDate = this.xScale.invert(clickXPosition);
     this.triggerMapDateChange(this.selectorDate);
-    this._moveSelectorToDate(this.selectorDate);
+    this.moveSelectorToDate(this.selectorDate);
   }
 
   /**
@@ -606,12 +699,23 @@ export class Timeline {
   updateLayerDateExtent() {
     this.layerDateExtent = {};
     for (let layer of this.timelineCurrentLayers) {
-      let allDates = layer.dimensions.time.values;
-      if (new Date(allDates[0]) < this.layerDateExtent.min || this.layerDateExtent.min === undefined) {
-        this.layerDateExtent.min = new Date(allDates[0]);
-      }
-      if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max || this.layerDateExtent.max === undefined) { // eslint-disable-line max-len
-        this.layerDateExtent.max = new Date(allDates[allDates.length - 1]);
+      let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
+      if (allDates.length === 1) {
+        if (new Date(allDates[0] - this.SINGLE_TIME_EXTENT_MARGIN) < this.layerDateExtent.min
+          || this.layerDateExtent.min === undefined) {
+          this.layerDateExtent.min = new Date(new Date(allDates[0]) - this.SINGLE_TIME_EXTENT_MARGIN);
+        }
+        if (new Date(allDates[0] + this.SINGLE_TIME_EXTENT_MARGIN) > this.layerDateExtent.max
+          || this.layerDateExtent.max === undefined) {
+          this.layerDateExtent.max = new Date(new Date(allDates[0]) + this.SINGLE_TIME_EXTENT_MARGIN);
+        }
+      } else {
+        if (new Date(allDates[0]) < this.layerDateExtent.min || this.layerDateExtent.min === undefined) {
+          this.layerDateExtent.min = new Date(allDates[0]);
+        }
+        if (new Date(allDates[allDates.length - 1]) > this.layerDateExtent.max || this.layerDateExtent.max === undefined) { // eslint-disable-line max-len
+          this.layerDateExtent.max = new Date(allDates[allDates.length - 1]);
+        }
       }
     }
   }
@@ -619,7 +723,7 @@ export class Timeline {
   /**
    * Sets the timeline date to the specified date. If date is outside the layerDateExtent then it will be capped at the
    * layerDateExtent min or max.
-   * @param {String|Date} date // TODO make definitely string
+   * @param {String|Date} date The date to set the timeline to - will be restrained if outside the layerDateExtent.
    */
   triggerMapDateChange(date) {
     let validDate = date;
@@ -628,7 +732,6 @@ export class Timeline {
     } else if (date > this.layerDateExtent.max) {
       validDate = this.layerDateExtent.max;
     }
-    // TODO is trigger in correct way?
     this.eventManager.trigger('timePanel.timelineChangeTime', new Date(validDate));
   }
 
@@ -638,7 +741,7 @@ export class Timeline {
    * Moves the selector tool to the date position on the x-axis.
    * @param {String} date The date to move the selector tool to.
    */
-  _moveSelectorToDate(date) {
+  moveSelectorToDate(date) {
     this.selectorDate = date;
     if (date < this.layerDateExtent.min) {
       this.selectorDate = this.layerDateExtent.min;
@@ -648,7 +751,7 @@ export class Timeline {
     // Move the selector (optionally animated)
     if (this.options.animateSelector) {
       this.selectorTool
-        .transition().duration(500)
+        .transition().duration(this.TRANSITION_DURATION)
         .attr('x', () => {
           return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
         });
@@ -657,6 +760,26 @@ export class Timeline {
         .attr('x', () => {
           return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
         });
+    }
+
+    // Pan the timeline if the selector has moved offscreen
+    if (
+      this.xScale(new Date(this.selectorDate)) < this.Y_AXIS_LABEL_WIDTH
+      || this.xScale(new Date(this.selectorDate)) > this.Y_AXIS_LABEL_WIDTH + this.dataWidth
+    ) {
+      // Interrupts the transition - required so the selector will be drawn at its destination position after setView()
+      this.selectorTool.interrupt();
+
+      let minDomainTimeMs = this.xScale.domain()[0].getTime();
+      let maxDomainTimeMs = this.xScale.domain()[1].getTime();
+      let domainTimeDifferenceMs = maxDomainTimeMs - minDomainTimeMs;
+
+      // Calculate a min and max domain - keeps the same date difference (scale) but centres on the selector date
+      let newViewMinDatetime = new Date(new Date(this.selectorDate).getTime() - (domainTimeDifferenceMs / 2));
+      let newViewMaxDatetime = new Date(new Date(this.selectorDate).getTime() + (domainTimeDifferenceMs / 2));
+
+      this.setView([newViewMinDatetime, newViewMaxDatetime], false, this.options.animateSelector);
+      this._translateSelectorTool();
     }
   }
 
@@ -683,34 +806,49 @@ export class Timeline {
   }
 
   /**
-   * Programmatically zooms or pans so that the timeline view is set between the specified dates.
-   * @param {String[]} dates Contains two or more dates, sorted from least-to-most recent, that the view will be set to.
+   * Programmatically zooms or pans so that the timeline view is set between the min and max of the specified dates.
+   * @param {String[]} dates     Contains two or more dates, sorted from least-to-most recent.
+   * @param {Boolean}  [padding] If True, the padding specified in options.paddingPercentage will be added on.
+   * @param {Boolean}  [animate] If True, the view will animate smoothly to the new position.
    */
-  setView(dates) {
-    // The difference, in ms, between the current xScale domain dates
-    let previousDateSpacing = this.xScale.domain()[1].getTime() - this.xScale.domain()[0].getTime();
-    // The difference, in ms, between the new min and max dates
-    let newDateSpacing = new Date(dates[dates.length - 1]).getTime() - new Date(dates[0]).getTime();
+  setView(dates, padding = false, animate = false) {
+    let firstDate = new Date(dates[0]);
+    let lastDate = new Date(dates[dates.length - 1]);
 
-    // Update domain
-    this._updateXScaleDomain(dates, false);
-
-    // Update the x-axis
-    this.timelineXAxisGroup.call(this.xAxis);
-
-    // Adjust layer bars
-    this._resizeLayerBars();
-
-    // If the spacing is different, then the scale has changed, and we must redraw the time markers
-    if (newDateSpacing !== previousDateSpacing) {
-      this._redrawTimeMarkers();
-    } else { // We can just move the markers on the x-axis
-      this._translateTimeMarkers();
+    // Add optional padding to dates
+    let paddingPercent = this.options.paddingPercentage;
+    if (padding === true && (paddingPercent.left || paddingPercent.right)) {
+      let msDateDifference = lastDate.getTime() - firstDate.getTime();
+      firstDate = new Date(firstDate.getTime() - (msDateDifference / 100 * paddingPercent.left));
+      lastDate = new Date(lastDate.getTime() + (msDateDifference / 100 * paddingPercent.right));
     }
 
-    // Reposition today line and selector tool
-    this._translateTodayLine();
-    this._translateSelectorTool();
+    // The number of pixels between the min and max date for the current scale value (k)
+    let pxDatesDifferenceAtCurrentScale = this.xScale(lastDate) - this.xScale(firstDate);
+    // The ratio to multiply by to fit the min and max date into the domain
+    let pxRatio = this.dataWidth / pxDatesDifferenceAtCurrentScale;
+    // Scale in or out by the ratio
+    if (animate) {
+      this.zoomBehavior.scaleBy(this.timeline.transition().duration(this.TRANSITION_DURATION), pxRatio);
+    } else {
+      this.zoomBehavior.scaleBy(this.timeline, pxRatio);
+    }
+
+    // The pixel position of the minimum date at the new scale
+    let pxPositionOfMinDate = this.xScale(firstDate);
+    // The scale which has just been set by the scaleBy()
+    let newScale = d3.zoomTransform(this.timeline.node()).k;
+    // Translate the zoom behavior - need to multiply by '1 / newScale' because translateBy() changes the pixel values
+    // so that they are based off the scale movement at k = 1.
+    if (animate) {
+      this.zoomBehavior.translateBy(
+        this.timeline
+          .transition()
+          .duration(this.TRANSITION_DURATION), (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0
+      );
+    } else {
+      this.zoomBehavior.translateBy(this.timeline, (1 / newScale) * (this.Y_AXIS_LABEL_WIDTH - pxPositionOfMinDate), 0);
+    }
   }
 
   /**
@@ -719,14 +857,14 @@ export class Timeline {
    */
   _resizeLayerBars() {
     // Adjust the positioning of the layer bars
-    this.timelineData.selectAll('.geona-timeline-layer-bar')
+    this.timelineData.selectAll('.js-geona-timeline-layer-bar')
       .attr('x', (layer) => {
-        let allDates = layer.dimensions.time.values;
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
         return this.xScale(new Date(startDate).getTime());
       })
       .attr('width', (layer) => {
-        let allDates = layer.dimensions.time.values;
+        let allDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let startDate = allDates[0];
         let endDate = allDates[allDates.length - 1];
         return this.xScale(new Date(endDate).getTime()) - this.xScale(new Date(startDate).getTime());
@@ -735,15 +873,15 @@ export class Timeline {
 
   /**
    * @private
-   * Redraws the time markers. Used when the xScale has zoomed in or out.
+   * Redraws the time markers. Used when the xScale has zoomed or panned.
    */
   _redrawTimeMarkers() {
     // Remove the time markers - we need to redraw completely in case of pixel overlap (more info on wiki)
-    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
+    this.timelineData.selectAll('.js-geona-timeline-layer-time-marker')
       .remove().exit();
     // Add time markers back
     for (let layer of this.timelineCurrentLayers) {
-      this._addTimeStepMarkers(layer, layer.dimensions.time.values);
+      this._addTimeStepMarkers(layer, this.geona.map.getActiveLayerDatetimes(layer.identifier));
     }
   }
 
@@ -752,7 +890,7 @@ export class Timeline {
    * Moves the time markers on the x-axis. Used when the xScale has panned, and not zoomed.
    */
   _translateTimeMarkers() {
-    this.timelineData.selectAll('.geona-timeline-layer-time-marker')
+    this.timelineData.selectAll('.js-geona-timeline-layer-time-marker')
       .attr('x1', (date) => {
         let xPosition = Math.floor(this.xScale(new Date(date).getTime()));
         return xPosition;
@@ -783,7 +921,7 @@ export class Timeline {
    * Moves the selector tool on the x-axis. Used when the xScale changes.
    */
   _translateSelectorTool() {
-  // Adjust positioning of the selector tool
+    // Adjust positioning of the selector tool
     this.selectorTool
       .attr('x', () => {
         return this.xScale(new Date(this.selectorDate)) - this.SELECTOR_TOOL_CORRECTION;
@@ -797,7 +935,7 @@ export class Timeline {
    * @param {String} layerIdentifier The identifier for the currentLayer.
    * @return {Object|undefined} A layer from this.timelineCurrentLayers
    */
-  _findActiveLayerDefinition(layerIdentifier) {
+  _findCurrentLayerDefinition(layerIdentifier) {
     for (let layer of this.timelineCurrentLayers) {
       if (layer.identifier === layerIdentifier) {
         return layer;
@@ -813,44 +951,100 @@ export class Timeline {
    * Only affects the displayed text - the yScale will still use the full titles.
    * @param {d3.Selection} yAxisLabels The selection of y-axis 'text' elements
    */
-  _trimYAxisLabels(yAxisLabels) {
+  _trimYAxisLabels(yAxisLabels) { // fixme this does not work if the timeline starts removed, then is revealed when a layer is added (see issue 112) https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/112
     for (let textElement of yAxisLabels.nodes()) {
       if (textElement.getComputedTextLength() > this.Y_AXIS_LABEL_WIDTH) {
         // Gives us the percentage of text which is contained within the label area
         let trimProportion = this.Y_AXIS_LABEL_WIDTH / textElement.getComputedTextLength();
         // Gives us the number of characters we can fit into the label area from the full title
-        let trimLength = Math.floor(textElement.innerHTML.length * trimProportion) - 3; // -3 makes space for '...'
+        let trimLength = Math.floor(textElement.textContent.length * trimProportion) - 3; // -3 makes space for '...'
         // Gives us the trimmed title, with ellipsis at end to indicate cutoff
-        let trimmedLabel = textElement.innerHTML.slice(0, trimLength) + '...';
+        let trimmedLabel = textElement.textContent.slice(0, trimLength) + '...';
 
-        textElement.innerHTML = trimmedLabel;
+        textElement.textContent = trimmedLabel;
       }
     }
   }
 
   /**
+   * Currently not working properly (see Geona issue 97) https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/97
    * Redraws the Timeline elements for a new window width. Called when the window resizes.
    */
   resizeTimeline() {
     // resources https://stackoverflow.com/questions/25875316/d3-preserve-scale-translate-after-resetting-range http://jsfiddle.net/xf3fk8hu/9/ https://stackoverflow.com/questions/32959056/responsive-d3-zoom-behavior
-    // FIXME problem with margin after resize
+    let minDomainDatetimeMs = this.xScale.domain()[0].getTime();
+    let maxDomainDatetimeMs = this.xScale.domain()[1].getTime();
+    console.log(minDomainDatetimeMs + ', ' + maxDomainDatetimeMs);
+    let domainDatetimeDifferenceMs = maxDomainDatetimeMs - minDomainDatetimeMs;
+
+    // let msPerPixel = (maxDomainDatetimeMs - minDomainDatetimeMs) / this.dataWidth;
+    console.log(maxDomainDatetimeMs - minDomainDatetimeMs);
+    // console.log(msPerPixel);
+
+    // let transform = d3.zoomTransform(this.timeline.node());
+    // let previousWidth = this.fullWidth * transform.k;
+    let previousWidth = this.dataWidth;
     this._calculateWidths();
+    let newWidth = this.dataWidth;
+
+    let widthResizeProportion = newWidth / previousWidth;
+
+    maxDomainDatetimeMs = minDomainDatetimeMs + (domainDatetimeDifferenceMs * widthResizeProportion);
+
+    // let newWidth = this.fullWidth * transform.k;
+
+    // maxDomainDatetimeMs = msPerPixel * this.dataWidth;
+    console.log(maxDomainDatetimeMs);
 
     this.timeline
       .attr('width', this.fullWidth + 1); // +1 because the containing svg needs to be 1 px longer than inner elements
 
-    this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
-    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]); // FIXME This line fixes the zoom alignment bug, but introduces the axis warping backwards in time bug (or, the layers warping forwards in time bug)
+
+    this.xScale.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth + this.Y_AXIS_LABEL_WIDTH]);
+
+    // this.xScale2.range([this.Y_AXIS_LABEL_WIDTH, this.dataWidth]);
+
+    // Keep the domain the same
+
+    // console.log('domain about to set');
+    // console.log(new Date(minDomainDatetimeMs));
+    // console.log(new Date(maxDomainDatetimeMs));
+    // this.xScale.domain([
+    //   new Date(minDomainDatetimeMs),
+    //   new Date(maxDomainDatetimeMs),
+    // ]);
+
+    // this.zoomBehavior.transform(this.timeline, d3.zoomIdentity);
+
+    // console.log('domain set');
+
+    // let newX = -(newWidth * ((transform.x * -1) / previousWidth));
+
+    // let translateBy = (newX - transform.x) / transform.k;
+
+    // this.timeline.call(this.zoomBehavior.transform, transform.translate(translateBy, 0));
+
+    let currentTransform = d3.zoomTransform(this.timeline.node());
+
+    let resizeProportion = newWidth / previousWidth;
+
+    // this.zoomBehavior.translateBy();
+    // this.zoomBehavior.scaleBy(this.timeline, 1 / resizeProportion);
+    // this.zoomBehavior.scaleTo(this.timeline, 1);
+
 
     this.xAxis.ticks(this.xAxisTicks);
     this.timelineXAxisGroup
       .call(this.xAxis);
+
 
     // Reposition data elements
     this._resizeLayerBars();
     this._redrawTimeMarkers();
     this._translateTodayLine();
     this._translateSelectorTool();
+
+    console.log(d3.zoomTransform(this.timeline.node()));
   }
 
   /**
@@ -874,6 +1068,7 @@ export class Timeline {
    *
    * @param  {Number} intervals         Number of times to traverse forwards before returning.
    * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
+   *
    * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
    */
   findFutureDate(intervals, layerIdentifier) {
@@ -884,11 +1079,10 @@ export class Timeline {
 
     // If a layer has been supplied, we only want to traverse the times for that layer
     if (layerIdentifier) {
-      // TODO find this function and import it (also move this sort of thing to a generic utils file)
       for (let layer of this.timelineCurrentLayers) {
         if (layer.identifier === layerIdentifier) {
           layerTitle = selectPropertyLanguage(layer.title);
-          listOfDates = layer.dimensions.time.values;
+          listOfDates = this.geona.map.getActiveLayerDatetimes(layerIdentifier);
         }
       }
     }
@@ -922,7 +1116,7 @@ export class Timeline {
       changingLayers.push(layerTitle);
     } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
       for (let layer of this.timelineCurrentLayers) {
-        let values = layer.dimensions.time.values;
+        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let dateIndex = values.findIndex((value) => {
           // Required to avoid problems with date representation comparisons (info on wiki)
           return new Date(futureDate).getTime() === new Date(value).getTime();
@@ -962,21 +1156,21 @@ export class Timeline {
    * @param  {Number} intervals         Number of times to traverse forwards before returning.
    * @param  {String} [layerIdentifier] The identifier for the selected layer whose times we want to check.
    *
-   * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
+   * @return {IntervalDate|undefined}   The date found on the final interval, and the layer(s) whose times will update.
    */
   findPastDate(intervals, layerIdentifier) {
     // TODO write tests for this
+    // Holds all the datetimes to consider when we are searching for the date - changes if layerIdentifier is defined
     let listOfDates = Array.from(this._allLayerDates);
     // Only used if layerIdentifier has been specified
     let layerTitle;
 
     // If a layer has been supplied, we only want to traverse the times for that layer
     if (layerIdentifier) {
-      // TODO find this function and import it (also move this sort of thing to a generic utils file)
       for (let layer of this.timelineCurrentLayers) {
         if (layer.identifier === layerIdentifier) {
           layerTitle = selectPropertyLanguage(layer.title);
-          listOfDates = layer.dimensions.time.values;
+          listOfDates = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         }
       }
     }
@@ -985,8 +1179,6 @@ export class Timeline {
     let startingIndex;
 
     // findNearestValidTime() returns undefined if out of bounds, but if we are ahead, we want to load the end date
-
-
     if (new Date(this.selectorDate) > new Date(listOfDates[listOfDates.length - 1])) {
       startingIndex = listOfDates.length + 1; // If starting date is after the last time, we decrement to the last index downwards.
     } else // If the current time is less than or equal to the minimum time in the list, there isn't a time to move to
@@ -1001,11 +1193,11 @@ export class Timeline {
     if (new Date(this.selectorDate) > new Date(startingDate)) {
       let loadedLayers = 0;
       for (let layer of this.timelineCurrentLayers) {
-        let values = layer.dimensions.time.values;
+        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
         let valueIndex = values.findIndex((value) => {
           return new Date(startingDate).getTime() === new Date(value).getTime();
         });
-        if (valueIndex !== -1 && valueIndex !== values.length - 1 ) {
+        if (valueIndex !== -1 && valueIndex !== values.length - 1) {
           loadedLayers++;
         }
       }
@@ -1030,16 +1222,20 @@ export class Timeline {
       changingLayers.push(layerTitle);
     } else { // If we don't have a layer identifier we need to check the current layers to see which ones will update
       for (let layer of this.timelineCurrentLayers) {
-        let values = layer.dimensions.time.values;
+        let values = this.geona.map.getActiveLayerDatetimes(layer.identifier);
+
         // Functions required to avoid problems with date representation comparisons
+        // Searches the layer's time values for the pastDate and returns the index or -1
         let valueIndex = values.findIndex((value) => {
           return new Date(pastDate).getTime() === new Date(value).getTime();
         });
+        // Searches the list of dates' values for the pastDate and returns the index or -1
         let setIndex = listOfDates.findIndex((value) => {
           return new Date(pastDate).getTime() === new Date(value).getTime();
         });
+
         // If the past date is in the layer's time values AND this time value is not the closest one currently loaded
-        if (valueIndex !== -1 && new Date([setIndex + 1]) <= new Date(this.selectorDate)) {
+        if (valueIndex !== -1 && new Date(listOfDates[setIndex + 1]) <= new Date(this.selectorDate)) {
           let title = selectPropertyLanguage(layer.title);
           changingLayers.push(title);
         }
@@ -1080,47 +1276,34 @@ function getDateFormat(date) {
 }
 
 /**
- * Deeply assigns two objects into a new object, with the second object taking priority.
- * Deep assignment means that nested objects will be combined as well, instead of the default
- * Object.assign() behaviour where only the top-level properties are combined.
- * @param {*} object1
- * @param {*} args
- * @return {Object} Combined object
+ * Performs browser compatibility checks and fixes for the Timeline.
+ * Each polyfill should be commented with the browser and the reason the polyfill is needed.
  */
-function deepAssign(object1, ...args) {
-  // Check for circular references
-  for (let arg of args) {
-    try {
-      JSON.stringify(arg);
-    } catch (e) {
-      if (e instanceof TypeError) {
-        throw new Error('Cannot deep assign object with circular reference!');
-      } else {
-        throw e;
+function checkBrowser() {
+  /* eslint-disable */ // eslint is disabled for this function, as polyfills can be quite old
+
+  // IE11 - required for Tippy to work on the SVG text used for the titles
+  if (SVGElement.prototype.contains === undefined) {
+    SVGElement.prototype.contains = function contains(node) {
+      if (!(0 in arguments)) {
+        throw new TypeError('1 argument is required');
       }
-    }
+
+      do {
+        if (this === node) {
+          return true;
+        }
+      } while (node = node && node.parentNode);
+
+      return false;
+    };
   }
-
-  // Objects are safe, we can proceed
-  // 
-  let newObject = object1;
-
-  let object2 = args[0];
-
-  // Check to see if we need to recurse
-  if (args.length > 1) {
-    object2 = deepAssign(args);
-  }
-
-  //
-  for (let key of Object.keys(object2)) {
-    if (typeof key === 'object' && key !== null && key.length === undefined && !(key instanceof Date)) {
-      // Probably a normal object - recurse
-      object1.key = deepAssign(object1.key, object2.key);
-    } else {
-      object1.key = object2.key;
-    }
-  }
-
-  return newObject;
 }
+
+/* Type definitions for this class */
+
+/**
+ * @typedef {Object} IntervalDate
+ *   @property {String}   date   A datetime in ISO 8601 format.
+ *   @property {String[]} layers The titles for the layers which will be updated.
+ */

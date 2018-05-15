@@ -9,7 +9,8 @@ import LayerServer from './layer_server';
 export default class LayerServerOws extends LayerServer {
   /**
    * Instantiate a new LayerServerOws
-   * @param  {Object} serverConfig The server config. See the class diagram.
+   * @param {Object} serverConfig The server config. See the class diagram.
+   * @param {String} identifier   The identifier to use for this layer server.
    */
   constructor(serverConfig, identifier) {
     super(serverConfig, identifier);

@@ -4,15 +4,15 @@ import dragula from 'dragula';
 /**
  * Sets event triggers for main menu elements.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
- * @param {JQuery}       parentDiv    The div which contains the current map.
+ * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-export function registerTriggers(eventManager, parentDiv) {
+export function registerTriggers(eventManager, geonaDiv) {
   // Tracks the last tab that was clicked
-  let lastTabClicked = '';
+  let lastTabClicked = ''; // fixme when loading from state this doesn't get updated (there's probably a better way anyway)
 
   // Open/close menu
-  parentDiv.find('.js-geona-menu-toggle').click(() => {
-    if (parentDiv.find('.js-geona-menu').hasClass('removed')) {
+  geonaDiv.find('.js-geona-menu-toggle').click(() => {
+    if (geonaDiv.find('.js-geona-menu').hasClass('removed')) {
       eventManager.trigger('mainMenu.openMenu');
     } else {
       eventManager.trigger('mainMenu.closeMenu');
@@ -24,12 +24,11 @@ export function registerTriggers(eventManager, parentDiv) {
    *  Explore Panel - more triggers are set in the registerExploreTriggers() method
    */
   // Open/close panel
-  parentDiv.find('.js-geona-menu__explore').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__explore') {
+  geonaDiv.find('.js-geona-menu__explore').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__explore') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayExplorePanel');
-      registerExploreTriggers(eventManager, parentDiv);
     }
     lastTabClicked = 'js-geona-menu__explore';
   });
@@ -39,12 +38,11 @@ export function registerTriggers(eventManager, parentDiv) {
       Layers Panel
   \* ------------------------------------*/
   // Open/close panel
-  parentDiv.find('.js-geona-menu__layers').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__layers') {
+  geonaDiv.find('.js-geona-menu__layers').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__layers') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLayersPanel');
-      registerLayersTriggers(eventManager, parentDiv);
     }
     lastTabClicked = 'js-geona-menu__layers';
   });
@@ -53,8 +51,8 @@ export function registerTriggers(eventManager, parentDiv) {
       Analysis Panel
   \* ------------------------------------*/
   // Open/close panel
-  parentDiv.find('.js-geona-menu__analysis').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__analysis') {
+  geonaDiv.find('.js-geona-menu__analysis').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__analysis') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayAnalysisPanel');
@@ -66,8 +64,8 @@ export function registerTriggers(eventManager, parentDiv) {
    * Login Panel
    */
   // Open/close panel
-  parentDiv.find('.js-geona-menu__login').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__login') {
+  geonaDiv.find('.js-geona-menu__login').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__login') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayLoginPanel');
@@ -79,12 +77,11 @@ export function registerTriggers(eventManager, parentDiv) {
    * Options Panel - more triggers are set in the registerOptionsTriggers() method
    */
   // Open/close panel
-  parentDiv.find('.js-geona-menu__options').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__options') {
+  geonaDiv.find('.js-geona-menu__options').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__options') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayOptionsPanel');
-      registerOptionsTriggers(eventManager, parentDiv);
     }
     lastTabClicked = 'js-geona-menu__options';
   });
@@ -93,8 +90,8 @@ export function registerTriggers(eventManager, parentDiv) {
       Help Panel
   \* ------------------------------------*/
   // Open/close panel
-  parentDiv.find('.js-geona-menu__help').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__help') {
+  geonaDiv.find('.js-geona-menu__help').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__help') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displayHelpPanel');
@@ -106,8 +103,8 @@ export function registerTriggers(eventManager, parentDiv) {
       Share Panel
   \* ------------------------------------*/
   // Open/close panel
-  parentDiv.find('.js-geona-menu__share').click(() => {
-    if (!parentDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__share') {
+  geonaDiv.find('.js-geona-menu__share').click(() => {
+    if (!geonaDiv.find('.js-geona-panel').hasClass('removed') && lastTabClicked === 'js-geona-menu__share') {
       eventManager.trigger('mainMenu.closePanel');
     } else {
       eventManager.trigger('mainMenu.displaySharePanel');
@@ -120,29 +117,29 @@ export function registerTriggers(eventManager, parentDiv) {
  * Used by the main registerTriggers function to register triggers for
  * Explore panel elements which are not loaded at startup.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
- * @param {JQuery}       parentDiv    The div which contains the current map.
+ * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-function registerExploreTriggers(eventManager, parentDiv) {
+export function registerExploreTriggers(eventManager, geonaDiv) {
   // Scans for pre-cached URLs
-  parentDiv.find('.js-geona-explore-panel-content__layer-url').on('input', () => {
+  geonaDiv.find('.js-geona-explore-panel-content__layer-url').on('input', () => {
     // The current input
-    let url = parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
+    let url = geonaDiv.find('.js-geona-explore-panel-content__layer-url').val();
     eventManager.trigger('mainMenu.scanCache', url);
     eventManager.trigger('mainMenu.autoselectService', url);
   });
 
   // Submit layer URL
-  parentDiv.find('.js-geona-explore-panel-content__add-url').click(() => {
+  geonaDiv.find('.js-geona-explore-panel-content__add-url').click(() => {
     // The input URL
-    let url = parentDiv.find('.js-geona-explore-panel-content__layer-url').val();
+    let url = geonaDiv.find('.js-geona-explore-panel-content__layer-url').val();
     // The selected service type
-    let service = parentDiv.find('.js-geona-explore-panel-content__service option:selected').text();
+    let service = geonaDiv.find('.js-geona-explore-panel-content__service option:selected').text();
     // Whether to save the config to the cache folder
     let save = false;
     // Whether to load the config from the cache folder
     let useCache = false;
-    if (parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked') ||
-    parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('removed')) {
+    if (geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked') ||
+      geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').hasClass('removed')) {
       save = true;
     } else {
       useCache = true;
@@ -151,24 +148,24 @@ function registerExploreTriggers(eventManager, parentDiv) {
   });
 
   // Update text to use or refresh cache
-  parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').click(() => {
-    let checked = parentDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked');
+  geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').click(() => {
+    let checked = geonaDiv.find('.js-geona-explore-panel-content__cache-checkbox').prop('checked');
     if (checked === true) {
-      eventManager.trigger('mainMenu.changeAddUrlButtonText', true);
+      eventManager.trigger('mainMenu.addLayerButtonTextAsUrl', true);
     } else {
-      eventManager.trigger('mainMenu.changeAddUrlButtonText', false);
+      eventManager.trigger('mainMenu.addLayerButtonTextAsUrl', false);
     }
   });
 
   // Add URL layer to map
-  parentDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
-    let layerIdentifier = parentDiv.find('.js-geona-explore-panel-content__layer-select').val();
+  geonaDiv.find('.js-geona-explore-panel-content__add-layer').click(() => {
+    let layerIdentifier = geonaDiv.find('.js-geona-explore-panel-content__layer-select').val();
     eventManager.trigger('mainMenu.addUrlLayerToMap', layerIdentifier);
   });
 
   // Add available layer to map
-  parentDiv.find('.js-geona-explore-panel-content__available-layers').change(() => {
-    let option = parentDiv.find('.js-geona-explore-panel-content__available-layers').val();
+  geonaDiv.find('.js-geona-explore-panel-content__available-layers').change(() => {
+    let option = geonaDiv.find('.js-geona-explore-panel-content__available-layers').val();
     if (option !== 'geona-available-layers-title') {
       eventManager.trigger('mainMenu.addAvailableLayerToMap', option);
     }
@@ -179,34 +176,225 @@ function registerExploreTriggers(eventManager, parentDiv) {
  * Used by the main registerTriggers function to register triggers for
  * Layers panel elements which are not loaded at startup.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
- * @param {JQuery}       parentDiv    The div which contains the current map.
+ * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-function registerLayersTriggers(eventManager, parentDiv) {
+export function registerLayersTriggers(eventManager, geonaDiv) {
   // Dragula reordering
-  let dragger = dragula([parentDiv.find('.js-geona-layers-list')[0]]);
+  let dragger = dragula([geonaDiv.find('.js-geona-layers-list')[0]],
+    {
+      moves: (item, container, handle) => {
+        return handle.classList.contains('js-geona-layers-list__item-header');
+      },
+    });
   dragger.on('drop', (item) => {
     eventManager.trigger('mainMenu.reorderLayers', [item]);
   });
 
-  // Show/hide layer
-  // TODO why is 'this' invalid, and is there a better way to do it?
-  parentDiv.find('.js-geona-layers-list__item-visibility').click(function(jQueryEvent) {
-    // Finds the list element that contains the icon which was clicked
-    let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this
-    if (this.classList.contains('layer-hidden')) {// eslint-disable-line no-invalid-this
-      eventManager.trigger('mainMenu.showLayer', [item[0]]);
-      this.classList.remove('layer-hidden');// eslint-disable-line no-invalid-this
-    } else {
-      eventManager.trigger('mainMenu.hideLayer', [item[0]]);
-      this.classList.add('layer-hidden');// eslint-disable-line no-invalid-this
-    }
+  // Show layer
+  geonaDiv.find('.js-geona-layers-list__item-header-icon-visibility-hiding').click((jQueryEvent) => {
+    let item = jQueryEvent.target; // The HTML element which was clicked
+    let identifier = $(jQueryEvent.target).closest('li')[0].dataset.identifier; // The layer id, stored in the dataset
+    eventManager.trigger('mainMenu.showLayer', [identifier, item]);
+  });
+
+  // Hide layer
+  geonaDiv.find('.js-geona-layers-list__item-header-icon-visibility-showing').click((jQueryEvent) => {
+    let item = jQueryEvent.target; // The HTML element which was clicked
+    let identifier = $(jQueryEvent.target).closest('li')[0].dataset.identifier; // The layer id, stored in the dataset
+    eventManager.trigger('mainMenu.hideLayer', [identifier, item]);
+  });
+
+  // Toggle settings panel
+  geonaDiv.find('.js-geona-layers-list__item-header-icon-settings').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.toggleLayersPanelItemTab', [item, 'settings']);
+  });
+
+  // Toggle info panel
+  geonaDiv.find('.js-geona-layers-list__item-header-icon-info').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.toggleLayersPanelItemTab', [item, 'info']);
+  });
+
+  // Toggle analysis panel
+  geonaDiv.find('.js-geona-layers-list__item-header-icon-analysis').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.toggleLayersPanelItemTab', [item, 'analysis']);
   });
 
   // Remove layer
-  parentDiv.find('.js-geona-layers-list__item-remove').click(function(jQueryEvent) {
+  geonaDiv.find('.js-geona-layers-list__item-header-icon-remove').click((jQueryEvent) => {
     // Finds the list element that contains the icon which was clicked
-    let item = $(jQueryEvent.target).closest('li'); // eslint-disable-line no-invalid-this
+    let item = $(jQueryEvent.target).closest('li');
     eventManager.trigger('mainMenu.removeLayer', [item[0]]);
+  });
+
+  // Change layer min value - also calls reEnableAutoScale
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__scale-min').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li');
+    let layerIdentifier = item[0].dataset.identifier;
+    let min = jQueryEvent.target.value;
+    let max = item.find('.js-geona-layers-list__item-body-settings__scale-max').val();
+    let log = item.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked');
+    eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [item, layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable (as part of splitting main manu up)
+    eventManager.trigger('mainMenu.reEnableAutoScale', item);
+  });
+
+  // Change layer max value - also calls reEnableAutoScale
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__scale-max').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li');
+    let layerIdentifier = item[0].dataset.identifier;
+    let min = item.find('.js-geona-layers-list__item-body-settings__scale-min').val();
+    let max = jQueryEvent.target.value;
+    let log = item.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').prop('checked');
+    eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [item, layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable (as part of splitting main manu up)
+    eventManager.trigger('mainMenu.reEnableAutoScale', item);
+  });
+
+  // Toggle layer logarithmic - also calls reEnableAutoScale
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__scale-logarithmic').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li');
+    let layerIdentifier = item[0].dataset.identifier;
+    let min = item.find('.js-geona-layers-list__item-body-settings__scale-min').val();
+    let max = item.find('.js-geona-layers-list__item-body-settings__scale-max').val();
+    let log = $(jQueryEvent.target).prop('checked');
+    eventManager.trigger('mainMenu.layersPanelScalebars.validateScale', [item, layerIdentifier, min, max, log]); // todo change this from layersPanelScalebars to something more reasonable (as part of splitting main manu up)
+    eventManager.trigger('mainMenu.reEnableAutoScale', item); // todo https://gitlab.rsg.pml.ac.uk/web-development/geona/issues/109
+  });
+
+  // Apply layer autoscale
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__scale-auto-scale').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.applyAutoScale', item);
+  });
+
+  // Reset scale - also calls reEnableAutoScale
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__scale-reset').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let layerIdentifier = item.dataset.identifier;
+    eventManager.trigger('mainMenu.layersPanelScalebars.resetScale', layerIdentifier);
+    eventManager.trigger('mainMenu.reEnableAutoScale', item);
+  });
+
+  // Change layer opacity
+  geonaDiv.find('.js-geona-layers-list__item-body-settings-opacity-range').on('input', (jQueryEvent) => {
+    let value = $(jQueryEvent.target).val();
+    let item = $(jQueryEvent.target).closest('li')[0];
+    eventManager.trigger('mainMenu.changeLayerOpacity', [item, value]);
+  });
+
+  // Change layer elevation
+  geonaDiv.find('.js-geona-layers-list__item-body-settings-elevation-select').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let layerIdentifier = item.dataset.identifier;
+    let elevation = $(item).find('.js-geona-layers-list__item-body-settings-elevation-select').val();
+    eventManager.trigger('mainMenu.changeElevationStyle', [layerIdentifier, elevation]);
+  }); // todo also change the layer elevation in the analysis tab
+
+  // Change layer style
+  geonaDiv.find('.js-geona-layers-list__item-body-settings-styles-select').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let style = $(item).find('.js-geona-layers-list__item-body-settings-styles-select').val();
+    eventManager.trigger('mainMenu.changeLayerStyle', [item, style]);
+  });
+
+  // Set below min color - contains show/hide below min color input
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__below-min-color').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let option = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color option:selected').val();
+    if (option === 'Custom') {
+      eventManager.trigger('mainMenu.showBelowMinColorInput', item);
+    } else {
+      eventManager.trigger('mainMenu.hideBelowMinColorInput', item);
+      eventManager.trigger('mainMenu.setBelowMinColor', [item, option]);
+    }
+  });
+  // Set custom below min color
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__text').val();
+    let option = '0x' + customColorHex;
+    eventManager.trigger('mainMenu.setBelowMinColor', [item, option]);
+  });
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker')
+    .change((jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+
+      let option = '0x' + customColorHex;
+      eventManager.trigger('mainMenu.setBelowMinColor', [item, option]);
+    })
+    .on('input', (jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__below-min-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+      eventManager.trigger('mainMenu.updateBelowMinColorGraphic', [item, customColorHex]);
+    });
+
+  // Set above max color - contains show/hide above max color input
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__above-max-color').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let option = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color option:selected').val();
+    if (option === 'Custom') {
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val();
+      option = '0x' + customColorHex;
+      eventManager.trigger('mainMenu.showAboveMaxColorInput', item);
+    } else {
+      eventManager.trigger('mainMenu.hideAboveMaxColorInput', item);
+      eventManager.trigger('mainMenu.setAboveMaxColor', [item, option]);
+    }
+  });
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__text').val();
+    let option = '0x' + customColorHex;
+    eventManager.trigger('mainMenu.setAboveMaxColor', [item, option]);
+  });
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker')
+    .change((jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+
+      let option = '0x' + customColorHex;
+      eventManager.trigger('mainMenu.setAboveMaxColor', [item, option]);
+    })
+    .on('input', (jQueryEvent) => {
+      let item = $(jQueryEvent.target).closest('li')[0];
+      let customColorHex = $(item).find('.js-geona-layers-list__item-body-settings__above-max-color-input__picker').val();
+      // Remove the '#' from the color code
+      customColorHex = customColorHex.slice(1);
+      eventManager.trigger('mainMenu.updateAboveMaxColorGraphic', [item, customColorHex]);
+    });
+
+  // Set number of color bands
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__color-bands-text').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let numColorBands = $(item).find('.js-geona-layers-list__item-body-settings__color-bands-text').val();
+    eventManager.trigger('mainMenu.setNumberOfColorBands', [item, numColorBands]);
+  });
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__color-bands-slider').change((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let numColorBands = $(item).find('.js-geona-layers-list__item-body-settings__color-bands-slider').val();
+    eventManager.trigger('mainMenu.setNumberOfColorBands', [item, numColorBands]);
+  });
+
+  // Execute changes buffer
+  geonaDiv.find('.js-geona-layers-list__item-body-settings__apply-changes').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let layerIdentifier = item.dataset.identifier;
+    eventManager.trigger('mainMenu.executeChangesBuffer', layerIdentifier);
+  });
+
+  // Submit WCS URL
+  geonaDiv.find('.js-geona-layers-list__item-body-analysis__no-wcs-url__submit-url').click((jQueryEvent) => {
+    let item = $(jQueryEvent.target).closest('li')[0];
+    let url = $(item).find('.js-geona-layers-list__item-body-analysis__no-wcs-url__wcs-url').val();
+    eventManager.trigger('mainMenu.submitWcsUrl', [item, url]);
   });
 }
 
@@ -214,23 +402,23 @@ function registerLayersTriggers(eventManager, parentDiv) {
  * Used by the main registerTriggers function to register triggers for Options panel elements which are
  * not loaded at startup.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
- * @param {JQuery}       parentDiv    The div which contains the current map.
+ * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
-function registerOptionsTriggers(eventManager, parentDiv) {
+export function registerOptionsTriggers(eventManager, geonaDiv) {
   // Select basemap
-  parentDiv.find('.js-geona-options-panel-content__basemaps').change(function() {
-    let option = parentDiv.find('.js-geona-options-panel-content__basemaps').val();
+  geonaDiv.find('.js-geona-options-panel-content__basemaps').change(function() {
+    let option = geonaDiv.find('.js-geona-options-panel-content__basemaps').val();
     eventManager.trigger('mainMenu.setBasemap', option);
   });
   // Select borders
-  parentDiv.find('.js-geona-options-panel-content__borders').change(function() {
-    let option = parentDiv.find('.js-geona-options-panel-content__borders option:selected').val();
-    let style = parentDiv.find('.js-geona-options-panel-content__borders option:selected').data('style');
+  geonaDiv.find('.js-geona-options-panel-content__borders').change(function() {
+    let option = geonaDiv.find('.js-geona-options-panel-content__borders option:selected').val();
+    let style = geonaDiv.find('.js-geona-options-panel-content__borders option:selected').data('style');
     eventManager.trigger('mainMenu.setBorders', [option, style]);
   });
   // Toggle graticule
-  parentDiv.find('.js-geona-options-panel-content__graticule').click(function() {
-    if (parentDiv.find('.js-geona-options-panel-content__graticule').prop('checked') === true) {
+  geonaDiv.find('.js-geona-options-panel-content__graticule').click(function() {
+    if (geonaDiv.find('.js-geona-options-panel-content__graticule').prop('checked') === true) {
       eventManager.trigger('mainMenu.showGraticule');
     } else {
       eventManager.trigger('mainMenu.hideGraticule');
@@ -239,10 +427,10 @@ function registerOptionsTriggers(eventManager, parentDiv) {
   // Select projection
   let previousProjection;
   let newProjection;
-  parentDiv.find('.js-geona-options-panel-content__projection').focus(() => {
-    previousProjection = parentDiv.find('.js-geona-options-panel-content__projection').val();
+  geonaDiv.find('.js-geona-options-panel-content__projection').focus(() => {
+    previousProjection = geonaDiv.find('.js-geona-options-panel-content__projection').val();
   }).change(() => {
-    newProjection = parentDiv.find('.js-geona-options-panel-content__projection').val();
+    newProjection = geonaDiv.find('.js-geona-options-panel-content__projection').val();
     eventManager.trigger('mainMenu.setProjection', [previousProjection, newProjection]);
   });
 }

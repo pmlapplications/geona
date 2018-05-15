@@ -15,10 +15,13 @@ export default class LayerWmts extends LayerVisible {
   constructor(layerConfig, layerServer) {
     super(layerConfig, layerServer);
     this.protocol = 'wmts';
-    this.identifier = layerConfig.identifier;
-    this.styles = layerConfig.styles;
     this.formats = layerConfig.formats;
     this.resourceUrls = layerConfig.resourceUrls;
     this.tileMatrixSetLinks = layerConfig.tileMatrixSetLinks;
+
+    // Add the supported projections to each layer from its tileMatrixSetLinks
+    for (let tileMatrixSetId of this.tileMatrixSetLinks) {
+      this.projections.push(layerServer.tileMatrixSets[tileMatrixSetId.tileMatrixSet].projection);
+    }
   }
 }

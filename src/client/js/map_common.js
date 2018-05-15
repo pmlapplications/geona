@@ -3,9 +3,15 @@
 import i18next from 'i18next';
 import $ from 'jquery';
 import request from 'request';
+import moment from 'moment';
+import _ from 'lodash';
+
 import {urlToFilename} from '../../common/map';
+import LayerWms from '../../common/layer/layer_wms';
+import LayerWmts from '../../common/layer/layer_wmts';
 
 
+// TODO some of these functions shouldn't be in here (e.g. urlInCache)
 /**
  * Variables and functions common to all map types.
  */
@@ -104,18 +110,22 @@ export function latLonLabelFormatter(latLonValue, positiveEnding, negativeEnding
 }
 
 /**
- * Checks if the url has been saved in the cache previously
- * @param {String} url The URL to check the cache for
- * @return {Boolean}   True if the URL has been saved previously
+ * Checks if the url has been saved in the cache previously.
+ * @param {String} geonaServer The server that this instance of Geona should query.
+ * @param {String} url         The URL to check the cache for.
+ *
+ * @return {Boolean} True if the URL has been saved previously.
  */
-export function urlInCache(url) {
+export function urlInCache(geonaServer, url) {
   return new Promise((resolve, reject) => {
-    let searchFile = 'http://127.0.0.1:7890/map/getCache/' + encodeURIComponent(urlToFilename(url) + '.json');
+    let searchFile = geonaServer + '/map/getCache/' + encodeURIComponent(urlToFilename(url) + '.json');
     request(searchFile, (err, response) => {
       if (err) {
         reject(err);
       } else if (response.statusCode === 200) {
-        resolve(true);
+        let jsonResponse = JSON.parse(response.body);
+        // Resolve the datetime that the layer server was cached
+        resolve(jsonResponse.cacheDatetime);
       } else {
         resolve(false);
       }
@@ -125,17 +135,18 @@ export function urlInCache(url) {
 
 /**
  * Fetches layers for all supported services.
- * @param  {String}  url        URL for service request
- * @param  {String}  service    Explicitly-defined service type
- * @param  {Boolean} save       Whether to save the retrieved config to cache
- * @param  {Boolean} [useCache] Whether to retrieve from cache or to fetch from the web and overwrite
- * @return {Array}              List of layers found from the request
+ * @param  {String}  geonaServer The address of the server that Geona should send queries to.
+ * @param  {String}  url         URL for service request.
+ * @param  {String}  service     Explicitly-defined service type.
+ * @param  {Boolean} [save]      Whether to save the retrieved config to cache.
+ * @param  {Boolean} [useCache]  Whether to retrieve from cache or to fetch from the web and overwrite.
+ * @return {Array}               List of layers found from the request.
  */
-export function getLayerServer(url, service, save = false, useCache = false) {
+export function getLayerServer(geonaServer, url, service, save = false, useCache = false) {
   return new Promise((resolve, reject) => {
     // ajax to server getLayerServer
-    let requestUrl = encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
-    $.ajax('http://127.0.0.1:7890/map/getLayerServer/' + requestUrl)
+    let requestUrl = encodeURIComponent(geonaServer) + '/' + encodeURIComponent(url) + '/' + service + '/' + save + '/' + useCache;
+    $.ajax(geonaServer + '/map/getLayerServer/' + requestUrl)
       .done((layerServerJson) => {
         resolve(layerServerJson);
       })
@@ -146,20 +157,19 @@ export function getLayerServer(url, service, save = false, useCache = false) {
 }
 
 /**
- * Gets the nearest possible time prior to or matching the requested time.
+ * Gets the nearest possible time prior to or matching the requested time. If the requestedTime is outside the bounds of
+ * the minimum or maximum time for the list of times, will return undefined.
  * @param  {String[]} times         The list of times to get the time from.
  * @param  {String}   requestedTime The requested time in ISO 8601 format.
  *
  * @return {String|undefined}       The nearest valid time to the requested time.
  */
 export function findNearestValidTime(times, requestedTime) {
-  // TODO remove the sort - map_libraries should sort instead
-  let sortedTimes = times.sort();
   // We set this to the earliest as a starting point
-  let nearestValidTime = sortedTimes[0];
+  let nearestValidTime = times[0];
   // We use Date objects for easy comparison
-  let dateNearestValidTime = new Date(sortedTimes[0]);
-  let dateLatestValidTime = new Date(sortedTimes[sortedTimes.length - 1]);
+  let dateNearestValidTime = new Date(times[0]);
+  let dateLatestValidTime = new Date(times[times.length - 1]);
   let dateRequestedTime = new Date(requestedTime);
 
   // If the requested time is earlier than the earliest possible or later than the latest possible
@@ -189,10 +199,10 @@ export function findNearestValidTime(times, requestedTime) {
 export function constructExtent(extent1, extent2) {
   let newExtent = {};
 
-  if (extent1.minLat === undefined || extent1.minLon === undefined || extent1.maxLat === undefined || extent1.maxLon === undefined) { // eslint-disable-line max-len
+  if (!extent1.minLat || !extent1.minLon || !extent1.maxLat || !extent1.maxLon) {
     throw new Error('First parameter: ' + extent1 + ' contains undefined values.');
   }
-  if (extent2.minLat === undefined || extent2.minLon === undefined || extent2.maxLat === undefined || extent2.maxLon === undefined) { // eslint-disable-line max-len
+  if (!extent2.minLat || !extent2.minLon || !extent2.maxLat || !extent2.maxLon) {
     throw new Error('Second parameter: ' + extent2 + ' contains undefined values.');
   }
 
@@ -225,11 +235,60 @@ export function constructExtent(extent1, extent2) {
 }
 
 /**
- * Loads the default/config Geona Layers and their corresponding LayerServers
- * @param  {Object} config The config for the map
- * @return {Object}           The availableLayers and availableLayerServers
+ * Generates an array of datetimes from 'start/end/interval' definitions
+ * @param  {Layer}    geonaLayer A Geona Layer definition.
+ * @return {String[]}            The newly-generated datetime values based on the data in the geonaLayer.
  */
-export function loadDefaultLayersAndLayerServers(config) {
+export function generateDatetimesFromIntervals(geonaLayer) {
+  // TODO add a progress bar for this operation (bar fills up as times get closer to the endtime)
+  // Some servers will represent time as 'startDate/endDate/period' so we will have to generate that data
+  let datetimes = [];
+
+  // Generate any dates if necessary
+  if (geonaLayer.dimensions.time.intervals) {
+    let allGeneratedTimes = [];
+    let times = geonaLayer.dimensions.time.intervals;
+    for (let i = 0; i < times.length; i++) {
+      let startDate = times[i].min;
+      let endDate = times[i].max;
+      let duration = moment.duration(times[i].resolution);
+
+      let generatedTimes = [startDate];
+      let nextTime = moment(startDate).add(duration);
+
+      // use moment
+      while (nextTime < moment(endDate)) {
+        generatedTimes.push(nextTime.toISOString());
+        nextTime.add(duration);
+      }
+      generatedTimes.push(endDate);
+
+      // Store the generated times to be added outside of the loop
+      allGeneratedTimes.push(generatedTimes);
+    }
+
+    // Concatenate all the generated times with any other values
+    for (let generatedTimes of allGeneratedTimes) {
+      datetimes = datetimes.concat(generatedTimes);
+    }
+
+    // Remove duplicate times
+    datetimes = _.uniq(datetimes);
+    // Sort from least-to-most recent
+    datetimes.sort();
+  }
+  return datetimes;
+}
+
+/**
+ * Loads the default/config Geona Layers and their corresponding LayerServers
+ * @param  {Object} config      The config for the map.
+ * @param  {String} geonaServer The address to query for server-side Geona functions.
+ * @return {Object}             The availableLayers and availableLayerServers.
+ */
+export function loadDefaultLayersAndLayerServers(config, geonaServer) {
+  // TODO actually instantiate some layer servers instead of just using the Objects
+
   // We will be modifying the config, so we want to clone it.
   // This is in case we have been passed a reference to the map's config, which we do not want to alter.
   // let config = JSON.parse(JSON.stringify(mapConfig)); // Fastest deep clone according to stackoverflow.com/a/5344074
@@ -250,7 +309,7 @@ export function loadDefaultLayersAndLayerServers(config) {
       uniqueLayerServers[layerServer.identifier] = layerServer;
     } else { // Merge the layers from both
       uniqueLayerServers[layerServer.identifier].layers =
-          uniqueLayerServers[layerServer.identifier].layers.concat(layerServer.layers);
+        uniqueLayerServers[layerServer.identifier].layers.concat(layerServer.layers);
     }
   }
   // Extract the layers from all the layerServers
@@ -260,12 +319,23 @@ export function loadDefaultLayersAndLayerServers(config) {
       if (loadedServersAndLayers.availableLayers[layer.identifier] === undefined) {
         if (layer.protocol !== 'bing' || config.bingMapsApiKey) {
           if (layer.layerServer === layerServer.identifier) {
-            loadedServersAndLayers.availableLayers[layer.identifier] = layer;
+            let geonaLayer;
+            switch (layer.protocol.toLowerCase()) {
+              case 'wms':
+                geonaLayer = new LayerWms(geonaServer, layer, layerServer);
+                break;
+              case 'wmts':
+                geonaLayer = new LayerWmts(layer, layerServer);
+                break;
+              default:
+                throw new Error('Unsupported layer protocol: ' + layer.protocol.toLowerCase());
+            }
+            loadedServersAndLayers.availableLayers[layer.identifier] = geonaLayer;
           } else {
             throw new Error(
               'Layer ' + layer.identifier + ' in LayerServer ' + layerServer.identifier +
-                ' has different LayerServer property (' + layer.layerServer +
-                '). Please ensure the Layer\'s layerServer property matches the identifier for its LayerServer.'
+              ' has different LayerServer property (' + layer.layerServer +
+              '). Please ensure the Layer\'s layerServer property matches the identifier for its LayerServer.'
             );
           }
         } else {
@@ -280,7 +350,6 @@ export function loadDefaultLayersAndLayerServers(config) {
   // Save the non-layer information for the LayerServers
   for (let layerServerIdentifier of Object.keys(uniqueLayerServers)) {
     let layerServer = {};
-    // delete layerServer.layers; // Do we want to keep the identifiers?
 
     for (let property of Object.keys(uniqueLayerServers[layerServerIdentifier])) {
       if (property !== 'layers') {

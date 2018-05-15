@@ -62,7 +62,7 @@ i18next
 
 
 /*
- * Setup express, the hbs (handlebars) template engine, and i18next handling and multiload backend route
+ * Set up express; the hbs (handlebars) template engine; and i18next handling and multiload backend route
  */
 
 let app = express();
@@ -132,6 +132,7 @@ app.use(mainRouter);
 let server = http.createServer(app);
 
 server.listen(configServer.get('port'), function() {
+  // TODO make this say the actual server
   console.log('Server running at http://127.0.0.1:' + configServer.get('port'));
 });
 

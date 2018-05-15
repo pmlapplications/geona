@@ -8,22 +8,17 @@ import LayerServerOws from './layer_server_ows';
  */
 export default class LayerServerWmts extends LayerServerOws {
   /**
-   * Instantiate a new LayerServerWmts
-   * @param  {Object} serverConfig The server config. See the class diagram.
+   * Instantiates a new LayerServerWmts. WMTS layer servers have two additional properties:
+   *  - operationsMetadata: Describes the server operations that can be performed (e.g. GetCapabilities).
+   *  - tileMatrixSets: Definitions for the tiles that corresponding layers use.
+   *
+   * @param {Object} serverConfig The server config. See the class diagram.
+   * @param {String} identifier   The identifier to use for this layer server.
    */
   constructor(serverConfig, identifier) {
     super(serverConfig, identifier);
 
-    // this.identifier = identifier;
-
     this.operationsMetadata = serverConfig.operationsMetadata;
     this.tileMatrixSets = serverConfig.tileMatrixSets;
-
-    for (let layer of this.layers) {
-      // Add the supported projections to each layer from its tileMatrixSetLinks
-      for (let tileMatrixSetId of layer.tileMatrixSetLinks) {
-        layer.projections.push(this.tileMatrixSets[tileMatrixSetId.tileMatrixSet].projection);
-      }
-    }
   }
 }

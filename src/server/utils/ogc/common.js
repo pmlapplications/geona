@@ -46,6 +46,36 @@ export function getCapabilities(protocol, url) {
 }
 
 /**
+ * Download the GetMetadata XML for the provided protocol from the provided url.
+ * @param  {String}  protocol        The OGC protocol/service type
+ * @param  {String}  url             The URL of the service
+ * @param  {String}  layerIdentifier The identifier for the layer we want the details of.
+ * @return {Promise}                 A promise that resolves with the GetMetadata XML
+ */
+export function getMetadata(protocol, url, layerIdentifier) {
+  return new Promise((resolve, reject) => {
+    // If a version is specified in the URL, it will be added onto the clean URL.
+    let version = '&' + url.match(/version=.*?(?=[&\s])|version=.*/);
+    // Cuts off the query string of the URL
+    let cleanUrl = url.replace(/\?.*/g, '');
+
+    switch (protocol) {
+      case 'wms':
+        cleanUrl += '?service=WMS&request=GetMetadata&item=layerDetails&layerName=' + layerIdentifier + version;
+        break;
+    }
+
+    request(cleanUrl, (err, response, body) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(body);
+    });
+  });
+}
+
+/**
  * Performs a DescribeCoverage request and downloads the returned XML.
  * @param  {String}  protocol The OGC protocol/service type
  * @param  {String}  url      The URL of the service

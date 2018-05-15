@@ -1,21 +1,29 @@
 <div class="js-geona-options-panel-content geona-options-panel-content">
-  <h3>Map Options</h3>
-  <label>Select basemap</label>
+  <h3>{{t 'menu:options-panel.header'}}</h3>
+  <label>{{t 'menu:options-panel.basemap'}}</label>
   <select class="js-geona-options-panel-content__basemaps">
-    <option>None</option>
+    <option>{{t 'menu:options-panel.none'}}</option>
+    {{#each data.basemaps}}
+      <option value= {{this.identifier}}>{{this.identifier}} - {{this.title}}</option>
+    {{/each}}
   </select>
   <br>
-  <label>Select borders</label>
+  <label>{{t 'menu:options-panel.borders'}}</label>
   <select class="js-geona-options-panel-content__borders">
-    <option>None</option>
+    <option>{{t 'menu:options-panel.none'}}</option>
+    {{#each data.borders}}
+      {{#each this.styles}}
+        <option value= {{../this.identifier}} data-style= {{this}}>{{../this.identifier}} ({{this}}) - {{../this.title}}</option>
+      {{/each}}
+    {{/each}}
   </select>
   <br>
-  <label>Display graticule</label>
+  <label>{{t 'menu:options-panel.graticule'}}</label>
   <input type="checkbox" class="js-geona-options-panel-content__graticule"></input>
   <br>
-  <label>Select projection</label>
+  <label>{{t 'menu:options-panel.projection'}}</label>
   <select class="js-geona-options-panel-content__projection">
-    <option>EPSG:4326</option>
-    <option>EPSG:3857</option>
+    <option value="EPSG:4326">{{t 'menu:options-panel.epsg4326'}}</option>
+    <option value="EPSG:3857">{{t 'menu:options-panel.epsg3857'}}</option>
   </select>
 </div>
