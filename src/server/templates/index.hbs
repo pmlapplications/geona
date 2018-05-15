@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>GP2</title>
+  <title>{{ package.name }}</title>
 
   {{!-- TODO Can we link to node_modules? --}}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js"></script>
@@ -11,7 +11,7 @@
   {{!-- <script src="/local1/data/scratch/git/web-development/gp2-contribution-guide/node_modules/babel-polyfill/dist/polyfill.min.js"></script> --}}
 
   <!--Includes the loader in the html-->
-  <script src="js/loader.js"></script>
+  <script src="{{ subFolderPath}}/js/loader.js"></script>
 
   <!--This script defines a particular config,
       then instantiates a new loader-->
@@ -22,7 +22,7 @@
     var config1 = {
       geonaVariable: 'geonaOl',
       onReadyCallback: 'geonaOnReady',
-      geonaServer: 'http://192.171.164.90:7890',
+      geonaServer: '/geona',
       divId: 'ol',
       map: {
         graticule: true,
@@ -31,7 +31,7 @@
     };
     var config2 = {
       geonaVariable: 'geonaL',
-      geonaServer: 'http://192.171.164.90:7890',
+      geonaServer: '/geona',
       divId: 'leaflet',
       map: {
         library: 'leaflet',

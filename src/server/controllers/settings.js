@@ -1,6 +1,6 @@
 /** @module controllers/settings */
 
-import conf from '../config';
+import * as conf from '../config';
 
 /**
  * Get the config for a client
@@ -8,5 +8,5 @@ import conf from '../config';
  * @param  {Object} res Express response
  */
 export function config(req, res) {
-  res.json(conf.getProperties().client);
+  res.json(conf.clients.getProperties());
 }

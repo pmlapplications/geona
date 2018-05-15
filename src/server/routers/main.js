@@ -2,6 +2,9 @@
 
 import express from 'express';
 
+import * as config from '../config';
+
+import adminRouter from '../admin/routers/main';
 import settingsRouter from './settings';
 import utilsRouter from './utils';
 import mapRouter from './map';
@@ -12,8 +15,12 @@ import * as mainController from '../controllers/main';
 const router = express.Router();
 export default router;
 
-router.get('/', mainController.index);
+let subFolderPath = config.server.get('subFolderPath');
 
-router.use('/settings', settingsRouter);
-router.use('/utils', utilsRouter);
-router.use('/map', mapRouter);
+router.get(subFolderPath + '/', mainController.index);
+
+router.use(subFolderPath + '/admin', adminRouter);
+
+router.use(subFolderPath + '/settings', settingsRouter);
+router.use(subFolderPath + '/utils', utilsRouter);
+router.use(subFolderPath + '/map', mapRouter);

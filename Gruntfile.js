@@ -7,6 +7,10 @@ module.exports = function(grunt) {
     'static/js/bundle.js': 'src/client/js/geona.js',
   };
 
+  let clientAdminBundle = {
+    'static/admin_static/js/bundle.js': 'src/client_admin/js/main.js',
+  };
+
   let loaderBundle = {
     'static/js/loader.js': 'src/client_loader/loader.js',
   };
@@ -24,8 +28,19 @@ module.exports = function(grunt) {
   let clientMapLeafletBundle = {
     'static/js/map_leaflet_es5.js': 'src/client/js/map_leaflet.js',
   };
+  let clientVendorLibs = [
+    'babel-runtime/regenerator',
+    'convict',
+    'eventemitter3',
+    'handlebars/runtime',
+    'i18next',
+    'i18next-browser-languagedetector',
+    'i18next-xhr-backend',
+    'jquery',
+    'lodash',
+  ];
 
-  let vendorLibs = [
+  let adminVendorLibs = [
     'babel-runtime/regenerator',
     'convict',
     'eventemitter3',
@@ -41,13 +56,14 @@ module.exports = function(grunt) {
     './src/client/vendor/js/leaflet_latlng_graticule.js',
   ];
 
-  let clientExternalLibs = vendorLibs.concat(leafletPlugins).concat([
+  let clientExternalLibs = clientVendorLibs.concat(leafletPlugins).concat([
     'openlayers',
     'leaflet',
   ]);
 
   let cssFiles = {
     'static/css/main.css': 'src/client/scss/main.scss',
+    'static/admin_static/css/main.css': 'src/client_admin/scss/main.scss',
   };
 
   let eslintFiles = [
@@ -55,6 +71,7 @@ module.exports = function(grunt) {
     '!src/client/vendor/**',
     '!src/client/templates/**',
     '!src/server/vendor/**',
+    '!src/client_admin/vendor/**',
   ];
 
   grunt.initConfig({
@@ -77,13 +94,20 @@ module.exports = function(grunt) {
           },
         ],
       },
-      babili: { // Minifying the browser bundle
+      minify: { // Minifying the browser bundle for client and admin apps
         files: [
           {
             expand: true,
             cwd: 'static/js/',
             src: ['*.js'],
             dest: 'static/js/',
+            ext: '.js',
+          },
+          {
+            expand: true,
+            cwd: 'static/admin_static/js/',
+            src: ['*.js'],
+            dest: 'static/admin_static/js/',
             ext: '.js',
           },
         ],
@@ -109,6 +133,15 @@ module.exports = function(grunt) {
           },
           watch: true,
           external: clientExternalLibs,
+        },
+      },
+
+      // Make client admin bundle
+      clientAdmin: {
+        files: clientAdminBundle,
+        options: {
+          watch: true,
+          external: adminVendorLibs,
         },
       },
 
@@ -165,7 +198,20 @@ module.exports = function(grunt) {
         src: ['.'],
         dest: 'static/js/vendor.js',
         options: {
-          alias: vendorLibs,
+          browserifyOptions: {},
+          alias: clientVendorLibs,
+          external: null,
+        },
+      },
+
+      // Make the vendor bundle for the admin app with all the common libraries
+      admin_vendor: {
+        src: ['.'],
+        dest: 'static/admin_static/js/vendor.js',
+        options: {
+          browserifyOptions: {},
+          alias: adminVendorLibs,
+          external: null,
         },
       },
 
@@ -207,7 +253,7 @@ module.exports = function(grunt) {
           {
             expand: true,
             cwd: 'src/server/templates',
-            src: ['*'],
+            src: ['**/*'],
             dest: 'lib/server/templates',
           },
         ],
@@ -222,14 +268,34 @@ module.exports = function(grunt) {
           },
         ],
       },
+      server_admin: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/server/admin/templates',
+            src: ['**/*'],
+            dest: 'lib/server/admin/templates',
+          },
+        ],
+      },
+      client_admin: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/client_admin/vendor',
+            src: ['*.js'],
+            dest: 'static/admin_static/js',
+          },
+        ],
+      },
     },
 
     env: { // Setting the BABEL_ENV environment variable to use the correct .babelrc config
       server: {
         BABEL_ENV: 'server',
       },
-      babili: {
-        BABEL_ENV: 'babili',
+      minify: {
+        BABEL_ENV: 'minify',
       },
       babelify: {
         BABEL_ENV: 'babelify',
@@ -269,7 +335,7 @@ module.exports = function(grunt) {
 
     jsdoc: {
       combined: {
-        src: ['README.md'],
+        src: ['src/documentation.js', 'README_documentation.md'],
         dest: 'static/documentation',
       },
       client: {
@@ -328,22 +394,65 @@ module.exports = function(grunt) {
         tasks: ['handlebars'],
       },
       sass: {
-        files: ['src/client/scss/**/*.scss'],
+        files: ['src/client/scss/**/*.scss', 'src/client_admin/scss/**/*.scss'],
         tasks: ['sass:development'],
       },
     },
   });
 
   // Build all
-  grunt.registerTask('default', ['server', 'client']);
-  // Build the server
-  grunt.registerTask('server', ['clean:server', 'copy:server', 'env:server', 'babel:server', 'jsdoc']);
-  // Build the client
-  grunt.registerTask('client', ['clean:client', 'copy:client', 'sass:production', 'handlebars', 'env:babelify', 'browserify:client',
-    'browserifyOther', 'env:babili', 'babel:babili']);
-  // Build the client and client tests, and watch for changes
-  grunt.registerTask('clientDev', ['eslint:fix', 'clean:client', 'copy:client', 'sass:development', 'handlebars', 'env:babelify',
-    'browserify:client', 'browserifyOther', 'copy:test', 'watch']);
+  grunt.registerTask('default', [
+    'server',
+    'client',
+  ]);
 
-  grunt.registerTask('browserifyOther', ['browserify:loader', 'browserify:clientTests', 'browserify:clientMapCommon', 'browserify:clientMapLeaflet', 'browserify:vendor', 'browserify:openlayers', 'browserify:leaflet']);
+  // Build the server
+  grunt.registerTask('server', [
+    'clean:server',
+    'copy:server',
+    'copy:server_admin',
+    'env:server',
+    'babel:server',
+  ]);
+
+  // Build the client
+  grunt.registerTask('client', [
+    'clean:client',
+    'copy:client',
+    'copy:client_admin',
+    'sass:production',
+    'handlebars',
+    'env:babelify',
+    'browserify:client',
+    'browserifyOther',
+    'env:minify',
+    'babel:minify',
+    'jsdoc',
+  ]);
+
+  // Build the client and watch for changes
+  grunt.registerTask('clientDev', [
+    'eslint:fix',
+    'clean:client',
+    'copy:client',
+    'copy:client_admin',
+    'sass:development',
+    'handlebars',
+    'env:babelify',
+    'browserify:client',
+    'browserifyOther',
+    'watch',
+  ]);
+
+  grunt.registerTask('browserifyOther', [
+    'browserify:loader',
+    'browserify:clientTests',
+    'browserify:clientMapCommon',
+    'browserify:clientMapLeaflet',
+    'browserify:vendor',
+    'browserify:clientAdmin',
+    'browserify:admin_vendor',
+    'browserify:openlayers',
+    'browserify:leaflet',
+  ]);
 };

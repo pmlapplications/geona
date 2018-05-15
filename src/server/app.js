@@ -17,6 +17,7 @@ import './hbs_helpers';
 blocked((ms) => {
   console.log('Node thread blocked for ' + ms + ' ms!');
 });
+let subFolderPath = configServer.get('subFolderPath');
 
 /*
  * Setup i18next
@@ -66,7 +67,7 @@ i18next
 
 let app = express();
 app.set('view engine', 'hbs');
-app.set('views', __dirname + '/templates');
+app.set('views', [__dirname + '/templates', __dirname + '/admin/templates']);
 
 app.use(function(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -76,7 +77,7 @@ app.use(function(req, res, next) {
 });
 
 app.use(i18nextMiddleware.handle(i18next, {}));
-app.get('/locales/resources.json', i18nextMiddleware.getResourcesHandler(i18next)); // i18next multiload backend route
+app.get(subFolderPath + '/locales/resources.json', i18nextMiddleware.getResourcesHandler(i18next)); // i18next multiload backend route
 
 /*
  * Setup swagger for api docs
@@ -101,7 +102,7 @@ let swaggerOptions = {
 let swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 // serve swagger
-app.get('/swagger.json', function(req, res) {
+app.get(subFolderPath + '/swagger.json', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });
@@ -112,7 +113,7 @@ app.get('/swagger.json', function(req, res) {
  */
 
 // Setup the static path for the static folder
-app.use(express.static(path.join(__dirname, '../../static'), {
+app.use(subFolderPath, express.static(path.join(__dirname, '../../static'), {
   setHeaders: function(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
