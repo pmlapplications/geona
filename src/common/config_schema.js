@@ -11,6 +11,11 @@ export let server = {
     format: Array,
     default: [],
   },
+  subFolderPath: {
+    doc: 'If you wish to run the application in a subfolder then specify the path here; sub-sub-folders are permitted',
+    format: String,
+    default: '',
+  },
 };
 
 export let client = {
@@ -20,7 +25,7 @@ export let client = {
     default: '',
   },
   geonaServer: {
-    doc: 'The URL of the geona server to use, including "http://" or "https://", and without a trailing "/".',
+    doc: 'The URL of the geona server to use, including "http://" or "https://", and without a trailing "/". This value should be set if you intend to run Geona in a sub-directory',
     format: String,
     default: '',
   },

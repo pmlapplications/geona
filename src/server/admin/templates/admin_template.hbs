@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{ config.package.name }}</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Adamina|Quicksand">
+    <link rel="stylesheet" href="{{ config.subFolderPath }}/admin_static/css/main.css">
+  </head>
+  <body>
+
+    <!-- Fixed navbar -->
+    {{> main_navigation }}
+
+    <div class="container first-container" role="main">
+      {{> (lookup . 'template') }}
+      
+
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted small pull-right"><a href="{{ config.package.repositoryUrl }}" target="_blank">{{ config.package.name }} v{{ config.package.version }}</a></p>
+        <p class="text-muted small">&copy; 2017 <a href="http://www.pml-applications.co.uk">PML Applications Ltd.</a></p>
+      </div>
+    </footer>
+
+    <script src="{{ config.subFolderPath }}/admin_static/js/vendor.js" crossorigin="anonymous"></script>
+    <script src="{{ config.subFolderPath }}/admin_static/js/bundle.js" crossorigin="anonymous"></script>
+    <script src="{{ config.subFolderPath }}/admin_static/js/bootstrap.js" crossorigin="anonymous"></script>
+  </body>
+</html>

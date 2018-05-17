@@ -64,8 +64,8 @@
       ]
     },
 
-    "babili": { // For minifying/uglifying
-      "presets": [["babili"]]
+    "minify": { // For minifying/uglifying
+      "presets": [["minify"]]
     }
   }
 }
