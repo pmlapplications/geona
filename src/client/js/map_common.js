@@ -281,6 +281,48 @@ export function generateDatetimesFromIntervals(geonaLayer) {
 }
 
 /**
+   * Saves a layer to the config, including the server if not already saved in the config.
+   * @param  {Layer}         geonaLayer       The layer we want to save in the config.
+   * @param  {LayerServer}   geonaLayerServer The layer server for the layer we want to save in the config.
+   * @param  {LayerServer[]} configLayersList The basemapLayers, bordersLayers or dataLayers array from the config.
+   * @return {LayerServer[]}                  The configLayersList with the layer added.
+   */
+export function saveLayerToConfig(geonaLayer, geonaLayerServer, configLayersList) {
+  // Check if we need to save the layer server
+  let configLayerServer;
+  for (let i = 0; i < configLayersList.length; i++) {
+    let layerServer = configLayersList[i];
+    if (layerServer.identifier === geonaLayerServer.identifier) {
+      configLayerServer = layerServer;
+    }
+  }
+  // If the layer server has not been saved in the config previously, add it
+  if (!configLayerServer) {
+    configLayersList.push(geonaLayerServer);
+    configLayerServer = configLayersList[configLayersList.length - 1];
+  }
+
+  // The layer server might have a list of layers already. We'll save these too if it does
+  if (!configLayerServer.layers) {
+    configLayerServer.layers = [];
+  }
+  let layerExists = false;
+  // Check if the server's list of layers contains this layer (i.e. was added when the layerServer was saved to config)
+  for (let layer of configLayerServer.layers) {
+    if (layer.identifier === geonaLayer.identifier) {
+      layerExists = true;
+    }
+  }
+  // If the layer hasn't been added, put it in the config
+  if (!layerExists) {
+    configLayerServer.layers.push(geonaLayer);
+  }
+
+  // Return the updated config layers list
+  return configLayersList;
+}
+
+/**
  * Loads the default/config Geona Layers and their corresponding LayerServers
  * @param  {Object} config      The config for the map.
  * @param  {String} geonaServer The address to query for server-side Geona functions.

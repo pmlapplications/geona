@@ -2,7 +2,7 @@
 
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, saveLayerToConfig,
   findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
 import $ from 'jquery';
@@ -38,8 +38,6 @@ export class LMap extends GeonaMap {
     this._mapLayers = L.featureGroup();
     this.activeLayers = {};
     this._activeLayerGeneratedTimes = {};
-    /** @type {String} The time the map is set to */
-    this._mapTime = undefined;
     /**  @type {L.latlngGraticule} The map graticule */
     this._graticule = L.latlngGraticule({
       showLabel: true,
@@ -109,28 +107,30 @@ export class LMap extends GeonaMap {
     this.availableLayerServers = loadedServersAndLayers.availableLayerServers;
 
     // Adds any defined basemap to the map
-    if (this.config.basemap !== 'none' && this.config.basemap !== undefined) {
+    if (this.config.basemap !== 'none') {
       let layer = this.availableLayers[this.config.basemap];
       let layerServer = this.availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'basemap'});
     }
     // TODO don't do this if there is an overlay 'do you want to load or make new map'
     // Adds all defined data layers to the map
-    if (this.config.data !== undefined) {
-      if (this.config.data.length !== 0) {
-        for (let layerIdentifier of this.config.data) {
-          let layer = this.availableLayers[layerIdentifier];
-          let layerServer = this.availableLayerServers[layer.layerServer];
-          if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
-            this.addLayer(layer, layerServer, {modifier: 'hasTime'});
+    if (this.config.data.length !== 0) {
+      for (let layerIdentifier of this.config.data) {
+        let layer = this.availableLayers[layerIdentifier];
+        let layerServer = this.availableLayerServers[layer.layerServer];
+        if (this.availableLayers[layerIdentifier].modifier === 'hasTime') {
+          if (this.config.mapTime) {
+            this.addLayer(layer, layerServer, {modifier: 'hasTime', requestedTime: this.config.mapTime});
           } else {
-            this.addLayer(layer, layerServer);
+            this.addLayer(layer, layerServer, {modifier: 'hasTime', requestedTime: layer.dimensions.time.loaded});
           }
+        } else {
+          this.addLayer(layer, layerServer);
         }
       }
     }
     // Adds any defined borders layer to the map
-    if (this.config.borders.identifier !== 'none' && this.config.borders.identifier !== undefined) {
+    if (this.config.borders.identifier !== 'none') {
       let layer = this.availableLayers[this.config.borders.identifier];
       let layerServer = this.availableLayerServers[layer.layerServer];
       this.addLayer(layer, layerServer, {modifier: 'borders', requestedStyle: this.config.borders.style});
@@ -244,10 +244,12 @@ export class LMap extends GeonaMap {
           let geonaLayerServer = this.availableLayerServers[geonaLayer.layerServer];
           let options = {
             modifier: layer.options.modifier,
-            requestedTime: layer.options.layerTime,
             requestedStyle: layer.options.styles,
             shown: layer.options.shown,
           };
+          if (options.modifier === 'hasTime') {
+            options.requestedTime = geonaLayer.dimensions.time.loaded;
+          }
           this.addLayer(geonaLayer, geonaLayerServer, options);
         }
       });
@@ -588,8 +590,10 @@ export class LMap extends GeonaMap {
           // Selects the requested time, the closest to the map time, or the default layer time.
           if (options.requestedTime !== undefined) {
             time = findNearestValidTime(timeValues, options.requestedTime);
-          } else if (options.modifier === 'hasTime' && this._mapTime !== undefined) {
-            time = findNearestValidTime(timeValues, this._mapTime);
+          } else if (options.modifier === 'hasTime' && geonaLayer.dimensions.time.loaded) {
+            time = findNearestValidTime(timeValues, geonaLayer.dimensions.time.loaded);
+          } else if (options.modifier === 'hasTime' && this.config.mapTime !== '') {
+            time = findNearestValidTime(timeValues, this.config.mapTime);
           } else if (options.modifier === 'hasTime') {
             time = geonaLayer.dimensions.time.default;
           }
@@ -637,6 +641,9 @@ export class LMap extends GeonaMap {
     if (options.modifier) {
       geonaLayer.modifier = options.modifier;
     }
+    if (geonaLayer.modifier === 'hasTime') {
+      geonaLayer.dimensions.time.loaded = time;
+    }
     this.availableLayers[geonaLayer.identifier] = geonaLayer;
 
     // Save the LayerServer if not already saved
@@ -646,12 +653,24 @@ export class LMap extends GeonaMap {
       this.availableLayerServers[geonaLayerServer.identifier] = layerServerCopy;
     }
 
-    // Sets the map time if this is the first layer
-    if (this._mapTime === undefined && time !== undefined) {
-      this._mapTime = time;
+    // Save to config
+    switch (geonaLayer.modifier) {
+      case 'basemap':
+        this.config.basemapLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.basemapLayers);
+        break;
+      case 'borders':
+        this.config.bordersLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.bordersLayers);
+        break;
+      default:
+        this.config.dataLayers = saveLayerToConfig(geonaLayer, geonaLayerServer, this.config.dataLayers);
     }
 
-    switch (options.modifier) {
+    // Sets the map time if this is the first layer
+    if (this.config.mapTime === '' && time !== undefined) {
+      this.config.mapTime = time;
+    }
+
+    switch (geonaLayer.modifier) {
       case 'basemap':
         this._clearBasemap();
         layer.addTo(this._map);
@@ -675,12 +694,19 @@ export class LMap extends GeonaMap {
         this.activeLayers[geonaLayer.identifier] = layer;
         if (this.config.borders.identifier !== 'none' && this.initialized === true) {
           this.reorderLayers(geonaLayer.identifier, this._mapLayers.getLayers().length - 2);
+        }
+        if (!this.config.data.includes(geonaLayer.identifier)) {
           this.config.data.push(geonaLayer.identifier);
         }
     }
 
     if (options.shown === false) {
       this.hideLayer(geonaLayer.identifier);
+    }
+    if (geonaLayer.modifier === 'hasTime' && geonaLayer.dimensions.time.loaded === undefined) {
+      layer.setOpacity(0);
+      layer.options.opacity = 0;
+      layer.options.timeHidden = true;
     }
 
     if (geonaLayer.viewSettings !== undefined) {
@@ -745,7 +771,7 @@ export class LMap extends GeonaMap {
           }
         }
         if (dataLayersCounter === 0) {
-          this._mapTime = undefined;
+          this.config.mapTime = '';
         }
 
         // Update the config for the max and fit extents
@@ -954,9 +980,9 @@ export class LMap extends GeonaMap {
         activeLayer.options.opacity = 0;
         activeLayer.options.timeHidden = true;
         // We set the layerTime to undefined because it's now off the map
-        activeLayer.options.layerTime = undefined;
+        geonaLayer.dimensions.time.loaded = undefined;
         // We also set the map time to be the requestedTime, so when we sort below we have an early starting point.
-        this._mapTime = requestedTime;
+        this.config.mapTime = requestedTime;
       } else { // TODO change to 'else if (time !== the current layer time)' so that it doesn't readd unnecessarily
         // We save the zIndex so we can reorder the layer to it's current position when we re-add it
         let zIndex = activeLayer.options.zIndex;
@@ -977,23 +1003,22 @@ export class LMap extends GeonaMap {
         activeLayer.options.timeHidden = false;
 
         // We also set the map time to be the new layer time, so when we sort below we will have a valid starting point.
-        this._mapTime = time;
+        this.config.mapTime = time;
       }
 
       // We now find the latest map time.
-      let mapTime = new Date(this._mapTime);
+      let loadedTimes = [];
 
       // We compare the map data layers to find the latest time for the visible data layers
       for (let layer of this._mapLayers.getLayers()) {
-        // We check for visibility so that the map time will be the requested time if all layers are hidden
-        if (layer.options.modifier === 'hasTime' && layer.options.opacity < 0) {
-          let layerTime = new Date(layer.options.layerTime);
-          if (layerTime > mapTime) {
-            this._mapTime = layer.options.layerTime;
-            mapTime = new Date(layer.options.layerTime);
+        if (layer.options.modifier === 'hasTime') {
+          if (this.availableLayers[layer.options.identifier].dimensions.time.loaded) {
+            loadedTimes.push(this.availableLayers[layer.options.identifier].dimensions.time.loaded);
           }
         }
       }
+      loadedTimes.sort();
+      this.config.mapTime = loadedTimes[loadedTimes.length - 1];
     }
   }
 
@@ -1037,11 +1062,13 @@ export class LMap extends GeonaMap {
           // Save the layer options for re-adding
           let layerOptions = {
             modifier: layer.options.modifier,
-            requestedTime: layer.options.layerTime,
             shown: layer.options.shown,
             requestedStyle: styleIdentifier,
             elevation: layer.options.elevation,
           };
+          if (layerOptions.modifier === 'hasTime') {
+            layerOptions.requestedTime = geonaLayer.dimensions.time.loaded;
+          }
           // Save the z-index so the layer remains in position
           let zIndex = layer.options.zIndex;
 
@@ -1192,7 +1219,8 @@ export class LMap extends GeonaMap {
       lon: currentCenter.lng,
       lat: currentCenter.lat,
     };
-    this.config.viewSettings.zoom = deLeafletizeZoom(this._map.getZoom());
+    let projection = leafletizeProjection(this._map.options.crs.code);
+    this.config.viewSettings.zoom = deLeafletizeZoom(this._map.getZoom(), projection);
   }
 }
 
@@ -1209,7 +1237,7 @@ function leafletizeZoom(zoom, projection) {
     case L.CRS.EPSG4326:
       return zoom - 1;
     default:
-      return zoom;
+      return zoom; // todo maybe this should throw an error instead of silently doing nothing?
   }
 }
 
@@ -1226,7 +1254,7 @@ export function deLeafletizeZoom(zoom, projection) {
     case L.CRS.EPSG4326:
       return zoom + 1;
     default:
-      return zoom;
+      return zoom; // todo maybe this should throw an error instead of silently doing nothing?
   }
 }
 

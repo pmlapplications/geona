@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import GeonaMap from './map';
 import {
-  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage,
+  loadDefaultLayersAndLayerServers, latLonLabelFormatter, selectPropertyLanguage, saveLayerToConfig,
   findNearestValidTime, constructExtent, generateDatetimesFromIntervals,
 } from './map_common';
 import {registerTriggers} from './map_openlayers_triggers';
@@ -47,8 +47,6 @@ export class OlMap extends GeonaMap {
     this.activeLayers = {};
     /** @private @type {Object} @desc The generated times for the active layers */
     this._activeLayerGeneratedTimes = {};
-    /** @private @type {String} The time that the active map layers are set by */
-    this.config.mapTime = this.config.mapTime;
     /** @private @type {ol.Graticule} The map graticule */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
@@ -983,33 +981,17 @@ export class OlMap extends GeonaMap {
 
       // We now find the latest map time
       let loadedTimes = [];
-      console.log(requestedTime);
-      console.log(this.config.mapTime);
 
       // We compare the map data layers to find the latest time for the visible data layers
       for (let layer of this._map.getLayers().getArray()) {
-        // We check for visibility so that the map time will be the requested time if all layers are hidden
-        // if (layer.get('modifier') === 'hasTime' && layer.getVisible() === true) {
         if (layer.get('modifier') === 'hasTime') {
           if (this.availableLayers[layer.get('identifier')].dimensions.time.loaded) {
             loadedTimes.push(this.availableLayers[layer.get('identifier')].dimensions.time.loaded);
-            // let layerTime = new Date(geonaLayer.dimensions.time.loaded);
-            // if (!mapTime) {
-            //   mapTime = layerTime;
-            // }
-            // console.log('layerTime for ' + geonaLayer.identifier + ': ' + geonaLayer.dimensions.time.loaded);
-            // if (layerTime > mapTime) {
-            //   this.config.mapTime = geonaLayer.dimensions.time.loaded;
-            //   mapTime = new Date(geonaLayer.dimensions.time.loaded);
-            // }
           }
         }
       }
       loadedTimes.sort();
-      console.log(loadedTimes);
       this.config.mapTime = loadedTimes[loadedTimes.length - 1];
-      console.log('Map time at the end of loadNearestValidTime for layer ' + layerIdentifier);
-      console.log(this.config.mapTime);
     }
   }
 
@@ -1510,46 +1492,4 @@ function wmtsTileGridFromMatrixSet(matrixSet, extent = undefined, matrixLimits =
     tileSizes: tileSizes,
     sizes: sizes,
   });
-}
-
-/**
-   * Saves a layer to the config, including the server if not already saved in the config.
-   * @param  {Layer}         geonaLayer       The layer we want to save in the config.
-   * @param  {LayerServer}   geonaLayerServer The layer server for the layer we want to save in the config.
-   * @param  {LayerServer[]} configLayersList The basemapLayers, bordersLayers or dataLayers array from the config.
-   * @return {LayerServer[]}                  The configLayersList with the layer added.
-   */
-function saveLayerToConfig(geonaLayer, geonaLayerServer, configLayersList) {
-  // Check if we need to save the layer server
-  let configLayerServer;
-  for (let i = 0; i < configLayersList.length; i++) {
-    let layerServer = configLayersList[i];
-    if (layerServer.identifier === geonaLayerServer.identifier) {
-      configLayerServer = layerServer;
-    }
-  }
-  // If the layer server has not been saved in the config previously, add it
-  if (!configLayerServer) {
-    configLayersList.push(geonaLayerServer);
-    configLayerServer = configLayersList[configLayersList.length - 1];
-  }
-
-  // The layer server might have a list of layers already. We'll save these too if it does
-  if (!configLayerServer.layers) {
-    configLayerServer.layers = [];
-  }
-  let layerExists = false;
-  // Check if the server's list of layers contains this layer (i.e. was added when the layerServer was saved to config)
-  for (let layer of configLayerServer.layers) {
-    if (layer.identifier === geonaLayer.identifier) {
-      layerExists = true;
-    }
-  }
-  // If the layer hasn't been added, put it in the config
-  if (!layerExists) {
-    configLayerServer.layers.push(geonaLayer);
-  }
-
-  // Return the updated config layers list
-  return configLayersList;
 }
