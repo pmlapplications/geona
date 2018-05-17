@@ -436,6 +436,7 @@ module.exports = function(grunt) {
     'clean:client',
     'copy:client',
     'copy:client_admin',
+    'copy:test',
     'sass:development',
     'handlebars',
     'env:babelify',
