@@ -24,6 +24,9 @@ export class Geona {
    * @param {Object} [clientConfig] A JSON client config.
    */
   constructor(clientConfig) {
+    /** @desc The number of milliseconds between each auto-save of the Geona state. @type {Number} */
+    this.AUTO_SAVE_PERIOD = 60000; // One minute = 60000 milliseconds
+
     this.config = new Config(clientConfig);
 
     // Get the Geona div and add the 'geona-container' class to it
@@ -82,6 +85,17 @@ export class Geona {
           break;
       }
     });
+  }
+
+  /**
+   * Auto-saves the Geona state to the browser localStorage, and repeats every x milliseconds (where x is the period
+   * supplied).
+   * @param {Number} period The number of milliseconds between each auto-save.
+   */
+  activatePeriodicStateSave() {
+    setInterval(() => {
+      this.saveGeonaStateToBrowser();
+    }, this.AUTO_SAVE_PERIOD);
   }
 
   /**
