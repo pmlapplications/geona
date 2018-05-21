@@ -85,12 +85,29 @@ export class Geona {
   }
 
   /**
+   * Saves the current Geona config options as an Object in the browser localStorage.
+   */
+  saveGeonaStateToBrowser() {
+    // Gets the current Geona state as an Object
+    let geonaState = this._saveGeonaState();
+
+    // Construct a key for this instance's localStorage save (e.g. '#geona_geona-state') if not already constructed
+    if (!this.browserStorageKey) { // todo if the div ID has changed, this should be deleted and re-saved as the new divID
+      this.browserStorageKey = this.config.get('divId') + '_geona-state';
+    }
+    // Stores a stringified version of the Geona state Object in the browser localStorage
+    window.localStorage.setItem(this.browserStorageKey, JSON.stringify(geonaState));
+  }
+
+  /**
    * Saves the necessary options to recreate an instance of Geona in an identical form as when the method was called.
    * This includes (but is not limited to) the layers on the map, the available layers, the current zoom and extent, and
    * the GUI panels which are open.
+   * @return {Object} The current instance's config state for the 'map', 'intro' and 'controls' sections of the config.
+   * @private
    */
-  saveGeonaState() {
-    // Compiles all required options into a config Object
+  _saveGeonaState() {
+    // Holds all required options into a config Object
     let geonaState = {};
 
     // Map options
@@ -159,19 +176,29 @@ export class Geona {
       geonaState.map.viewSettings.maxExtent.maxLon = 'sanitized.Infinity';
     }
 
+    // Return the Geona state Object
+    return geonaState;
+  }
 
-    console.log(geonaState); // removeme
-
-
-    // Save the state into the browser cache (or database?)
-    this.geonaSaveState = JSON.stringify(geonaState); // TODO put this in the cache
+  /**
+   * Loads the Geona state that was most recently saved for this instance from the browser localStorage.
+   */
+  loadGeonaStateFromBrowser() {
+    // Will recreate the browserStorageKey if not kept from previous instantiation
+    // todo save the browserStorageKey to the config - will allow access to the previous map even if div ID changes
+    if (!this.browserStorageKey) {
+      this.browserStorageKey = this.config.get('divId') + '_geona-state';
+    }
+    let geonaStateJson = window.localStorage.getItem(this.browserStorageKey);
+    this._loadGeonaState(geonaStateJson);
   }
 
   /**
    * Alters the map and GUI to match the state as it was in the specified Geona state.
    * @param {String} geonaStateJson A stringified JSON Geona config containing map, controls and intro settings.
+   * @private
    */
-  loadGeonaState(geonaStateJson) {
+  _loadGeonaState(geonaStateJson) {
     let geonaState = JSON.parse(geonaStateJson);
 
     // Infinity will get converted to null when stringified so we need to check all the viewSettings and unsanitize them
