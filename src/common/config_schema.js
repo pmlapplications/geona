@@ -61,7 +61,7 @@ export let client = {
       display: {
         doc: 'Whether we will display the splash screen on page load.',
         format: Boolean,
-        default: false,
+        default: true,
       },
       content: {
         doc: 'The HTML (or a translation key) that will be displayed on the splash screen.',

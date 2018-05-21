@@ -6,8 +6,7 @@
   <title>{{ package.name }}</title>
 
   {{!-- TODO Can we link to node_modules? --}}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js"></script>
-  {{!-- <script src="../../../../node_modules/babel-polyfill/dist/polyfill.min.js"></script> --}}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js"></script>{{!-- <script src="../../../../node_modules/babel-polyfill/dist/polyfill.min.js"></script> --}}
   {{!-- <script src="/local1/data/scratch/git/web-development/gp2-contribution-guide/node_modules/babel-polyfill/dist/polyfill.min.js"></script> --}}
 
   <!--Includes the loader in the html-->
@@ -27,7 +26,12 @@
       map: {
         graticule: true,
         bingMapsApiKey: 'AgNtBFpBNF81T-ODIf_9WzE8UF_epbsfiSu9RYMbLfq_wXU_bBVAoyBw8VzfSjkd',
-      }
+      },
+      intro: {
+        splashScreen: {
+          display: false, // false while developing
+        },
+      },
     };
     var config2 = {
       geonaVariable: 'geonaL',
@@ -36,7 +40,12 @@
       map: {
         library: 'leaflet',
         graticule: true,
-      }
+      },
+      intro: {
+        splashScreen: {
+          display: false, // false while developing
+        },
+      },
     };
     // instantiates new loader for map
     geonaLoader.load(config1);
@@ -56,6 +65,7 @@
       width: 50%;
       height: 100%;
     }
+
     #leaflet {
       position: absolute;
       top: 0;
