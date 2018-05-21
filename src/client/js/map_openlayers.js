@@ -332,6 +332,8 @@ export class OlMap extends GeonaMap {
     });
     this._map.setView(newView);
 
+    registerTriggers(this.eventManager, this.geonaDiv, this._map);
+
     // todo Fit the map in the fitExtent - overrides zoom level
     // todo check for if config.zoomToExtent === true
     // if (fitExtent) {
