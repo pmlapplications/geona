@@ -9,6 +9,7 @@ import * as ol from './map_openlayers';
 import {initI18n} from './i18n';
 import {Gui} from './gui/gui';
 import {EventManager} from '../../common/event_manager';
+import {registerBindings} from './geona_bindings';
 
 // TODO These are for testing only
 window.templates = templates;
@@ -43,6 +44,7 @@ export class Geona {
 
     this.gui = new Gui(this);
     this.geonaServer = this.config.get('geonaServer');
+    registerBindings(this);
 
     // Initialize i18n and then the GUI
     initI18n(this.geonaServer).then(() => {
@@ -343,6 +345,7 @@ export class Geona {
     this.loadingInitialMenu = true;
     // Instantiate a new GUI
     this.gui = new Gui(this);
+    registerBindings(this);
 
     // Call init in order to instantiate a new Map
     this.gui.init(() => {
