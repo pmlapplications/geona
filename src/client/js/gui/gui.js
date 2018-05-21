@@ -27,6 +27,8 @@ export class Gui {
     this.geona = geona;
     /** The div containing this instance of Geona. Used to find the correct GUI elements. @type {HTMLElement} */
     this.geonaDiv = this.geona.geonaDiv;
+    /** The event manager for this instance of Geona. */
+    this.eventManager = this.geona.eventManager;
 
     /** The terms and conditions class which displays Ts&Cs before loading the map. @type {TermsAndConditions} */
     this.termsAndConditions = undefined;
@@ -78,6 +80,9 @@ export class Gui {
     let splashScreenConfig = this.geona.config.get('intro.splashScreen');
     if (splashScreenConfig.display) {
       this.splashScreen = new SplashScreen(this, splashScreenConfig);
+    } else {
+      // Auto-save will start straight away with no splash screen
+      this.eventManager.trigger('geona.activatePeriodicStateSave');
     }
 
     // When the map is ready, call the onReadyCallback
