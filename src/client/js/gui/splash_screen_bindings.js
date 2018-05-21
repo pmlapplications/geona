@@ -5,11 +5,11 @@
  */
 export function registerBindings(eventManager, splashScreen) {
   // Start new map
-  eventManager.bind('startNewMap', () => {
+  eventManager.bind('splashScreen.startNewMap', () => {
     splashScreen.startNewMap();
   });
   // Load previous map
-  eventManager.bind('loadPreviousMap', () => {
+  eventManager.bind('splashScreen.loadPreviousMap', () => {
     splashScreen.loadPreviousMap();
   });
 }

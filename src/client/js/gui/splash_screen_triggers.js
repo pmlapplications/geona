@@ -7,10 +7,10 @@
 export function registerTriggers(eventManager, geonaDiv) {
   // Button - Start building map
   geonaDiv.find('.js-geona-splash-screen__start-new').click(() => {
-    eventManager.trigger('startNewMap');
+    eventManager.trigger('splashScreen.startNewMap');
   });
   // Button - Load previous map
   geonaDiv.find('.js-geona-splash-screen__load-previous').click(() => {
-    eventManager.trigger('loadPreviousMap');
+    eventManager.trigger('splashScreen.loadPreviousMap');
   });
 }
