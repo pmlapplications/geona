@@ -32,10 +32,10 @@ export class SplashScreen {
   }
 
   /**
-   * TODO Removes the splash screen and places the saved map items on the map.
+   * Removes the splash screen and loads the most recently-saved Geona state.
    */
   loadPreviousMap() {
-    // variable only set to stop eslint from complaining about using 'this' - can be removed along with the alert.
-    this.eslintPleaser = alert('Need to save maps first. This alert is located in splash_screen.js');
+    this.geona.loadGeonaStateFromBrowser();
+    this.gui.geonaDiv.find('.js-geona-splash-screen').remove();
   }
 }
