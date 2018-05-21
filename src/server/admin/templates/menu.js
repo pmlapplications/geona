@@ -36,6 +36,6 @@ export let structure = [
     title: 'Contact',
     path: '/contact',
   },
-  
+
 ];
 

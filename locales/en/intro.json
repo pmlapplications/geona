@@ -5,7 +5,7 @@
     "accept": "Accept"
   },
   "splashScreen": {
-    "content": "<p>The GIS portal provides model simulated, earth observation and in-situ data for global water resources.</p><p>Enter the portal now and plot data on a map, analyse it through graphs or export and share.</p>",
+    "content": "<p>Geona provides model simulated, earth observation and in-situ data for global water resources.</p><p>Enter the portal now and plot data on a map, analyse it through graphs or export and share.</p>",
     "loadPreviousMap": "Load your previous map",
     "startBuildingMap": "Start building a map"
   }
