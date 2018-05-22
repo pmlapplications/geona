@@ -97,7 +97,7 @@
     "d3": "^4.11.0",
     "dragula": "^3.7.2",
     "eventemitter3": "^2.0.3",
-    "express": "^4.15.2",
+    "express": "^4.16.3",
     "grunt-handlebars-compiler": "^0.3.1",
     "grunt-sass": "^2.0.0",
     "hbs": "^4.0.1",

@@ -76,6 +76,7 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use(express.json());
 app.use(i18nextMiddleware.handle(i18next, {}));
 app.get(subFolderPath + '/locales/resources.json', i18nextMiddleware.getResourcesHandler(i18next)); // i18next multiload backend route
 
