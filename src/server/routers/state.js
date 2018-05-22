@@ -8,4 +8,4 @@ const router = express.Router();
 export default router;
 
 router.post('/saveStateToDatabase', state.saveStateToDatabase);
-router.get('/:fileId', state.loadStateFromDatabase);
+router.get('/:stateId', state.loadStateFromDatabase);

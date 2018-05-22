@@ -34,12 +34,27 @@ export function saveStateToDatabase(req, res) {
   }
 }
 
+/**
+ * Returns a previously-saved state (which corresponds to the supplied key) from the database, if found.
+ * @param {Object} req Express request
+ * @param {Object} res Express response
+ */
 export function loadStateFromDatabase(req, res) {
-
+  let stateUri = path.join(__dirname, '..', '..', '..', 'state/');
+  let fileId = req.params.stateId;
+  let filePath = stateUri + fileId + '.json';
+  fs.readFile(filePath, 'utf8', (err) => {
+    if (err !== null) { // File with that name does not exist
+      res.status(404).send(new Error('No state with ID \'' + req.params.stateId + '\' was found.'));
+    } else { // Found file with that name
+      res.status(200).sendFile(filePath);
+    }
+  });
 }
 
 /**
  * Generates a hash to use when saving a state. The hashing function was taken from https://stackoverflow.com/a/32649933
+ * @return {String} A (probably) unique String of variable length to use as a unique code.
  */
 function generateHashCode() {
   // return (Number(new Date)).toString(36).slice(-6);

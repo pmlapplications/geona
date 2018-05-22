@@ -239,6 +239,24 @@ export class Geona {
   }
 
   /**
+   * Requests and loads the Geona state which corresponds to
+   * @param {String} key The ID assigned to the state when it was saved into the database
+   */
+  loadGeonaStateFromDatabase(key) { // todo 1. The new loader method for when config has state option 2. Check for URL containing '#/state/id'
+    // Sends to server to be saved
+    $.ajax(this.geonaServer + '/state/' + key,
+      {
+        contentType: 'application/json',
+      })
+      .done((response) => {
+        this._loadGeonaState(JSON.stringify(response));
+      })
+      .fail((err) => {
+        console.error(err.statusText);
+      });
+  }
+
+  /**
    * Alters the map and GUI to match the state as it was in the specified Geona state.
    * @param {String} geonaStateJson A stringified JSON Geona config containing map, controls and intro settings.
    * @private
