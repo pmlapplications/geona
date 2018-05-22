@@ -1,6 +1,7 @@
 /** @module loader */
 
 // import 'babel-polyfill';
+import $ from 'jquery';
 
 /* global geona */
 
@@ -71,10 +72,35 @@ function createInstances() {
   while (queuedConfigs.length) {
     let config = queuedConfigs.pop();
 
-    let geonaInstance = new geona.Geona(config);
+    let geonaInstance;
+    // If there is a state defined, we'll retrieve the config from the server
+    if (config.state) {
+      console.log(config);
+      $.ajax(config.geonaServer + '/state/' + config.state,
+        {
+          contentType: 'application/json',
+        })
+        .done((response) => {
+          // Update the current config options to match the state
+          config.map = response.map;
+          config.intro = response.intro;
+          config.controls = response.controls;
 
-    if (config.geonaVariable) {
-      window[config.geonaVariable] = geonaInstance;
+          geonaInstance = new geona.Geona(config);
+        })
+        .fail(() => {
+          geonaInstance = new geona.Geona(config);
+        });
+
+      if (config.geonaVariable) {
+        window[config.geonaVariable] = geonaInstance;
+      }
+    } else { // Otherwise we'll just use the defaults, and any user-defined options
+      geonaInstance = new geona.Geona(config);
+
+      if (config.geonaVariable) {
+        window[config.geonaVariable] = geonaInstance;
+      }
     }
   }
 }

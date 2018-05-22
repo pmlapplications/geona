@@ -34,6 +34,11 @@ export let client = {
     format: String,
     default: '#geona',
   },
+  state: {
+    doc: 'The ID of a Geona state to load from the server. Will override the intro, controls and map settings of the default config, including any user-defined settings.',
+    format: String,
+    default: '',
+  },
   geonaVariable: {
     doc: 'The string name of a global (window) variable to store the geona instance in as soon as it is created (before it\'s finished initializing).',
     format: String,
