@@ -90,9 +90,8 @@ export class Geona {
   }
 
   /**
-   * Auto-saves the Geona state to the browser localStorage, and repeats every x milliseconds (where x is the period
-   * supplied).
-   * @param {Number} period The number of milliseconds between each auto-save.
+   * Auto-saves the Geona state to the browser localStorage, and repeats every x milliseconds (where x is the CONST
+   * defined at the top of the file).
    */
   activatePeriodicStateSave() {
     setInterval(() => {
@@ -104,7 +103,7 @@ export class Geona {
    * Saves the current Geona config options as an Object in the browser localStorage.
    */
   saveGeonaStateToBrowser() {
-    // Gets the current Geona state as an Object
+    // Gets the current, stringified Geona state
     let geonaState = this._saveGeonaState();
 
     // Construct a key for this instance's localStorage save (e.g. '#geona_geona-state') if not already constructed
@@ -112,14 +111,40 @@ export class Geona {
       this.browserStorageKey = this.config.get('divId') + '_geona-state';
     }
     // Stores a stringified version of the Geona state Object in the browser localStorage
-    window.localStorage.setItem(this.browserStorageKey, JSON.stringify(geonaState));
+    window.localStorage.setItem(this.browserStorageKey, geonaState);
+  }
+
+  /**
+   * Saves the current Geona config options as a stringified Object in the database.
+   * TODO currently saves to local disk rather than database
+   */
+  saveGeonaStateToDatabase() {
+    // Gets the current, stringified Geona state
+    let geonaState = this._saveGeonaState();
+    console.log(geonaState);
+
+    // Sends to server to be saved
+    $.ajax(this.geonaServer + '/state/saveStateToDatabase',
+      {
+        data: geonaState,
+        type: 'POST',
+        contentType: 'application/json',
+        // dataType: 'json',
+      })
+      .done((response) => {
+        console.log(response);
+      })
+      .fail((err) => {
+        console.error(err.statusText);
+      });
   }
 
   /**
    * Saves the necessary options to recreate an instance of Geona in an identical form as when the method was called.
    * This includes (but is not limited to) the layers on the map, the available layers, the current zoom and extent, and
    * the GUI panels which are open.
-   * @return {Object} The current instance's config state for the 'map', 'intro' and 'controls' sections of the config.
+   * @return {String} The current instance's config state for the 'map', 'intro' and 'controls' sections of the config
+   *                  (stringified).
    * @private
    */
   _saveGeonaState() {
@@ -193,7 +218,7 @@ export class Geona {
     }
 
     // Return the Geona state Object
-    return geonaState;
+    return JSON.stringify(geonaState);
   }
 
   /**
@@ -206,7 +231,11 @@ export class Geona {
       this.browserStorageKey = this.config.get('divId') + '_geona-state';
     }
     let geonaStateJson = window.localStorage.getItem(this.browserStorageKey);
-    this._loadGeonaState(geonaStateJson);
+    if (geonaStateJson) {
+      this._loadGeonaState(geonaStateJson);
+    } else {
+      console.error('Geona state info not found in browser local storage with key ' + this.browserStorageKey);
+    }
   }
 
   /**
