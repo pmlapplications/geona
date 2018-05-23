@@ -72,11 +72,17 @@ function createInstances() {
   while (queuedConfigs.length) {
     let config = queuedConfigs.pop();
 
+    // Check the URL for a state to load
+    // If the URL after the '#' contains the string 'state'
+    if (window.location.pathname.match(/state/)) {
+      // Regex for array of '#/state/' and everything after - if string is '#/state/1234', regex[2] will match '1234'
+      config.state = window.location.pathname.match(/(state\/)(.*)/)[2];
+    }
+
     let geonaInstance;
     // If there is a state defined, we'll retrieve the config from the server
     if (config.state) {
-      console.log(config);
-      $.ajax(config.geonaServer + '/state/' + config.state,
+      $.ajax(config.geonaServer + '/state/loadStateFromDatabase/' + config.state,
         {
           contentType: 'application/json',
         })

@@ -226,7 +226,7 @@ export class Geona {
    */
   loadGeonaStateFromBrowser() {
     // Will recreate the browserStorageKey if not kept from previous instantiation
-    // todo save the browserStorageKey to the config - will allow access to the previous map even if div ID changes
+    // todo save the browserStorageKey to the config? Will allow access to the previous map even if div ID changes
     if (!this.browserStorageKey) {
       this.browserStorageKey = this.config.get('divId') + '_geona-state';
     }
@@ -240,11 +240,11 @@ export class Geona {
 
   /**
    * Requests and loads the Geona state which corresponds to
-   * @param {String} key The ID assigned to the state when it was saved into the database
+   * @param {String} key The ID assigned to the state when it was saved into the database.
    */
-  loadGeonaStateFromDatabase(key) { // todo 1. The new loader method for when config has state option 2. Check for URL containing '#/state/id'
+  loadGeonaStateFromDatabase(key) {
     // Sends to server to be saved
-    $.ajax(this.geonaServer + '/state/' + key,
+    $.ajax(this.geonaServer + '/state/loadStateFromDatabase/' + key,
       {
         contentType: 'application/json',
       })
