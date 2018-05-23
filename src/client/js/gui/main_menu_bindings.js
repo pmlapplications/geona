@@ -230,7 +230,16 @@ export function registerBindings(eventManager, menu) {
   /**
    * Share Panel
    */
+  // Display share panel
   eventManager.bind('mainMenu.displaySharePanel', () => {
     menu.displaySharePanel();
+  });
+  // Display share URL overlay
+  eventManager.bind('mainMenu.displayShareOverlay', (stateId) => {
+    menu.displayShareOverlay(stateId);
+  });
+  // Close share URL overlay
+  eventManager.bind('mainMenu.closeShareOverlay', () => {
+    menu.closeShareOverlay();
   });
 }

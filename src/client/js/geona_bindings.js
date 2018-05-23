@@ -3,5 +3,8 @@ export function registerBindings(geona) {
   eventManager.bind('geona.activatePeriodicStateSave', () => {
     geona.activatePeriodicStateSave();
   });
-  // eventManager.trigger('geona.activatePeriodicStateSave');
+
+  eventManager.bind('geona.saveGeonaStateToDatabase', () => {
+    geona.saveGeonaStateToDatabase();
+  });
 }

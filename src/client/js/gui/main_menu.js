@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import moment from 'moment';
 import * as templates from '../../templates/compiled';
-import {registerTriggers, registerLayersTriggers, registerExploreTriggers, registerOptionsTriggers} from './main_menu_triggers';
+import {registerTriggers, registerLayersTriggers, registerExploreTriggers, registerOptionsTriggers, registerShareTriggers, registerShareOverlayTriggers} from './main_menu_triggers';
 import {registerBindings} from './main_menu_bindings';
 
 import {selectPropertyLanguage, getLayerServer, urlInCache} from '../map_common';
@@ -56,6 +56,8 @@ export class MainMenu {
     this.helpPanel = undefined;
     /** @desc Holds the share panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.sharePanel = undefined;
+    /** @desc Holds the share panel overlay after creation so it can be displayed again easily. @type {HTMLElement} */
+    this.sharePanelOverlay = undefined;
 
     /** @desc Holds an array of impending changes for each layer. @type {Object} */
     this.changesBuffer = {};
@@ -1579,6 +1581,39 @@ export class MainMenu {
    */
   constructSharePanel() {
     this.geonaDiv.find('.js-geona-panel').prepend(templates.share_panel());
+    registerShareTriggers(this.eventManager, this.geonaDiv);
+  }
+
+  /**
+   * Displays the share URL box, with a URL in it.
+   * @param {String} stateId The ID for the state that we want to share.
+   */
+  displayShareOverlay(stateId) {
+    let shareUrl = this.geona.geonaServer + '/state/' + stateId;
+
+    // Construct the share overlay, or unhide it
+    if (!this.sharePanelOverlay) {
+      this.constructShareOverlay();
+      this.sharePanelOverlay = this.geonaDiv.find('.js-geona-overlay__share-url')[0];
+    } else {
+      this.sharePanelOverlay.classList.remove('removed');
+    }
+
+    // Display the URL in the box
+    $(this.sharePanelOverlay).find('.js-geona-overlay__share-url__output').val(shareUrl);
+  }
+
+  constructShareOverlay() {
+    this.geonaDiv.append(templates.share_url_overlay());
+    registerShareOverlayTriggers(this.eventManager, this.geonaDiv);
+  }
+
+  /**
+   * Removes the share URL box, but keeps it existing on the GUI.
+   */
+  closeShareOverlay() {
+    $(this.sharePanelOverlay).find('.js-geona-overlay__share-url__output').val('');
+    this.sharePanelOverlay.classList.add('removed');
   }
 }
 

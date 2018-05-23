@@ -399,8 +399,7 @@ export function registerLayersTriggers(eventManager, geonaDiv) {
 }
 
 /**
- * Used by the main registerTriggers function to register triggers for Options panel elements which are
- * not loaded at startup.
+ * Used by the options panel construct function to register triggers for Options panel elements.
  * @param {EventManager} eventManager The event manager for the current instance of Geona.
  * @param {JQuery}       geonaDiv    The div which contains the current map.
  */
@@ -432,5 +431,27 @@ export function registerOptionsTriggers(eventManager, geonaDiv) {
   }).change(() => {
     newProjection = geonaDiv.find('.js-geona-options-panel-content__projection').val();
     eventManager.trigger('mainMenu.setProjection', [previousProjection, newProjection]);
+  });
+}
+
+/**
+ * Used by the share panel construct function to register triggers for share panel elements.
+ * @param {EventManager} eventManager The event manager for the current instance of Geona.
+ * @param {JQuery}       geonaDiv    The div which contains the current map.
+ */
+export function registerShareTriggers(eventManager, geonaDiv) {
+  geonaDiv.find('.js-geona-share-panel-content__share-url').click(function() {
+    eventManager.trigger('geona.saveGeonaStateToDatabase');
+  });
+}
+
+/**
+ * Used by the share panel overlay construct function to register triggers for share panel overlay elements.
+ * @param {EventManager} eventManager The event manager for the current instance of Geona.
+ * @param {JQuery}       geonaDiv    The div which contains the current map.
+ */
+export function registerShareOverlayTriggers(eventManager, geonaDiv) {
+  geonaDiv.find('.js-geona-overlay__share-url__close').click(function() {
+    eventManager.trigger('mainMenu.closeShareOverlay');
   });
 }

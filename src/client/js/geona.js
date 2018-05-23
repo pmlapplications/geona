@@ -121,7 +121,6 @@ export class Geona {
   saveGeonaStateToDatabase() {
     // Gets the current, stringified Geona state
     let geonaState = this._saveGeonaState();
-    console.log(geonaState);
 
     // Sends to server to be saved
     $.ajax(this.geonaServer + '/state/saveStateToDatabase',
@@ -131,8 +130,8 @@ export class Geona {
         contentType: 'application/json',
         // dataType: 'json',
       })
-      .done((response) => {
-        console.log(response);
+      .done((stateId) => {
+        this.eventManager.trigger('mainMenu.displayShareOverlay', stateId);
       })
       .fail((err) => {
         console.error(err.statusText);
