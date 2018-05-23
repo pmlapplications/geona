@@ -26,19 +26,19 @@ export class LMap extends GeonaMap {
    */
   constructor(config, mapDiv, geona) {
     super();
-    /** @type {Object} The map config */
+    /** @desc The map config @type {Object}*/
     this.config = config;
     this.geona = geona;
     this.eventManager = geona.eventManager;
     this.geonaDiv = geona.geonaDiv;
-    /**  @type {Object} The available map layers */
+    /** @desc  The available map layers @type {Object}*/
     this.availableLayers = {};
     this.availableLayerServers = {};
-    /**  @type {L.featureGroup} The layers on the map */
+    /** @desc The layers on the map @type {L.featureGroup} */
     this._mapLayers = L.featureGroup();
     this.activeLayers = {};
     this._activeLayerGeneratedTimes = {};
-    /**  @type {L.latlngGraticule} The map graticule */
+    /** @desc The map graticule @type {L.latlngGraticule} */
     this._graticule = L.latlngGraticule({
       showLabel: true,
       color: '#ccc',
@@ -66,10 +66,10 @@ export class LMap extends GeonaMap {
     });
 
 
-    /** @private @type {Boolean} Tracks whether the map has been initialized */
+    /** @desc Tracks whether the map has been initialized @type {Boolean} @private */
     this.initialized = false;
 
-    /**  @type {L.map} The Leaflet map */
+    /** @desc The Leaflet map @type {L.map} */
     this._map = L.map(mapDiv, {
       crs: leafletizeProjection(this.config.projection),
       center: [this.config.viewSettings.center.lat, this.config.viewSettings.center.lon],

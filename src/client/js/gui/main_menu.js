@@ -26,40 +26,40 @@ export class MainMenu {
    * @param {MenuConfigOptions} [menuConfigOptions] The config settings relating to the main menu.
    */
   constructor(gui, menuConfigOptions) {
-    /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
+    /** @desc This instance of Geona. Used to gain access to the map from the GUI. @type {Geona} */
     this.gui = gui;
-    /** @type {Geona} @desc This instance of Geona. Used to gain access to the map from the GUI. */
+    /** @desc This instance of Geona. Used to gain access to the map from the GUI. @type {Geona} */
     this.geona = gui.geona;
-    /** @type {MenuConfigOptions} @desc The options to configure the main menu. */
+    /** @desc The options to configure the main menu. @type {MenuConfigOptions} */
     this.config = menuConfigOptions;
     this.geonaDiv = gui.geonaDiv;
     this.eventManager = this.geona.eventManager;
 
-    /** @type {Object} Holds the layerServer found for the most recent WMS/WMTS request. */
+    /** Holds the layerServer found for the most recent WMS/WMTS request. @type {Object} */
     this.requestLayerServer = undefined;
-    /** @type {String[]} @desc Holds the order of the layers in the layers list, using identifiers. */
+    /** @desc Holds the order of the layers in the layers list, using identifiers. @type {String[]} */
     this.layersPanelItemList = [];
-    /** @type {HTMLElement} @desc The currently open layer item tab - defaults to first layer item's info tab. */
+    /** @desc The currently open layer item tab - defaults to first layer item's info tab. @type {HTMLElement} */
     this.layersPanelActiveItemTab = undefined;
 
-    /** @type {HTMLElement} @desc Holds the explore panel after creation so it can be displayed again easily. */
+    /** @desc Holds the explore panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.explorePanel = undefined;
-    /** @type {HTMLElement} @desc Holds the layers panel after creation so it can be displayed again easily. */
+    /** @desc Holds the layers panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.layersPanel = undefined;
-    /** @type {HTMLElement} @desc Holds the analysis panel after creation so it can be displayed again easily. */
+    /** @desc Holds the analysis panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.analysisPanel = undefined;
-    /** @type {HTMLElement} @desc Holds the login panel after creation so it can be displayed again easily. */
+    /** @desc Holds the login panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.loginPanel = undefined;
-    /** @type {HTMLElement} @desc Holds the options panel after creation so it can be displayed again easily. */
+    /** @desc Holds the options panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.optionsPanel = undefined;
-    /** @type {HTMLElement} @desc Holds the help panel after creation so it can be displayed again easily. */
+    /** @desc Holds the help panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.helpPanel = undefined;
-    /** @type {HTMLElement} @desc Holds the share panel after creation so it can be displayed again easily. */
+    /** @desc Holds the share panel after creation so it can be displayed again easily. @type {HTMLElement} */
     this.sharePanel = undefined;
 
-    /** @type {Object} @desc Holds an array of impending changes for each layer. */
+    /** @desc Holds an array of impending changes for each layer. @type {Object} */
     this.changesBuffer = {};
-    /** @type {Number} @desc CONST - The time to wait (in ms) before executing the buffered operations for a layer. */
+    /** @desc CONST - The time to wait (in ms) before executing the buffered operations for a layer. @type {Number} */
     this.CHANGES_BUFFER_TIME = 10000;
 
     this.layersPanelScalebars = {};

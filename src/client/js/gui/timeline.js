@@ -66,55 +66,55 @@ export class Timeline {
         bottom: 0,
       },
     };
-    /** @type {Object} @desc Default options with custom settings if defined */
+    /** @desc Default options with custom settings if defined @type {Object} */
     this.options = Object.assign({}, defaultOptions, settings);
 
-    /** @type {Number} @desc CONST - The pixel height for a layer on the timeline */
+    /** @desc CONST - The pixel height for a layer on the timeline @type {Number} */
     this.LAYER_HEIGHT = 10;
-    /** @type {Number} @desc CONST - The pixel height for the padding between layers */
+    /** @desc CONST - The pixel height for the padding between layers @type {Number} */
     this.LAYER_PADDING = 0.25;
-    /** @type {Number} @desc CONST - The pixel height needed to make room for the x-axis */
+    /** @desc CONST - The pixel height needed to make room for the x-axis @type {Number} */
     this.X_AXIS_LABEL_HEIGHT = 25;
-    /** @type {Number} @desc CONST - The pixel spacing between the layers and the x-axis */
+    /** @desc CONST - The pixel spacing between the layers and the x-axis @type {Number} */
     this.X_AXIS_SEPARATION = 5;
-    /** @type {Number} @desc CONST - The pixel width needed to make room for the y-axis */
+    /** @desc CONST - The pixel width needed to make room for the y-axis @type {Number} */
     this.Y_AXIS_LABEL_WIDTH = 138;
-    /** @type {Number} @desc CONST - The vertical positioning of the selector tool */
+    /** @desc CONST - The vertical positioning of the selector tool @type {Number} */
     this.SELECTOR_TOOL_Y = 1;
-    /** @type {Number} @desc CONST - The width of the selector tool */
+    /** @desc CONST - The width of the selector tool @type {Number} */
     this.SELECTOR_TOOL_WIDTH = 10;
-    /** @type {Number} @desc CONST - The x-axis radius of the ellipse used to round the edges of the selector tool */
+    /** @desc CONST - The x-axis radius of the ellipse used to round the edges of the selector tool @type {Number} */
     this.SELECTOR_TOOL_RX = 6;
-    /** @type {Number} @desc CONST - The y-axis radius of the ellipse used to round the edges of the selector tool */
+    /** @desc CONST - The y-axis radius of the ellipse used to round the edges of the selector tool @type {Number} */
     this.SELECTOR_TOOL_RY = 6;
-    /** @type {Number} @desc CONST - The correction on the x-axis needed to center the selector tool */
+    /** @desc CONST - The correction on the x-axis needed to center the selector tool @type {Number} */
     this.SELECTOR_TOOL_CORRECTION = this.SELECTOR_TOOL_WIDTH / 2;
-    /** @type {Number} @desc CONST - The amount of pixels off the edge of the timeline before markers are not drawn */
+    /** @desc CONST - The amount of pixels off the edge of the timeline before markers are not drawn @type {Number} */
     this.TIME_MARKER_DRAW_MARGIN = 5;
-    /** @type {Number} @desc CONST - The time (ms) to add to each side if the first timeline layer has a single time */
+    /** @desc CONST - The time (ms) to add to each side if the first timeline layer has a single time @type {Number} */
     this.SINGLE_TIME_EXTENT_MARGIN = 15638400000; // 6 months in ms
-    /** @type {Number} @desc CONST - The time (ms) that a transition should take (e.g. selector tool moving) */
+    /** @desc CONST - The time (ms) that a transition should take (e.g. selector tool moving) @type {Number} */
     this.TRANSITION_DURATION = 500;
 
-    /** @type {Array} @desc The currently active layer definitions shown on the timeline */
+    /** @desc The currently active layer definitions shown on the timeline @type {Array} */
     this.timelineCurrentLayers = [];
 
-    /** @type {Number} @desc The width of the whole svg element created for the timeline */
+    /** @desc The width of the whole svg element created for the timeline @type {Number} */
     this.fullWidth = undefined;
-    /** @type {Number} @desc The width of only the section of the svg which contains the layers */
+    /** @desc The width of only the section of the svg which contains the layers @type {Number} */
     this.dataWidth = undefined;
-    /** @type {Number} @desc The height of the whole svg element created for the timeline */
+    /** @desc The height of the whole svg element created for the timeline @type {Number} */
     this.fullHeight = undefined;
-    /** @type {Number} @desc The height of only the section of the svg which contains the layers */
+    /** @desc The height of only the section of the svg which contains the layers @type {Number} */
     this.dataHeight = undefined;
 
-    /** @type {Number} @desc The minimum spacing ratio between x-axis labels */
+    /** @desc The minimum spacing ratio between x-axis labels @type {Number} */
     this.xAxisTicks = undefined; // More information can be found on the Geona wiki
 
     this._calculateWidths();
     this._calculateHeights();
 
-    /** @type {d3.scaleTime} @desc The scale to use for the x-axis - translates px to date */
+    /** @desc The scale to use for the x-axis - translates px to date @type {d3.scaleTime} */
     this.xScale = d3.scaleTime()
       .range([this.Y_AXIS_LABEL_WIDTH, this.fullWidth])
       .domain([
@@ -128,40 +128,40 @@ export class Timeline {
         new Date('2011-01-01'),
       ]);
 
-    /** @type {d3.axisBottom} @desc The x-axis which is displayed underneath the timeline data */
+    /** @desc The x-axis which is displayed underneath the timeline data @type {d3.axisBottom} */
     this.xAxis = d3.axisBottom(this.xScale)
       .ticks(this.xAxisTicks)
       .tickFormat(getDateFormat);
 
 
-    /** @type {d3.scaleBand} @desc The scale to use for the y-axis - translates px to layer title/display name */
+    /** @desc The scale to use for the y-axis - translates px to layer title/display name @type {d3.scaleBand} */
     this.yScale = d3.scaleBand() // Domain is not set because it will update as layers are added and removed
       .range([0, this.dataHeight])
       .paddingInner(this.LAYER_PADDING);
 
-    /** @type {d3.axisBottom} @desc The y-axis which is displayed to the left of the timeline data */
+    /** @desc The y-axis which is displayed to the left of the timeline data @type {d3.axisBottom} */
     this.yAxis = d3.axisRight(this.yScale)
       .ticks(this.timelineCurrentLayers.length)
       .tickSize(0);
 
-    /** @type {Object} @desc The full labels for the current layers - used so we don't get display name, server again */
+    /** @desc The full labels for the current layers - used so we don't get display name, server again @type {Object} */
     this.yAxisFullLabels = {};
 
 
-    /** @type {Object} @desc The minimum and maximum dates after checking every layer on the timeline */
+    /** @desc The minimum and maximum dates after checking every layer on the timeline @type {Object} */
     this.layerDateExtent = { // Set to the domain for default
       min: this.xScale.domain()[0],
       max: this.xScale.domain()[1],
     };
 
 
-    /** @type {d3.zoom} @desc The zoom behaviour to be used for panning and zooming the timeline data */
+    /** @desc The zoom behaviour to be used for panning and zooming the timeline data @type {d3.zoom} */
     this.zoomBehavior = d3.zoom()
       .on('zoom', () => { // Uses arrow function to prevent 'this' context changing within zoom()
         this.zoom();
       });
 
-    /** @type {SVGElement} @desc The main SVG element used for the timeline */
+    /** @desc The main SVG element used for the timeline @type {SVGElement} */
     this.timeline = d3.select('#' + this.options.elementId) // Selects the main element to insert the timeline into
       .append('svg')
       .attr('width', this.fullWidth + 1) // +1 because the containing svg needs to be 1 px longer than inner elements
@@ -176,7 +176,7 @@ export class Timeline {
       });
 
 
-    /** @type {SVGElement} @desc The SVG g element which holds the x-axis elements */
+    /** @desc The SVG g element which holds the x-axis elements @type {SVGElement} */
     this.timelineXAxisGroup = this.timeline.append('g')
       .attr('class', 'geona-timeline-x-axis')
       .attr('transform', 'translate(' +
@@ -193,7 +193,7 @@ export class Timeline {
       });
 
 
-    /** @type {SVGElement} @desc The SVG g element which holds the y-axis elements */
+    /** @desc The SVG g element which holds the y-axis elements @type {SVGElement} */
     this.timelineYAxisGroup = this.timeline.append('g')
       .call(this.yAxis)
       .on('click', () => { // Prevents the click functions from being triggered when y-axis is clicked
@@ -206,11 +206,11 @@ export class Timeline {
       .attr('height', this.fullHeight);
 
 
-    /** @type {SVGElement} @desc The SVG g element which holds the timeline data (layers) */
+    /** @desc The SVG g element which holds the timeline data (layers) @type {SVGElement} */
     this.timelineData = this.timeline.append('g');
 
 
-    /** @type {d3.drag} @desc The drag behaviour to be used for dragging the selector tool */
+    /** @desc The drag behaviour to be used for dragging the selector tool @type {d3.drag} */
     let drag = d3.drag()
       .on('drag', () => {
         this.dragDate();
@@ -219,10 +219,10 @@ export class Timeline {
         this.triggerMapDateChange(this.selectorDate);
       });
 
-    /** @type {String} @desc The date that the selector tool should be set to */
+    /** @desc The date that the selector tool should be set to @type {String} */
     this.selectorDate = '2010-06-01';
 
-    /** @type {SVGElement} @desc The SVG rect element which moves to show the currently selected date */
+    /** @desc The SVG rect element which moves to show the currently selected date @type {SVGElement} */
     this.selectorTool = this.timelineData.append('rect')
       .attr('class', 'geona-timeline-selector-tool')
       .attr('x', () => {
@@ -236,16 +236,16 @@ export class Timeline {
       .call(drag);
 
 
-    /** @type {SVGElement} @desc The SVG line element which marks today's date */
+    /** @desc The SVG line element which marks today's date @type {SVGElement} */
     this.todayLine = this.timelineData
       .append('line')
       .attr('class', 'geona-timeline-today-line')
       .attr('y1', 0); // y2, x1, x2 are set when the first layer is added
 
-    /** @type {Date} @desc Today's date - only changes on page reload */
+    /** @desc Today's date - only changes on page reload @type {Date} */
     this.todayDate = new Date();
 
-    /** @type {Set} @desc A Set of the dates from all layers, used for findFutureDate() and findPastDate() */
+    /** @desc A Set of the dates from all layers, used for findFutureDate() and findPastDate() @type {Set} */
     this._allLayerDates = new Set();
 
     // Set triggers and bindings
@@ -1182,11 +1182,11 @@ export class Timeline {
     if (new Date(this.selectorDate) > new Date(listOfDates[listOfDates.length - 1])) {
       startingIndex = listOfDates.length + 1; // If starting date is after the last time, we decrement to the last index downwards.
     } else // If the current time is less than or equal to the minimum time in the list, there isn't a time to move to
-    if (new Date(startingDate) <= new Date(listOfDates[0]) || startingDate === undefined) {
-      return undefined;
-    } else {
-      startingIndex = listOfDates.indexOf(startingDate);
-    }
+      if (new Date(startingDate) <= new Date(listOfDates[0]) || startingDate === undefined) {
+        return undefined;
+      } else {
+        startingIndex = listOfDates.indexOf(startingDate);
+      }
 
     // If the layer which contains the startingDate is currently out of bounds, we want to include the starting date as
     // one of the dates to count past (so that if we are out of bounds and go back 1, we set to the end date)
@@ -1259,20 +1259,20 @@ function getDateFormat(date) {
   if (d3.timeSecond(date) < date) {
     return d3.timeFormat('%H:%M:%S.%L')(date);
   } else
-  if (d3.timeMinute(date) < date) {
-    return d3.timeFormat('%H:%M:%S')(date);
-  } else
-  if (d3.timeHour(date) < date) {
-    return d3.timeFormat('%H:%M')(date);
-  } else
-  if (d3.timeDay(date) < date) {
-    return d3.timeFormat('%H:%M')(date);
-  } else
-  if (d3.timeMonth(date) < date) {
-    return d3.timeFormat('%Y-%m-%d')(date);
-  } else {
-    return d3.timeFormat('%b %Y')(date);
-  }
+    if (d3.timeMinute(date) < date) {
+      return d3.timeFormat('%H:%M:%S')(date);
+    } else
+      if (d3.timeHour(date) < date) {
+        return d3.timeFormat('%H:%M')(date);
+      } else
+        if (d3.timeDay(date) < date) {
+          return d3.timeFormat('%H:%M')(date);
+        } else
+          if (d3.timeMonth(date) < date) {
+            return d3.timeFormat('%Y-%m-%d')(date);
+          } else {
+            return d3.timeFormat('%b %Y')(date);
+          }
 }
 
 /**

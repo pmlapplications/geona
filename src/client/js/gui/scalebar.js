@@ -28,12 +28,12 @@ export class Scalebar {
     this.geonaDiv = mainMenu.geonaDiv;
     this.mainMenu = mainMenu;
 
-    /** @type {HTMLElement} @desc The item this scalebar belongs to. */
+    /** @desc The item this scalebar belongs to. @type {HTMLElement} */
     this.layersPanelItem = scalebarConfigOptions.layersPanelItem;
-    /** @type {String} @desc The identifier for the layer this scalebar represents. */
+    /** @desc The identifier for the layer this scalebar represents. @type {String} */
     this.layerIdentifier = scalebarConfigOptions.layerIdentifier;
 
-    /** @type {Number} @desc CONST - The number of divisions to search when finding the min and max scale values. */
+    /** @desc CONST - The number of divisions to search when finding the min and max scale values. @type {Number} */
     this.MINMAX_SEARCH_DENSITY = 1000;
   }
 

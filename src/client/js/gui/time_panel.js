@@ -25,32 +25,32 @@ export class TimePanel {
     this.gui = gui;
     this.geona = gui.geona;
     this.config = timelineConfigOptions;
-    /** @type {JQuery} @desc The jQuery selection for the div which contains this instance of Geona */
+    /** @desc The jQuery selection for the div which contains this instance of Geona @type {JQuery} */
     this.geonaDiv = gui.geonaDiv;
 
-    /** @type {Number} @desc The number of datetimes to traverse when calling step methods with a 'short' value */
+    /** @desc The number of datetimes to traverse when calling step methods with a 'short' value @type {Number} */
     this.SHORT_INTERVALS = 1;
-    /** @type {Number} @desc The number of datetimes to traverse when calling step methods with a 'far' value */
+    /** @desc The number of datetimes to traverse when calling step methods with a 'far' value @type {Number} */
     this.FAR_INTERVALS = 10;
 
-    /** @type {Timeline} @desc The instance of the timeline that has been created for this instance of Geona */
+    /** @desc The instance of the timeline that has been created for this instance of Geona @type {Timeline} */
     this.timeline = undefined;
-    /** @type {Pikaday} @desc The Pikaday-time date picker that can be used to select datetimes */
+    /** @desc The Pikaday-time date picker that can be used to select datetimes @type {Pikaday} */
     this.pikaday = undefined;
 
-    /** @type {String} @desc The datetime to move to when a step method is called with the value 'prev-far' */
+    /** @desc The datetime to move to when a step method is called with the value 'prev-far' @type {String} */
     this.datetimePrevFar = undefined;
-    /** @type {String} @desc The datetime to move to when a step method is called with the value 'prev-short' */
+    /** @desc The datetime to move to when a step method is called with the value 'prev-short' @type {String} */
     this.datetimePrevShort = undefined;
-    /** @type {String} @desc The datetime to move to when a step method is called with the value 'next-short' */
+    /** @desc The datetime to move to when a step method is called with the value 'next-short' @type {String} */
     this.datetimeNextFar = undefined;
-    /** @type {String} @desc The datetime to move to when a step method is called with the value 'next-far' */
+    /** @desc The datetime to move to when a step method is called with the value 'next-far' @type {String} */
     this.datetimeNextShort = undefined;
 
-    /** @type {Number} @desc The width of the TimePanel container in px */
+    /** @desc The width of the TimePanel container in px @type {Number} */
     this.fullWidth = this.geonaDiv.find('.js-geona-time-panel-container').width();
 
-    /** @type {String} @desc The identifier for the currently selected layer on the timeline */
+    /** @desc The identifier for the currently selected layer on the timeline @type {String} */
     this.activeLayer = undefined; // Currently there are no GUI controls for this, but the appropriate functions should be ready for use from the console
 
     this.geonaDiv.append(templates.time_panel());

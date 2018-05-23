@@ -31,23 +31,23 @@ export class OlMap extends GeonaMap {
    */
   constructor(config, mapDiv, geona) {
     super();
-    /** @type {Object} The map config */
+    /** @desc The map config @type {Object} */
     this.config = config;
     this.geona = geona;
     this.eventManager = geona.eventManager;
     this.geonaDiv = geona.geonaDiv;
 
-    /** @private @type {Object} The available basemaps, as OpenLayers Tile layers */
+    /** @desc The available basemaps, as OpenLayers Tile layers @type {Object} @private */
     this.basemaps_ = {};
-    /** @private @type {Object} The available map Layers, as Geona Layers */
+    /** @desc The available map Layers, as Geona Layers @type {Object} @private */
     this.availableLayers = {};
-    /** @private @type {Object} The available map LayerServers, as Geona LayerServers */
+    /** @desc The available map LayerServers, as Geona LayerServers @type {Object} @private */
     this.availableLayerServers = {};
-    /** @private @type {Object} The map layers currently on the map, as OpenLayers Tile layers */
+    /** @desc The map layers currently on the map, as OpenLayers Tile layers @type {Object} @private */
     this.activeLayers = {};
-    /** @private @type {Object} @desc The generated times for the active layers */
+    /** @desc @desc The generated times for the active layers @type {Object} @private */
     this._activeLayerGeneratedTimes = {};
-    /** @private @type {ol.Graticule} The map graticule */
+    /** @desc The map graticule @type {ol.Graticule} @private */
     this.graticule_ = new ol.Graticule({
       showLabels: true,
       strokeStyle: new ol.style.Stroke({
@@ -62,10 +62,10 @@ export class OlMap extends GeonaMap {
         return latLonLabelFormatter(longitude, 'E', 'W');
       },
     });
-    /** @type {Boolean} Tracks whether the map has been initialized */
+    /** @desc Tracks whether the map has been initialized @type {Boolean} */
     this.initialized = false;
 
-    /** @private @type {ol.Map} The OpenLayers map */
+    /** @desc The OpenLayers map @type {ol.Map} @private */
     this._map = new ol.Map({
       view: new ol.View(
         {

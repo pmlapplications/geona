@@ -13,7 +13,7 @@ export default class Config {
    * @param  {Object} clientConfig A JSON config to load.
    */
   constructor(clientConfig) {
-    /** @const @type {Object} @desc The convict config instance */
+    /** @desc The convict config instance @type {Object} @const*/
     this.config_ = convict(schema);
     this.config_.load(clientConfig);
 
