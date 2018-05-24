@@ -739,7 +739,7 @@ export class Timeline {
    * @private
    *
    * Moves the selector tool to the date position on the x-axis.
-   * @param {String} date The date to move the selector tool to.
+   * @param {String|Date} date The date to move the selector tool to.
    */
   moveSelectorToDate(date) {
     this.selectorDate = date;
@@ -1072,7 +1072,6 @@ export class Timeline {
    * @return {Object|undefined}         The date found on the final interval, and the layer(s) whose times will update.
    */
   findFutureDate(intervals, layerIdentifier) {
-    // TODO write tests for this
     let listOfDates = Array.from(this._allLayerDates);
     // Only used if layerIdentifier has been specified
     let layerTitle;

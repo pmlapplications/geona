@@ -1,17 +1,24 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import i18next from 'i18next';
+import chaiAsPromised from 'chai-as-promised';
 
 import {load} from '../../../../src/client_loader/loader.js';
 
-import {findFutureDate, findPastDate} from '../../../../src/client/js/gui/timeline';
 
+chai.use(chaiAsPromised);
 chai.use(chaiHttp);
 let expect = chai.expect;
 
 describe('client/js/test/gui/timeline', function() {
   // Shorthand for window.geonaTest, used in the actual tests
   let geona;
+  // Shorthand for timeline, used in the actual tests
+  let timeline;
+
+
+  // Shorthand for data layers and servers
+  let rrs412;
+  let chlorA;
 
   before(function(done) {
     this.timeout(5000); // eslint-disable-line no-invalid-this
@@ -21,23 +28,22 @@ describe('client/js/test/gui/timeline', function() {
      */
     function geonaOnReady() {
       console.log('Geona is ready.');
-      geona = window.geonaOlTest;
+      geona = window.geonaTimelineTest;
+      timeline = geona.gui.timePanel.timeline;
       done();
     }
     window.geonaOnReady = geonaOnReady;
 
-    // let config1 = JSON.parse(fs.readFile('/local1/data/scratch/git/web-development/gp2-contribution-guide/test_dependencies/resources/client/js/openlayers_map_config_1.json', 'utf8', (err) => {
-    //   // if (err !== null) {
-    //   //   res.status(404).send('File not found');
-    //   // } else {
-    //   //   res.sendFile(searchFile);
-    //   // }
-    // }));
-
     let config1 = {
-      'geonaVariable': 'geonaOlTest',
+      'geonaVariable': 'geonaTimelineTest',
       'onReadyCallback': 'geonaOnReady',
+      'geonaServer': '/geona',
       'divId': 'oltest',
+      'intro': {
+        'splashScreen': {
+          'display': false,
+        },
+      },
       'map': {
         'library': 'openlayers',
         'graticule': true,
@@ -2311,6 +2317,7 @@ describe('client/js/test/gui/timeline', function() {
                     current: true,
                     values: [
                       '2016-12-31T00:00:00.000Z',
+                      '2005-07-30T00:00:00.000Z',
                       '1997-09-04T00:00:00.000Z',
                       '2001-07-05T00:00:00.000Z',
                     ],
@@ -2323,22 +2330,269 @@ describe('client/js/test/gui/timeline', function() {
       },
     };
 
-    Promise.resolve(load(config1)).catch(function(err) {
-      console.error(err);
-      done();
+    Promise.resolve(load(config1)).then(function() {
+      console.warn('geonaServer is set to \'' + config1.geonaServer + '\' - please ensure this is the address you want to use for your testing.');
+    })
+      .catch(function(err) {
+        console.error(err);
+        done();
+      });
+  });
+  describe('findFutureDate()', function() {
+    before(function() {
+      // Set shorthands for layers and layer
+      // Data layers
+      rrs412 = geona.map.availableLayers.Rrs_412;
+      chlorA = geona.map.availableLayers.chlor_a;
+
+      // Add layers
+      timeline.addTimelineLayer(rrs412);
+      timeline.addTimelineLayer(chlorA);
+    });
+
+
+    // '1997-09-04T00:00:00.000Z',
+    // '1998-01-01T00:00:00.000Z',
+    // '2001-07-05T00:00:00.000Z',
+    // '2005-07-30T00:00:00.000Z',
+    // '2015-12-27T00:00:00.000Z',
+    // '2016-12-31T00:00:00.000Z',
+    describe('findFutureDate() with no layer identifier specified', function() {
+      it('should currently be set to 2015-12-27T00:00:00.000Z', function() {
+        expect(timeline.selectorDate).to.equal('2015-12-27T00:00:00.000Z');
+      });
+
+      it('should find 2016-12-31T00:00:00.000Z at 1 interval', function() {
+        let futureDate = timeline.findFutureDate(1).date;
+        expect(futureDate).to.equal('2016-12-31T00:00:00.000Z');
+      });
+
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 1 interval', function() {
+        let futureTitle = timeline.findFutureDate(1).layers;
+        expect(futureTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find 2016-12-31T00:00:00.000Z at 2 intervals', function() {
+        let futureDate = timeline.findFutureDate(2).date;
+        expect(futureDate).to.equal('2016-12-31T00:00:00.000Z');
+      });
+
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 2 intervals', function() {
+        let futureTitle = timeline.findFutureDate(2).layers;
+        expect(futureTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find undefined at 1 interval', function() {
+        timeline.moveSelectorToDate('2016-12-31T00:00:00.000Z');
+        let futureDate = timeline.findFutureDate(1);
+        expect(futureDate).to.be.undefined;
+      });
+
+      it('should find date 1998-01-01T00:00:00.000Z at 1 interval', function() {
+        timeline.moveSelectorToDate('1997-09-04T00:00:00.000Z');
+        let futureDate = timeline.findFutureDate(1).date;
+        expect(futureDate).to.equal('1998-01-01T00:00:00.000Z');
+      });
+
+      it('should find title surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air at 1 interval', function() {
+        let futureTitle = timeline.findFutureDate(1).layers;
+        expect(futureTitle).to.include('surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find date 2001-07-05T00:00:00.000Z at 2 intervals', function() {
+        let futureDate = timeline.findFutureDate(2).date;
+        expect(futureDate).to.equal('2001-07-05T00:00:00.000Z');
+      });
+
+      it('should find the titles mass_concentration_of_chlorophyll_a_in_sea_water at 2 intervals', function() {
+        let futureTitle = timeline.findFutureDate(2).layers;
+        expect(futureTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find date 2005-07-30T00:00:00.000Z at 3 intervals', function() {
+        let futureDate = timeline.findFutureDate(3).date;
+        expect(futureDate).to.equal('2005-07-30T00:00:00.000Z');
+      });
+
+      it('should find the titles mass_concentration_of_chlorophyll_a_in_sea_water and surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air at 3 intervals', function() {
+        let futureTitles = timeline.findFutureDate(3).layers;
+        expect(futureTitles).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitles).to.include('surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air');
+        expect(futureTitles.length).to.equal(2);
+      });
+    });
+
+    describe('findFutureDate() with chlor_a layer identifier specified', function() {
+      it('should find date 2001-07-05T00:00:00.000Z at 1 interval', function() {
+        let futureDate = timeline.findFutureDate(1, 'chlor_a').date;
+        expect(futureDate).to.equal('2001-07-05T00:00:00.000Z');
+      });
+
+      it('should find title mass_concentration_of_chlorophyll_a_in_sea_water at 1 interval', function() {
+        let futureTitle = timeline.findFutureDate(1, 'chlor_a').layers;
+        expect(futureTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find date 2005-07-30T00:00:00.000Z at 2 intervals', function() {
+        let futureDate = timeline.findFutureDate(2, 'chlor_a').date;
+        expect(futureDate).to.equal('2005-07-30T00:00:00.000Z');
+      });
+
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 2 intervals', function() {
+        let futureTitles = timeline.findFutureDate(2, 'chlor_a').layers;
+        expect(futureTitles).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitles.length).to.equal(1);
+      });
+
+      it('should find 2016-12-31T00:00:00.000Z at 3 intervals', function() {
+        let futureDate = timeline.findFutureDate(3, 'chlor_a').date;
+        expect(futureDate).to.equal('2016-12-31T00:00:00.000Z');
+      });
+
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 3 intervals', function() {
+        let futureTitle = timeline.findFutureDate(1, 'chlor_a').layers;
+        expect(futureTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find 2016-12-31T00:00:00.000Z at 4 intervals', function() {
+        let futureDate = timeline.findFutureDate(4, 'chlor_a').date;
+        expect(futureDate).to.equal('2016-12-31T00:00:00.000Z');
+      });
+
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 4 intervals', function() {
+        let futureTitle = timeline.findFutureDate(4, 'chlor_a').layers;
+        expect(futureTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(futureTitle.length).to.equal(1);
+      });
+
+      it('should find undefined at 1 interval', function() {
+        timeline.moveSelectorToDate('2016-12-31T00:00:00.000Z');
+        let futureDate = timeline.findFutureDate(1, 'chlor_a');
+        expect(futureDate).to.be.undefined;
+      });
     });
   });
-  describe('findFutureDate', function() {
-    before(function() {
+  describe('findPastDate()', function() {
+    describe('findPastDate() with no layer identifier specified', function() {
+      it('should currently be set to 2016-12-31T00:00:00.000Z', function() {
+        expect(timeline.selectorDate).to.equal('2016-12-31T00:00:00.000Z');
+      });
 
+      it('should find 2015-12-27T00:00:00.000Z at 1 interval', function() {
+        let pastDate = timeline.findPastDate(1).date;
+        expect(pastDate).to.equal('2015-12-27T00:00:00.000Z');
+      });
+
+      it('should find the title surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air at 1 interval', function() {
+        let pastTitle = timeline.findPastDate(1).layers;
+        expect(pastTitle).to.include('surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air');
+        expect(pastTitle.length).to.equal(1);
+      });
+
+      it('should find 2005-07-30T00:00:00.000Z at 2 intervals', function() {
+        let pastDate = timeline.findPastDate(2).date;
+        expect(pastDate).to.equal('2005-07-30T00:00:00.000Z');
+      });
+
+      it('should find the titles mass_concentration_of_chlorophyll_a_in_sea_water and surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air at 2 intervals', function() {
+        let pastTitles = timeline.findPastDate(2).layers;
+        expect(pastTitles).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitles).to.include('surface_ratio_of_upwelling_radiance_emerging_from_sea_water_to_downwelling_radiative_flux_in_air');
+        expect(pastTitles.length).to.equal(2);
+      });
+
+      it('should find undefined at 1 interval', function() {
+        timeline.moveSelectorToDate('1997-09-04T00:00:00.000Z');
+        let pastDate = timeline.findPastDate(1);
+        expect(pastDate).to.be.undefined;
+      });
+
+      it('should find date 1997-09-04T00:00:00.000Z at 1 interval', function() {
+        timeline.moveSelectorToDate('1998-01-01T00:00:00.000Z');
+        let pastDate = timeline.findPastDate(1).date;
+        expect(pastDate).to.equal('1997-09-04T00:00:00.000Z');
+      });
+
+      it('should find title mass_concentration_of_chlorophyll_a_in_sea_water at 1 interval', function() {
+        let pastTitle = timeline.findPastDate(1).layers;
+        expect(pastTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitle.length).to.equal(1);
+      });
+
+      it('should find date 1997-09-04T00:00:00.000Z at 2 intervals', function() {
+        let pastDate = timeline.findPastDate(2).date;
+        expect(pastDate).to.equal('1997-09-04T00:00:00.000Z');
+      });
+
+      it('should find title mass_concentration_of_chlorophyll_a_in_sea_water at 2 intervals', function() {
+        let pastTitle = timeline.findPastDate(2).layers;
+        expect(pastTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitle.length).to.equal(1);
+      });
     });
 
-    it('should ', function() {
+    describe('findPastDate() with chlor_a layer identifier specified', function() {
+      it('should currently be set to 2016-12-31T00:00:00.000Z', function() {
+        timeline.moveSelectorToDate('2016-12-31T00:00:00.000Z');
+        expect(timeline.selectorDate).to.equal('2016-12-31T00:00:00.000Z');
+      });
 
-    });
+      it('should find 2005-07-30T00:00:00.000Z at 1 interval', function() {
+        let pastDate = timeline.findPastDate(1, 'chlor_a').date;
+        expect(pastDate).to.equal('2005-07-30T00:00:00.000Z');
+      });
 
-    after(function() {
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 1 interval', function() {
+        let pastTitle = timeline.findPastDate(1, 'chlor_a').layers;
+        expect(pastTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitle.length).to.equal(1);
+      });
 
+      it('should find 2001-07-05T00:00:00.000Z at 2 intervals', function() {
+        let pastDate = timeline.findPastDate(2, 'chlor_a').date;
+        expect(pastDate).to.equal('2001-07-05T00:00:00.000Z');
+      });
+
+      it('should find the title mass_concentration_of_chlorophyll_a_in_sea_water at 2 intervals', function() {
+        let pastTitle = timeline.findPastDate(2, 'chlor_a').layers;
+        expect(pastTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitle.length).to.equal(1);
+      });
+
+      it('should find undefined at 1 interval', function() {
+        timeline.moveSelectorToDate('1997-09-04T00:00:00.000Z');
+        let pastDate = timeline.findPastDate(1, 'chlor_a');
+        expect(pastDate).to.be.undefined;
+      });
+
+      it('should find date 1997-09-04T00:00:00.000Z at 1 interval', function() {
+        timeline.moveSelectorToDate('2001-07-05T00:00:00.000Z');
+        let pastDate = timeline.findPastDate(1, 'chlor_a').date;
+        expect(pastDate).to.equal('1997-09-04T00:00:00.000Z');
+      });
+
+      it('should find title mass_concentration_of_chlorophyll_a_in_sea_water at 1 interval', function() {
+        let pastTitle = timeline.findPastDate(1, 'chlor_a').layers;
+        expect(pastTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitle.length).to.equal(1);
+      });
+
+      it('should find date 1997-09-04T00:00:00.000Z at 2 intervals', function() {
+        let pastDate = timeline.findPastDate(2, 'chlor_a').date;
+        expect(pastDate).to.equal('1997-09-04T00:00:00.000Z');
+      });
+
+      it('should find title mass_concentration_of_chlorophyll_a_in_sea_water at 2 intervals', function() {
+        let pastTitle = timeline.findPastDate(2, 'chlor_a').layers;
+        expect(pastTitle).to.include('mass_concentration_of_chlorophyll_a_in_sea_water');
+        expect(pastTitle.length).to.equal(1);
+      });
     });
   });
 });
