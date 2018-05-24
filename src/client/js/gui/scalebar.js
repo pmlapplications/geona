@@ -437,7 +437,7 @@ export class Scalebar {
  * @param  {Number|String} number The full number to convert into standard form.
  * @return {String}               A number in standard form.
  */
-function convertToStandardForm(number) {
+export function convertToStandardForm(number) {
   let string = number.toString();
   let exponential = parseFloat(number).toExponential(2);
   if (exponential) {
