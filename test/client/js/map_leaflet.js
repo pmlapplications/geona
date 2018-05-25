@@ -34,7 +34,7 @@ describe('client/js/map_leaflet', function() {
 
     let config1 = {
       geonaVariable: 'geonaLeafTest',
-      geonaServer: 'http://192.171.164.90:7890',
+      geonaServer: '/geona',
       onReadyCallback: 'geonaOnReady',
       divId: 'leaftest',
       map: {
@@ -2367,8 +2367,8 @@ describe('client/js/map_leaflet', function() {
     });
 
     after(function() {
-    // Shorthand for the available layers, used to keep tests shorter and more readable
-    // Basemaps
+      // Shorthand for the available layers, used to keep tests shorter and more readable
+      // Basemaps
       terrainLight = geona.map.availableLayers['terrain-light'];
       gebco08Grid = geona.map.availableLayers.gebco_08_grid;
       // Borders

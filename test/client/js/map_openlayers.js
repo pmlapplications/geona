@@ -41,7 +41,7 @@ describe('client/js/map_openlayers', function() {
     let config1 = {
       'geonaVariable': 'geonaOlTest',
       'onReadyCallback': 'geonaOnReady',
-      'geonaServer': 'http://192.171.164.90:7890',
+      'geonaServer': '/geona',
       'divId': 'oltest',
       'map': {
         'library': 'openlayers',
@@ -2338,11 +2338,14 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('constructor', function() {
-    // Add new config to test default loading basemaps, data and borders
+    // todo Add new config to test default loading basemaps, data and borders
     after(function() {
-      // Remove it all I guess
+      // todo Remove it all I guess
     });
   });
+
+  // Holds the tested methods - untested methods will be highlighted at the end
+  let testedMethods = [];
 
   // Will be used as shorthand in the tests
   // Basemaps
@@ -2379,8 +2382,8 @@ describe('client/js/map_openlayers', function() {
     });
 
     after(function() {
-    // Shorthand for the available layers, used to keep tests shorter and more readable
-    // Basemaps
+      // Shorthand for the available layers, used to keep tests shorter and more readable
+      // Basemaps
       terrainLight = geona.map.availableLayers['terrain-light'];
       gebco08Grid = geona.map.availableLayers.gebco_08_grid;
       // Borders
@@ -2405,6 +2408,8 @@ describe('client/js/map_openlayers', function() {
 
 
   describe('addLayer()', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('addLayer');
     // The list of layers on the map
     let mapLayers;
 
@@ -2481,6 +2486,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('removeLayer()', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('removeLayer');
+
     // Will hold the currently active map layers
     let data;
     let basemap;
@@ -2529,6 +2537,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('setProjection()', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('setProjection');
+
     before(function() {
       geona.map.addLayer(gebco08Grid, gebco, {modifier: 'basemap'});
     });
@@ -2567,6 +2578,9 @@ describe('client/js/map_openlayers', function() {
   // (i.e. could be made to test the same number of aspects in fewer lines of code).
   // They also might not be comprehensive, as reorderLayers() deals with a variety of situations.
   describe('reorderLayers()', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('reorderLayers');
+
     describe('reordering - 1x basemap, 1x borders, 0x data', function() {
       before(function() {
         // Basic setup with one basemap and one borders layer.
@@ -2923,6 +2937,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('loadNearestValidTime', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('loadNearestValidTime');
+
     // These variables are used as shorthand for the active layers in the tests.
     // They are redefined in each test to keep them up-to-date with any changes we make during the tests.
     let rrs412Active;
@@ -3027,6 +3044,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('loadLayersToNearestValidTime', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('loadLayersToNearestValidTime');
+
     before(function() {
       // Add a basemap, two data layers, and a borders layer.
       geona.map.addLayer(terrainLight, eox, {modifier: 'basemap'});
@@ -3075,6 +3095,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('changeLayerStyle', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('changeLayerStyle');
+
     // This variable is used as shorthand for the active layer in the tests.
     // It is redefined in each test to keep it up-to-date with any changes we make during the tests.
     let rrs412Active;
@@ -3143,6 +3166,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('layerGet', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('layerGet');
+
     before(function() {
       geona.map.addLayer(rrs412, rsgCci, {modifier: 'hasTime'});
     });
@@ -3163,6 +3189,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('getLayersFromWms()', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('getLayersFromWms');
+
     let wmsLayerServerInfo;
     before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
@@ -3205,6 +3234,9 @@ describe('client/js/map_openlayers', function() {
   });
 
   describe('getLayersFromWmts()', function() {
+    // Add this method to the list of tested methods
+    testedMethods.push('getLayersFromWmts');
+
     let wmtsLayerServerInfo;
     before(function(done) {
       this.timeout(10000); // eslint-disable-line no-invalid-this
@@ -3235,6 +3267,15 @@ describe('client/js/map_openlayers', function() {
       // Clear the layer we added from the map
       let layer = geona.map._map.getLayers().getArray()[0];
       geona.map.removeLayer(layer.get('identifier'));
+    });
+  });
+
+  describe('testedMethods[ ]', function() {
+    it('should include every method in OlMap', function() {
+      let allMapOlMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(geona.map));
+      for (let method of allMapOlMethods) {
+        expect(testedMethods).to.contain(method);
+      }
     });
   });
 });
